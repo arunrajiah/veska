@@ -1,0 +1,48 @@
+{
+  "name": "@veska/core",
+  "version": "0.1.0",
+  "description": "Veska core primitives: entities, fields, workflows, permissions, channels, integrations",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./db": {
+      "import": "./dist/db/index.js",
+      "types": "./dist/db/index.d.ts"
+    },
+    "./ai": {
+      "import": "./dist/ai/index.js",
+      "types": "./dist/ai/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vitest run --coverage",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist coverage .tsbuildinfo",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.95.2",
+    "drizzle-orm": "^0.38.3",
+    "postgres": "^3.4.5",
+    "bullmq": "^5.34.0",
+    "ioredis": "^5.4.2",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "drizzle-kit": "^0.30.1",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8",
+    "@vitest/coverage-v8": "^2.1.8"
+  }
+}

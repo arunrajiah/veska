@@ -1,0 +1,37 @@
+{
+  "name": "@veska/cli",
+  "version": "0.1.0",
+  "description": "Veska CLI — scaffold plugins, run local dev instances",
+  "license": "Apache-2.0",
+  "type": "module",
+  "bin": {
+    "veska": "./dist/bin/veska.js"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@veska/sdk": "workspace:*",
+    "commander": "^12.1.0",
+    "ora": "^8.1.1",
+    "chalk": "^5.4.1",
+    "prompts": "^2.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/prompts": "^2.4.9",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}
