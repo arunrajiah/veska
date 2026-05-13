@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { InstallButton } from './install-button.js';
+import InstallButton from './install-button.js';
 
 const PLUGINS = [
   {
@@ -225,7 +225,7 @@ export default async function PluginDetailPage({ params }: PageProps) {
           {/* Sidebar */}
           <div className="space-y-4">
             <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <InstallButton pluginId={plugin.id} pluginName={plugin.name} plugin={plugin} />
+              <InstallButton pluginId={plugin.id} pluginName={plugin.name} />
               <div className="mt-4 pt-4 border-t border-gray-100 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">Category</span>

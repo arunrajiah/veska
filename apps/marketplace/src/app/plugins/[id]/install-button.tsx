@@ -1,103 +1,88 @@
 'use client';
-
 import { useState } from 'react';
 
-interface Plugin {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  author: string;
-  price: string;
-  installs: string;
-  icon: string;
-}
+type Mode = 'idle' | 'choosing' | 'self-hosted-url' | 'installing' | 'done' | 'error';
 
-interface InstallButtonProps {
-  pluginId: string;
-  pluginName: string;
-  plugin: Plugin;
-}
+export default function InstallButton({ pluginId, pluginName }: { pluginId: string; pluginName: string }) {
+  const [mode, setMode] = useState<Mode>('idle');
+  const [instanceUrl, setInstanceUrl] = useState('');
+  const [error, setError] = useState('');
 
-export function InstallButton({ pluginId, pluginName, plugin }: InstallButtonProps) {
-  const [status, setStatus] = useState<'idle' | 'installing' | 'success' | 'error'>('idle');
-
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  const tenantId = process.env.NEXT_PUBLIC_TENANT_ID;
-
-  if (!apiUrl) {
-    return (
-      <div className="w-full text-center bg-amber-50 border border-amber-200 rounded-xl p-4">
-        <p className="text-xs text-amber-700 font-medium mb-1">Configuration required</p>
-        <p className="text-xs text-amber-600">
-          Set <code className="font-mono bg-amber-100 px-1 rounded">NEXT_PUBLIC_API_URL</code> to
-          enable one-click install.
-        </p>
-      </div>
-    );
+  // Cloud install: redirect to cloud dashboard install page
+  function handleCloudInstall() {
+    window.location.href = `https://app.veska.com/dashboard/plugins/install?pluginId=${encodeURIComponent(pluginId)}`;
   }
 
-  async function handleInstall() {
-    setStatus('installing');
+  // Self-hosted install: redirect to user's instance admin
+  function handleSelfHostedInstall() {
+    if (!instanceUrl.trim()) { setError('Please enter your instance URL'); return; }
     try {
-      const res = await fetch(`${apiUrl}/api/v1/plugins`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Veska-Tenant-Id': tenantId ?? '',
-        },
-        body: JSON.stringify({
-          pluginId,
-          name: pluginName,
-          version: '1.0.0',
-          manifest: {
-            id: plugin.id,
-            name: plugin.name,
-            description: plugin.description,
-            category: plugin.category,
-            author: plugin.author,
-            price: plugin.price,
-            icon: plugin.icon,
-          },
-          code: '// Plugin installed from marketplace',
-        }),
-      });
-
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`API error ${res.status}: ${text}`);
-      }
-
-      setStatus('success');
+      const url = new URL(instanceUrl.trim().replace(/\/$/, ''));
+      window.location.href = `${url.origin}/dashboard/plugins/install?pluginId=${encodeURIComponent(pluginId)}&source=marketplace`;
     } catch {
-      setStatus('error');
-      setTimeout(() => setStatus('idle'), 3000);
+      setError('Invalid URL — enter something like https://veska.mycompany.com');
     }
   }
 
-  const label =
-    status === 'installing'
-      ? 'Installing…'
-      : status === 'success'
-      ? 'Installed!'
-      : status === 'error'
-      ? 'Failed — retry'
-      : `Install ${pluginName}`;
-
-  const colorClass =
-    status === 'success'
-      ? 'bg-green-600 hover:bg-green-700'
-      : status === 'error'
-      ? 'bg-red-600 hover:bg-red-700'
-      : 'bg-gray-900 hover:bg-gray-700';
+  if (mode === 'done') {
+    return <div className="text-sm text-green-600 font-medium">Installed ✓</div>;
+  }
 
   return (
-    <button
-      onClick={handleInstall}
-      disabled={status === 'installing' || status === 'success'}
-      className={`w-full text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors disabled:opacity-60 ${colorClass}`}
-    >
-      {label}
-    </button>
+    <div>
+      {mode === 'idle' && (
+        <button
+          onClick={() => setMode('choosing')}
+          className="w-full bg-gray-900 text-white text-sm px-5 py-2.5 rounded-lg hover:bg-gray-700 transition-colors font-medium"
+        >
+          Install plugin
+        </button>
+      )}
+
+      {mode === 'choosing' && (
+        <div className="space-y-2">
+          <p className="text-xs text-gray-500 mb-3">Where do you want to install?</p>
+          <button
+            onClick={handleCloudInstall}
+            className="w-full border border-gray-900 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+          >
+            Veska Cloud ↗
+          </button>
+          <button
+            onClick={() => setMode('self-hosted-url')}
+            className="w-full border border-gray-200 text-gray-700 text-sm px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Self-hosted instance
+          </button>
+          <button onClick={() => setMode('idle')} className="w-full text-xs text-gray-400 hover:text-gray-600 pt-1">
+            Cancel
+          </button>
+        </div>
+      )}
+
+      {mode === 'self-hosted-url' && (
+        <div className="space-y-2">
+          <label className="block text-xs text-gray-500">Your Veska instance URL</label>
+          <input
+            type="url"
+            value={instanceUrl}
+            onChange={(e) => { setInstanceUrl(e.target.value); setError(''); }}
+            placeholder="https://veska.mycompany.com"
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            onKeyDown={(e) => e.key === 'Enter' && handleSelfHostedInstall()}
+          />
+          {error && <p className="text-xs text-red-500">{error}</p>}
+          <button
+            onClick={handleSelfHostedInstall}
+            className="w-full bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+          >
+            Go to my instance →
+          </button>
+          <button onClick={() => setMode('choosing')} className="w-full text-xs text-gray-400 hover:text-gray-600 pt-1">
+            Back
+          </button>
+        </div>
+      )}
+    </div>
   );
 }

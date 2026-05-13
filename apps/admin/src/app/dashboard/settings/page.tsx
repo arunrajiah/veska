@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { KeyRound } from 'lucide-react';
+import { WorkspaceForm } from './workspace-form.js';
 
 export default function SettingsPage() {
   return (
@@ -10,43 +11,7 @@ export default function SettingsPage() {
         {/* Workspace */}
         <section className="bg-white border border-gray-200 rounded-xl p-6">
           <h2 className="text-sm font-medium text-gray-900 mb-4">Workspace</h2>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Business name</label>
-              <input
-                type="text"
-                defaultValue="Acme Corp"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Slug</label>
-              <input
-                type="text"
-                defaultValue="acme-corp"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 font-mono"
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Timezone</label>
-              <input
-                type="text"
-                defaultValue="America/New_York"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Default currency</label>
-              <input
-                type="text"
-                defaultValue="USD"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 font-mono"
-              />
-            </div>
-          </div>
-          <button className="mt-4 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
-            Save changes
-          </button>
+          <WorkspaceForm />
         </section>
 
         {/* Config */}
