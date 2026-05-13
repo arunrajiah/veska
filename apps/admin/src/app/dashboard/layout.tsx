@@ -22,9 +22,15 @@ import {
   ArrowLeftRight,
   Truck,
   ShoppingCart,
+  ShoppingBag,
   Folder,
   CheckSquare,
+  TrendingUp,
+  BarChart3,
+  PieChart,
+  Activity,
 } from 'lucide-react';
+import NotificationBell from '@/components/notification-bell.js';
 
 const NAV_SECTIONS = [
   {
@@ -49,7 +55,16 @@ const NAV_SECTIONS = [
   },
   {
     label: 'Finance',
-    items: [{ href: '/dashboard/finance/invoices', icon: Receipt, label: 'Invoices' }],
+    items: [
+      { href: '/dashboard/finance/invoices', icon: Receipt, label: 'Invoices' },
+      { href: '/dashboard/expenses', icon: Receipt, label: 'Expenses' },
+    ],
+  },
+  {
+    label: 'Sales',
+    items: [
+      { href: '/dashboard/sales/orders', icon: ShoppingBag, label: 'Orders' },
+    ],
   },
   {
     label: 'HR',
@@ -83,6 +98,15 @@ const NAV_SECTIONS = [
     ],
   },
   {
+    label: 'Reports',
+    items: [
+      { href: '/dashboard/reports/finance', icon: TrendingUp, label: 'Finance' },
+      { href: '/dashboard/reports/inventory', icon: BarChart3, label: 'Inventory' },
+      { href: '/dashboard/reports/hr', icon: PieChart, label: 'HR' },
+      { href: '/dashboard/reports/projects', icon: Activity, label: 'Projects' },
+    ],
+  },
+  {
     label: 'System',
     items: [
       { href: '/dashboard/config', icon: Wand2, label: 'Config AI' },
@@ -102,8 +126,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
       <aside className="w-56 bg-white border-r border-gray-200 flex flex-col fixed inset-y-0">
-        <div className="px-5 py-4 border-b border-gray-100">
+        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
           <span className="font-semibold text-gray-900 tracking-tight">Veska</span>
+          <NotificationBell />
         </div>
 
         <nav className="flex-1 overflow-y-auto py-3 px-2">

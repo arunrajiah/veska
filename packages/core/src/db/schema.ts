@@ -293,6 +293,24 @@ export const apiKeys = pgTable('api_keys', {
 ]);
 
 // ──────────────────────────────────────────────────────────────
+// Notifications — in-app notification inbox
+// ──────────────────────────────────────────────────────────────
+
+export const notifications = pgTable('notifications', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  title: text('title').notNull(),
+  body: text('body'),
+  type: text('type').notNull().default('info'),
+  link: text('link'),
+  read: boolean('read').notNull().default(false),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index('notifications_tenant_read_idx').on(t.tenantId, t.read),
+  index('notifications_tenant_created_at_idx').on(t.tenantId, t.createdAt),
+]);
+
+// ──────────────────────────────────────────────────────────────
 // Magic links
 // ──────────────────────────────────────────────────────────────
 
