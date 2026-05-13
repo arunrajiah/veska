@@ -1,55 +1,123 @@
 import { Hono } from 'hono';
-import { eq, and, desc } from 'drizzle-orm';
-import { schema } from '@veska/core';
+import { sql } from 'drizzle-orm';
 import { sharedDb } from '../shared.js';
 import type { TenantContext } from '../middleware/tenant-context.js';
 
 export const auditRouter = new Hono<{ Variables: TenantContext }>();
 
-// GET / — list audit events for tenant
+// ── Helper — callable by other routes ─────────────────────────
+
+export async function logAudit(
+  db: typeof sharedDb,
+  entry: {
+    tenantId: string;
+    action: string;
+    entityType?: string;
+    entityId?: string;
+    actorType?: string;
+    actorId?: string;
+    diff?: unknown;
+    ip?: string;
+    userAgent?: string;
+  },
+): Promise<void> {
+  await db.execute(sql`
+    INSERT INTO "auditLog" (
+      "tenantId", "actorId", "actorType", "action",
+      "entityType", "entityId", "diff", "ip", "userAgent"
+    )
+    VALUES (
+      ${entry.tenantId},
+      ${entry.actorId ?? null},
+      ${entry.actorType ?? 'system'},
+      ${entry.action},
+      ${entry.entityType ?? null},
+      ${entry.entityId ?? null},
+      ${entry.diff ? JSON.stringify(entry.diff) : null}::jsonb,
+      ${entry.ip ?? null},
+      ${entry.userAgent ?? null}
+    )
+  `);
+}
+
+// GET / — query audit log with optional filters
 auditRouter.get('/', async (c) => {
   const { tenantId } = c.get('tenantCtx');
 
-  const action = c.req.query('action');
-  const resourceType = c.req.query('resourceType');
+  const entityType = c.req.query('entityType');
+  const action     = c.req.query('action');
+  const actorId    = c.req.query('actorId');
+  const from       = c.req.query('from');
+  const to         = c.req.query('to');
   const limitParam = c.req.query('limit');
-  const limit = Math.min(parseInt(limitParam ?? '50', 10), 200);
+  const limit      = Math.min(parseInt(limitParam ?? '50', 10), 200);
 
-  const conditions: ReturnType<typeof eq>[] = [
-    eq(schema.auditLog.tenantId, tenantId),
-  ];
+  // Build optional filter clauses
+  const entityTypeClause = entityType
+    ? sql` AND "entityType" = ${entityType}`
+    : sql``;
+  const actionClause = action
+    ? sql` AND "action" = ${action}`
+    : sql``;
+  const actorIdClause = actorId
+    ? sql` AND "actorId" = ${actorId}`
+    : sql``;
+  const fromClause = from
+    ? sql` AND "createdAt" >= ${new Date(from)}`
+    : sql``;
+  const toClause = to
+    ? sql` AND "createdAt" <= ${new Date(to)}`
+    : sql``;
 
-  if (action) {
-    conditions.push(eq(schema.auditLog.action, action));
-  }
-  if (resourceType) {
-    conditions.push(eq(schema.auditLog.resourceType, resourceType));
-  }
+  const entries = await sharedDb.execute(sql`
+    SELECT * FROM "auditLog"
+    WHERE "tenantId" = ${tenantId}
+    ${entityTypeClause}
+    ${actionClause}
+    ${actorIdClause}
+    ${fromClause}
+    ${toClause}
+    ORDER BY "createdAt" DESC
+    LIMIT ${limit}
+  `);
 
-  const events = await sharedDb.query.auditLog.findMany({
-    where: and(...conditions),
-    orderBy: [desc(schema.auditLog.createdAt)],
-    limit,
-  });
+  const countResult = await sharedDb.execute(sql`
+    SELECT COUNT(*)::int AS total FROM "auditLog"
+    WHERE "tenantId" = ${tenantId}
+    ${entityTypeClause}
+    ${actionClause}
+    ${actorIdClause}
+    ${fromClause}
+    ${toClause}
+  `);
 
-  return c.json({ events });
+  const total = (countResult.rows[0] as Record<string, unknown>)['total'] as number;
+
+  return c.json({ entries: entries.rows, total });
 });
 
-// GET /:id — get single audit event
-auditRouter.get('/:id', async (c) => {
-  const id = c.req.param('id');
+// POST / — insert an audit log entry directly
+auditRouter.post('/', async (c) => {
   const { tenantId } = c.get('tenantCtx');
+  const body = await c.req.json<{
+    action: string;
+    entityType?: string;
+    entityId?: string;
+    actorType?: string;
+    actorId?: string;
+    diff?: unknown;
+    ip?: string;
+    userAgent?: string;
+  }>();
 
-  const event = await sharedDb.query.auditLog.findFirst({
-    where: and(
-      eq(schema.auditLog.id, id),
-      eq(schema.auditLog.tenantId, tenantId),
-    ),
+  if (!body.action) return c.json({ error: 'action is required' }, 400);
+
+  await logAudit(sharedDb, {
+    tenantId,
+    ...body,
+    ip: body.ip ?? c.req.header('x-forwarded-for') ?? c.req.header('cf-connecting-ip'),
+    userAgent: body.userAgent ?? c.req.header('user-agent'),
   });
 
-  if (!event) {
-    return c.json({ error: 'Audit event not found' }, 404);
-  }
-
-  return c.json(event);
+  return c.json({ success: true }, 201);
 });

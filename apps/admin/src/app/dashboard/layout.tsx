@@ -35,6 +35,8 @@ import {
   DollarSign,
   FileText,
   PackageCheck,
+  Key,
+  Webhook,
 } from 'lucide-react';
 import NotificationBell from '@/components/notification-bell.js';
 
@@ -126,6 +128,14 @@ const NAV_SECTIONS = [
       { href: '/dashboard/reports/inventory', icon: BarChart3, label: 'Inventory' },
       { href: '/dashboard/reports/hr', icon: PieChart, label: 'HR' },
       { href: '/dashboard/reports/projects', icon: Activity, label: 'Projects' },
+    ],
+  },
+  {
+    label: 'Developer',
+    items: [
+      { href: '/dashboard/developer/api-keys', icon: Key, label: 'API Keys' },
+      { href: '/dashboard/developer/webhooks', icon: Webhook, label: 'Webhooks' },
+      { href: '/dashboard/developer/audit', icon: ClipboardList, label: 'Audit Log' },
     ],
   },
   {

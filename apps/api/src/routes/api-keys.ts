@@ -1,57 +1,66 @@
 import { Hono } from 'hono';
-import { eq, and } from 'drizzle-orm';
-import { schema } from '@veska/core';
+import { sql } from 'drizzle-orm';
 import { randomBytes, createHash } from 'node:crypto';
 import { sharedDb } from '../shared.js';
 import type { TenantContext } from '../middleware/tenant-context.js';
 
 export const apiKeysRouter = new Hono<{ Variables: TenantContext }>();
 
-// List API keys (never expose the hash)
+// GET / — list all non-revoked API keys for tenant (never return keyHash)
 apiKeysRouter.get('/', async (c) => {
   const { tenantId } = c.get('tenantCtx');
-  const keys = await sharedDb.query.apiKeys.findMany({
-    where: eq(schema.apiKeys.tenantId, tenantId),
-    orderBy: (t, { desc }) => [desc(t.createdAt)],
-  });
-  return c.json(keys.map(({ keyHash: _h, ...rest }) => rest));
+
+  const result = await sharedDb.execute(sql`
+    SELECT "id", "tenant_id" AS "tenantId", "name", "key_prefix" AS "keyPrefix",
+           "scopes", "last_used_at" AS "lastUsedAt", "expires_at" AS "expiresAt",
+           "revoked_at" AS "revokedAt", "created_at" AS "createdAt"
+    FROM "api_keys"
+    WHERE "tenant_id" = ${tenantId}
+      AND "revoked_at" IS NULL
+    ORDER BY "created_at" DESC
+  `);
+
+  return c.json({ keys: result.rows });
 });
 
-// Create a new API key
+// POST / — create a new API key
 apiKeysRouter.post('/', async (c) => {
   const { tenantId } = c.get('tenantCtx');
-  const { name, expiresAt } = await c.req.json<{ name: string; expiresAt?: string }>();
+  const body = await c.req.json<{ name: string; scopes?: string[]; expiresAt?: string }>();
 
-  if (!name?.trim()) return c.json({ error: 'name is required' }, 400);
+  if (!body.name?.trim()) return c.json({ error: 'name is required' }, 400);
 
-  // Generate: vsk_live_<32 random bytes hex>
-  const rawKey = `vsk_live_${randomBytes(32).toString('hex')}`;
-  const keyHash = createHash('sha256').update(rawKey).digest('hex');
-  const keyPrefix = rawKey.slice(0, 12); // "vsk_live_XXX"
+  const raw = 'vsk_live_' + randomBytes(16).toString('hex');
+  const keyHash = createHash('sha256').update(raw).digest('hex');
+  const keyPrefix = raw.slice(0, 16);
+  const scopes: string[] = body.scopes ?? [];
+  const expiresAt = body.expiresAt ? new Date(body.expiresAt) : null;
 
-  const [key] = await sharedDb
-    .insert(schema.apiKeys)
-    .values({
-      tenantId,
-      name: name.trim(),
-      keyHash,
-      keyPrefix,
-      expiresAt: expiresAt ? new Date(expiresAt) : null,
-    })
-    .returning();
+  const result = await sharedDb.execute(sql`
+    INSERT INTO "api_keys" ("tenant_id", "name", "key_hash", "key_prefix", "scopes", "expires_at")
+    VALUES (${tenantId}, ${body.name.trim()}, ${keyHash}, ${keyPrefix}, ${scopes}, ${expiresAt})
+    RETURNING "id", "name", "key_prefix" AS "keyPrefix", "scopes",
+              "expires_at" AS "expiresAt", "created_at" AS "createdAt"
+  `);
+
+  const created = result.rows[0] as Record<string, unknown>;
 
   // Return the raw key ONCE — it will never be shown again
-  return c.json({ ...key, keyHash: undefined, rawKey }, 201);
+  return c.json({ key: raw, id: created['id'], name: created['name'], keyPrefix: created['keyPrefix'] }, 201);
 });
 
-// Revoke an API key
+// DELETE /:id — soft-revoke (set revokedAt = now())
 apiKeysRouter.delete('/:id', async (c) => {
   const id = c.req.param('id');
   const { tenantId } = c.get('tenantCtx');
 
-  await sharedDb
-    .delete(schema.apiKeys)
-    .where(and(eq(schema.apiKeys.id, id), eq(schema.apiKeys.tenantId, tenantId)));
+  await sharedDb.execute(sql`
+    UPDATE "api_keys"
+    SET "revoked_at" = now()
+    WHERE "id" = ${id}::uuid
+      AND "tenant_id" = ${tenantId}
+      AND "revoked_at" IS NULL
+  `);
 
-  return c.json({ revoked: true });
+  return c.json({ success: true });
 });
