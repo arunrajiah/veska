@@ -1,0 +1,21 @@
+{
+  "id": "com.veska.google-calendar",
+  "name": "Google Calendar",
+  "version": "1.0.0",
+  "description": "Sync follow-up meetings, deal deadlines, and ticket SLA times with Google Calendar.",
+  "author": {
+    "name": "Veska",
+    "developerId": "veska-official",
+    "email": "plugins@veska.com"
+  },
+  "veskaMinVersion": "0.1.0",
+  "capabilitiesRequired": ["deal.read", "ticket.read", "contact.read", "audit.*"],
+  "capabilitiesProvided": [],
+  "entities": ["Deal", "Ticket"],
+  "workflows": [],
+  "networkWhitelist": ["www.googleapis.com"],
+  "pricing": { "model": "free" },
+  "license": "Apache-2.0",
+  "homepage": "https://veska.com/plugins/google-calendar",
+  "supportEmail": "plugins@veska.com"
+}

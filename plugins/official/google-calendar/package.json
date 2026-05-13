@@ -1,0 +1,14 @@
+{
+  "name": "@veska-official/plugin-google-calendar",
+  "version": "1.0.0",
+  "description": "Official Veska Google Calendar integration plugin",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "dependencies": {
+    "@veska/sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}

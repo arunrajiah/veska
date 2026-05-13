@@ -1,0 +1,21 @@
+{
+  "id": "com.veska.quickbooks",
+  "name": "QuickBooks Online",
+  "version": "1.0.0",
+  "description": "Export transactions, invoices, and journal entries to QuickBooks Online. Two-way sync for customers and vendors.",
+  "author": {
+    "name": "Veska",
+    "developerId": "veska-official",
+    "email": "plugins@veska.com"
+  },
+  "veskaMinVersion": "0.1.0",
+  "capabilitiesRequired": ["invoice.read", "invoice.create", "contact.read", "audit.*"],
+  "capabilitiesProvided": [],
+  "entities": ["Invoice", "Contact"],
+  "workflows": [],
+  "networkWhitelist": ["quickbooks.api.intuit.com", "sandbox-quickbooks.api.intuit.com"],
+  "pricing": { "model": "free" },
+  "license": "Apache-2.0",
+  "homepage": "https://veska.com/plugins/quickbooks",
+  "supportEmail": "plugins@veska.com"
+}
