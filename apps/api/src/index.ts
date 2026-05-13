@@ -26,6 +26,8 @@ import { notificationsRouter } from './routes/notifications.js';
 import { projectsRouter } from './routes/projects.js';
 import { reportsRouter } from './routes/reports.js';
 import { expensesRouter } from './routes/expenses.js';
+import { budgetsRouter } from './routes/budgets.js';
+import { payrollRouter } from './routes/payroll.js';
 import { tenantContext } from './middleware/tenant-context.js';
 import { rateLimit } from './middleware/rate-limit.js';
 import {
@@ -102,6 +104,8 @@ api.route('/inventory', inventoryRouter);
 api.route('/purchasing', purchasingRouter);
 api.route('/projects', projectsRouter);
 api.route('/expenses', expensesRouter);
+api.route('/budgets', budgetsRouter);
+api.route('/payroll', payrollRouter);
 api.route('/sales', salesRouter);
 api.route('/notifications', notificationsRouter);
 api.route('/reports', reportsRouter);

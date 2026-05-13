@@ -29,6 +29,9 @@ import {
   BarChart3,
   PieChart,
   Activity,
+  PiggyBank,
+  DollarSign,
+  FileText,
 } from 'lucide-react';
 import NotificationBell from '@/components/notification-bell.js';
 
@@ -58,6 +61,7 @@ const NAV_SECTIONS = [
     items: [
       { href: '/dashboard/finance/invoices', icon: Receipt, label: 'Invoices' },
       { href: '/dashboard/expenses', icon: Receipt, label: 'Expenses' },
+      { href: '/dashboard/budgets', icon: PiggyBank, label: 'Budgets' },
     ],
   },
   {
@@ -72,6 +76,13 @@ const NAV_SECTIONS = [
       { href: '/dashboard/hr/employees', icon: Users, label: 'Employees' },
       { href: '/dashboard/hr/departments', icon: Building2, label: 'Departments' },
       { href: '/dashboard/hr/leave', icon: CalendarDays, label: 'Leave' },
+    ],
+  },
+  {
+    label: 'Payroll',
+    items: [
+      { href: '/dashboard/payroll/runs', icon: DollarSign, label: 'Pay Runs' },
+      { href: '/dashboard/payroll/payslips', icon: FileText, label: 'Payslips' },
     ],
   },
   {
