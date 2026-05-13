@@ -17,6 +17,8 @@ export { ActionAgent, type ActionAgentResult } from './ai/action-agent.js';
 // Channels
 export { SlackChannelAdapter } from './channels/slack/adapter.js';
 export { resolveSlackIdentity } from './channels/slack/identity-resolver.js';
+export { EmailChannelAdapter, type EmailChannelConfig } from './channels/email/adapter.js';
+export { resolveEmailIdentity } from './channels/email/identity-resolver.js';
 
 // Services
 export { TenantService, type CreateTenantParams, type BootstrapResult } from './services/tenant.service.js';

@@ -9,6 +9,9 @@ import { configRouter } from './routes/config.js';
 import { entitiesRouter } from './routes/entities.js';
 import { tenantsRouter } from './routes/tenants.js';
 import { magicLinksRouter } from './routes/magic-links.js';
+import { crmRouter } from './routes/crm.js';
+import { supportRouter } from './routes/support.js';
+import { financeRouter } from './routes/finance.js';
 import { tenantContext } from './middleware/tenant-context.js';
 import {
   sharedDb,
@@ -31,12 +34,27 @@ app.route('/health', healthRouter);
 app.route('/api/v1/tenants', tenantsRouter);
 app.route('/ml', magicLinksRouter);
 
+// Email inbound webhook (Resend/Postmark sends POST here)
+app.post('/webhooks/email', async (c) => {
+  const payload = await c.req.json();
+  // Enqueue for async processing so the webhook returns quickly
+  await sharedQueueService.enqueue('inbound_message', {
+    tenantId: payload.tenantId ?? (c.req.header('X-Veska-Tenant-Id') ?? ''),
+    channelName: 'email',
+    rawPayload: payload,
+  });
+  return c.json({ received: true });
+});
+
 // Tenant-scoped API routes
 const api = new Hono();
 api.use('*', tenantContext);
 api.route('/config', configRouter);
 api.route('/entities', entitiesRouter);
 api.route('/channels', channelsRouter);
+api.route('/crm', crmRouter);
+api.route('/support', supportRouter);
+api.route('/finance', financeRouter);
 app.route('/api/v1', api);
 
 // ── Slack setup ───────────────────────────────────────────────
