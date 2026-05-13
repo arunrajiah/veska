@@ -13,6 +13,7 @@ import {
   Puzzle,
   Plug,
   Bell,
+  Wand2,
 } from 'lucide-react';
 
 const NAV_SECTIONS = [
@@ -42,6 +43,7 @@ const NAV_SECTIONS = [
   {
     label: 'System',
     items: [
+      { href: '/dashboard/config', icon: Wand2, label: 'Config AI' },
       { href: '/dashboard/workflows', icon: GitBranch, label: 'Workflows' },
       { href: '/dashboard/integrations', icon: Plug, label: 'Integrations' },
       { href: '/dashboard/webhooks', icon: Bell, label: 'Webhooks' },
