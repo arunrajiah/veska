@@ -1,4 +1,3 @@
-'use client' in {} ? null : null; // keep this a server file
 import Link from 'next/link';
 import { apiFetch } from '@/lib/api.js';
 import { QualifyButton } from './_components.js';
