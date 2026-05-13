@@ -28,6 +28,8 @@ import { notificationChannelsRouter } from './routes/notification-channels.js';
 import { projectsRouter } from './routes/projects.js';
 import { reportsRouter } from './routes/reports.js';
 import { expensesRouter } from './routes/expenses.js';
+import { approvalChainsRouter } from './routes/approval-chains.js';
+import { approvalRequestsRouter } from './routes/approval-requests.js';
 import { budgetsRouter } from './routes/budgets.js';
 import { timeRouter } from './routes/time.js';
 import { payrollRouter } from './routes/payroll.js';
@@ -132,6 +134,8 @@ app.route('/api/v1/roles', rolesRouter);
 app.route('/api/v1/notification-channels', notificationChannelsRouter);
 app.route('/api/v1/attachments', attachmentsRouter);
 app.route('/api/v1/import-export', importExportRouter);
+app.route('/api/v1/approval-chains', approvalChainsRouter);
+app.route('/api/v1/approval-requests', approvalRequestsRouter);
 
 // ── Slack setup ───────────────────────────────────────────────
 const slackManager = new SlackAppManager({

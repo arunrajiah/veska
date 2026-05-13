@@ -50,6 +50,7 @@ const NAV_SECTIONS = [
     items: [
       { href: '/dashboard', icon: LayoutDashboard, label: 'Overview' },
       { href: '/dashboard/inbox', icon: Inbox, label: 'Inbox' },
+      { href: '/dashboard/approvals', icon: CheckSquare, label: 'Approvals', badge: true },
     ],
   },
   {
@@ -155,6 +156,7 @@ const NAV_SECTIONS = [
     items: [
       { href: '/dashboard/config', icon: Wand2, label: 'Config AI' },
       { href: '/dashboard/workflows', icon: GitBranch, label: 'Workflows' },
+      { href: '/dashboard/settings/approvals', icon: GitBranch, label: 'Approval Chains' },
       { href: '/dashboard/integrations', icon: Plug, label: 'Integrations' },
       { href: '/dashboard/webhooks', icon: Bell, label: 'Webhooks' },
       { href: '/dashboard/settings/notifications', icon: Bell, label: 'Notifications' },
@@ -202,7 +204,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   className="flex items-center gap-2.5 px-2.5 py-2 text-sm text-gray-600 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-colors"
                 >
                   <item.icon size={15} className="flex-shrink-0" />
-                  {item.label}
+                  <span className="flex-1">{item.label}</span>
+                  {'badge' in item && item.badge && (
+                    <span className="w-2 h-2 rounded-full bg-indigo-500 flex-shrink-0" />
+                  )}
                 </Link>
               ))}
             </div>
