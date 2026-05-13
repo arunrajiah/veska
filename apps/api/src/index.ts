@@ -24,6 +24,7 @@ import { purchasingRouter } from './routes/purchasing.js';
 import { grnRouter } from './routes/grn.js';
 import { salesRouter } from './routes/sales.js';
 import { notificationsRouter } from './routes/notifications.js';
+import { notificationChannelsRouter } from './routes/notification-channels.js';
 import { projectsRouter } from './routes/projects.js';
 import { reportsRouter } from './routes/reports.js';
 import { expensesRouter } from './routes/expenses.js';
@@ -124,6 +125,7 @@ api.route('/api-keys', apiKeysRouter);
 app.route('/api/v1', api);
 app.route('/api/v1/users', usersRouter);
 app.route('/api/v1/roles', rolesRouter);
+app.route('/api/v1/notification-channels', notificationChannelsRouter);
 
 // ── Slack setup ───────────────────────────────────────────────
 const slackManager = new SlackAppManager({
