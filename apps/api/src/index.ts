@@ -30,6 +30,8 @@ import { expensesRouter } from './routes/expenses.js';
 import { budgetsRouter } from './routes/budgets.js';
 import { timeRouter } from './routes/time.js';
 import { payrollRouter } from './routes/payroll.js';
+import { usersRouter } from './routes/users.js';
+import { rolesRouter } from './routes/roles.js';
 import { tenantContext } from './middleware/tenant-context.js';
 import { rateLimit } from './middleware/rate-limit.js';
 import {
@@ -120,6 +122,8 @@ api.route('/audit', auditRouter);
 api.route('/webhooks', webhooksRouter);
 api.route('/api-keys', apiKeysRouter);
 app.route('/api/v1', api);
+app.route('/api/v1/users', usersRouter);
+app.route('/api/v1/roles', rolesRouter);
 
 // ── Slack setup ───────────────────────────────────────────────
 const slackManager = new SlackAppManager({

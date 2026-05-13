@@ -37,6 +37,8 @@ import {
   PackageCheck,
   Key,
   Webhook,
+  Shield,
+  UserCog,
 } from 'lucide-react';
 import NotificationBell from '@/components/notification-bell.js';
 
@@ -136,6 +138,13 @@ const NAV_SECTIONS = [
       { href: '/dashboard/developer/api-keys', icon: Key, label: 'API Keys' },
       { href: '/dashboard/developer/webhooks', icon: Webhook, label: 'Webhooks' },
       { href: '/dashboard/developer/audit', icon: ClipboardList, label: 'Audit Log' },
+    ],
+  },
+  {
+    label: 'Team',
+    items: [
+      { href: '/dashboard/team', icon: UserCog, label: 'Users' },
+      { href: '/dashboard/team/roles', icon: Shield, label: 'Roles' },
     ],
   },
   {
