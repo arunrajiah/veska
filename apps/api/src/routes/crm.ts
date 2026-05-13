@@ -330,6 +330,104 @@ crmRouter.patch(
   },
 );
 
+crmRouter.patch(
+  '/deals/:id',
+  zValidator(
+    'json',
+    z.object({
+      name: z.string().min(1).optional(),
+      value: z.number().optional(),
+      stage: z.enum(DEAL_STAGES).optional(),
+      status: z.string().optional(),
+      contact_name: z.string().optional(),
+      company_name: z.string().optional(),
+      company_id: z.string().uuid().optional(),
+      contact_id: z.string().uuid().optional(),
+      assigned_to: z.string().optional(),
+      notes: z.string().optional(),
+      close_date: z.string().optional(),
+    }),
+  ),
+  async (c) => {
+    const dealId = c.req.param('id');
+    const { db, tenantId, identityId } = c.get('tenantCtx');
+    const body = c.req.valid('json');
+
+    const existing = await db.query.entityRecords.findFirst({
+      where: and(
+        eq(schema.entityRecords.tenantId, tenantId),
+        eq(schema.entityRecords.entityType, 'Deal'),
+        eq(schema.entityRecords.id, dealId),
+        isNull(schema.entityRecords.deletedAt),
+      ),
+    });
+
+    if (!existing) return c.json({ error: 'Deal not found' }, 404);
+
+    const [updated] = await db
+      .update(schema.entityRecords)
+      .set({
+        data: { ...(existing.data as Record<string, unknown>), ...body },
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.entityRecords.id, dealId))
+      .returning();
+
+    // When a deal transitions to 'won', auto-create a Sales Order
+    if (body.status === 'won') {
+      const dealData = { ...(existing.data as Record<string, unknown>), ...body };
+      const customerName = String(dealData['contact_name'] ?? dealData['company_name'] ?? dealData['name'] ?? 'Unknown');
+      const soNumber = `SO-${Date.now()}`;
+
+      // Check if SO already exists for this deal
+      const existingSOs = await db
+        .select()
+        .from(schema.entityRecords)
+        .where(
+          and(
+            eq(schema.entityRecords.tenantId, tenantId),
+            eq(schema.entityRecords.entityType, 'SalesOrder'),
+            sql`data->>'deal_id' = ${dealId}`,
+          ),
+        )
+        .limit(1);
+
+      if (existingSOs.length === 0) {
+        await db.insert(schema.entityRecords).values({
+          id: crypto.randomUUID(),
+          tenantId,
+          entityType: 'SalesOrder',
+          data: {
+            number: soNumber,
+            customer_name: customerName,
+            deal_id: dealId,
+            status: 'confirmed',
+            total: Number(dealData['value'] ?? 0),
+            items: [],
+            notes: `Auto-created from deal: ${String(dealData['name'] ?? '')}`,
+          },
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+
+        // Also create a notification using the dedicated notifications table
+        await db.insert(schema.notifications).values({
+          id: crypto.randomUUID(),
+          tenantId,
+          type: 'success',
+          title: 'Deal won — Sales Order created',
+          body: `${soNumber} created automatically for ${customerName}.`,
+          read: false,
+          link: '/dashboard/sales/orders',
+          createdAt: new Date(),
+        });
+      }
+    }
+
+    return c.json(updated);
+  },
+);
+
 // ── Pipeline ──────────────────────────────────────────────────
 
 crmRouter.get('/pipeline', async (c) => {

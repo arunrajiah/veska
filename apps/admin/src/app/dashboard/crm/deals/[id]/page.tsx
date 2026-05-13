@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { apiFetch } from '@/lib/api.js';
+import { AutomationBanner } from './_automation.js';
 
 const STAGES = [
   { key: 'prospecting', label: 'Prospecting', color: 'bg-gray-100 text-gray-600' },
@@ -49,6 +50,7 @@ export default async function DealDetailPage({ params }: { params: { id: string 
 
   const d = record.data;
   const stage = (d['stage'] as string) ?? '';
+  const dealStatus = (d['status'] as string) ?? '';
   const stageInfo = STAGES.find((s) => s.key === stage);
 
   const fields: Array<{ label: string; value: string }> = [
@@ -64,6 +66,8 @@ export default async function DealDetailPage({ params }: { params: { id: string 
           ← Deals
         </Link>
       </div>
+
+      <AutomationBanner status={dealStatus} dealId={id} />
 
       <div className="flex items-start justify-between mb-8">
         <div>
