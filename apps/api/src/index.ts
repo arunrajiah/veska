@@ -14,6 +14,8 @@ import { supportRouter } from './routes/support.js';
 import { financeRouter } from './routes/finance.js';
 import { workflowsRouter } from './routes/workflows.js';
 import { pluginsRouter } from './routes/plugins.js';
+import { integrationsRouter } from './routes/integrations.js';
+import { auditRouter } from './routes/audit.js';
 import { tenantContext } from './middleware/tenant-context.js';
 import {
   sharedDb,
@@ -25,6 +27,7 @@ import {
 } from './shared.js';
 import { SlackAppManager } from './slack/slack-app.js';
 import { registerMessageWorker } from './slack/message-worker.js';
+import { registerEnrichmentWorker } from './workers/enrichment-worker.js';
 import { WorkflowEngine } from '@veska/core';
 
 // ── App setup ─────────────────────────────────────────────────
@@ -72,6 +75,8 @@ api.route('/support', supportRouter);
 api.route('/finance', financeRouter);
 api.route('/workflows', workflowsRouter);
 api.route('/plugins', pluginsRouter);
+api.route('/integrations', integrationsRouter);
+api.route('/audit', auditRouter);
 app.route('/api/v1', api);
 
 // ── Slack setup ───────────────────────────────────────────────
@@ -99,6 +104,9 @@ sharedQueueService.registerWorker('workflow.execute_step', async (job) => {
   const { tenantId, workflowRunId, stepId } = job.data as { tenantId: string; workflowRunId: string; stepId: string };
   await workflowEngine.executeStep({ tenantId, workflowRunId, stepId });
 });
+
+// AI entity enrichment worker
+registerEnrichmentWorker(sharedQueueService, sharedDb, sharedLlm, sharedAuditService);
 
 // ── Graceful shutdown ─────────────────────────────────────────
 const shutdown = async () => {

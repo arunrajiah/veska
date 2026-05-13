@@ -240,6 +240,24 @@ export const auditLog = pgTable('audit_log', {
 ]);
 
 // ──────────────────────────────────────────────────────────────
+// Integration instances (per-tenant configured integrations)
+// ──────────────────────────────────────────────────────────────
+
+export const integrationInstances = pgTable('integration_instances', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  enabled: boolean('enabled').notNull().default(true),
+  config: jsonb('config').notNull().default(sql`'{}'::jsonb`),
+  lastSyncedAt: timestamp('last_synced_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  unique('integration_instances_tenant_name_key').on(t.tenantId, t.name),
+  index('integration_instances_tenant_id_idx').on(t.tenantId),
+]);
+
+// ──────────────────────────────────────────────────────────────
 // Magic links
 // ──────────────────────────────────────────────────────────────
 

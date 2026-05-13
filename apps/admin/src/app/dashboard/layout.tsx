@@ -9,6 +9,8 @@ import {
   Settings,
   Radio,
   ScrollText,
+  GitBranch,
+  Puzzle,
 } from 'lucide-react';
 
 const NAV_SECTIONS = [
@@ -38,6 +40,8 @@ const NAV_SECTIONS = [
   {
     label: 'System',
     items: [
+      { href: '/dashboard/workflows', icon: GitBranch, label: 'Workflows' },
+      { href: '/dashboard/plugins', icon: Puzzle, label: 'Plugins' },
       { href: '/dashboard/audit', icon: ScrollText, label: 'Audit log' },
       { href: '/dashboard/channels', icon: Radio, label: 'Channels' },
       { href: '/dashboard/settings', icon: Settings, label: 'Settings' },

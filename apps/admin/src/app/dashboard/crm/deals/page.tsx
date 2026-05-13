@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
+import { apiFetch } from '@/lib/api.js';
 
 const STAGES = [
   { key: 'prospecting', label: 'Prospecting', color: 'bg-gray-100' },
@@ -10,31 +11,40 @@ const STAGES = [
   { key: 'closed_lost', label: 'Lost', color: 'bg-red-50' },
 ];
 
-// Stub pipeline data
-const STUB_PIPELINE: Record<string, Array<{ id: string; name: string; company: string; value: string; closeDate: string }>> = {
-  prospecting: [
-    { id: '1', name: 'Website Redesign', company: 'Nexus Labs', value: '$8,000', closeDate: '2026-06-30' },
-  ],
-  qualification: [
-    { id: '2', name: 'Annual Support Contract', company: 'BrightPath', value: '$24,000', closeDate: '2026-06-15' },
-  ],
-  proposal: [
-    { id: '3', name: 'ERP Integration', company: 'TechVault', value: '$45,000', closeDate: '2026-05-31' },
-  ],
-  negotiation: [],
-  closed_won: [
-    { id: '4', name: 'Starter Onboarding', company: 'GreenLeaf', value: '$3,500', closeDate: '2026-05-01' },
-  ],
-  closed_lost: [],
-};
+interface DealData {
+  name?: string;
+  company_id?: string;
+  value?: number;
+  close_date?: string;
+}
 
-export default function DealsPage() {
-  const totalPipeline = Object.values(STUB_PIPELINE)
-    .flat()
-    .filter((d) => !['closed_won', 'closed_lost'].includes(
-      STAGES.find((s) => Object.values(STUB_PIPELINE).some((deals) => deals.find((x) => x.id === d.id)))?.key ?? ''
-    ))
-    .reduce((sum, d) => sum + parseFloat(d.value.replace(/[$,]/g, '')), 0);
+interface Deal {
+  id: string;
+  data: DealData;
+}
+
+interface StageData {
+  deals: Deal[];
+  count: number;
+  totalValue: number;
+}
+
+type PipelineResponse = Record<string, StageData>;
+
+function formatCurrency(value: number | undefined): string {
+  if (value == null) return '—';
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+}
+
+export default async function DealsPage() {
+  const tenantId = process.env.VESKA_TENANT_ID ?? '';
+
+  let pipeline: PipelineResponse = {};
+  try {
+    pipeline = await apiFetch<PipelineResponse>('/api/v1/crm/pipeline', tenantId);
+  } catch {
+    pipeline = {};
+  }
 
   return (
     <div className="px-8 py-8">
@@ -55,7 +65,8 @@ export default function DealsPage() {
       {/* Kanban board */}
       <div className="flex gap-3 overflow-x-auto pb-4">
         {STAGES.map((stage) => {
-          const deals = STUB_PIPELINE[stage.key] ?? [];
+          const stageData = pipeline[stage.key];
+          const deals: Deal[] = stageData?.deals ?? [];
           return (
             <div key={stage.key} className="flex-shrink-0 w-60">
               <div className="flex items-center justify-between mb-2 px-1">
@@ -69,11 +80,22 @@ export default function DealsPage() {
                     href={`/dashboard/crm/deals/${deal.id}`}
                     className="block bg-white border border-gray-200 rounded-lg p-3 hover:border-gray-300 transition-colors"
                   >
-                    <p className="text-sm font-medium text-gray-900 mb-1">{deal.name}</p>
-                    <p className="text-xs text-gray-500 mb-2">{deal.company}</p>
+                    <p className="text-sm font-medium text-gray-900 mb-1">
+                      {deal.data.name ?? '(Unnamed)'}
+                    </p>
+                    {deal.data.company_id && (
+                      <p className="text-xs text-gray-500 mb-2">
+                        <span className="text-gray-400">Company: </span>
+                        {deal.data.company_id}
+                      </p>
+                    )}
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold text-gray-900">{deal.value}</span>
-                      <span className="text-xs text-gray-400">{deal.closeDate}</span>
+                      <span className="text-sm font-semibold text-gray-900">
+                        {formatCurrency(deal.data.value)}
+                      </span>
+                      {deal.data.close_date && (
+                        <span className="text-xs text-gray-400">{deal.data.close_date}</span>
+                      )}
                     </div>
                   </Link>
                 ))}

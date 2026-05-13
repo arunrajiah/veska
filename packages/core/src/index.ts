@@ -21,6 +21,11 @@ export { EmailChannelAdapter, type EmailChannelConfig } from './channels/email/a
 export { resolveEmailIdentity } from './channels/email/identity-resolver.js';
 export { WhatsAppChannelAdapter, type WhatsAppChannelConfig } from './channels/whatsapp/adapter.js';
 export { resolveWhatsAppIdentity } from './channels/whatsapp/identity-resolver.js';
+export { TelegramChannelAdapter, type TelegramChannelConfig } from './channels/telegram/adapter.js';
+export { resolveTelegramIdentity } from './channels/telegram/identity-resolver.js';
+
+// Integrations
+export { StripeIntegrationAdapter } from './integrations/index.js';
 
 // Engine
 export { WorkflowEngine } from './engine/index.js';
@@ -36,4 +41,4 @@ export { AuditService, type AuditEvent } from './services/audit.service.js';
 
 // Queue
 export { QueueService } from './queue/queue.service.js';
-export type { JobName, JobPayload, InboundMessageJob, WorkflowStepJob, SendMessageJob } from './queue/jobs.js';
+export type { JobName, JobPayload, InboundMessageJob, WorkflowStepJob, SendMessageJob, EnrichEntityJob } from './queue/jobs.js';

@@ -1,0 +1,23 @@
+{
+  "id": "com.veska.stripe",
+  "name": "Stripe",
+  "version": "1.0.0",
+  "description": "Sync Stripe customers, subscriptions, and invoices with Veska CRM. Automatically create Contact records when Stripe customers are created.",
+  "author": {
+    "name": "Veska",
+    "developerId": "veska-official",
+    "email": "plugins@veska.com"
+  },
+  "veskaMinVersion": "0.1.0",
+  "capabilitiesRequired": ["contact.create", "contact.read", "invoice.create", "invoice.read", "audit.*"],
+  "capabilitiesProvided": [],
+  "entities": ["Contact", "Invoice"],
+  "workflows": [],
+  "agents": [],
+  "channels": [],
+  "networkWhitelist": ["api.stripe.com"],
+  "pricing": { "model": "free" },
+  "license": "Apache-2.0",
+  "homepage": "https://veska.com/plugins/stripe",
+  "supportEmail": "plugins@veska.com"
+}
