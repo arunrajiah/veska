@@ -41,6 +41,7 @@ import {
   UserCog,
   Sparkles,
   ArrowUpDown,
+  Globe,
 } from 'lucide-react';
 import NotificationBell from '@/components/notification-bell.js';
 
@@ -160,6 +161,7 @@ const NAV_SECTIONS = [
       { href: '/dashboard/integrations', icon: Plug, label: 'Integrations' },
       { href: '/dashboard/webhooks', icon: Bell, label: 'Webhooks' },
       { href: '/dashboard/settings/notifications', icon: Bell, label: 'Notifications' },
+      { href: '/dashboard/settings/currency', icon: Globe, label: 'Currency' },
       { href: '/dashboard/plugins', icon: Puzzle, label: 'Plugins' },
       { href: '/dashboard/audit', icon: ScrollText, label: 'Audit log' },
       { href: '/dashboard/channels', icon: Radio, label: 'Channels' },
