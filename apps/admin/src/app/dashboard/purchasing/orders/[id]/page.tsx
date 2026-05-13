@@ -1,12 +1,16 @@
 import Link from 'next/link';
 import { apiFetch } from '@/lib/api.js';
-import StatusButtons from './_components.js';
+import ApprovalButtons from './_approval.js';
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-600',
-  sent: 'bg-blue-100 text-blue-700',
+  pending_approval: 'bg-yellow-100 text-yellow-700',
+  approved: 'bg-emerald-100 text-emerald-700',
+  ordered: 'bg-blue-100 text-blue-700',
+  partial_received: 'bg-orange-100 text-orange-700',
   received: 'bg-green-100 text-green-700',
   cancelled: 'bg-red-100 text-red-600',
+  sent: 'bg-blue-100 text-blue-700',
 };
 
 interface LineItem {
@@ -22,12 +26,13 @@ interface OrderRecord {
   createdAt: string;
 }
 
-export default async function OrderDetailPage({ params }: { params: { id: string } }) {
+export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const tenantId = process.env.VESKA_TENANT_ID ?? '';
 
   let record: OrderRecord | null = null;
   try {
-    record = await apiFetch<OrderRecord>(`/api/v1/purchasing/orders/${params.id}`, tenantId);
+    record = await apiFetch<OrderRecord>(`/api/v1/purchasing/orders/${id}`, tenantId);
   } catch {
     record = null;
   }
@@ -136,7 +141,12 @@ export default async function OrderDetailPage({ params }: { params: { id: string
         <div className="w-48 flex-shrink-0">
           <div className="bg-white border border-gray-200 rounded-xl p-4">
             <p className="text-xs font-medium text-gray-500 mb-3">Actions</p>
-            <StatusButtons orderId={record.id} currentStatus={status} />
+            <ApprovalButtons
+              orderId={record.id}
+              tenantId={tenantId}
+              currentStatus={status}
+              poNumber={poNumber}
+            />
           </div>
         </div>
       </div>

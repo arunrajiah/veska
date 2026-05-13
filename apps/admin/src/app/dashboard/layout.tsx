@@ -25,6 +25,8 @@ import {
   ShoppingBag,
   Folder,
   CheckSquare,
+  Clock,
+  ClipboardList,
   TrendingUp,
   BarChart3,
   PieChart,
@@ -32,6 +34,7 @@ import {
   PiggyBank,
   DollarSign,
   FileText,
+  PackageCheck,
 } from 'lucide-react';
 import NotificationBell from '@/components/notification-bell.js';
 
@@ -99,6 +102,7 @@ const NAV_SECTIONS = [
     items: [
       { href: '/dashboard/purchasing/vendors', icon: Truck, label: 'Vendors' },
       { href: '/dashboard/purchasing/orders', icon: ShoppingCart, label: 'Purchase Orders' },
+      { href: '/dashboard/purchasing/grn', icon: PackageCheck, label: 'Received (GRN)' },
     ],
   },
   {
@@ -106,6 +110,13 @@ const NAV_SECTIONS = [
     items: [
       { href: '/dashboard/projects', icon: Folder, label: 'All Projects' },
       { href: '/dashboard/projects/tasks', icon: CheckSquare, label: 'Tasks' },
+    ],
+  },
+  {
+    label: 'Time',
+    items: [
+      { href: '/dashboard/time', icon: Clock, label: 'Overview' },
+      { href: '/dashboard/time/entries', icon: ClipboardList, label: 'Time Entries' },
     ],
   },
   {

@@ -7,8 +7,29 @@ import type { TenantContext } from '../middleware/tenant-context.js';
 
 export const purchasingRouter = new Hono<{ Variables: TenantContext }>();
 
-const PO_STATUSES = ['draft', 'sent', 'received', 'cancelled'] as const;
+const PO_STATUSES = [
+  'draft',
+  'pending_approval',
+  'approved',
+  'ordered',
+  'partial_received',
+  'received',
+  'cancelled',
+] as const;
+
 const PAYMENT_TERMS = ['net30', 'net60', 'net90', 'immediate'] as const;
+
+type POStatus = (typeof PO_STATUSES)[number];
+
+const PO_TRANSITIONS: Record<POStatus, POStatus[]> = {
+  draft: ['pending_approval', 'cancelled'],
+  pending_approval: ['approved', 'draft', 'cancelled'],
+  approved: ['ordered', 'cancelled'],
+  ordered: ['partial_received', 'received'],
+  partial_received: ['received', 'cancelled'],
+  received: [],
+  cancelled: [],
+};
 
 // ── Vendors ───────────────────────────────────────────────────
 
@@ -164,8 +185,8 @@ purchasingRouter.patch(
   ),
   async (c) => {
     const id = c.req.param('id');
-    const { db, tenantId } = c.get('tenantCtx');
-    const { status } = c.req.valid('json');
+    const { db, tenantId, identityId } = c.get('tenantCtx');
+    const { status: newStatus } = c.req.valid('json');
 
     const order = await db.query.entityRecords.findFirst({
       where: and(
@@ -178,14 +199,40 @@ purchasingRouter.patch(
 
     if (!order) return c.json({ error: 'Purchase order not found' }, 404);
 
+    const currentStatus = ((order.data as Record<string, unknown>)['status'] ?? 'draft') as POStatus;
+    const allowedTransitions = PO_TRANSITIONS[currentStatus] ?? [];
+
+    if (!allowedTransitions.includes(newStatus)) {
+      return c.json(
+        { error: `Invalid transition from '${currentStatus}' to '${newStatus}'. Allowed: ${allowedTransitions.join(', ') || 'none'}` },
+        422,
+      );
+    }
+
     const [updated] = await db
       .update(schema.entityRecords)
       .set({
-        data: { ...(order.data as Record<string, unknown>), status },
+        data: { ...(order.data as Record<string, unknown>), status: newStatus },
         updatedAt: new Date(),
       })
       .where(eq(schema.entityRecords.id, id))
       .returning();
+
+    // Insert approval notification when PO is approved
+    if (newStatus === 'approved') {
+      const poNumber = String((order.data as Record<string, unknown>)['number'] ?? id.slice(0, 8).toUpperCase());
+      await db.insert(schema.entityRecords).values({
+        tenantId,
+        entityType: 'Notification',
+        data: {
+          type: 'success',
+          title: 'Purchase order approved',
+          body: `PO ${poNumber} has been approved.`,
+          read: false,
+        },
+        createdBy: identityId,
+      });
+    }
 
     return c.json(updated);
   },
