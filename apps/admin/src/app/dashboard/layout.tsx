@@ -4,6 +4,7 @@ import {
   Inbox,
   Users,
   Briefcase,
+  Building2,
   Ticket,
   Receipt,
   Settings,
@@ -29,6 +30,7 @@ const NAV_SECTIONS = [
     items: [
       { href: '/dashboard/crm/leads', icon: Users, label: 'Leads' },
       { href: '/dashboard/crm/contacts', icon: Users, label: 'Contacts' },
+      { href: '/dashboard/crm/companies', icon: Building2, label: 'Companies' },
       { href: '/dashboard/crm/deals', icon: Briefcase, label: 'Deals' },
     ],
   },

@@ -1,3 +1,6 @@
+import Link from 'next/link';
+import { KeyRound } from 'lucide-react';
+
 export default function SettingsPage() {
   return (
     <div className="px-8 py-8 max-w-2xl">
@@ -66,6 +69,21 @@ export default function SettingsPage() {
               View config history
             </a>
           </div>
+        </section>
+
+        {/* Developer */}
+        <section className="bg-white border border-gray-200 rounded-xl p-6">
+          <h2 className="text-sm font-medium text-gray-900 mb-2">Developer</h2>
+          <p className="text-xs text-gray-500 mb-4">
+            Manage API keys for programmatic access to the Veska API.
+          </p>
+          <Link
+            href="/dashboard/settings/api-keys"
+            className="inline-flex items-center gap-2 text-sm border border-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <KeyRound size={14} />
+            Manage API keys
+          </Link>
         </section>
 
         {/* Danger zone */}

@@ -17,6 +17,7 @@ import { pluginsRouter } from './routes/plugins.js';
 import { integrationsRouter } from './routes/integrations.js';
 import { auditRouter } from './routes/audit.js';
 import { webhooksRouter } from './routes/webhooks.js';
+import { apiKeysRouter } from './routes/api-keys.js';
 import { tenantContext } from './middleware/tenant-context.js';
 import { rateLimit } from './middleware/rate-limit.js';
 import {
@@ -93,6 +94,7 @@ api.route('/plugins', pluginsRouter);
 api.route('/integrations', integrationsRouter);
 api.route('/audit', auditRouter);
 api.route('/webhooks', webhooksRouter);
+api.route('/api-keys', apiKeysRouter);
 app.route('/api/v1', api);
 
 // ── Slack setup ───────────────────────────────────────────────

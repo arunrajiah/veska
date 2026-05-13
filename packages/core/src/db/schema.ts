@@ -275,6 +275,24 @@ export const webhookSubscriptions = pgTable('webhook_subscriptions', {
 ]);
 
 // ──────────────────────────────────────────────────────────────
+// API keys — programmatic access for CI/CD and integrations
+// ──────────────────────────────────────────────────────────────
+
+export const apiKeys = pgTable('api_keys', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  keyHash: text('key_hash').notNull().unique(),
+  keyPrefix: text('key_prefix').notNull(),
+  lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
+  expiresAt: timestamp('expires_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index('api_keys_tenant_id_idx').on(t.tenantId),
+  index('api_keys_key_hash_idx').on(t.keyHash),
+]);
+
+// ──────────────────────────────────────────────────────────────
 // Magic links
 // ──────────────────────────────────────────────────────────────
 
