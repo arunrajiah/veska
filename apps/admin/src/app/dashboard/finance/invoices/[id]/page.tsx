@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { apiFetch } from '@/lib/api.js';
 import { SendInvoiceButton, MarkAsPaidForm } from './_components.js';
+import { AttachmentsPanel } from '@/components/attachments.js';
 
 interface LineItem {
   description: string;
@@ -177,6 +178,12 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
           <p className="px-5 py-4 text-sm text-gray-700 whitespace-pre-wrap">{String(d['notes'])}</p>
         </div>
       )}
+
+      {/* Attachments */}
+      <section className="mt-8">
+        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">Attachments</h2>
+        <AttachmentsPanel entityType="invoice" entityId={record.id} />
+      </section>
     </div>
   );
 }

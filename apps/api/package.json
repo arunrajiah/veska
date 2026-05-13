@@ -19,6 +19,7 @@
     "@veska/core": "workspace:*",
     "@veska-cloud/ai": "workspace:*",
     "@veska-cloud/notifications": "workspace:*",
+    "@veska-cloud/storage": "workspace:*",
     "@slack/bolt": "^4.1.0",
     "@slack/web-api": "^7.8.0",
     "hono": "^4.6.20",

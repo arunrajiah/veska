@@ -40,6 +40,7 @@ import {
   Shield,
   UserCog,
   Sparkles,
+  ArrowUpDown,
 } from 'lucide-react';
 import NotificationBell from '@/components/notification-bell.js';
 
@@ -139,6 +140,7 @@ const NAV_SECTIONS = [
       { href: '/dashboard/developer/api-keys', icon: Key, label: 'API Keys' },
       { href: '/dashboard/developer/webhooks', icon: Webhook, label: 'Webhooks' },
       { href: '/dashboard/developer/audit', icon: ClipboardList, label: 'Audit Log' },
+      { href: '/dashboard/import-export', icon: ArrowUpDown, label: 'Import / Export' },
     ],
   },
   {

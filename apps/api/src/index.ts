@@ -34,6 +34,8 @@ import { payrollRouter } from './routes/payroll.js';
 import { aiRouter } from './routes/ai.js';
 import { usersRouter } from './routes/users.js';
 import { rolesRouter } from './routes/roles.js';
+import { attachmentsRouter } from './routes/attachments.js';
+import { importExportRouter } from './routes/import-export.js';
 import { tenantContext } from './middleware/tenant-context.js';
 import { rateLimit } from './middleware/rate-limit.js';
 import {
@@ -128,6 +130,8 @@ app.route('/api/v1', api);
 app.route('/api/v1/users', usersRouter);
 app.route('/api/v1/roles', rolesRouter);
 app.route('/api/v1/notification-channels', notificationChannelsRouter);
+app.route('/api/v1/attachments', attachmentsRouter);
+app.route('/api/v1/import-export', importExportRouter);
 
 // ── Slack setup ───────────────────────────────────────────────
 const slackManager = new SlackAppManager({
