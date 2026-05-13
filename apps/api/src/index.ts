@@ -16,7 +16,9 @@ import { workflowsRouter } from './routes/workflows.js';
 import { pluginsRouter } from './routes/plugins.js';
 import { integrationsRouter } from './routes/integrations.js';
 import { auditRouter } from './routes/audit.js';
+import { webhooksRouter } from './routes/webhooks.js';
 import { tenantContext } from './middleware/tenant-context.js';
+import { rateLimit } from './middleware/rate-limit.js';
 import {
   sharedDb,
   sharedLlm,
@@ -64,9 +66,22 @@ app.post('/webhooks/whatsapp', async (c) => {
   return c.text('', 200);
 });
 
+// Telegram Bot API sends POST to this endpoint
+app.post('/webhooks/telegram', async (c) => {
+  const update = await c.req.json<Record<string, unknown>>();
+  const tenantId = c.req.header('X-Veska-Tenant-Id') ?? '';
+  await sharedQueueService.enqueue('inbound_message', {
+    tenantId,
+    channelName: 'telegram',
+    rawMessage: update,
+  });
+  return c.json({ ok: true });
+});
+
 // Tenant-scoped API routes
 const api = new Hono();
 api.use('*', tenantContext);
+api.use('*', rateLimit(sharedRedis, { windowMs: 60_000, max: 120 }));
 api.route('/config', configRouter);
 api.route('/entities', entitiesRouter);
 api.route('/channels', channelsRouter);
@@ -77,6 +92,7 @@ api.route('/workflows', workflowsRouter);
 api.route('/plugins', pluginsRouter);
 api.route('/integrations', integrationsRouter);
 api.route('/audit', auditRouter);
+api.route('/webhooks', webhooksRouter);
 app.route('/api/v1', api);
 
 // ── Slack setup ───────────────────────────────────────────────

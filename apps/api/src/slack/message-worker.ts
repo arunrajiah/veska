@@ -11,8 +11,17 @@ import {
   SlackChannelAdapter,
   resolveSlackIdentity,
   ActionAgent,
+  EmailChannelAdapter,
+  resolveEmailIdentity,
+  WhatsAppChannelAdapter,
+  resolveWhatsAppIdentity,
+  TelegramChannelAdapter,
+  resolveTelegramIdentity,
+  type EmailChannelConfig,
+  type WhatsAppChannelConfig,
+  type TelegramChannelConfig,
 } from '@veska/core';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import type { InboundMessageJob } from '@veska/core';
 import type { SlackAppManager } from './slack-app.js';
 
@@ -31,50 +40,162 @@ export function registerMessageWorker(
     async (job: Job<InboundMessageJob>) => {
       const { tenantId, channelName, rawMessage } = job.data;
 
-      if (channelName !== 'slack') return;
+      // ── Slack ──────────────────────────────────────────────────
+      if (channelName === 'slack') {
+        const raw = rawMessage as {
+          tenantId: string;
+          event?: Record<string, unknown>;
+          resolvedIdentityId?: string;
+          confirmationResponse?: string;
+        };
 
-      const raw = rawMessage as {
-        tenantId: string;
-        event?: Record<string, unknown>;
-        resolvedIdentityId?: string;
-        confirmationResponse?: string;
-      };
+        if (!raw.event) return;
 
-      if (!raw.event) return;
+        // Parse the inbound message
+        const adapter = slackManager.getAdapter();
+        const inbound = await adapter.parseInbound(raw);
+        inbound.senderIdentityId = raw.resolvedIdentityId;
 
-      // Parse the inbound message
-      const adapter = slackManager.getAdapter();
-      const inbound = await adapter.parseInbound(raw);
-      inbound.senderIdentityId = raw.resolvedIdentityId;
+        if (!inbound.senderIdentityId) {
+          inbound.senderIdentityId = await resolveSlackIdentity(db, inbound);
+        }
 
-      if (!inbound.senderIdentityId) {
-        inbound.senderIdentityId = await resolveSlackIdentity(db, inbound);
-      }
+        // Load the identity
+        const identity = await db.query.identities.findFirst({
+          where: eq(schema.identities.id, inbound.senderIdentityId),
+        });
 
-      // Load the identity
-      const identity = await db.query.identities.findFirst({
-        where: eq(schema.identities.id, inbound.senderIdentityId),
-      });
+        if (!identity) {
+          console.warn(`[Worker] No identity found for ${inbound.senderIdentityId}`);
+          return;
+        }
 
-      if (!identity) {
-        console.warn(`[Worker] No identity found for ${inbound.senderIdentityId}`);
+        // Run the action agent
+        const result = await actionAgent.process(inbound, identity as import('@veska/core').Identity);
+
+        // Send the response back via Slack
+        const channelConfig = await db.query.channelConfigs.findFirst({
+          where: eq(schema.channelConfigs.tenantId, tenantId),
+        });
+
+        if (channelConfig) {
+          const slackChannelId = raw.event['channel'] as string | undefined;
+          if (slackChannelId) {
+            await adapter.send(tenantId, slackChannelId, result.response, channelConfig);
+          }
+        }
         return;
       }
 
-      // Run the action agent
-      const result = await actionAgent.process(inbound, identity as import('@veska/core').Identity);
+      // ── Email ──────────────────────────────────────────────────
+      if (channelName === 'email') {
+        const channelConfig = await db.query.channelConfigs.findFirst({
+          where: and(
+            eq(schema.channelConfigs.tenantId, tenantId),
+            eq(schema.channelConfigs.channelName, channelName),
+          ),
+        });
 
-      // Send the response back via Slack
-      const channelConfig = await db.query.channelConfigs.findFirst({
-        where: eq(schema.channelConfigs.tenantId, tenantId),
-      });
-
-      if (channelConfig) {
-        const slackChannelId = raw.event['channel'] as string | undefined;
-        if (slackChannelId) {
-          await adapter.send(tenantId, slackChannelId, result.response, channelConfig);
+        if (!channelConfig) {
+          console.warn(`[Worker] No channel config found for tenant=${tenantId} channel=email`);
+          return;
         }
+
+        const adapter = new EmailChannelAdapter(
+          JSON.parse(channelConfig.credentialsRef) as EmailChannelConfig,
+        );
+        const inbound = await adapter.parseInbound(rawMessage);
+
+        inbound.senderIdentityId = await resolveEmailIdentity(db, inbound);
+
+        const identity = await db.query.identities.findFirst({
+          where: eq(schema.identities.id, inbound.senderIdentityId),
+        });
+
+        if (!identity) {
+          console.warn(`[Worker] No identity found for ${inbound.senderIdentityId}`);
+          return;
+        }
+
+        const result = await actionAgent.process(inbound, identity as import('@veska/core').Identity);
+
+        await adapter.send(tenantId, inbound.senderChannelId, result.response, channelConfig);
+        return;
       }
+
+      // ── WhatsApp ───────────────────────────────────────────────
+      if (channelName === 'whatsapp') {
+        const channelConfig = await db.query.channelConfigs.findFirst({
+          where: and(
+            eq(schema.channelConfigs.tenantId, tenantId),
+            eq(schema.channelConfigs.channelName, channelName),
+          ),
+        });
+
+        if (!channelConfig) {
+          console.warn(`[Worker] No channel config found for tenant=${tenantId} channel=whatsapp`);
+          return;
+        }
+
+        const adapter = new WhatsAppChannelAdapter(
+          JSON.parse(channelConfig.credentialsRef) as WhatsAppChannelConfig,
+        );
+        const inbound = await adapter.parseInbound(rawMessage);
+
+        inbound.senderIdentityId = await resolveWhatsAppIdentity(db, inbound);
+
+        const identity = await db.query.identities.findFirst({
+          where: eq(schema.identities.id, inbound.senderIdentityId),
+        });
+
+        if (!identity) {
+          console.warn(`[Worker] No identity found for ${inbound.senderIdentityId}`);
+          return;
+        }
+
+        const result = await actionAgent.process(inbound, identity as import('@veska/core').Identity);
+
+        await adapter.send(tenantId, inbound.senderChannelId, result.response, channelConfig);
+        return;
+      }
+
+      // ── Telegram ───────────────────────────────────────────────
+      if (channelName === 'telegram') {
+        const channelConfig = await db.query.channelConfigs.findFirst({
+          where: and(
+            eq(schema.channelConfigs.tenantId, tenantId),
+            eq(schema.channelConfigs.channelName, channelName),
+          ),
+        });
+
+        if (!channelConfig) {
+          console.warn(`[Worker] No channel config found for tenant=${tenantId} channel=telegram`);
+          return;
+        }
+
+        const adapter = new TelegramChannelAdapter(
+          JSON.parse(channelConfig.credentialsRef) as TelegramChannelConfig,
+        );
+        const inbound = await adapter.parseInbound(rawMessage);
+
+        inbound.senderIdentityId = await resolveTelegramIdentity(db, inbound);
+
+        const identity = await db.query.identities.findFirst({
+          where: eq(schema.identities.id, inbound.senderIdentityId),
+        });
+
+        if (!identity) {
+          console.warn(`[Worker] No identity found for ${inbound.senderIdentityId}`);
+          return;
+        }
+
+        const result = await actionAgent.process(inbound, identity as import('@veska/core').Identity);
+
+        await adapter.send(tenantId, inbound.senderChannelId, result.response, channelConfig);
+        return;
+      }
+
+      console.warn(`[Worker] Unhandled channel: ${channelName}`);
     },
     10,
   );

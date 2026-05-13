@@ -38,6 +38,7 @@ export { PluginManager, type InstalledPlugin } from './plugins/manager.js';
 export { TenantService, type CreateTenantParams, type BootstrapResult } from './services/tenant.service.js';
 export { MagicLinkService, type MagicLinkParams, type MagicLinkVerifyResult } from './services/magic-link.service.js';
 export { AuditService, type AuditEvent } from './services/audit.service.js';
+export { WebhookDispatcherService, type WebhookEvent } from './services/webhook-dispatcher.service.js';
 
 // Queue
 export { QueueService } from './queue/queue.service.js';

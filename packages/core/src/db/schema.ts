@@ -258,6 +258,23 @@ export const integrationInstances = pgTable('integration_instances', {
 ]);
 
 // ──────────────────────────────────────────────────────────────
+// Webhook subscriptions — outbound event delivery
+// ──────────────────────────────────────────────────────────────
+
+export const webhookSubscriptions = pgTable('webhook_subscriptions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  url: text('url').notNull(),
+  events: text('events').array().notNull().default([]),
+  secret: text('secret').notNull(),
+  enabled: boolean('enabled').notNull().default(true),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index('webhook_subscriptions_tenant_id_idx').on(t.tenantId),
+]);
+
+// ──────────────────────────────────────────────────────────────
 // Magic links
 // ──────────────────────────────────────────────────────────────
 
