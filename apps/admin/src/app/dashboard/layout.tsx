@@ -39,6 +39,7 @@ import {
   Webhook,
   Shield,
   UserCog,
+  Sparkles,
 } from 'lucide-react';
 import NotificationBell from '@/components/notification-bell.js';
 
@@ -174,6 +175,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         <nav className="flex-1 overflow-y-auto py-3 px-2">
+          {/* AI Assistant — pinned at top */}
+          <div className="mb-4">
+            <Link
+              href="/dashboard/ai"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors"
+            >
+              <Sparkles size={15} className="flex-shrink-0" />
+              Ask AI
+            </Link>
+          </div>
+
           {NAV_SECTIONS.map((section, si) => (
             <div key={si} className="mb-3">
               {section.label && (
