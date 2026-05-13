@@ -12,7 +12,17 @@ export { createDatabase, type Database, schema } from './db/index.js';
 export { type LLMProvider, type CompletionParams, type CompletionResult, type Tool } from './ai/provider.js';
 export { AnthropicProvider, type AnthropicProviderConfig } from './ai/anthropic-provider.js';
 export { ConfigAgent, type ConfigDiff, type ConfigChange, type ApplyResult } from './ai/config-agent.js';
+export { ActionAgent, type ActionAgentResult } from './ai/action-agent.js';
 
 // Channels
 export { SlackChannelAdapter } from './channels/slack/adapter.js';
 export { resolveSlackIdentity } from './channels/slack/identity-resolver.js';
+
+// Services
+export { TenantService, type CreateTenantParams, type BootstrapResult } from './services/tenant.service.js';
+export { MagicLinkService, type MagicLinkParams, type MagicLinkVerifyResult } from './services/magic-link.service.js';
+export { AuditService, type AuditEvent } from './services/audit.service.js';
+
+// Queue
+export { QueueService } from './queue/queue.service.js';
+export type { JobName, JobPayload, InboundMessageJob, WorkflowStepJob, SendMessageJob } from './queue/jobs.js';

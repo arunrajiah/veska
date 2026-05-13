@@ -20,6 +20,11 @@ export default defineConfig({
         'src/db/**',
         'src/ai/**',
         'src/channels/**',
+        // Queue requires a live Redis — covered by integration tests
+        'src/queue/**',
+        // These services require a live DB — covered by integration tests
+        'src/services/audit.service.ts',
+        'src/services/tenant.service.ts',
         // Pure interface/type files — no runnable logic to cover
         'src/primitives/channel.ts',
         'src/primitives/integration.ts',
