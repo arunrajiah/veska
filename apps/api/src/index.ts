@@ -12,6 +12,8 @@ import { magicLinksRouter } from './routes/magic-links.js';
 import { crmRouter } from './routes/crm.js';
 import { supportRouter } from './routes/support.js';
 import { financeRouter } from './routes/finance.js';
+import { workflowsRouter } from './routes/workflows.js';
+import { pluginsRouter } from './routes/plugins.js';
 import { tenantContext } from './middleware/tenant-context.js';
 import {
   sharedDb,
@@ -23,6 +25,7 @@ import {
 } from './shared.js';
 import { SlackAppManager } from './slack/slack-app.js';
 import { registerMessageWorker } from './slack/message-worker.js';
+import { WorkflowEngine } from '@veska/core';
 
 // ── App setup ─────────────────────────────────────────────────
 const app = new Hono();
@@ -34,16 +37,28 @@ app.route('/health', healthRouter);
 app.route('/api/v1/tenants', tenantsRouter);
 app.route('/ml', magicLinksRouter);
 
-// Email inbound webhook (Resend/Postmark sends POST here)
+// Inbound channel webhooks — enqueue for async processing
 app.post('/webhooks/email', async (c) => {
-  const payload = await c.req.json();
-  // Enqueue for async processing so the webhook returns quickly
+  const payload = await c.req.json<Record<string, unknown>>();
   await sharedQueueService.enqueue('inbound_message', {
-    tenantId: payload.tenantId ?? (c.req.header('X-Veska-Tenant-Id') ?? ''),
+    tenantId: String(payload['tenantId'] ?? c.req.header('X-Veska-Tenant-Id') ?? ''),
     channelName: 'email',
-    rawPayload: payload,
+    rawMessage: payload,
   });
   return c.json({ received: true });
+});
+
+// Twilio sends form-encoded data for WhatsApp; respond with 200 immediately
+app.post('/webhooks/whatsapp', async (c) => {
+  const body = await c.req.parseBody();
+  const tenantId = c.req.header('X-Veska-Tenant-Id') ?? '';
+  await sharedQueueService.enqueue('inbound_message', {
+    tenantId,
+    channelName: 'whatsapp',
+    rawMessage: body,
+  });
+  // Twilio expects TwiML or empty 200
+  return c.text('', 200);
 });
 
 // Tenant-scoped API routes
@@ -55,6 +70,8 @@ api.route('/channels', channelsRouter);
 api.route('/crm', crmRouter);
 api.route('/support', supportRouter);
 api.route('/finance', financeRouter);
+api.route('/workflows', workflowsRouter);
+api.route('/plugins', pluginsRouter);
 app.route('/api/v1', api);
 
 // ── Slack setup ───────────────────────────────────────────────
@@ -75,6 +92,13 @@ registerMessageWorker(
   sharedMagicLinkService,
   slackManager,
 );
+
+// Workflow step executor worker
+const workflowEngine = new WorkflowEngine(sharedDb, sharedQueueService, sharedAuditService, sharedLlm);
+sharedQueueService.registerWorker('workflow.execute_step', async (job) => {
+  const { tenantId, workflowRunId, stepId } = job.data as { tenantId: string; workflowRunId: string; stepId: string };
+  await workflowEngine.executeStep({ tenantId, workflowRunId, stepId });
+});
 
 // ── Graceful shutdown ─────────────────────────────────────────
 const shutdown = async () => {

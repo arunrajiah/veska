@@ -19,6 +19,15 @@ export { SlackChannelAdapter } from './channels/slack/adapter.js';
 export { resolveSlackIdentity } from './channels/slack/identity-resolver.js';
 export { EmailChannelAdapter, type EmailChannelConfig } from './channels/email/adapter.js';
 export { resolveEmailIdentity } from './channels/email/identity-resolver.js';
+export { WhatsAppChannelAdapter, type WhatsAppChannelConfig } from './channels/whatsapp/adapter.js';
+export { resolveWhatsAppIdentity } from './channels/whatsapp/identity-resolver.js';
+
+// Engine
+export { WorkflowEngine } from './engine/index.js';
+
+// Plugins
+export { PluginRuntime, type PluginRunContext, type PluginRunResult } from './plugins/runtime.js';
+export { PluginManager, type InstalledPlugin } from './plugins/manager.js';
 
 // Services
 export { TenantService, type CreateTenantParams, type BootstrapResult } from './services/tenant.service.js';

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
+import { apiFetch } from '@/lib/api.js';
 
 const STATUS_COLORS: Record<string, string> = {
   open: 'bg-blue-100 text-blue-700',
@@ -16,15 +17,26 @@ const PRIORITY_COLORS: Record<string, string> = {
   urgent: 'text-red-500',
 };
 
-const STUB_TICKETS = [
-  { id: 'TKT-001', subject: 'Cannot log in to admin panel', status: 'open', priority: 'high', contact: 'alice@example.com', channel: 'email', updatedAt: '5 min ago' },
-  { id: 'TKT-002', subject: 'Invoice link not working', status: 'in_progress', priority: 'medium', contact: 'bob@acmecorp.com', channel: 'slack', updatedAt: '22 min ago' },
-  { id: 'TKT-003', subject: 'How do I export my data?', status: 'waiting_customer', priority: 'low', contact: 'carol@xyz.io', channel: 'email', updatedAt: '3 hr ago' },
-  { id: 'TKT-004', subject: 'Slack integration stopped syncing', status: 'open', priority: 'urgent', contact: 'dave@startup.co', channel: 'slack', updatedAt: '10 min ago' },
-];
+interface TicketRecord {
+  id: string;
+  entityType: string;
+  data: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+}
 
-export default function TicketsPage() {
-  const openCount = STUB_TICKETS.filter((t) => t.status === 'open').length;
+export default async function TicketsPage() {
+  const tenantId = process.env.VESKA_TENANT_ID ?? '';
+
+  let records: TicketRecord[] = [];
+  try {
+    const res = await apiFetch<TicketRecord[]>('/api/v1/support/tickets', tenantId);
+    records = Array.isArray(res) ? res : [];
+  } catch {
+    records = [];
+  }
+
+  const openCount = records.filter((r) => r.data['status'] === 'open').length;
 
   return (
     <div className="px-8 py-8 max-w-5xl">
@@ -54,50 +66,89 @@ export default function TicketsPage() {
         ))}
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-gray-100 bg-gray-50">
-              <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">ID</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Subject</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Contact</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Priority</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Channel</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Updated</th>
-            </tr>
-          </thead>
-          <tbody>
-            {STUB_TICKETS.map((ticket) => (
-              <tr key={ticket.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
-                <td className="px-4 py-3">
-                  <Link href={`/dashboard/support/tickets/${ticket.id}`} className="font-mono text-xs text-gray-500 hover:text-gray-900">
-                    {ticket.id}
-                  </Link>
-                </td>
-                <td className="px-4 py-3">
-                  <Link href={`/dashboard/support/tickets/${ticket.id}`} className="font-medium text-gray-900 hover:underline">
-                    {ticket.subject}
-                  </Link>
-                </td>
-                <td className="px-4 py-3 text-xs text-gray-500">{ticket.contact}</td>
-                <td className="px-4 py-3">
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[ticket.status] ?? 'bg-gray-100 text-gray-600'}`}>
-                    {ticket.status.replace(/_/g, ' ')}
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  <span className={`text-xs font-medium capitalize ${PRIORITY_COLORS[ticket.priority] ?? 'text-gray-500'}`}>
-                    {ticket.priority}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-xs text-gray-500 capitalize">{ticket.channel}</td>
-                <td className="px-4 py-3 text-xs text-gray-400">{ticket.updatedAt}</td>
+      {records.length === 0 ? (
+        <div className="bg-white border border-gray-200 rounded-xl px-8 py-16 text-center">
+          <p className="text-gray-400 text-sm">No tickets yet.</p>
+          <Link
+            href="/dashboard/support/tickets/new"
+            className="mt-4 inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900"
+          >
+            <Plus size={14} /> Create first ticket
+          </Link>
+        </div>
+      ) : (
+        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-100 bg-gray-50">
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">ID</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Subject</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Contact</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Priority</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Channel</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Updated</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {records.map((record) => {
+                const d = record.data;
+                const status = (d['status'] as string) ?? 'open';
+                const priority = (d['priority'] as string) ?? 'medium';
+                const ticketNum = (d['ticket_number'] as string) ?? record.id.slice(0, 8).toUpperCase();
+                const updatedAt =
+                  typeof record.updatedAt === 'string'
+                    ? record.updatedAt.slice(0, 10)
+                    : '';
+                return (
+                  <tr
+                    key={record.id}
+                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
+                  >
+                    <td className="px-4 py-3">
+                      <Link
+                        href={`/dashboard/support/tickets/${record.id}`}
+                        className="font-mono text-xs text-gray-500 hover:text-gray-900"
+                      >
+                        {ticketNum}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-3">
+                      <Link
+                        href={`/dashboard/support/tickets/${record.id}`}
+                        className="font-medium text-gray-900 hover:underline"
+                      >
+                        {String(d['subject'] ?? '')}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-3 text-xs text-gray-500">
+                      {String(d['contact'] ?? d['contact_email'] ?? '')}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-600'}`}
+                      >
+                        {status.replace(/_/g, ' ')}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`text-xs font-medium capitalize ${PRIORITY_COLORS[priority] ?? 'text-gray-500'}`}
+                      >
+                        {priority}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-xs text-gray-500 capitalize">
+                      {String(d['channel'] ?? '')}
+                    </td>
+                    <td className="px-4 py-3 text-xs text-gray-400">{updatedAt}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
