@@ -15,6 +15,15 @@ import {
   Plug,
   Bell,
   Wand2,
+  CalendarDays,
+  Package,
+  Warehouse,
+  BarChart2,
+  ArrowLeftRight,
+  Truck,
+  ShoppingCart,
+  Folder,
+  CheckSquare,
 } from 'lucide-react';
 
 const NAV_SECTIONS = [
@@ -41,6 +50,37 @@ const NAV_SECTIONS = [
   {
     label: 'Finance',
     items: [{ href: '/dashboard/finance/invoices', icon: Receipt, label: 'Invoices' }],
+  },
+  {
+    label: 'HR',
+    items: [
+      { href: '/dashboard/hr/employees', icon: Users, label: 'Employees' },
+      { href: '/dashboard/hr/departments', icon: Building2, label: 'Departments' },
+      { href: '/dashboard/hr/leave', icon: CalendarDays, label: 'Leave' },
+    ],
+  },
+  {
+    label: 'Inventory',
+    items: [
+      { href: '/dashboard/inventory/products', icon: Package, label: 'Products' },
+      { href: '/dashboard/inventory/warehouses', icon: Warehouse, label: 'Warehouses' },
+      { href: '/dashboard/inventory/stock', icon: BarChart2, label: 'Stock levels' },
+      { href: '/dashboard/inventory/movements', icon: ArrowLeftRight, label: 'Movements' },
+    ],
+  },
+  {
+    label: 'Purchasing',
+    items: [
+      { href: '/dashboard/purchasing/vendors', icon: Truck, label: 'Vendors' },
+      { href: '/dashboard/purchasing/orders', icon: ShoppingCart, label: 'Purchase Orders' },
+    ],
+  },
+  {
+    label: 'Projects',
+    items: [
+      { href: '/dashboard/projects', icon: Folder, label: 'All Projects' },
+      { href: '/dashboard/projects/tasks', icon: CheckSquare, label: 'Tasks' },
+    ],
   },
   {
     label: 'System',

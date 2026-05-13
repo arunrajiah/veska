@@ -1,0 +1,240 @@
+import { Hono } from 'hono';
+import { zValidator } from '@hono/zod-validator';
+import { z } from 'zod';
+import { eq, and, isNull, sql } from 'drizzle-orm';
+import { schema } from '@veska/core';
+import type { TenantContext } from '../middleware/tenant-context.js';
+
+export const hrRouter = new Hono<{ Variables: TenantContext }>();
+
+// ── Employees ────────────────────────────────────────────────
+
+hrRouter.get('/employees', async (c) => {
+  const { db, tenantId } = c.get('tenantCtx');
+  const status = c.req.query('status');
+
+  const conditions = [
+    eq(schema.entityRecords.tenantId, tenantId),
+    eq(schema.entityRecords.entityType, 'Employee'),
+    isNull(schema.entityRecords.deletedAt),
+  ];
+
+  if (status) {
+    conditions.push(sql`${schema.entityRecords.data}->>'status' = ${status}`);
+  }
+
+  const records = await db.query.entityRecords.findMany({
+    where: and(...conditions),
+    orderBy: (t, { desc }) => [desc(t.createdAt)],
+  });
+
+  return c.json(records);
+});
+
+hrRouter.get('/employees/:id', async (c) => {
+  const { db, tenantId } = c.get('tenantCtx');
+  const record = await db.query.entityRecords.findFirst({
+    where: and(
+      eq(schema.entityRecords.id, c.req.param('id')),
+      eq(schema.entityRecords.tenantId, tenantId),
+      eq(schema.entityRecords.entityType, 'Employee'),
+      isNull(schema.entityRecords.deletedAt),
+    ),
+  });
+  if (!record) return c.json({ error: 'Not found' }, 404);
+  return c.json(record);
+});
+
+hrRouter.post(
+  '/employees',
+  zValidator(
+    'json',
+    z.object({
+      first_name: z.string().min(1),
+      last_name: z.string().optional(),
+      email: z.string().email().optional(),
+      phone: z.string().optional(),
+      department: z.string().optional(),
+      title: z.string().optional(),
+      hire_date: z.string().optional(),
+      salary: z.number().optional(),
+      status: z.enum(['active', 'on_leave', 'inactive']).optional().default('active'),
+      notes: z.string().optional(),
+    }),
+  ),
+  async (c) => {
+    const { db, tenantId, identityId } = c.get('tenantCtx');
+    const body = c.req.valid('json');
+
+    const [record] = await db
+      .insert(schema.entityRecords)
+      .values({ tenantId, entityType: 'Employee', data: body, createdBy: identityId })
+      .returning();
+
+    if (!record) return c.json({ error: 'Failed to create employee' }, 500);
+    return c.json(record, 201);
+  },
+);
+
+// ── Departments ──────────────────────────────────────────────
+
+hrRouter.get('/departments', async (c) => {
+  const { db, tenantId } = c.get('tenantCtx');
+
+  const records = await db.query.entityRecords.findMany({
+    where: and(
+      eq(schema.entityRecords.tenantId, tenantId),
+      eq(schema.entityRecords.entityType, 'Department'),
+      isNull(schema.entityRecords.deletedAt),
+    ),
+    orderBy: (t, { desc }) => [desc(t.createdAt)],
+  });
+
+  return c.json(records);
+});
+
+hrRouter.get('/departments/:id', async (c) => {
+  const { db, tenantId } = c.get('tenantCtx');
+  const record = await db.query.entityRecords.findFirst({
+    where: and(
+      eq(schema.entityRecords.id, c.req.param('id')),
+      eq(schema.entityRecords.tenantId, tenantId),
+      eq(schema.entityRecords.entityType, 'Department'),
+      isNull(schema.entityRecords.deletedAt),
+    ),
+  });
+  if (!record) return c.json({ error: 'Not found' }, 404);
+  return c.json(record);
+});
+
+hrRouter.post(
+  '/departments',
+  zValidator(
+    'json',
+    z.object({
+      name: z.string().min(1),
+      head_id: z.string().optional(),
+      budget: z.number().optional(),
+      notes: z.string().optional(),
+    }),
+  ),
+  async (c) => {
+    const { db, tenantId, identityId } = c.get('tenantCtx');
+    const body = c.req.valid('json');
+
+    const [record] = await db
+      .insert(schema.entityRecords)
+      .values({ tenantId, entityType: 'Department', data: body, createdBy: identityId })
+      .returning();
+
+    if (!record) return c.json({ error: 'Failed to create department' }, 500);
+    return c.json(record, 201);
+  },
+);
+
+// ── Leave Requests ───────────────────────────────────────────
+
+hrRouter.get('/leave', async (c) => {
+  const { db, tenantId } = c.get('tenantCtx');
+  const employeeId = c.req.query('employeeId');
+  const status = c.req.query('status');
+
+  const conditions = [
+    eq(schema.entityRecords.tenantId, tenantId),
+    eq(schema.entityRecords.entityType, 'LeaveRequest'),
+    isNull(schema.entityRecords.deletedAt),
+  ];
+
+  if (employeeId) {
+    conditions.push(sql`${schema.entityRecords.data}->>'employee_id' = ${employeeId}`);
+  }
+  if (status) {
+    conditions.push(sql`${schema.entityRecords.data}->>'status' = ${status}`);
+  }
+
+  const records = await db.query.entityRecords.findMany({
+    where: and(...conditions),
+    orderBy: (t, { desc }) => [desc(t.createdAt)],
+  });
+
+  return c.json(records);
+});
+
+hrRouter.get('/leave/:id', async (c) => {
+  const { db, tenantId } = c.get('tenantCtx');
+  const record = await db.query.entityRecords.findFirst({
+    where: and(
+      eq(schema.entityRecords.id, c.req.param('id')),
+      eq(schema.entityRecords.tenantId, tenantId),
+      eq(schema.entityRecords.entityType, 'LeaveRequest'),
+      isNull(schema.entityRecords.deletedAt),
+    ),
+  });
+  if (!record) return c.json({ error: 'Not found' }, 404);
+  return c.json(record);
+});
+
+hrRouter.post(
+  '/leave',
+  zValidator(
+    'json',
+    z.object({
+      employee_id: z.string().optional(),
+      employee_name: z.string().optional(),
+      leave_type: z.enum(['annual', 'sick', 'unpaid', 'parental', 'other']).default('annual'),
+      start_date: z.string(),
+      end_date: z.string(),
+      notes: z.string().optional(),
+    }),
+  ),
+  async (c) => {
+    const { db, tenantId, identityId } = c.get('tenantCtx');
+    const body = c.req.valid('json');
+    const data = { ...body, status: 'pending' };
+
+    const [record] = await db
+      .insert(schema.entityRecords)
+      .values({ tenantId, entityType: 'LeaveRequest', data, createdBy: identityId })
+      .returning();
+
+    if (!record) return c.json({ error: 'Failed to create leave request' }, 500);
+    return c.json(record, 201);
+  },
+);
+
+hrRouter.patch(
+  '/leave/:id',
+  zValidator(
+    'json',
+    z.object({
+      status: z.enum(['approved', 'rejected', 'pending']),
+    }),
+  ),
+  async (c) => {
+    const id = c.req.param('id');
+    const { db, tenantId } = c.get('tenantCtx');
+    const { status } = c.req.valid('json');
+
+    const leave = await db.query.entityRecords.findFirst({
+      where: and(
+        eq(schema.entityRecords.tenantId, tenantId),
+        eq(schema.entityRecords.entityType, 'LeaveRequest'),
+        eq(schema.entityRecords.id, id),
+        isNull(schema.entityRecords.deletedAt),
+      ),
+    });
+
+    if (!leave) return c.json({ error: 'Leave request not found' }, 404);
+
+    const [updated] = await db
+      .update(schema.entityRecords)
+      .set({
+        data: { ...(leave.data as Record<string, unknown>), status },
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.entityRecords.id, id))
+      .returning();
+
+    return c.json(updated);
+  },
+);
