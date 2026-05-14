@@ -40,6 +40,8 @@ import { attachmentsRouter } from './routes/attachments.js';
 import { importExportRouter } from './routes/import-export.js';
 import { dashboardRouter } from './routes/dashboard.js';
 import { currenciesRouter } from './routes/currencies.js';
+import { customFieldsRouter } from './routes/custom-fields.js';
+import { recurringInvoicesRouter } from './routes/recurring-invoices.js';
 import { tenantContext } from './middleware/tenant-context.js';
 import { rateLimit } from './middleware/rate-limit.js';
 import {
@@ -140,6 +142,8 @@ app.route('/api/v1/approval-chains', approvalChainsRouter);
 app.route('/api/v1/approval-requests', approvalRequestsRouter);
 app.route('/api/v1/dashboard', dashboardRouter);
 app.route('/api/v1/currencies', currenciesRouter);
+app.route('/api/v1/custom-fields', customFieldsRouter);
+app.route('/api/v1/recurring-invoices', recurringInvoicesRouter);
 
 // ── Slack setup ───────────────────────────────────────────────
 const slackManager = new SlackAppManager({

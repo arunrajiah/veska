@@ -42,6 +42,8 @@ import {
   Sparkles,
   ArrowUpDown,
   Globe,
+  RefreshCw,
+  Sliders,
 } from 'lucide-react';
 import NotificationBell from '@/components/notification-bell.js';
 
@@ -71,6 +73,7 @@ const NAV_SECTIONS = [
     label: 'Finance',
     items: [
       { href: '/dashboard/finance/invoices', icon: Receipt, label: 'Invoices' },
+      { href: '/dashboard/finance/recurring', icon: RefreshCw, label: 'Recurring' },
       { href: '/dashboard/expenses', icon: Receipt, label: 'Expenses' },
       { href: '/dashboard/budgets', icon: PiggyBank, label: 'Budgets' },
     ],
@@ -162,6 +165,7 @@ const NAV_SECTIONS = [
       { href: '/dashboard/webhooks', icon: Bell, label: 'Webhooks' },
       { href: '/dashboard/settings/notifications', icon: Bell, label: 'Notifications' },
       { href: '/dashboard/settings/currency', icon: Globe, label: 'Currency' },
+      { href: '/dashboard/settings/custom-fields', icon: Sliders, label: 'Custom Fields' },
       { href: '/dashboard/plugins', icon: Puzzle, label: 'Plugins' },
       { href: '/dashboard/audit', icon: ScrollText, label: 'Audit log' },
       { href: '/dashboard/channels', icon: Radio, label: 'Channels' },
