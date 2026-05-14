@@ -42,6 +42,8 @@ import { dashboardRouter } from './routes/dashboard.js';
 import { currenciesRouter } from './routes/currencies.js';
 import { customFieldsRouter } from './routes/custom-fields.js';
 import { recurringInvoicesRouter } from './routes/recurring-invoices.js';
+import { invoiceEmailRouter } from './routes/invoice-email.js';
+import { standardLimit, aiLimit } from '@veska-cloud/rate-limit';
 import { tenantContext } from './middleware/tenant-context.js';
 import { rateLimit } from './middleware/rate-limit.js';
 import {
@@ -107,6 +109,9 @@ app.post('/webhooks/telegram', async (c) => {
 const api = new Hono();
 api.use('*', tenantContext);
 api.use('*', rateLimit(sharedRedis, { windowMs: 60_000, max: 120 }));
+// Sliding-window rate limiters (package: @veska-cloud/rate-limit)
+api.use('*', standardLimit());
+api.use('/ai/*', aiLimit());
 api.route('/config', configRouter);
 api.route('/entities', entitiesRouter);
 api.route('/channels', channelsRouter);
@@ -144,6 +149,7 @@ app.route('/api/v1/dashboard', dashboardRouter);
 app.route('/api/v1/currencies', currenciesRouter);
 app.route('/api/v1/custom-fields', customFieldsRouter);
 app.route('/api/v1/recurring-invoices', recurringInvoicesRouter);
+app.route('/api/v1/invoices/email', invoiceEmailRouter);
 
 // ── Slack setup ───────────────────────────────────────────────
 const slackManager = new SlackAppManager({
