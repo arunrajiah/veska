@@ -44,8 +44,9 @@ import { customFieldsRouter } from './routes/custom-fields.js';
 import { recurringInvoicesRouter } from './routes/recurring-invoices.js';
 import { invoiceEmailRouter } from './routes/invoice-email.js';
 import { searchRouter } from './routes/search.js';
-import { standardLimit, aiLimit } from '@veska-cloud/rate-limit';
+import { standardLimit, aiLimit, authLimit } from '@veska-cloud/rate-limit';
 import { tenantContext } from './middleware/tenant-context.js';
+import { authRouter } from './routes/auth.js';
 import { rateLimit } from './middleware/rate-limit.js';
 import {
   sharedDb,
@@ -64,6 +65,10 @@ import { WorkflowEngine } from '@veska/core';
 const app = new Hono();
 app.use('*', logger());
 app.use('*', secureHeaders());
+
+// Auth routes — no tenant middleware; apply strict rate limiting
+app.use('/auth/*', authLimit());
+app.route('/auth', authRouter);
 
 // Public routes
 app.route('/health', healthRouter);

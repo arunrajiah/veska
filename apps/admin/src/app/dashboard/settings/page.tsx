@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { KeyRound } from 'lucide-react';
+import { KeyRound, Shield } from 'lucide-react';
 import { WorkspaceForm } from './workspace-form.js';
 
 export default function SettingsPage() {
@@ -48,6 +48,21 @@ export default function SettingsPage() {
           >
             <KeyRound size={14} />
             Manage API keys
+          </Link>
+        </section>
+
+        {/* Security */}
+        <section className="bg-white border border-gray-200 rounded-xl p-6">
+          <h2 className="text-sm font-medium text-gray-900 mb-2">Security</h2>
+          <p className="text-xs text-gray-500 mb-4">
+            Manage two-factor authentication, active sessions, and SSO configuration.
+          </p>
+          <Link
+            href="/dashboard/settings/security"
+            className="inline-flex items-center gap-2 text-sm border border-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <Shield size={14} />
+            Security settings
           </Link>
         </section>
 

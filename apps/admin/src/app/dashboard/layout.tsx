@@ -171,6 +171,7 @@ const NAV_SECTIONS = [
       { href: '/dashboard/plugins', icon: Puzzle, label: 'Plugins' },
       { href: '/dashboard/audit', icon: ScrollText, label: 'Audit log' },
       { href: '/dashboard/channels', icon: Radio, label: 'Channels' },
+      { href: '/dashboard/settings/security', icon: Shield, label: 'Security' },
       { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
     ],
   },
