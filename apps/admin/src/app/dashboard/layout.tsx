@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { GlobalSearchBar } from './search/_components.js';
 import {
   LayoutDashboard,
   Inbox,
@@ -133,6 +134,7 @@ const NAV_SECTIONS = [
   {
     label: 'Reports',
     items: [
+      { href: '/dashboard/reports', icon: BarChart2, label: 'Report Builder' },
       { href: '/dashboard/reports/finance', icon: TrendingUp, label: 'Finance' },
       { href: '/dashboard/reports/inventory', icon: BarChart3, label: 'Inventory' },
       { href: '/dashboard/reports/hr', icon: PieChart, label: 'HR' },
@@ -182,6 +184,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
           <span className="font-semibold text-gray-900 tracking-tight">Veska</span>
           <NotificationBell />
+        </div>
+        <div className="px-3 py-2 border-b border-gray-100">
+          <GlobalSearchBar />
         </div>
 
         <nav className="flex-1 overflow-y-auto py-3 px-2">

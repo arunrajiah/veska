@@ -1,7 +1,50 @@
 import { Hono } from 'hono';
-import { eq, and, isNull } from 'drizzle-orm';
+import { eq, and, isNull, sql } from 'drizzle-orm';
 import { schema } from '@veska/core';
 import type { TenantContext } from '../middleware/tenant-context.js';
+
+// ── Saved-report types ────────────────────────────────────────
+
+interface MetricConfig {
+  field: string;
+  aggregation: 'sum' | 'avg' | 'count' | 'min' | 'max';
+  label: string;
+}
+
+interface FilterConfig {
+  field: string;
+  operator: 'eq' | 'gt' | 'lt' | 'gte' | 'lte' | 'contains';
+  value: string | number;
+}
+
+interface DateRangeConfig {
+  field: string;
+  from?: string;
+  to?: string;
+}
+
+interface ReportConfig {
+  entityType: string;
+  metrics: MetricConfig[];
+  filters: FilterConfig[];
+  groupBy?: string;
+  dateRange?: DateRangeConfig;
+}
+
+// Sanitise a JSONB field path so it only contains safe characters.
+function safePgField(field: string): string {
+  return field.replace(/[^a-zA-Z0-9_.]/g, '');
+}
+
+function buildAggregation(metric: MetricConfig): string {
+  const field = safePgField(metric.field);
+  const label = safePgField(metric.label);
+  const agg = metric.aggregation.toUpperCase();
+  if (agg === 'COUNT') {
+    return `COUNT(*) AS "${label}"`;
+  }
+  return `${agg}((data->>'${field}')::numeric) AS "${label}"`;
+}
 
 export const reportsRouter = new Hono<{ Variables: TenantContext }>();
 
@@ -329,4 +372,327 @@ reportsRouter.get('/projects', async (c) => {
     overdueTaskCount,
     projectsWithProgress,
   });
+});
+
+// ═══════════════════════════════════════════════════════════════
+// Saved Reports CRUD
+// ═══════════════════════════════════════════════════════════════
+
+// ── GET /reports/saved ────────────────────────────────────────
+
+reportsRouter.get('/saved', async (c) => {
+  const { db, tenantId } = c.get('tenantCtx');
+  try {
+    const res = await db.execute(sql`
+      SELECT id, "tenantId", name, description, config, "createdBy", "isPublic", "createdAt", "updatedAt"
+      FROM "savedReports"
+      WHERE "tenantId" = ${tenantId}
+      ORDER BY "createdAt" DESC
+    `);
+    return c.json(res.rows);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return c.json({ error: message }, 500);
+  }
+});
+
+// ── POST /reports/saved ───────────────────────────────────────
+
+reportsRouter.post('/saved', async (c) => {
+  const { db, tenantId, identityId } = c.get('tenantCtx');
+  try {
+    const body = await c.req.json<{
+      name: string;
+      description?: string;
+      config: ReportConfig;
+      isPublic?: boolean;
+    }>();
+
+    if (!body.name || !body.config?.entityType) {
+      return c.json({ error: 'name and config.entityType are required' }, 400);
+    }
+
+    const res = await db.execute(sql`
+      INSERT INTO "savedReports" ("tenantId", name, description, config, "createdBy", "isPublic")
+      VALUES (
+        ${tenantId},
+        ${body.name},
+        ${body.description ?? null},
+        ${JSON.stringify(body.config)}::jsonb,
+        ${identityId},
+        ${body.isPublic ?? false}
+      )
+      RETURNING *
+    `);
+
+    return c.json(res.rows[0], 201);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return c.json({ error: message }, 500);
+  }
+});
+
+// ── GET /reports/saved/:id ────────────────────────────────────
+
+reportsRouter.get('/saved/:id', async (c) => {
+  const { db, tenantId } = c.get('tenantCtx');
+  const id = c.req.param('id');
+  try {
+    const res = await db.execute(sql`
+      SELECT * FROM "savedReports"
+      WHERE id = ${id} AND "tenantId" = ${tenantId}
+    `);
+    if (!res.rows[0]) return c.json({ error: 'Report not found' }, 404);
+    return c.json(res.rows[0]);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return c.json({ error: message }, 500);
+  }
+});
+
+// ── PUT /reports/saved/:id ────────────────────────────────────
+
+reportsRouter.put('/saved/:id', async (c) => {
+  const { db, tenantId } = c.get('tenantCtx');
+  const id = c.req.param('id');
+  try {
+    const body = await c.req.json<{
+      name?: string;
+      description?: string;
+      config?: ReportConfig;
+      isPublic?: boolean;
+    }>();
+
+    const res = await db.execute(sql`
+      UPDATE "savedReports"
+      SET
+        name        = COALESCE(${body.name ?? null}, name),
+        description = COALESCE(${body.description ?? null}, description),
+        config      = COALESCE(${body.config ? JSON.stringify(body.config) : null}::jsonb, config),
+        "isPublic"  = COALESCE(${body.isPublic ?? null}, "isPublic"),
+        "updatedAt" = now()
+      WHERE id = ${id} AND "tenantId" = ${tenantId}
+      RETURNING *
+    `);
+
+    if (!res.rows[0]) return c.json({ error: 'Report not found' }, 404);
+    return c.json(res.rows[0]);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return c.json({ error: message }, 500);
+  }
+});
+
+// ── DELETE /reports/saved/:id ─────────────────────────────────
+
+reportsRouter.delete('/saved/:id', async (c) => {
+  const { db, tenantId } = c.get('tenantCtx');
+  const id = c.req.param('id');
+  try {
+    const res = await db.execute(sql`
+      DELETE FROM "savedReports"
+      WHERE id = ${id} AND "tenantId" = ${tenantId}
+      RETURNING id
+    `);
+    if (!res.rows[0]) return c.json({ error: 'Report not found' }, 404);
+    return c.json({ deleted: true });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return c.json({ error: message }, 500);
+  }
+});
+
+// ── POST /reports/saved/:id/run ───────────────────────────────
+// Dynamically execute a saved report against entityRecords.
+
+reportsRouter.post('/saved/:id/run', async (c) => {
+  const { db, tenantId } = c.get('tenantCtx');
+  const id = c.req.param('id');
+  try {
+    const reportRes = await db.execute(sql`
+      SELECT config FROM "savedReports"
+      WHERE id = ${id} AND "tenantId" = ${tenantId}
+    `);
+    if (!reportRes.rows[0]) return c.json({ error: 'Report not found' }, 404);
+
+    const config = (reportRes.rows[0] as Record<string, unknown>)['config'] as ReportConfig;
+
+    if (!config.entityType) {
+      return c.json({ error: 'Report config is missing entityType' }, 400);
+    }
+
+    // Collect parameterised WHERE conditions
+    const conditions: ReturnType<typeof sql>[] = [
+      sql`"tenantId" = ${tenantId}`,
+      sql`"entityType" = ${config.entityType}`,
+      sql`"deletedAt" IS NULL`,
+    ];
+
+    // Date range filter — field names are sanitised, values are parameterised
+    if (config.dateRange) {
+      const dr = config.dateRange;
+      const dateField = safePgField(dr.field);
+      if (dr.from) {
+        conditions.push(
+          sql.raw(`(data->>'${dateField}')::timestamptz >= `).append(sql`${dr.from}::timestamptz`),
+        );
+      }
+      if (dr.to) {
+        conditions.push(
+          sql.raw(`(data->>'${dateField}')::timestamptz <= `).append(sql`${dr.to}::timestamptz`),
+        );
+      }
+    }
+
+    // Field filters — operators are exhaustively matched, values are parameterised
+    for (const filter of config.filters ?? []) {
+      const field = safePgField(filter.field);
+      const val = filter.value;
+      switch (filter.operator) {
+        case 'eq':
+          conditions.push(sql.raw(`data->>'${field}' = `).append(sql`${String(val)}`));
+          break;
+        case 'gt':
+          conditions.push(sql.raw(`(data->>'${field}')::numeric > `).append(sql`${Number(val)}`));
+          break;
+        case 'lt':
+          conditions.push(sql.raw(`(data->>'${field}')::numeric < `).append(sql`${Number(val)}`));
+          break;
+        case 'gte':
+          conditions.push(sql.raw(`(data->>'${field}')::numeric >= `).append(sql`${Number(val)}`));
+          break;
+        case 'lte':
+          conditions.push(sql.raw(`(data->>'${field}')::numeric <= `).append(sql`${Number(val)}`));
+          break;
+        case 'contains':
+          conditions.push(
+            sql.raw(`data->>'${field}' ILIKE `).append(sql`${'%' + String(val) + '%'}`),
+          );
+          break;
+      }
+    }
+
+    // Combine all conditions with AND
+    const whereClause = conditions.reduce((acc, cond, idx) =>
+      idx === 0 ? cond : sql`${acc} AND ${cond}`,
+    );
+
+    const metrics = config.metrics ?? [];
+    const groupByField = config.groupBy ? safePgField(config.groupBy) : null;
+
+    let rows: Record<string, unknown>[];
+
+    if (groupByField && metrics.length > 0) {
+      const aggParts = metrics.map((m) => buildAggregation(m)).join(', ');
+      const queryRes = await db.execute(
+        sql
+          .raw(
+            `SELECT data->>'${groupByField}' AS group_key, ${aggParts} FROM "entityRecords" WHERE `,
+          )
+          .append(whereClause)
+          .append(sql.raw(` GROUP BY data->>'${groupByField}' ORDER BY data->>'${groupByField}'`)),
+      );
+      rows = queryRes.rows as Record<string, unknown>[];
+    } else if (metrics.length > 0) {
+      const aggParts = metrics.map((m) => buildAggregation(m)).join(', ');
+      const queryRes = await db.execute(
+        sql.raw(`SELECT ${aggParts} FROM "entityRecords" WHERE `).append(whereClause),
+      );
+      rows = queryRes.rows as Record<string, unknown>[];
+    } else {
+      const queryRes = await db.execute(
+        sql.raw(`SELECT COUNT(*) AS count FROM "entityRecords" WHERE `).append(whereClause),
+      );
+      rows = queryRes.rows as Record<string, unknown>[];
+    }
+
+    return c.json({
+      reportId: id,
+      ranAt: new Date().toISOString(),
+      rows,
+      summary: { rowCount: rows.length },
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return c.json({ error: message }, 500);
+  }
+});
+
+// ── GET /reports/saved/:id/schedules ──────────────────────────
+
+reportsRouter.get('/saved/:id/schedules', async (c) => {
+  const { db, tenantId } = c.get('tenantCtx');
+  const id = c.req.param('id');
+  try {
+    const res = await db.execute(sql`
+      SELECT rs.*
+      FROM "reportSchedules" rs
+      JOIN "savedReports" sr ON sr.id = rs."reportId"
+      WHERE rs."reportId" = ${id}
+        AND sr."tenantId" = ${tenantId}
+      ORDER BY rs."createdAt" DESC
+    `);
+    return c.json(res.rows);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return c.json({ error: message }, 500);
+  }
+});
+
+// ── POST /reports/saved/:id/schedules ─────────────────────────
+
+reportsRouter.post('/saved/:id/schedules', async (c) => {
+  const { db, tenantId } = c.get('tenantCtx');
+  const id = c.req.param('id');
+  try {
+    const reportRes = await db.execute(sql`
+      SELECT id FROM "savedReports" WHERE id = ${id} AND "tenantId" = ${tenantId}
+    `);
+    if (!reportRes.rows[0]) return c.json({ error: 'Report not found' }, 404);
+
+    const body = await c.req.json<{ cronExpr: string; recipients: string[] }>();
+    if (!body.cronExpr) return c.json({ error: 'cronExpr is required' }, 400);
+
+    const recipients = Array.isArray(body.recipients) ? body.recipients : [];
+
+    const res = await db.execute(sql`
+      INSERT INTO "reportSchedules" ("tenantId", "reportId", "cronExpr", recipients)
+      VALUES (
+        ${tenantId},
+        ${id},
+        ${body.cronExpr},
+        ${JSON.stringify(recipients)}::jsonb
+      )
+      RETURNING *
+    `);
+
+    return c.json(res.rows[0], 201);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return c.json({ error: message }, 500);
+  }
+});
+
+// ── DELETE /reports/saved/:id/schedules/:scheduleId ───────────
+
+reportsRouter.delete('/saved/:id/schedules/:scheduleId', async (c) => {
+  const { db, tenantId } = c.get('tenantCtx');
+  const id = c.req.param('id');
+  const scheduleId = c.req.param('scheduleId');
+  try {
+    const res = await db.execute(sql`
+      DELETE FROM "reportSchedules" rs
+      USING "savedReports" sr
+      WHERE rs.id = ${scheduleId}
+        AND rs."reportId" = ${id}
+        AND sr.id = rs."reportId"
+        AND sr."tenantId" = ${tenantId}
+      RETURNING rs.id
+    `);
+    if (!res.rows[0]) return c.json({ error: 'Schedule not found' }, 404);
+    return c.json({ deleted: true });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return c.json({ error: message }, 500);
+  }
 });
