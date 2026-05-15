@@ -62,6 +62,10 @@ import { eventsRouter } from './routes/events.js';
 import { roomsRouter } from './routes/rooms.js';
 import { facilitiesRouter } from './routes/facilities.js';
 import { productCatalogRouter } from './routes/product-catalog.js';
+import { tenantSettingsRouter } from './routes/tenant-settings.js';
+import { taxRatesRouter } from './routes/tax-rates.js';
+import { emailLogRouter } from './routes/email-log.js';
+import { registerEmailWorker } from './workers/email-worker.js';
 import { standardLimit, aiLimit, authLimit } from '@veska-cloud/rate-limit';
 import { tenantContext } from './middleware/tenant-context.js';
 import { authRouter } from './routes/auth.js';
@@ -165,6 +169,9 @@ api.route('/lms', lmsRouter);
 api.route('/events', eventsRouter);
 api.route('/rooms', roomsRouter);
 api.route('/facilities', facilitiesRouter);
+api.route('/tenant-settings', tenantSettingsRouter);
+api.route('/tax-rates', taxRatesRouter);
+api.route('/email-log', emailLogRouter);
 api.route('/catalog', productCatalogRouter);
 api.route('/ai', aiRouter);
 api.route('/analytics', analyticsRouter);
@@ -227,6 +234,9 @@ registerEnrichmentWorker(sharedQueueService, sharedDb, sharedLlm, sharedAuditSer
 
 // AI anomaly detection worker (repeatable, every 6 hours)
 registerAnomalyWorker(sharedQueueService, sharedDb, sharedLlm);
+
+// Email delivery worker (portal invites, invoice reminders)
+registerEmailWorker(sharedQueueService);
 
 // ── Graceful shutdown ─────────────────────────────────────────
 const shutdown = async () => {

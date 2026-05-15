@@ -124,6 +124,30 @@ const FEATURE_ROWS = [
     business: '✓',
     enterprise: '✓',
   },
+  {
+    feature: 'Tax Rates',
+    free: '1',
+    starter: '5',
+    growth: '20',
+    business: 'Unlimited',
+    enterprise: 'Unlimited',
+  },
+  {
+    feature: 'Custom SMTP',
+    free: '✗',
+    starter: '✗',
+    growth: '✓',
+    business: '✓',
+    enterprise: '✓',
+  },
+  {
+    feature: 'Module Management',
+    free: '✗',
+    starter: '✓',
+    growth: '✓',
+    business: '✓',
+    enterprise: '✓',
+  },
 ];
 
 function ProgressBar({

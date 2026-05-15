@@ -28,6 +28,9 @@ export interface Plan {
     portalUsers: number | 'unlimited';
     notificationRetentionDays: number | 'unlimited';
     portalCustomBranding: boolean;
+    taxRates: number | 'unlimited';     // number of tax rate configs
+    smtpCustomDomain: boolean;           // can use custom SMTP (vs Veska default)
+    customModules: boolean;              // can enable/disable individual modules
   };
   features: string[];
 }
@@ -61,6 +64,9 @@ export const PLANS: Record<PlanId, Plan> = {
       portalUsers: 0,
       notificationRetentionDays: 7,
       portalCustomBranding: false,
+      taxRates: 1,
+      smtpCustomDomain: false,
+      customModules: false,
     },
     features: [
       'Core CRM',
@@ -98,6 +104,9 @@ export const PLANS: Record<PlanId, Plan> = {
       portalUsers: 10,
       notificationRetentionDays: 30,
       portalCustomBranding: false,
+      taxRates: 5,
+      smtpCustomDomain: false,
+      customModules: true,
     },
     features: [
       'Everything in Free',
@@ -136,6 +145,9 @@ export const PLANS: Record<PlanId, Plan> = {
       portalUsers: 100,
       notificationRetentionDays: 90,
       portalCustomBranding: false,
+      taxRates: 20,
+      smtpCustomDomain: true,
+      customModules: true,
     },
     features: [
       'Everything in Starter',
@@ -175,6 +187,9 @@ export const PLANS: Record<PlanId, Plan> = {
       portalUsers: 500,
       notificationRetentionDays: 365,
       portalCustomBranding: true,
+      taxRates: 'unlimited',
+      smtpCustomDomain: true,
+      customModules: true,
     },
     features: [
       'Everything in Growth',
@@ -214,6 +229,9 @@ export const PLANS: Record<PlanId, Plan> = {
       portalUsers: 'unlimited',
       notificationRetentionDays: 'unlimited',
       portalCustomBranding: true,
+      taxRates: 'unlimited',
+      smtpCustomDomain: true,
+      customModules: true,
     },
     features: [
       'Everything in Business',
