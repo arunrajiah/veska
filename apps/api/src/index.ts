@@ -55,6 +55,8 @@ import { contractsRouter } from './routes/contracts.js';
 import { vendorsRouter } from './routes/vendors.js';
 import { serviceDeskRouter } from './routes/service-desk.js';
 import { knowledgeBaseRouter } from './routes/knowledge-base.js';
+import { portalRouter } from './routes/portal.js';
+import { portalMgmtRouter } from './routes/portal-mgmt.js';
 import { lmsRouter } from './routes/lms.js';
 import { eventsRouter } from './routes/events.js';
 import { roomsRouter } from './routes/rooms.js';
@@ -91,6 +93,7 @@ app.route('/auth', authRouter);
 app.route('/health', healthRouter);
 app.route('/api/v1/tenants', tenantsRouter);
 app.route('/ml', magicLinksRouter);
+app.route('/portal', portalRouter);
 
 // Inbound channel webhooks — enqueue for async processing
 app.post('/webhooks/email', async (c) => {
@@ -157,6 +160,7 @@ api.route('/contracts', contractsRouter);
 api.route('/vendors', vendorsRouter);
 api.route('/service-desk', serviceDeskRouter);
 api.route('/kb', knowledgeBaseRouter);
+api.route('/portal-mgmt', portalMgmtRouter);
 api.route('/lms', lmsRouter);
 api.route('/events', eventsRouter);
 api.route('/rooms', roomsRouter);

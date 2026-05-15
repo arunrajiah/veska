@@ -11,6 +11,7 @@ import {
   Check,
   ArrowRight,
   BarChart2,
+  Globe,
 } from 'lucide-react';
 
 // Mock usage data — Growth plan
@@ -61,6 +62,62 @@ const FEATURE_ROWS = [
   },
   {
     feature: 'Anomaly Detection',
+    free: '✗',
+    starter: '✗',
+    growth: '✗',
+    business: '✓',
+    enterprise: '✓',
+  },
+  {
+    feature: 'Analytics Retention',
+    free: '30d',
+    starter: '90d',
+    growth: '1yr',
+    business: 'Unlimited',
+    enterprise: 'Unlimited',
+  },
+  {
+    feature: 'AI Reports / month',
+    free: '0',
+    starter: '10',
+    growth: '50',
+    business: '200',
+    enterprise: 'Unlimited',
+  },
+  {
+    feature: 'Saved Reports',
+    free: '3',
+    starter: '10',
+    growth: '50',
+    business: 'Unlimited',
+    enterprise: 'Unlimited',
+  },
+  {
+    feature: 'Data Exports / month',
+    free: '5',
+    starter: '50',
+    growth: '500',
+    business: 'Unlimited',
+    enterprise: 'Unlimited',
+  },
+  {
+    feature: 'Portal Users',
+    free: '0',
+    starter: '10',
+    growth: '100',
+    business: '500',
+    enterprise: 'Unlimited',
+  },
+  {
+    feature: 'Notification Retention',
+    free: '7d',
+    starter: '30d',
+    growth: '90d',
+    business: '1yr',
+    enterprise: 'Unlimited',
+  },
+  {
+    feature: 'Portal Custom Branding',
     free: '✗',
     starter: '✗',
     growth: '✗',
@@ -333,10 +390,59 @@ export function AIUsageClient() {
         </div>
       </div>
 
+      {/* Customer Portal — full width */}
+      <div className="bg-white border border-gray-200 rounded-xl p-5">
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Globe size={16} className="text-blue-500" />
+            <span className="text-sm font-medium text-gray-700">Customer Portal</span>
+          </div>
+          <Link
+            href="/dashboard/crm"
+            className="flex items-center gap-1.5 text-xs font-medium text-indigo-600 hover:text-indigo-800 transition-colors border border-indigo-200 rounded-lg px-3 py-1.5 hover:bg-indigo-50"
+          >
+            Manage Portal Tokens
+            <ArrowRight size={12} />
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          {/* Portal Users */}
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600">Portal Users</span>
+              <span className="text-gray-400">
+                <span className="font-semibold text-gray-900">23</span> / 100
+              </span>
+            </div>
+            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-full bg-blue-500 rounded-full" style={{ width: `${(23 / 100) * 100}%` }} />
+            </div>
+            <p className="text-xs text-gray-400">active token slots</p>
+          </div>
+          {/* Notification Retention */}
+          <div className="space-y-1.5">
+            <span className="text-sm text-gray-600">Notification Retention</span>
+            <div>
+              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                90 days
+              </span>
+            </div>
+            <p className="text-xs text-gray-400">notification history window</p>
+          </div>
+          {/* Custom Branding */}
+          <div className="col-span-2 flex items-center gap-2 pt-1">
+            <Lock size={14} className="text-gray-400 flex-shrink-0" />
+            <p className="text-sm text-gray-500">
+              Not available on Growth plan. Upgrade to Business to add your logo and brand colors to the customer portal.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Feature comparison table */}
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100">
-          <h2 className="text-sm font-semibold text-gray-700">Plan Comparison — AI Features</h2>
+          <h2 className="text-sm font-semibold text-gray-700">Plan Comparison — All Features</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">

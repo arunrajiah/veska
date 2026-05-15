@@ -8,7 +8,8 @@ export type JobName =
   | 'ai.enrich_entity'
   | 'ai.anomaly_summary'
   | 'invoice.send_reminder'
-  | 'integration.sync';
+  | 'integration.sync'
+  | 'portal.send_invite';
 
 export interface InboundMessageJob {
   tenantId: string;
@@ -64,6 +65,13 @@ export interface InvoiceSendReminderJob {
   recipientEmail: string;
 }
 
+export interface PortalSendInviteJob {
+  tenantId: string;
+  tokenId: string;
+  email: string;
+  portalUrl: string;
+}
+
 export type JobPayload<T extends JobName> =
   T extends 'process.inbound_message' ? InboundMessageJob :
   T extends 'workflow.execute_step' ? WorkflowStepJob :
@@ -72,4 +80,5 @@ export type JobPayload<T extends JobName> =
   T extends 'ai.anomaly_summary' ? AnomalySummaryJob :
   T extends 'invoice.send_reminder' ? InvoiceSendReminderJob :
   T extends 'integration.sync' ? IntegrationSyncJob :
+  T extends 'portal.send_invite' ? PortalSendInviteJob :
   Record<string, unknown>;

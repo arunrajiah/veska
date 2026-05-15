@@ -1,108 +1,168 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
-import { eq, and, desc } from 'drizzle-orm';
-import { schema } from '@veska/core';
+import { sql } from 'drizzle-orm';
+import { sharedDb } from '../shared.js';
 import type { TenantContext } from '../middleware/tenant-context.js';
 
 export const notificationsRouter = new Hono<{ Variables: TenantContext }>();
 
-// GET /notifications — list unread (or all with ?all=true), ordered by createdAt desc, limit 50
-notificationsRouter.get('/', async (c) => {
-  const { db, tenantId } = c.get('tenantCtx');
-  const all = c.req.query('all') === 'true';
+// ── GET /notifications/unread-count (static — before /:id) ───
 
-  const conditions = [eq(schema.notifications.tenantId, tenantId)];
-  if (!all) {
-    conditions.push(eq(schema.notifications.read, false));
-  }
-
-  const records = await db.query.notifications.findMany({
-    where: and(...conditions),
-    orderBy: [desc(schema.notifications.createdAt)],
-    limit: 50,
-  });
-
-  return c.json(records);
-});
-
-// GET /notifications/unread-count — returns { count: number }
 notificationsRouter.get('/unread-count', async (c) => {
-  const { db, tenantId } = c.get('tenantCtx');
+  try {
+    const { tenantId } = c.get('tenantCtx');
+    const userId = c.req.query('userId');
+    if (!userId) return c.json({ error: 'userId query param required' }, 400);
 
-  const records = await db.query.notifications.findMany({
-    where: and(
-      eq(schema.notifications.tenantId, tenantId),
-      eq(schema.notifications.read, false),
-    ),
-  });
+    const rows = await sharedDb.execute(sql`
+      SELECT COUNT(*) AS cnt
+      FROM "notifications"
+      WHERE "tenantId" = ${tenantId}
+        AND "userId" = ${userId}
+        AND "isRead" = false
+    `);
 
-  return c.json({ count: records.length });
+    const count = Number((rows as unknown as { cnt: string }[])[0]?.cnt ?? 0);
+    return c.json({ count });
+  } catch (error) {
+    return c.json({ error }, 500);
+  }
 });
 
-// PATCH /notifications/:id/read — mark one as read
-notificationsRouter.patch('/:id/read', async (c) => {
-  const id = c.req.param('id');
-  const { db, tenantId } = c.get('tenantCtx');
+// ── POST /notifications/read-all (static — before /:id) ──────
 
-  const notification = await db.query.notifications.findFirst({
-    where: and(
-      eq(schema.notifications.tenantId, tenantId),
-      eq(schema.notifications.id, id),
-    ),
-  });
-
-  if (!notification) return c.json({ error: 'Notification not found' }, 404);
-
-  const [updated] = await db
-    .update(schema.notifications)
-    .set({ read: true })
-    .where(and(
-      eq(schema.notifications.tenantId, tenantId),
-      eq(schema.notifications.id, id),
-    ))
-    .returning();
-
-  return c.json(updated);
-});
-
-// POST /notifications/read-all — mark all as read for tenant
 notificationsRouter.post('/read-all', async (c) => {
-  const { db, tenantId } = c.get('tenantCtx');
+  try {
+    const { tenantId } = c.get('tenantCtx');
+    const userId = c.req.query('userId');
+    if (!userId) return c.json({ error: 'userId query param required' }, 400);
 
-  await db
-    .update(schema.notifications)
-    .set({ read: true })
-    .where(and(
-      eq(schema.notifications.tenantId, tenantId),
-      eq(schema.notifications.read, false),
-    ));
+    await sharedDb.execute(sql`
+      UPDATE "notifications"
+      SET "isRead" = true, "readAt" = now()
+      WHERE "tenantId" = ${tenantId}
+        AND "userId" = ${userId}
+        AND "isRead" = false
+    `);
 
-  return c.json({ success: true });
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ error }, 500);
+  }
 });
 
-// POST /notifications — create (internal use)
-notificationsRouter.post(
-  '/',
-  zValidator(
-    'json',
-    z.object({
-      title: z.string().min(1),
-      body: z.string().optional(),
-      type: z.enum(['info', 'warning', 'success', 'error']).optional().default('info'),
-      link: z.string().optional(),
-    }),
-  ),
-  async (c) => {
-    const { db, tenantId } = c.get('tenantCtx');
+// ── GET /notifications ────────────────────────────────────────
+
+notificationsRouter.get('/', async (c) => {
+  try {
+    const { tenantId } = c.get('tenantCtx');
+    const userId = c.req.query('userId');
+    const unreadOnly = c.req.query('unreadOnly') === 'true';
+    const limit = Math.min(Number(c.req.query('limit') ?? 50), 200);
+
+    if (!userId) return c.json({ error: 'userId query param required' }, 400);
+
+    const rows = await sharedDb.execute(sql`
+      SELECT *
+      FROM "notifications"
+      WHERE "tenantId" = ${tenantId}
+        AND "userId" = ${userId}
+        ${unreadOnly ? sql`AND "isRead" = false` : sql``}
+      ORDER BY "createdAt" DESC
+      LIMIT ${limit}
+    `);
+
+    return c.json(rows);
+  } catch (error) {
+    return c.json({ error }, 500);
+  }
+});
+
+// ── POST /notifications ───────────────────────────────────────
+
+const createNotificationSchema = z.object({
+  userId: z.string().min(1),
+  type: z.enum(['info', 'success', 'warning', 'error', 'ai_insight', 'anomaly', 'approval']).optional().default('info'),
+  title: z.string().min(1),
+  body: z.string().optional(),
+  entityType: z.string().optional(),
+  entityId: z.string().optional(),
+  actionUrl: z.string().optional(),
+});
+
+notificationsRouter.post('/', zValidator('json', createNotificationSchema), async (c) => {
+  try {
+    const { tenantId } = c.get('tenantCtx');
     const body = c.req.valid('json');
 
-    const [record] = await db
-      .insert(schema.notifications)
-      .values({ tenantId, ...body })
-      .returning();
+    const result = await sharedDb.execute(sql`
+      INSERT INTO "notifications" (
+        "tenantId", "userId", type, title, body,
+        "entityType", "entityId", "actionUrl"
+      ) VALUES (
+        ${tenantId},
+        ${body.userId},
+        ${body.type},
+        ${body.title},
+        ${body.body ?? null},
+        ${body.entityType ?? null},
+        ${body.entityId ?? null},
+        ${body.actionUrl ?? null}
+      )
+      RETURNING *
+    `);
 
-    if (!record) return c.json({ error: 'Failed to create notification' }, 500);
-    return c.json(record, 201);
-  },
-);
+    const row = (result as unknown[])[0];
+    return c.json(row, 201);
+  } catch (error) {
+    return c.json({ error }, 500);
+  }
+});
+
+// ── POST /notifications/:id/read ──────────────────────────────
+
+notificationsRouter.post('/:id/read', async (c) => {
+  try {
+    const { tenantId } = c.get('tenantCtx');
+    const id = c.req.param('id');
+
+    const result = await sharedDb.execute(sql`
+      UPDATE "notifications"
+      SET "isRead" = true, "readAt" = now()
+      WHERE id = ${id}
+        AND "tenantId" = ${tenantId}
+      RETURNING *
+    `);
+
+    const row = (result as unknown[])[0];
+    if (!row) return c.json({ error: 'Notification not found' }, 404);
+
+    return c.json(row);
+  } catch (error) {
+    return c.json({ error }, 500);
+  }
+});
+
+// ── DELETE /notifications/:id ─────────────────────────────────
+
+notificationsRouter.delete('/:id', async (c) => {
+  try {
+    const { tenantId } = c.get('tenantCtx');
+    const id = c.req.param('id');
+
+    const result = await sharedDb.execute(sql`
+      DELETE FROM "notifications"
+      WHERE id = ${id}
+        AND "tenantId" = ${tenantId}
+      RETURNING id
+    `);
+
+    const row = (result as unknown[])[0];
+    if (!row) return c.json({ error: 'Notification not found' }, 404);
+
+    return c.json({ deleted: true });
+  } catch (error) {
+    return c.json({ error }, 500);
+  }
+});

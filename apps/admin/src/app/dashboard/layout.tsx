@@ -256,6 +256,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <BarChart2 size={15} className="flex-shrink-0" />
               Analytics
             </Link>
+            <Link
+              href="/dashboard/notifications"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+            >
+              <Bell size={15} className="flex-shrink-0" />
+              <span className="flex-1">Notifications</span>
+            </Link>
           </div>
 
           {NAV_SECTIONS.map((section, si) => (

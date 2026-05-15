@@ -25,6 +25,9 @@ export interface Plan {
     aiReports: number | 'unlimited';
     savedReports: number | 'unlimited';
     dataExports: number | 'unlimited';
+    portalUsers: number | 'unlimited';
+    notificationRetentionDays: number | 'unlimited';
+    portalCustomBranding: boolean;
   };
   features: string[];
 }
@@ -55,6 +58,9 @@ export const PLANS: Record<PlanId, Plan> = {
       aiReports: 0,
       savedReports: 3,
       dataExports: 5,
+      portalUsers: 0,
+      notificationRetentionDays: 7,
+      portalCustomBranding: false,
     },
     features: [
       'Core CRM',
@@ -89,6 +95,9 @@ export const PLANS: Record<PlanId, Plan> = {
       aiReports: 10,
       savedReports: 10,
       dataExports: 50,
+      portalUsers: 10,
+      notificationRetentionDays: 30,
+      portalCustomBranding: false,
     },
     features: [
       'Everything in Free',
@@ -124,6 +133,9 @@ export const PLANS: Record<PlanId, Plan> = {
       aiReports: 50,
       savedReports: 50,
       dataExports: 500,
+      portalUsers: 100,
+      notificationRetentionDays: 90,
+      portalCustomBranding: false,
     },
     features: [
       'Everything in Starter',
@@ -160,6 +172,9 @@ export const PLANS: Record<PlanId, Plan> = {
       aiReports: 200,
       savedReports: 'unlimited',
       dataExports: 'unlimited',
+      portalUsers: 500,
+      notificationRetentionDays: 365,
+      portalCustomBranding: true,
     },
     features: [
       'Everything in Growth',
@@ -196,6 +211,9 @@ export const PLANS: Record<PlanId, Plan> = {
       aiReports: 'unlimited',
       savedReports: 'unlimited',
       dataExports: 'unlimited',
+      portalUsers: 'unlimited',
+      notificationRetentionDays: 'unlimited',
+      portalCustomBranding: true,
     },
     features: [
       'Everything in Business',

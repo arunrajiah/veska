@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Plus, Trash2, Edit2, Trophy, X, ChevronLeft, ChevronRight, Wand2, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Edit2, Trophy, X, ChevronLeft, ChevronRight, Wand2, Loader2, Link2, Copy, Mail } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_VESKA_TENANT_ID ?? 'demo';
@@ -699,6 +699,179 @@ function EnrichButton({ contactId }: { contactId: string }) {
   );
 }
 
+// ─── Send Portal Link ─────────────────────────────────────────────────────────
+
+type ExpiryOption = { label: string; value: number | null };
+const EXPIRY_OPTIONS: ExpiryOption[] = [
+  { label: 'Never', value: null },
+  { label: '30 days', value: 30 },
+  { label: '90 days', value: 90 },
+  { label: '1 year', value: 365 },
+];
+
+interface SendPortalLinkModalProps {
+  contactId: string;
+  email: string;
+  onClose: () => void;
+}
+
+function SendPortalLinkModal({ contactId, email, onClose }: SendPortalLinkModalProps) {
+  const [expiry, setExpiry] = useState<number | null>(null);
+  const [sending, setSending] = useState(false);
+  const [portalUrl, setPortalUrl] = useState<string | null>(null);
+  const [tokenId, setTokenId] = useState<string | null>(null);
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [error, setError] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  const handleCreate = async () => {
+    setSending(true);
+    setError('');
+    try {
+      const res = await fetch(`${API_BASE}/portal-mgmt/tokens`, {
+        method: 'POST',
+        headers: apiHeaders(),
+        body: JSON.stringify({
+          contactId,
+          email,
+          ...(expiry !== null ? { expiresInDays: expiry } : {}),
+        }),
+      });
+      if (!res.ok) throw new Error('Failed to create portal token');
+      const data = (await res.json()) as { id: string; token: string };
+      const url = `${window.location.origin}/portal/${data.token}`;
+      setPortalUrl(url);
+      setTokenId(data.id);
+    } catch {
+      setError('Failed to create portal link. Please try again.');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleCopy = () => {
+    if (!portalUrl) return;
+    void navigator.clipboard.writeText(portalUrl).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  const handleSendEmail = async () => {
+    if (!tokenId) return;
+    setSendingEmail(true);
+    try {
+      await fetch(`${API_BASE}/portal-mgmt/tokens/${tokenId}/send-email`, {
+        method: 'POST',
+        headers: apiHeaders(),
+      });
+      setEmailSent(true);
+    } catch {
+      setError('Failed to send email.');
+    } finally {
+      setSendingEmail(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-sm mx-4">
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+          <h2 className="text-sm font-semibold text-gray-900">Send Portal Access</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+            <X size={15} />
+          </button>
+        </div>
+
+        <div className="px-5 py-4 space-y-4">
+          {!portalUrl ? (
+            <>
+              <p className="text-sm text-gray-600">
+                Send portal access to <span className="font-medium text-gray-900">{email}</span>?
+              </p>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1.5">Link expiry</label>
+                <div className="flex flex-wrap gap-2">
+                  {EXPIRY_OPTIONS.map((opt) => (
+                    <button
+                      key={String(opt.value)}
+                      onClick={() => setExpiry(opt.value)}
+                      className={`px-3 py-1.5 text-xs rounded-lg border transition-colors ${
+                        expiry === opt.value
+                          ? 'bg-indigo-600 text-white border-indigo-600'
+                          : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {error && <p className="text-xs text-red-600">{error}</p>}
+
+              <button
+                onClick={() => void handleCreate()}
+                disabled={sending}
+                className="w-full bg-indigo-600 text-white text-sm py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+              >
+                {sending ? 'Creating…' : 'Create Portal Link'}
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="text-xs text-green-600 font-medium">Portal link created!</p>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1.5">Portal URL</label>
+                <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
+                  <p className="text-xs text-gray-700 truncate flex-1 font-mono">{portalUrl}</p>
+                  <button
+                    onClick={handleCopy}
+                    className="text-gray-400 hover:text-indigo-600 transition-colors flex-shrink-0"
+                    title="Copy link"
+                  >
+                    {copied ? (
+                      <span className="text-[10px] text-green-600 font-medium">Copied!</span>
+                    ) : (
+                      <Copy size={13} />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {error && <p className="text-xs text-red-600">{error}</p>}
+
+              {!emailSent ? (
+                <button
+                  onClick={() => void handleSendEmail()}
+                  disabled={sendingEmail}
+                  className="w-full flex items-center justify-center gap-2 border border-gray-200 text-gray-700 text-sm py-2 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                >
+                  <Mail size={14} />
+                  {sendingEmail ? 'Sending…' : 'Send email invite'}
+                </button>
+              ) : (
+                <p className="text-xs text-green-600 font-medium text-center">Email invite sent!</p>
+              )}
+
+              <button
+                onClick={onClose}
+                className="w-full text-sm text-gray-500 py-1.5 hover:text-gray-700 transition-colors"
+              >
+                Close
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Contacts Tab ─────────────────────────────────────────────────────────────
 
 function useDebounce<T>(value: T, delay: number): T {
@@ -718,6 +891,7 @@ function ContactsTab() {
   const [editContact, setEditContact] = useState<Contact | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [contactDeals, setContactDeals] = useState<Record<string, Deal[]>>({});
+  const [portalContact, setPortalContact] = useState<{ id: string; email: string } | null>(null);
 
   const fetchContacts = useCallback(async () => {
     try {
@@ -845,6 +1019,13 @@ function ContactsTab() {
                         <div className="flex items-center justify-end gap-2">
                           <EnrichButton contactId={contact.id} />
                           <button
+                            onClick={() => setPortalContact({ id: contact.id, email: d.email ?? '' })}
+                            title="Send portal access"
+                            className="text-gray-400 hover:text-indigo-500 transition-colors"
+                          >
+                            <Link2 size={13} />
+                          </button>
+                          <button
                             onClick={() => { setEditContact(contact); setShowForm(true); }}
                             className="text-gray-400 hover:text-indigo-500 transition-colors"
                           >
@@ -897,6 +1078,14 @@ function ContactsTab() {
           initial={editContact?.data}
           onClose={() => { setShowForm(false); setEditContact(null); }}
           onSaved={async () => { setShowForm(false); setEditContact(null); await fetchContacts(); }}
+        />
+      )}
+
+      {portalContact && (
+        <SendPortalLinkModal
+          contactId={portalContact.id}
+          email={portalContact.email}
+          onClose={() => setPortalContact(null)}
         />
       )}
     </div>
