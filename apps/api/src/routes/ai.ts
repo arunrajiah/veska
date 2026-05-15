@@ -2,9 +2,183 @@ import { Hono } from 'hono';
 import { sql } from 'drizzle-orm';
 import { AnthropicProvider, ActionAgent } from '@veska-cloud/ai';
 import type { LLMMessage } from '@veska-cloud/ai';
+import { aiLimit } from '@veska-cloud/rate-limit';
 import type { TenantContext } from '../middleware/tenant-context.js';
+import { sharedLlm, sharedQueueService } from '../shared.js';
 
 export const aiRouter = new Hono<{ Variables: TenantContext }>();
+
+// ── POST /insights — AI-generated KPI insights ────────────────
+
+aiRouter.post('/insights', aiLimit(), async (c) => {
+  const { db, tenantId } = c.get('tenantCtx');
+  const body = await c.req.json<{ focus?: 'finance' | 'hr' | 'sales' | 'ops' }>().catch(() => ({ focus: undefined }));
+  const focus = body.focus;
+
+  // Fetch KPI snapshot in parallel
+  const [
+    openInvoicesResult,
+    serviceTicketsResult,
+    budgetResult,
+    dealsResult,
+    overdueContractsResult,
+  ] = await Promise.all([
+    // Total open invoices count + sum
+    db.execute(sql`
+      SELECT COUNT(*) AS count, COALESCE(SUM((data->>'amount')::numeric), 0) AS total
+      FROM "entityRecords"
+      WHERE "tenantId" = ${tenantId}
+        AND "entityType" = 'Invoice'
+        AND data->>'status' NOT IN ('paid', 'cancelled')
+    `),
+    // Open service tickets by priority
+    db.execute(sql`
+      SELECT priority, COUNT(*) AS count
+      FROM "serviceTickets"
+      WHERE "tenantId" = ${tenantId}
+        AND status NOT IN ('resolved', 'closed')
+      GROUP BY priority
+    `),
+    // Budget utilization
+    db.execute(sql`
+      SELECT
+        b.name AS budget_name,
+        COALESCE(SUM(bli."plannedAmount"), 0) AS planned,
+        COALESCE(SUM(bli."actualAmount"), 0) AS actual,
+        CASE
+          WHEN COALESCE(SUM(bli."plannedAmount"), 0) > 0
+          THEN ROUND(SUM(bli."actualAmount") / SUM(bli."plannedAmount") * 100, 1)
+          ELSE 0
+        END AS utilization_pct
+      FROM budgets b
+      LEFT JOIN "budgetLineItems" bli ON bli."budgetId" = b.id
+      WHERE b."tenantId" = ${tenantId}
+      GROUP BY b.id, b.name
+    `),
+    // Deals in pipeline
+    db.execute(sql`
+      SELECT COUNT(*) AS count, COALESCE(SUM((data->>'value')::numeric), 0) AS total_value
+      FROM "entityRecords"
+      WHERE "tenantId" = ${tenantId}
+        AND "entityType" = 'CRMDeal'
+        AND data->>'status' NOT IN ('won', 'lost')
+    `),
+    // Overdue contracts
+    db.execute(sql`
+      SELECT COUNT(*) AS count
+      FROM contracts
+      WHERE "tenantId" = ${tenantId}
+        AND "endDate" < NOW()
+        AND status = 'active'
+    `),
+  ]);
+
+  const snapshot = {
+    focus,
+    openInvoices: {
+      count: Number((openInvoicesResult.rows[0] as { count: string; total: string })?.count ?? 0),
+      totalAmount: Number((openInvoicesResult.rows[0] as { count: string; total: string })?.total ?? 0),
+    },
+    serviceTicketsByPriority: serviceTicketsResult.rows as Array<{ priority: string; count: string }>,
+    budgetUtilization: budgetResult.rows as Array<{ budget_name: string; planned: string; actual: string; utilization_pct: string }>,
+    pipelineDeals: {
+      count: Number((dealsResult.rows[0] as { count: string; total_value: string })?.count ?? 0),
+      totalValue: Number((dealsResult.rows[0] as { count: string; total_value: string })?.total_value ?? 0),
+    },
+    overdueContracts: {
+      count: Number((overdueContractsResult.rows[0] as { count: string })?.count ?? 0),
+    },
+  };
+
+  const systemPrompt = `You are a business intelligence assistant for an ERP. Given the following metrics snapshot, provide 4-5 concise actionable insights. Be specific with numbers. Format as a JSON array of { insight: string, priority: 'high'|'medium'|'low', module: string }.`;
+
+  const userMessage = `Metrics snapshot:\n${JSON.stringify(snapshot, null, 2)}\n\nRespond ONLY with a JSON array of insight objects.`;
+
+  let insights: unknown[] = [];
+
+  try {
+    const completion = await sharedLlm.complete({
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userMessage }],
+      maxTokens: 1024,
+    });
+    const rawAnswer = completion.content;
+
+    const jsonText = rawAnswer
+      .trim()
+      .replace(/^```(?:json)?\n?/i, '')
+      .replace(/\n?```$/i, '')
+      .trim();
+
+    insights = JSON.parse(jsonText) as unknown[];
+  } catch (err) {
+    console.error('[AI /insights] LLM or parse error:', err);
+    insights = [];
+  }
+
+  return c.json({ insights, generatedAt: new Date().toISOString() });
+});
+
+// ── POST /enrich/:entityId — enqueue entity enrichment ────────
+
+aiRouter.post('/enrich/:entityId', async (c) => {
+  const { db, tenantId } = c.get('tenantCtx');
+  const entityId = c.req.param('entityId');
+
+  const body = await c.req.json<{ fields?: string[] }>().catch(() => ({ fields: undefined }));
+
+  const result = await db.execute(sql`
+    SELECT id, "entityType" FROM "entityRecords"
+    WHERE id = ${entityId}::uuid AND "tenantId" = ${tenantId}
+  `);
+
+  if (!result.rows.length) {
+    return c.json({ error: 'Entity not found' }, 404);
+  }
+
+  const row = result.rows[0] as { id: string; entityType: string };
+
+  await sharedQueueService.enqueue('ai.enrich_entity', {
+    tenantId,
+    entityId,
+    entityType: row.entityType,
+    fields: body.fields ?? [],
+  });
+
+  return c.json({ queued: true, entityId });
+});
+
+// ── POST /invoices/:invoiceId/reminder — send invoice reminder ─
+
+aiRouter.post('/invoices/:invoiceId/reminder', async (c) => {
+  const { db, tenantId } = c.get('tenantCtx');
+  const invoiceId = c.req.param('invoiceId');
+
+  const body = await c.req.json<{ recipientEmail: string }>().catch(() => ({ recipientEmail: '' }));
+  if (!body.recipientEmail) {
+    return c.json({ error: 'recipientEmail is required' }, 400);
+  }
+
+  // Verify the invoice exists and belongs to this tenant
+  const result = await db.execute(sql`
+    SELECT id FROM "entityRecords"
+    WHERE id = ${invoiceId}::uuid
+      AND "tenantId" = ${tenantId}
+      AND "entityType" = 'Invoice'
+  `);
+
+  if (!result.rows.length) {
+    return c.json({ error: 'Invoice not found' }, 404);
+  }
+
+  await sharedQueueService.enqueue('invoice.send_reminder', {
+    tenantId,
+    invoiceId,
+    recipientEmail: body.recipientEmail,
+  });
+
+  return c.json({ queued: true, invoiceId, recipientEmail: body.recipientEmail });
+});
 
 // ── GET /conversations — list conversations for tenant ────────
 
@@ -25,7 +199,7 @@ aiRouter.get('/conversations', async (c) => {
 
 aiRouter.post('/conversations', async (c) => {
   const { db, tenantId } = c.get('tenantCtx');
-  const body = await c.req.json<{ title?: string }>().catch(() => ({}));
+  const body = await c.req.json<{ title?: string }>().catch(() => ({ title: undefined }));
   const title = body.title ?? null;
 
   const rows = await db.execute(sql`

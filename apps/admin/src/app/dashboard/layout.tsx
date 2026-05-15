@@ -41,6 +41,7 @@ import {
   Shield,
   UserCog,
   Sparkles,
+  Bot,
   ArrowUpDown,
   Globe,
   RefreshCw,
@@ -53,6 +54,7 @@ import {
   DoorOpen,
   Wrench,
   Lock,
+  Brain,
 } from 'lucide-react';
 import NotificationBell from '@/components/notification-bell.js';
 
@@ -184,6 +186,7 @@ const NAV_SECTIONS = [
     label: 'Platform',
     items: [
       { href: '/dashboard/integrations', icon: Plug, label: 'Integrations' },
+      { href: '/dashboard/ai-usage', icon: Brain, label: 'AI Usage' },
       { href: '/dashboard/settings/privacy', icon: ShieldCheck, label: 'Privacy & GDPR' },
     ],
   },
@@ -243,8 +246,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               href="/dashboard/ai"
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors"
             >
-              <Sparkles size={15} className="flex-shrink-0" />
-              Ask AI
+              <Bot size={15} className="flex-shrink-0 text-indigo-600" />
+              AI Assistant
             </Link>
           </div>
 

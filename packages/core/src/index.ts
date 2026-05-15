@@ -42,4 +42,4 @@ export { WebhookDispatcherService, type WebhookEvent } from './services/webhook-
 
 // Queue
 export { QueueService } from './queue/queue.service.js';
-export type { JobName, JobPayload, InboundMessageJob, WorkflowStepJob, SendMessageJob, EnrichEntityJob } from './queue/jobs.js';
+export type { JobName, JobPayload, InboundMessageJob, WorkflowStepJob, SendMessageJob, EnrichEntityJob, AnomalyRecord, AnomalySummaryJob, InvoiceSendReminderJob } from './queue/jobs.js';

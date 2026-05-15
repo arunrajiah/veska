@@ -110,6 +110,122 @@ export class ActionAgent {
           const r = await fetch(`${base}/payroll/runs?${params}`);
           return r.ok ? r.json() : { error: 'fetch failed' };
         }
+
+        // ── New read tools ──────────────────────────────────────
+        case 'get_crm_contacts': {
+          const params = new URLSearchParams({ tenantId: tid, limit: String(input.limit ?? 20) });
+          if (input.search) params.set('search', String(input.search));
+          const r = await fetch(`${base}/crm/contacts?${params}`);
+          return r.ok ? r.json() : { error: 'fetch failed' };
+        }
+        case 'get_crm_deals': {
+          const params = new URLSearchParams({ tenantId: tid, limit: String(input.limit ?? 20) });
+          if (input.status) params.set('status', String(input.status));
+          const r = await fetch(`${base}/crm/deals?${params}`);
+          return r.ok ? r.json() : { error: 'fetch failed' };
+        }
+        case 'get_service_tickets': {
+          const params = new URLSearchParams({ tenantId: tid, limit: String(input.limit ?? 20) });
+          if (input.status) params.set('status', String(input.status));
+          const r = await fetch(`${base}/service-desk/tickets?${params}`);
+          return r.ok ? r.json() : { error: 'fetch failed' };
+        }
+        case 'get_vendors': {
+          const params = new URLSearchParams({ tenantId: tid, limit: String(input.limit ?? 20) });
+          if (input.status) params.set('status', String(input.status));
+          const r = await fetch(`${base}/vendors?${params}`);
+          return r.ok ? r.json() : { error: 'fetch failed' };
+        }
+        case 'get_contracts': {
+          const params = new URLSearchParams({ tenantId: tid, limit: String(input.limit ?? 20) });
+          if (input.status) params.set('status', String(input.status));
+          const r = await fetch(`${base}/contracts?${params}`);
+          return r.ok ? r.json() : { error: 'fetch failed' };
+        }
+        case 'get_lms_enrollments': {
+          const params = new URLSearchParams({ tenantId: tid, limit: String(input.limit ?? 20) });
+          if (input.status) params.set('status', String(input.status));
+          const r = await fetch(`${base}/lms/enrollments?${params}`);
+          return r.ok ? r.json() : { error: 'fetch failed' };
+        }
+        case 'get_product_variants': {
+          const params = new URLSearchParams({ tenantId: tid, limit: String(input.limit ?? 20) });
+          if (input.productId) params.set('productId', String(input.productId));
+          const r = await fetch(`${base}/catalog/variants?${params}`);
+          return r.ok ? r.json() : { error: 'fetch failed' };
+        }
+        case 'get_price_lists': {
+          const params = new URLSearchParams({ tenantId: tid, limit: String(input.limit ?? 20) });
+          const r = await fetch(`${base}/catalog/price-lists?${params}`);
+          return r.ok ? r.json() : { error: 'fetch failed' };
+        }
+        case 'get_discount_rules': {
+          const params = new URLSearchParams({ tenantId: tid, limit: String(input.limit ?? 20) });
+          if (input.status) params.set('status', String(input.status));
+          const r = await fetch(`${base}/catalog/discount-rules?${params}`);
+          return r.ok ? r.json() : { error: 'fetch failed' };
+        }
+        case 'get_time_entries': {
+          const params = new URLSearchParams({ tenantId: tid, limit: String(input.limit ?? 50) });
+          if (input.userId) params.set('userId', String(input.userId));
+          const r = await fetch(`${base}/time-tracking/entries?${params}`);
+          return r.ok ? r.json() : { error: 'fetch failed' };
+        }
+        case 'get_payroll_items': {
+          const params = new URLSearchParams({ tenantId: tid, limit: String(input.limit ?? 50) });
+          const r = await fetch(`${base}/payroll-runs/${String(input.payrollRunId)}/items?${params}`);
+          return r.ok ? r.json() : { error: 'fetch failed' };
+        }
+        case 'get_budget_actuals': {
+          const params = new URLSearchParams({ tenantId: tid });
+          if (input.budgetId) params.set('budgetId', String(input.budgetId));
+          const r = await fetch(`${base}/budgets/actuals?${params}`);
+          return r.ok ? r.json() : { error: 'fetch failed' };
+        }
+
+        // ── Write tools ─────────────────────────────────────────
+        case 'create_expense': {
+          const r = await fetch(`${base}/expenses`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tenantId: tid, ...input }),
+          });
+          return r.ok ? r.json() : { error: 'fetch failed' };
+        }
+        case 'update_service_ticket_status': {
+          const { ticketId, ...rest } = input;
+          const r = await fetch(`${base}/service-desk/tickets/${String(ticketId)}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tenantId: tid, ...rest }),
+          });
+          return r.ok ? r.json() : { error: 'fetch failed' };
+        }
+        case 'create_crm_note': {
+          const r = await fetch(`${base}/crm/notes`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tenantId: tid, ...input }),
+          });
+          return r.ok ? r.json() : { error: 'fetch failed' };
+        }
+        case 'send_invoice_reminder': {
+          const r = await fetch(`${base}/ai/invoices/${String(input.invoiceId)}/reminder`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tenantId: tid, recipientEmail: input.recipientEmail }),
+          });
+          return r.ok ? r.json() : { error: 'fetch failed' };
+        }
+        case 'approve_expense': {
+          const r = await fetch(`${base}/expenses/${String(input.expenseId)}/approve`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tenantId: tid }),
+          });
+          return r.ok ? r.json() : { error: 'fetch failed' };
+        }
+
         default:
           return { error: `Unknown tool: ${name}` };
       }

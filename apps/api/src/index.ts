@@ -74,6 +74,7 @@ import {
 import { SlackAppManager } from './slack/slack-app.js';
 import { registerMessageWorker } from './slack/message-worker.js';
 import { registerEnrichmentWorker } from './workers/enrichment-worker.js';
+import { registerAnomalyWorker } from './workers/anomaly-worker.js';
 import { WorkflowEngine } from '@veska/core';
 
 // ── App setup ─────────────────────────────────────────────────
@@ -217,6 +218,9 @@ sharedQueueService.registerWorker('workflow.execute_step', async (job) => {
 
 // AI entity enrichment worker
 registerEnrichmentWorker(sharedQueueService, sharedDb, sharedLlm, sharedAuditService);
+
+// AI anomaly detection worker (repeatable, every 6 hours)
+registerAnomalyWorker(sharedQueueService, sharedDb, sharedLlm);
 
 // ── Graceful shutdown ─────────────────────────────────────────
 const shutdown = async () => {

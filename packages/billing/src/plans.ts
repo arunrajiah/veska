@@ -16,6 +16,11 @@ export interface Plan {
     priceLists: number | 'unlimited';
     productVariants: number | 'unlimited';
     discountCodes: number | 'unlimited';
+    aiConversationsPerMonth: number | 'unlimited';
+    aiInsightsPerDay: number | 'unlimited';
+    aiEnrichments: number | 'unlimited';
+    aiWriteActions: boolean;
+    anomalyDetection: boolean;
   };
   features: string[];
 }
@@ -37,6 +42,11 @@ export const PLANS: Record<PlanId, Plan> = {
       priceLists: 1,
       productVariants: 0,
       discountCodes: 0,
+      aiConversationsPerMonth: 10,
+      aiInsightsPerDay: 1,
+      aiEnrichments: 0,
+      aiWriteActions: false,
+      anomalyDetection: false,
     },
     features: [
       'Core CRM',
@@ -62,6 +72,11 @@ export const PLANS: Record<PlanId, Plan> = {
       priceLists: 3,
       productVariants: 50,
       discountCodes: 5,
+      aiConversationsPerMonth: 100,
+      aiInsightsPerDay: 5,
+      aiEnrichments: 25,
+      aiWriteActions: false,
+      anomalyDetection: false,
     },
     features: [
       'Everything in Free',
@@ -88,6 +103,11 @@ export const PLANS: Record<PlanId, Plan> = {
       priceLists: 10,
       productVariants: 500,
       discountCodes: 25,
+      aiConversationsPerMonth: 500,
+      aiInsightsPerDay: 20,
+      aiEnrichments: 200,
+      aiWriteActions: true,
+      anomalyDetection: false,
     },
     features: [
       'Everything in Starter',
@@ -115,6 +135,11 @@ export const PLANS: Record<PlanId, Plan> = {
       priceLists: 50,
       productVariants: 'unlimited',
       discountCodes: 'unlimited',
+      aiConversationsPerMonth: 2000,
+      aiInsightsPerDay: 100,
+      aiEnrichments: 'unlimited',
+      aiWriteActions: true,
+      anomalyDetection: true,
     },
     features: [
       'Everything in Growth',
@@ -142,6 +167,11 @@ export const PLANS: Record<PlanId, Plan> = {
       priceLists: 'unlimited',
       productVariants: 'unlimited',
       discountCodes: 'unlimited',
+      aiConversationsPerMonth: 'unlimited',
+      aiInsightsPerDay: 'unlimited',
+      aiEnrichments: 'unlimited',
+      aiWriteActions: true,
+      anomalyDetection: true,
     },
     features: [
       'Everything in Business',

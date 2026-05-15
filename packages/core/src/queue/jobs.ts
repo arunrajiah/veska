@@ -6,6 +6,8 @@ export type JobName =
   | 'channel.send_message'
   | 'magic_link.prune_expired'
   | 'ai.enrich_entity'
+  | 'ai.anomaly_summary'
+  | 'invoice.send_reminder'
   | 'integration.sync';
 
 export interface InboundMessageJob {
@@ -44,10 +46,30 @@ export interface IntegrationSyncJob {
   syncType: 'full' | 'incremental';
 }
 
+export interface AnomalyRecord {
+  type: 'budget_overrun' | 'sla_breach' | 'overdue_invoice' | 'expiring_contract';
+  description: string;
+  entityId?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface AnomalySummaryJob {
+  tenantId: string;
+  anomalies: AnomalyRecord[];
+}
+
+export interface InvoiceSendReminderJob {
+  tenantId: string;
+  invoiceId: string;
+  recipientEmail: string;
+}
+
 export type JobPayload<T extends JobName> =
   T extends 'process.inbound_message' ? InboundMessageJob :
   T extends 'workflow.execute_step' ? WorkflowStepJob :
   T extends 'channel.send_message' ? SendMessageJob :
   T extends 'ai.enrich_entity' ? EnrichEntityJob :
+  T extends 'ai.anomaly_summary' ? AnomalySummaryJob :
+  T extends 'invoice.send_reminder' ? InvoiceSendReminderJob :
   T extends 'integration.sync' ? IntegrationSyncJob :
   Record<string, unknown>;

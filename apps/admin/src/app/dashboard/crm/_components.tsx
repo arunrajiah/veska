@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Plus, Trash2, Edit2, Trophy, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Trash2, Edit2, Trophy, X, ChevronLeft, ChevronRight, Wand2, Loader2 } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_VESKA_TENANT_ID ?? 'demo';
@@ -649,6 +649,56 @@ function ContactForm({ onSaved, onClose, initial, contactId }: ContactFormProps)
   );
 }
 
+// ─── Enrich Button ────────────────────────────────────────────────────────────
+
+function EnrichButton({ contactId }: { contactId: string }) {
+  const [state, setState] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
+
+  const handleEnrich = useCallback(async () => {
+    setState('loading');
+    try {
+      await apiFetch(`/api/v1/ai/enrich/${contactId}`, { method: 'POST' });
+      setState('done');
+      setTimeout(() => setState('idle'), 3000);
+    } catch {
+      setState('error');
+      setTimeout(() => setState('idle'), 3000);
+    }
+  }, [contactId]);
+
+  if (state === 'done') {
+    return (
+      <span className="text-xs text-green-600 font-medium whitespace-nowrap">
+        Enrichment queued ✓
+      </span>
+    );
+  }
+
+  if (state === 'error') {
+    return (
+      <span className="text-xs text-red-500 font-medium whitespace-nowrap">
+        Enrich failed
+      </span>
+    );
+  }
+
+  return (
+    <button
+      onClick={handleEnrich}
+      disabled={state === 'loading'}
+      title="AI Enrich contact"
+      className="flex items-center gap-1 px-1.5 py-0.5 text-xs text-indigo-500 hover:text-indigo-700 rounded hover:bg-indigo-50 transition-colors disabled:opacity-50"
+    >
+      {state === 'loading' ? (
+        <Loader2 size={12} className="animate-spin" />
+      ) : (
+        <Wand2 size={12} />
+      )}
+      {state === 'loading' ? '' : 'Enrich'}
+    </button>
+  );
+}
+
 // ─── Contacts Tab ─────────────────────────────────────────────────────────────
 
 function useDebounce<T>(value: T, delay: number): T {
@@ -793,6 +843,7 @@ function ContactsTab() {
                       </td>
                       <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-end gap-2">
+                          <EnrichButton contactId={contact.id} />
                           <button
                             onClick={() => { setEditContact(contact); setShowForm(true); }}
                             className="text-gray-400 hover:text-indigo-500 transition-colors"

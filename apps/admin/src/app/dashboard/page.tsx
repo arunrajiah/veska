@@ -8,6 +8,7 @@ import {
   Package,
   Clock,
 } from 'lucide-react';
+import { AIInsightsWidget } from './_components.js';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -362,6 +363,9 @@ export default async function DashboardOverviewPage() {
           </Link>
         ))}
       </div>
+
+      {/* ── AI Insights Widget ──────────────────────────────────────────────── */}
+      <AIInsightsWidget />
     </div>
   );
 }
