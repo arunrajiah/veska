@@ -1,7 +1,9 @@
 import { Hono } from 'hono';
 import { eq, and, isNull, sql } from 'drizzle-orm';
 import { schema } from '@veska/core';
+import { aiLimit } from '@veska-cloud/rate-limit';
 import type { TenantContext } from '../middleware/tenant-context.js';
+import { sharedLlm } from '../shared.js';
 
 // ── Saved-report types ────────────────────────────────────────
 
@@ -372,6 +374,275 @@ reportsRouter.get('/projects', async (c) => {
     overdueTaskCount,
     projectsWithProgress,
   });
+});
+
+// ═══════════════════════════════════════════════════════════════
+// AI Report Generation
+// ═══════════════════════════════════════════════════════════════
+
+// Schema context provided to the LLM
+const SCHEMA_CONTEXT = `
+entityRecords(id, tenantId, entityType, data JSONB, createdAt, updatedAt)
+serviceTickets(id, tenantId, code, title, status, priority, assignedTo, createdAt)
+vendors(id, tenantId, code, name, status, avgRating)
+timeEntries(id, tenantId, userId, projectId, hours, date)
+budgets(id, tenantId, name, totalAmount, status)
+budgetLineItems(id, budgetId, category, plannedAmount, actualAmount)
+priceLists(id, tenantId, name, type, currency)
+contracts(id, tenantId, title, status, startDate, endDate)
+payrollRuns(id, tenantId, period, status, totalGross, totalNet)
+`.trim();
+
+// Words that must not appear in AI-generated SQL
+const DANGEROUS_KEYWORDS = /\b(INSERT|UPDATE|DELETE|DROP|TRUNCATE|ALTER|CREATE|REPLACE|GRANT|REVOKE)\b/i;
+
+// ── POST /reports/ai-generate ─────────────────────────────────
+
+reportsRouter.post('/ai-generate', aiLimit(), async (c) => {
+  const { db, tenantId } = c.get('tenantCtx');
+
+  let body: { prompt?: string; maxRows?: number };
+  try {
+    body = await c.req.json<{ prompt?: string; maxRows?: number }>();
+  } catch {
+    return c.json({ error: 'Invalid JSON body' }, 400);
+  }
+
+  const prompt = body.prompt?.trim();
+  if (!prompt) {
+    return c.json({ error: 'prompt is required' }, 400);
+  }
+
+  const maxRows = body.maxRows ?? 500;
+
+  const systemPrompt = [
+    'You are a PostgreSQL expert for an ERP system.',
+    `Given this schema:\n${SCHEMA_CONTEXT}`,
+    `And a user question, generate a single valid SELECT query.`,
+    `The tenant is always filtered with tenantId = '${tenantId}'.`,
+    `Return ONLY a JSON object with no markdown fences:`,
+    `{ "sql": string, "chartType": "bar"|"line"|"pie"|"table", "title": string, "xAxis"?: string, "yAxis"?: string }`,
+    'Never include UPDATE/DELETE/INSERT/DROP/TRUNCATE/ALTER/CREATE statements.',
+  ].join('\n');
+
+  const userPrompt = `User question: ${prompt}`;
+
+  let generatedSql: string;
+  let chartType: string;
+  let title: string;
+  let xAxis: string | undefined;
+  let yAxis: string | undefined;
+
+  try {
+    const completion = await sharedLlm.complete({
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }],
+      maxTokens: 1024,
+    });
+
+    const rawText = completion.content
+      .trim()
+      .replace(/^```(?:json)?\n?/i, '')
+      .replace(/\n?```$/i, '')
+      .trim();
+
+    const parsed = JSON.parse(rawText) as {
+      sql: string;
+      chartType: string;
+      title: string;
+      xAxis?: string;
+      yAxis?: string;
+    };
+
+    generatedSql = parsed.sql;
+    chartType = parsed.chartType;
+    title = parsed.title;
+    xAxis = parsed.xAxis;
+    yAxis = parsed.yAxis;
+  } catch (err) {
+    return c.json(
+      { error: 'Could not generate valid SQL', detail: String(err) },
+      400,
+    );
+  }
+
+  // Safety check — reject dangerous statements
+  if (DANGEROUS_KEYWORDS.test(generatedSql)) {
+    return c.json(
+      { error: 'Could not generate valid SQL', detail: 'Generated SQL contains prohibited statements' },
+      400,
+    );
+  }
+
+  // Execute the generated SQL
+  let rows: unknown[][];
+  let columns: string[];
+
+  try {
+    const result = await db.execute(sql.raw(generatedSql));
+    const allRows = result.rows as Record<string, unknown>[];
+
+    if (allRows.length === 0) {
+      columns = [];
+      rows = [];
+    } else {
+      columns = Object.keys(allRows[0]!);
+      rows = allRows.slice(0, maxRows).map((r) => columns.map((col) => r[col] ?? null));
+    }
+  } catch (err) {
+    return c.json(
+      { error: 'Could not generate valid SQL', detail: `Query execution failed: ${String(err)}` },
+      400,
+    );
+  }
+
+  return c.json({
+    title,
+    sql: generatedSql,
+    chartType,
+    xAxis,
+    yAxis,
+    columns,
+    rows,
+    rowCount: rows.length,
+  });
+});
+
+// ── GET /reports/:id/export ───────────────────────────────────
+
+reportsRouter.get('/:id/export', async (c) => {
+  const { db, tenantId } = c.get('tenantCtx');
+  const id = c.req.param('id');
+  const format = c.req.query('format') ?? 'csv';
+
+  try {
+    // Fetch the saved report
+    const reportRes = await db.execute(sql`
+      SELECT config FROM "savedReports"
+      WHERE id = ${id} AND "tenantId" = ${tenantId}
+    `);
+    if (!reportRes.rows[0]) {
+      return c.json({ error: 'Report not found' }, 404);
+    }
+
+    const config = (reportRes.rows[0] as Record<string, unknown>)['config'] as ReportConfig;
+
+    if (!config.entityType) {
+      return c.json({ error: 'Report config is missing entityType' }, 400);
+    }
+
+    // Build the base conditions
+    const conditions: ReturnType<typeof sql>[] = [
+      sql`"tenantId" = ${tenantId}`,
+      sql`"entityType" = ${config.entityType}`,
+      sql`"deletedAt" IS NULL`,
+    ];
+
+    if (config.dateRange) {
+      const dr = config.dateRange;
+      const dateField = safePgField(dr.field);
+      if (dr.from) {
+        conditions.push(
+          sql.raw(`(data->>'${dateField}')::timestamptz >= `).append(sql`${dr.from}::timestamptz`),
+        );
+      }
+      if (dr.to) {
+        conditions.push(
+          sql.raw(`(data->>'${dateField}')::timestamptz <= `).append(sql`${dr.to}::timestamptz`),
+        );
+      }
+    }
+
+    for (const filter of config.filters ?? []) {
+      const field = safePgField(filter.field);
+      const val = filter.value;
+      switch (filter.operator) {
+        case 'eq':
+          conditions.push(sql.raw(`data->>'${field}' = `).append(sql`${String(val)}`));
+          break;
+        case 'gt':
+          conditions.push(sql.raw(`(data->>'${field}')::numeric > `).append(sql`${Number(val)}`));
+          break;
+        case 'lt':
+          conditions.push(sql.raw(`(data->>'${field}')::numeric < `).append(sql`${Number(val)}`));
+          break;
+        case 'gte':
+          conditions.push(sql.raw(`(data->>'${field}')::numeric >= `).append(sql`${Number(val)}`));
+          break;
+        case 'lte':
+          conditions.push(sql.raw(`(data->>'${field}')::numeric <= `).append(sql`${Number(val)}`));
+          break;
+        case 'contains':
+          conditions.push(
+            sql.raw(`data->>'${field}' ILIKE `).append(sql`${'%' + String(val) + '%'}`),
+          );
+          break;
+      }
+    }
+
+    const whereClause = conditions.reduce((acc, cond, idx) =>
+      idx === 0 ? cond : sql`${acc} AND ${cond}`,
+    );
+
+    const metrics = config.metrics ?? [];
+    const groupByField = config.groupBy ? safePgField(config.groupBy) : null;
+
+    let dbRows: Record<string, unknown>[];
+
+    if (groupByField && metrics.length > 0) {
+      const aggParts = metrics.map((m) => buildAggregation(m)).join(', ');
+      const queryRes = await db.execute(
+        sql
+          .raw(`SELECT data->>'${groupByField}' AS group_key, ${aggParts} FROM "entityRecords" WHERE `)
+          .append(whereClause)
+          .append(sql.raw(` GROUP BY data->>'${groupByField}' ORDER BY data->>'${groupByField}'`)),
+      );
+      dbRows = queryRes.rows as Record<string, unknown>[];
+    } else if (metrics.length > 0) {
+      const aggParts = metrics.map((m) => buildAggregation(m)).join(', ');
+      const queryRes = await db.execute(
+        sql.raw(`SELECT ${aggParts} FROM "entityRecords" WHERE `).append(whereClause),
+      );
+      dbRows = queryRes.rows as Record<string, unknown>[];
+    } else {
+      const queryRes = await db.execute(
+        sql.raw(`SELECT * FROM "entityRecords" WHERE `).append(whereClause).append(sql.raw(' LIMIT 10000')),
+      );
+      dbRows = queryRes.rows as Record<string, unknown>[];
+    }
+
+    if (format === 'csv') {
+      // Build CSV
+      const columns = dbRows.length > 0 ? Object.keys(dbRows[0]!) : [];
+
+      function csvEscape(val: unknown): string {
+        if (val === null || val === undefined) return '';
+        const str = typeof val === 'object' ? JSON.stringify(val) : String(val);
+        // Quote if contains comma, double-quote, or newline
+        if (/[",\r\n]/.test(str)) {
+          return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+      }
+
+      const lines: string[] = [];
+      lines.push(columns.map(csvEscape).join(','));
+      for (const row of dbRows) {
+        lines.push(columns.map((col) => csvEscape(row[col])).join(','));
+      }
+      const csv = lines.join('\r\n');
+
+      c.header('Content-Type', 'text/csv; charset=utf-8');
+      c.header('Content-Disposition', `attachment; filename="report-${id}.csv"`);
+      return c.text(csv, 200);
+    }
+
+    // Default: return JSON
+    return c.json({ rows: dbRows, rowCount: dbRows.length });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return c.json({ error: message }, 500);
+  }
 });
 
 // ═══════════════════════════════════════════════════════════════

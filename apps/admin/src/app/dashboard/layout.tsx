@@ -241,13 +241,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         <nav className="flex-1 overflow-y-auto py-3 px-2">
           {/* AI Assistant — pinned at top */}
-          <div className="mb-4">
+          <div className="mb-4 space-y-1">
             <Link
               href="/dashboard/ai"
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors"
             >
               <Bot size={15} className="flex-shrink-0 text-indigo-600" />
               AI Assistant
+            </Link>
+            <Link
+              href="/dashboard/analytics"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+            >
+              <BarChart2 size={15} className="flex-shrink-0" />
+              Analytics
             </Link>
           </div>
 

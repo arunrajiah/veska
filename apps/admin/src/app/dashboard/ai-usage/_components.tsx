@@ -10,6 +10,7 @@ import {
   Lock,
   Check,
   ArrowRight,
+  BarChart2,
 } from 'lucide-react';
 
 // Mock usage data — Growth plan
@@ -262,6 +263,74 @@ export function AIUsageClient() {
             </p>
           </div>
         )}
+      </div>
+
+      {/* Analytics & Reporting — full width */}
+      <div className="bg-white border border-gray-200 rounded-xl p-5">
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <BarChart2 size={16} className="text-indigo-500" />
+            <span className="text-sm font-medium text-gray-700">Analytics &amp; Reporting</span>
+          </div>
+          <Link
+            href="/dashboard/analytics"
+            className="flex items-center gap-1.5 text-xs font-medium text-indigo-600 hover:text-indigo-800 transition-colors border border-indigo-200 rounded-lg px-3 py-1.5 hover:bg-indigo-50"
+          >
+            Go to Analytics
+            <ArrowRight size={12} />
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          {/* AI Reports */}
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600">AI Reports</span>
+              <span className="text-gray-400">
+                <span className="font-semibold text-gray-900">18</span> / 50
+              </span>
+            </div>
+            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${(18 / 50) * 100}%` }} />
+            </div>
+            <p className="text-xs text-gray-400">this month</p>
+          </div>
+          {/* Data Exports */}
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600">Data Exports</span>
+              <span className="text-gray-400">
+                <span className="font-semibold text-gray-900">127</span> / 500
+              </span>
+            </div>
+            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${(127 / 500) * 100}%` }} />
+            </div>
+            <p className="text-xs text-gray-400">this month</p>
+          </div>
+          {/* Saved Reports */}
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600">Saved Reports</span>
+              <span className="text-gray-400">
+                <span className="font-semibold text-gray-900">12</span> / 50
+              </span>
+            </div>
+            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${(12 / 50) * 100}%` }} />
+            </div>
+            <p className="text-xs text-gray-400">slots used</p>
+          </div>
+          {/* Data Retention */}
+          <div className="space-y-1.5">
+            <span className="text-sm text-gray-600">Data Retention</span>
+            <div>
+              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-semibold bg-indigo-100 text-indigo-800">
+                365 days
+              </span>
+            </div>
+            <p className="text-xs text-gray-400">query history window</p>
+          </div>
+        </div>
       </div>
 
       {/* Feature comparison table */}

@@ -21,6 +21,10 @@ export interface Plan {
     aiEnrichments: number | 'unlimited';
     aiWriteActions: boolean;
     anomalyDetection: boolean;
+    analyticsRetentionDays: number | 'unlimited';
+    aiReports: number | 'unlimited';
+    savedReports: number | 'unlimited';
+    dataExports: number | 'unlimited';
   };
   features: string[];
 }
@@ -47,6 +51,10 @@ export const PLANS: Record<PlanId, Plan> = {
       aiEnrichments: 0,
       aiWriteActions: false,
       anomalyDetection: false,
+      analyticsRetentionDays: 30,
+      aiReports: 0,
+      savedReports: 3,
+      dataExports: 5,
     },
     features: [
       'Core CRM',
@@ -77,6 +85,10 @@ export const PLANS: Record<PlanId, Plan> = {
       aiEnrichments: 25,
       aiWriteActions: false,
       anomalyDetection: false,
+      analyticsRetentionDays: 90,
+      aiReports: 10,
+      savedReports: 10,
+      dataExports: 50,
     },
     features: [
       'Everything in Free',
@@ -108,6 +120,10 @@ export const PLANS: Record<PlanId, Plan> = {
       aiEnrichments: 200,
       aiWriteActions: true,
       anomalyDetection: false,
+      analyticsRetentionDays: 365,
+      aiReports: 50,
+      savedReports: 50,
+      dataExports: 500,
     },
     features: [
       'Everything in Starter',
@@ -140,6 +156,10 @@ export const PLANS: Record<PlanId, Plan> = {
       aiEnrichments: 'unlimited',
       aiWriteActions: true,
       anomalyDetection: true,
+      analyticsRetentionDays: 'unlimited',
+      aiReports: 200,
+      savedReports: 'unlimited',
+      dataExports: 'unlimited',
     },
     features: [
       'Everything in Growth',
@@ -172,6 +192,10 @@ export const PLANS: Record<PlanId, Plan> = {
       aiEnrichments: 'unlimited',
       aiWriteActions: true,
       anomalyDetection: true,
+      analyticsRetentionDays: 'unlimited',
+      aiReports: 'unlimited',
+      savedReports: 'unlimited',
+      dataExports: 'unlimited',
     },
     features: [
       'Everything in Business',
