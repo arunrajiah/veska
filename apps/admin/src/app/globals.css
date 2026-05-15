@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@source "../../../src/**/*.{ts,tsx}";
+@source "../../**/*.{ts,tsx}";
 
 @layer base {
   :root {
@@ -22,6 +24,9 @@
 }
 
 @layer base {
-  * { @apply border-border; }
-  body { @apply bg-background text-foreground; }
+  * { border-color: hsl(var(--border)); }
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
 }
