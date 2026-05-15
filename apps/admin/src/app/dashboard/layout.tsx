@@ -50,6 +50,8 @@ import {
   LifeBuoy,
   BookOpen,
   GraduationCap,
+  DoorOpen,
+  Wrench,
 } from 'lucide-react';
 import NotificationBell from '@/components/notification-bell.js';
 
@@ -58,8 +60,16 @@ const NAV_SECTIONS = [
     label: null,
     items: [
       { href: '/dashboard', icon: LayoutDashboard, label: 'Overview' },
+      { href: '/dashboard/calendar', icon: CalendarDays, label: 'Calendar' },
       { href: '/dashboard/inbox', icon: Inbox, label: 'Inbox' },
       { href: '/dashboard/approvals', icon: CheckSquare, label: 'Approvals', badge: true },
+    ],
+  },
+  {
+    label: 'Workplace',
+    items: [
+      { href: '/dashboard/rooms', icon: DoorOpen, label: 'Rooms' },
+      { href: '/dashboard/facilities', icon: Wrench, label: 'Facilities' },
     ],
   },
   {
