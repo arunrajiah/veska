@@ -61,6 +61,7 @@ export function LoginClient() {
 
       if (data.token) {
         localStorage.setItem('veska_token', data.token);
+        document.cookie = `veska_session=${data.token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
         router.push('/dashboard');
       }
     } catch {
@@ -89,6 +90,7 @@ export function LoginClient() {
 
       if (data.token) {
         localStorage.setItem('veska_token', data.token);
+        document.cookie = `veska_session=${data.token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
         router.push('/dashboard');
       }
     } catch {

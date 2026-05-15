@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Send, CheckCircle, Download, Sparkles } from 'lucide-react';
+import { Send, CheckCircle, Download, Printer, Sparkles } from 'lucide-react';
 import type { InvoiceRecord } from './page.js';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
@@ -238,13 +238,14 @@ export function InvoiceDetailClient({
               {loading === 'paid' ? 'Saving…' : 'Mark as Paid'}
             </button>
           )}
-          <button
-            onClick={() => alert('PDF download not yet implemented')}
+          <Link
+            href={`/dashboard/finance/invoices/${record.id}/print`}
+            target="_blank"
             className="inline-flex items-center gap-1.5 text-sm px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
           >
-            <Download size={14} />
-            Download PDF
-          </button>
+            <Printer size={14} />
+            Print Invoice
+          </Link>
         </div>
       </div>
 

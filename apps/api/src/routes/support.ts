@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { eq, and, isNull, ilike, sql } from 'drizzle-orm';
 import { schema } from '@veska/core';
 import { sharedQueueService, sharedAuditService } from '../shared.js';
+import { broadcast } from './sse.js';
 import type { TenantContext } from '../middleware/tenant-context.js';
 
 export const supportRouter = new Hono<{ Variables: TenantContext }>();
@@ -77,6 +78,9 @@ supportRouter.post(
       .insert(schema.entityRecords)
       .values({ tenantId, entityType: 'Ticket', data, createdBy: identityId })
       .returning();
+
+    // Broadcast ticket creation to SSE subscribers
+    broadcast(tenantId, { type: 'ticket.created', payload: { id: record?.id } });
 
     return c.json(record, 201);
   },

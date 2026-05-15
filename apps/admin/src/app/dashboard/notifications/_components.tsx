@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Bell, Info, AlertTriangle, AlertCircle, CheckCircle, Sparkles } from 'lucide-react';
+import { useRealtimeEvents } from '@/hooks/useRealtimeEvents.js';
 import type { Notification } from './page.js';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
@@ -88,6 +89,13 @@ export function NotificationsClient({ initialNotifications }: { initialNotificat
   const [notifications, setNotifications] = useState(initialNotifications);
   const [filter, setFilter] = useState<FilterTab>('all');
   const [markingAll, setMarkingAll] = useState(false);
+
+  useRealtimeEvents((event) => {
+    if (event.type === 'notification') {
+      // Refresh server data to prepend the new notification
+      startTransition(() => router.refresh());
+    }
+  });
 
   const total = notifications.length;
   const unreadCount = notifications.filter((n) => !n.data.read).length;

@@ -1,0 +1,6 @@
+@media print {
+  .no-print { display: none !important; }
+  .print-only { display: block !important; }
+  body { background: white !important; }
+  @page { margin: 1cm; }
+}

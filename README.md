@@ -50,6 +50,29 @@ plugins/
 
 **Stack:** TypeScript · Hono · PostgreSQL 16 + pgvector · Drizzle ORM · BullMQ · Redis · Next.js 15 · Anthropic Claude
 
+## Docker
+
+Run the full stack (Postgres, Redis, API, Admin UI) with a single command:
+
+```bash
+cp .env.example .env          # fill in ANTHROPIC_API_KEY at minimum
+docker compose up --build
+```
+
+| Service | URL |
+|---|---|
+| API | http://localhost:3001 |
+| Admin UI | http://localhost:3000 |
+
+The compose file uses `develop.watch` for live reload during development — run `docker compose up --watch` to enable it.
+
+**Individual image builds** (from repo root, passing the full monorepo context):
+
+```bash
+docker build -f apps/api/Dockerfile   -t veska-api   .
+docker build -f apps/admin/Dockerfile -t veska-admin .
+```
+
 ## Quick start
 
 See **[SELF_HOSTING.md](SELF_HOSTING.md)** for the full guide.

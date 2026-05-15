@@ -59,6 +59,7 @@ import { portalRouter } from './routes/portal.js';
 import { portalMgmtRouter } from './routes/portal-mgmt.js';
 import { lmsRouter } from './routes/lms.js';
 import { eventsRouter } from './routes/events.js';
+import { sseRouter } from './routes/sse.js';
 import { roomsRouter } from './routes/rooms.js';
 import { facilitiesRouter } from './routes/facilities.js';
 import { productCatalogRouter } from './routes/product-catalog.js';
@@ -202,6 +203,7 @@ app.route('/api/v1/currencies', currenciesRouter);
 app.route('/api/v1/custom-fields', customFieldsRouter);
 app.route('/api/v1/recurring-invoices', recurringInvoicesRouter);
 app.route('/api/v1/invoices/email', invoiceEmailRouter);
+app.route('/api/v1/events', sseRouter);
 
 // ── Slack setup ───────────────────────────────────────────────
 const slackManager = new SlackAppManager({

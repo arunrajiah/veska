@@ -3,6 +3,7 @@ import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { sql } from 'drizzle-orm';
 import { sharedDb } from '../shared.js';
+import { broadcast } from './sse.js';
 import type { TenantContext } from '../middleware/tenant-context.js';
 
 export const notificationsRouter = new Hono<{ Variables: TenantContext }>();
@@ -113,7 +114,11 @@ notificationsRouter.post('/', zValidator('json', createNotificationSchema), asyn
       RETURNING *
     `);
 
-    const row = (result as unknown[])[0];
+    const row = (result as unknown as Record<string, unknown>[])[0];
+
+    // Broadcast to SSE subscribers
+    broadcast(tenantId, { type: 'notification', payload: { id: row?.['id'], ...body } });
+
     return c.json(row, 201);
   } catch (error) {
     return c.json({ error }, 500);

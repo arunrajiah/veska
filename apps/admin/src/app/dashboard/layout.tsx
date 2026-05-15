@@ -300,8 +300,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="px-4 py-3 border-t border-gray-100">
           <p className="text-xs text-gray-400">Veska</p>
           <Link
+            href="/dashboard/settings/account"
+            className="flex items-center gap-1.5 mt-2 text-xs text-slate-500 hover:text-slate-700 transition-colors"
+          >
+            <UserCog size={11} className="flex-shrink-0" />
+            Account Settings
+          </Link>
+          <Link
             href="/super-admin"
-            className="flex items-center gap-1.5 mt-2 text-xs text-slate-400 hover:text-slate-600 transition-colors"
+            className="flex items-center gap-1.5 mt-1.5 text-xs text-slate-400 hover:text-slate-600 transition-colors"
           >
             <Lock size={11} className="flex-shrink-0" />
             Super Admin
