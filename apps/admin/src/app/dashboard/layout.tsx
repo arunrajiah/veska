@@ -46,6 +46,7 @@ import {
   RefreshCw,
   Sliders,
   ShieldCheck,
+  FileSignature,
 } from 'lucide-react';
 import NotificationBell from '@/components/notification-bell.js';
 
@@ -99,6 +100,7 @@ const NAV_SECTIONS = [
   {
     label: 'Payroll',
     items: [
+      { href: '/dashboard/payroll', icon: Receipt, label: 'Payroll Runs' },
       { href: '/dashboard/payroll/runs', icon: DollarSign, label: 'Pay Runs' },
       { href: '/dashboard/payroll/payslips', icon: FileText, label: 'Payslips' },
     ],
@@ -147,6 +149,7 @@ const NAV_SECTIONS = [
   {
     label: 'Documents & Assets',
     items: [
+      { href: '/dashboard/contracts', icon: FileSignature, label: 'Contracts' },
       { href: '/dashboard/templates', icon: FileText, label: 'Templates' },
       { href: '/dashboard/assets', icon: Building2, label: 'Assets' },
     ],
