@@ -29,6 +29,7 @@ import {
   Clock,
   ClipboardList,
   TrendingUp,
+  Users2,
   BarChart3,
   PieChart,
   Activity,
@@ -60,10 +61,12 @@ const NAV_SECTIONS = [
   {
     label: 'CRM',
     items: [
+      { href: '/dashboard/crm', icon: Users2, label: 'CRM Dashboard' },
       { href: '/dashboard/crm/leads', icon: Users, label: 'Leads' },
       { href: '/dashboard/crm/contacts', icon: Users, label: 'Contacts' },
       { href: '/dashboard/crm/companies', icon: Building2, label: 'Companies' },
       { href: '/dashboard/crm/deals', icon: Briefcase, label: 'Deals' },
+      { href: '/dashboard/crm/stages', icon: Briefcase, label: 'Stages' },
     ],
   },
   {
@@ -127,7 +130,7 @@ const NAV_SECTIONS = [
   {
     label: 'Time',
     items: [
-      { href: '/dashboard/time', icon: Clock, label: 'Overview' },
+      { href: '/dashboard/time', icon: Clock, label: 'Time Tracking' },
       { href: '/dashboard/time/entries', icon: ClipboardList, label: 'Time Entries' },
     ],
   },
