@@ -47,6 +47,7 @@ import {
   Sliders,
   ShieldCheck,
   FileSignature,
+  LifeBuoy,
 } from 'lucide-react';
 import NotificationBell from '@/components/notification-bell.js';
 
@@ -72,7 +73,10 @@ const NAV_SECTIONS = [
   },
   {
     label: 'Support',
-    items: [{ href: '/dashboard/support/tickets', icon: Ticket, label: 'Tickets' }],
+    items: [
+      { href: '/dashboard/support/tickets', icon: Ticket, label: 'Tickets' },
+      { href: '/dashboard/service-desk', icon: LifeBuoy, label: 'Service Desk' },
+    ],
   },
   {
     label: 'Finance',
@@ -118,6 +122,7 @@ const NAV_SECTIONS = [
     label: 'Purchasing',
     items: [
       { href: '/dashboard/purchasing/vendors', icon: Truck, label: 'Vendors' },
+      { href: '/dashboard/vendors', icon: Truck, label: 'Vendor Management' },
       { href: '/dashboard/purchasing/orders', icon: ShoppingCart, label: 'Purchase Orders' },
       { href: '/dashboard/purchasing/grn', icon: PackageCheck, label: 'Received (GRN)' },
     ],
