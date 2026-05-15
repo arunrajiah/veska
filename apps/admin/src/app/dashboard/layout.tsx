@@ -48,6 +48,8 @@ import {
   ShieldCheck,
   FileSignature,
   LifeBuoy,
+  BookOpen,
+  GraduationCap,
 } from 'lucide-react';
 import NotificationBell from '@/components/notification-bell.js';
 
@@ -149,6 +151,13 @@ const NAV_SECTIONS = [
       { href: '/dashboard/reports/inventory', icon: BarChart3, label: 'Inventory' },
       { href: '/dashboard/reports/hr', icon: PieChart, label: 'HR' },
       { href: '/dashboard/reports/projects', icon: Activity, label: 'Projects' },
+    ],
+  },
+  {
+    label: 'Knowledge',
+    items: [
+      { href: '/dashboard/kb', icon: BookOpen, label: 'Knowledge Base' },
+      { href: '/dashboard/lms', icon: GraduationCap, label: 'Learning & Dev' },
     ],
   },
   {
