@@ -1,5 +1,5 @@
-import RunForm from './run-form.js';
+import { redirect } from 'next/navigation';
 
-export default function NewPayRunPage() {
-  return <RunForm />;
+export default function NewPayrollRunPage() {
+  redirect('/dashboard/payroll/runs?new=true');
 }

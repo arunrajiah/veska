@@ -1,5 +1,5 @@
-import VendorForm from './vendor-form.js';
+import { redirect } from 'next/navigation';
 
 export default function NewVendorPage() {
-  return <VendorForm />;
+  redirect('/dashboard/purchasing/vendors?new=true');
 }

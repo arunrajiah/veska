@@ -1,51 +1,47 @@
+import Link from 'next/link';
 import { apiFetch } from '@/lib/api.js';
-import { TicketDetailClient } from './_components.js';
+import { ServiceDeskDetailClient } from './_components.js';
 
-export interface TicketComment {
+export interface ServiceDeskDetail {
   id: string;
-  body?: string;
-  author?: string;
-  isInternal?: boolean;
-  createdAt?: string;
+  data: {
+    requestNumber?: string;
+    title?: string;
+    description?: string;
+    type?: 'incident' | 'service_request' | 'change' | 'problem';
+    status?: 'new' | 'assigned' | 'in_progress' | 'pending' | 'resolved' | 'closed';
+    priority?: string;
+    requestorName?: string;
+    assignedTo?: string;
+    sla?: string;
+    dueBy?: string;
+    resolution?: string;
+    createdAt?: string;
+    updatedAt?: string;
+  };
 }
 
-export interface TicketDetail {
-  id: string;
-  number?: string;
-  title?: string;
-  description?: string;
-  category?: string;
-  priority?: string;
-  status?: string;
-  requestedBy?: string;
-  assignedTo?: string;
-  slaHours?: number;
-  slaBreached?: boolean;
-  slaDueAt?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  comments?: TicketComment[];
-}
-
-export default async function TicketDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ServiceDeskDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const tenantId = process.env.VESKA_TENANT_ID ?? 'demo-tenant';
+  const tenantId = 'demo-tenant';
 
-  let ticket: TicketDetail | null = null;
-
+  let item: ServiceDeskDetail | null = null;
   try {
-    ticket = await apiFetch<TicketDetail>(`/service-desk/tickets/${id}`, tenantId);
+    item = await apiFetch<ServiceDeskDetail>(`/api/v1/service-desk/${id}`, tenantId);
   } catch {
-    ticket = null;
+    item = null;
   }
 
-  if (!ticket) {
+  if (!item) {
     return (
-      <div className="px-8 py-16 text-center">
-        <p className="text-gray-500">Ticket not found.</p>
+      <div className="px-8 py-8 max-w-4xl">
+        <Link href="/dashboard/service-desk" className="text-xs text-gray-400 hover:text-gray-700">
+          ← Service Desk
+        </Link>
+        <p className="text-gray-500 text-sm mt-4">Request not found.</p>
       </div>
     );
   }
 
-  return <TicketDetailClient ticket={ticket} />;
+  return <ServiceDeskDetailClient item={item} />;
 }

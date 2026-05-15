@@ -1,128 +1,84 @@
 'use client';
 
-import { useState, useTransition, useEffect, useRef } from 'react';
+import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  LifeBuoy,
-  AlertCircle,
-  Clock,
-  CheckCircle2,
-  MessageSquare,
-  Plus,
-  X,
-  Search,
-  Filter,
-  User,
-} from 'lucide-react';
-import type { Ticket, ServiceDeskSummary } from './page.js';
+import { Plus, X, AlertCircle, Clock, CheckCircle2 } from 'lucide-react';
+import type { ServiceDeskItem } from './page.js';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
-const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
+const TENANT_ID = 'demo-tenant';
 
-const PRIORITY_COLORS: Record<string, string> = {
-  critical: 'bg-red-100 text-red-700',
-  high: 'bg-orange-100 text-orange-700',
-  medium: 'bg-yellow-100 text-yellow-700',
-  low: 'bg-gray-100 text-gray-500',
-};
+function apiHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'X-Veska-Tenant-Id': TENANT_ID,
+    'X-Veska-Identity-Id': process.env.NEXT_PUBLIC_ADMIN_IDENTITY_ID ?? 'admin',
+  };
+}
 
-const PRIORITY_DOTS: Record<string, string> = {
-  critical: 'bg-red-500',
-  high: 'bg-orange-500',
-  medium: 'bg-yellow-400',
-  low: 'bg-gray-400',
+const TYPE_COLORS: Record<string, string> = {
+  incident: 'bg-red-100 text-red-700',
+  service_request: 'bg-blue-100 text-blue-700',
+  change: 'bg-purple-100 text-purple-700',
+  problem: 'bg-orange-100 text-orange-700',
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  open: 'bg-blue-50 text-blue-700',
-  in_progress: 'bg-indigo-50 text-indigo-700',
-  waiting: 'bg-purple-50 text-purple-700',
+  new: 'bg-blue-50 text-blue-700',
+  assigned: 'bg-indigo-50 text-indigo-700',
+  in_progress: 'bg-yellow-50 text-yellow-700',
+  pending: 'bg-purple-50 text-purple-700',
   resolved: 'bg-green-50 text-green-700',
   closed: 'bg-gray-100 text-gray-500',
 };
 
-const CATEGORY_ICONS: Record<string, React.ReactNode> = {
-  it: <AlertCircle size={14} className="text-blue-500" />,
-  hr: <User size={14} className="text-violet-500" />,
-  facilities: <LifeBuoy size={14} className="text-teal-500" />,
-  finance: <CheckCircle2 size={14} className="text-green-500" />,
-  other: <MessageSquare size={14} className="text-gray-400" />,
+const PRIORITY_COLORS: Record<string, string> = {
+  low: 'bg-gray-100 text-gray-500',
+  medium: 'bg-blue-100 text-blue-600',
+  high: 'bg-orange-100 text-orange-700',
+  critical: 'bg-red-100 text-red-700',
 };
 
-function fmtDate(d?: string) {
-  if (!d) return '—';
-  return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+function isSlaBreached(item: ServiceDeskItem): boolean {
+  const d = item.data;
+  if (d.status === 'resolved' || d.status === 'closed') return false;
+  if (!d.dueBy) return false;
+  return new Date(d.dueBy).getTime() < Date.now();
 }
 
-function StatusBadge({ status }: { status?: string }) {
-  const s = status ?? 'open';
-  const label = s.replace(/_/g, ' ');
-  return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[s] ?? 'bg-gray-100 text-gray-600'}`}>
-      {label}
-    </span>
-  );
-}
-
-function PriorityBadge({ priority }: { priority?: string }) {
-  const p = priority ?? 'medium';
-  return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${PRIORITY_COLORS[p] ?? 'bg-gray-100 text-gray-600'}`}>
-      {p}
-    </span>
-  );
-}
-
-function SlaIndicator({ ticket }: { ticket: Ticket }) {
-  if (ticket.slaBreached) {
+function SlaChip({ item }: { item: ServiceDeskItem }) {
+  const d = item.data;
+  if (!d.dueBy) return <span className="text-xs text-gray-300">—</span>;
+  const ms = new Date(d.dueBy).getTime() - Date.now();
+  const breached = isSlaBreached(item);
+  if (breached) {
     return (
       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
-        <AlertCircle size={10} />
-        SLA Breached
+        <AlertCircle size={10} /> Breached
       </span>
     );
   }
-  if (ticket.slaDueAt) {
-    const ms = new Date(ticket.slaDueAt).getTime() - Date.now();
-    const hours = Math.ceil(ms / (1000 * 60 * 60));
-    if (hours <= 0) {
-      return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
-          <AlertCircle size={10} />
-          Overdue
-        </span>
-      );
-    }
-    if (hours <= 4) {
-      return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
-          <Clock size={10} />
-          {hours}h left
-        </span>
-      );
-    }
+  const hours = Math.ceil(ms / (1000 * 60 * 60));
+  if (hours <= 4) {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700">
-        <CheckCircle2 size={10} />
-        {hours}h left
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
+        <Clock size={10} /> {hours}h left
       </span>
     );
   }
-  return <span className="text-xs text-gray-400">—</span>;
+  return (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700">
+      <CheckCircle2 size={10} /> {hours}h left
+    </span>
+  );
 }
 
-// --- New Ticket Slide-Over ---
-function NewTicketSlideOver({
-  open,
-  onClose,
-  onSaved,
-}: {
-  open: boolean;
-  onClose: () => void;
-  onSaved: () => void;
-}) {
+// ─── New Request Slide-Over ───────────────────────────────────────────────────
+function NewRequestSlideOver({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const router = useRouter();
+  const [, startTransition] = useTransition();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -132,23 +88,23 @@ function NewTicketSlideOver({
     const body = {
       title: fd.get('title') as string,
       description: (fd.get('description') as string) || undefined,
-      category: fd.get('category') as string,
+      type: fd.get('type') as string,
       priority: fd.get('priority') as string,
-      requestedBy: (fd.get('requestedBy') as string) || undefined,
-      assignedTo: (fd.get('assignedTo') as string) || undefined,
-      slaHours: fd.get('slaHours') ? Number(fd.get('slaHours')) : undefined,
+      requestorName: (fd.get('requestorName') as string) || undefined,
+      sla: (fd.get('sla') as string) || undefined,
+      status: 'new',
     };
     try {
-      const res = await fetch(`${API_BASE}/service-desk/tickets`, {
+      const res = await fetch(`${API_BASE}/api/v1/service-desk`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-tenant-id': TENANT_ID },
+        headers: apiHeaders(),
         body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error(await res.text());
-      onSaved();
       onClose();
+      startTransition(() => router.refresh());
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create ticket');
+      setError(err instanceof Error ? err.message : 'Failed to create request');
     } finally {
       setSaving(false);
     }
@@ -161,7 +117,7 @@ function NewTicketSlideOver({
       <div className="fixed inset-0 bg-black/30" onClick={onClose} />
       <div className="relative bg-white w-full max-w-lg h-full overflow-y-auto shadow-xl flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-          <h2 className="text-base font-semibold text-gray-900">New ticket</h2>
+          <h2 className="text-base font-semibold text-gray-900">New Service Request</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
         </div>
         <form onSubmit={(e) => void handleSubmit(e)} className="flex-1 px-6 py-5 space-y-4">
@@ -177,19 +133,18 @@ function NewTicketSlideOver({
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Category *</label>
-              <select name="category" required defaultValue="it"
+              <label className="block text-xs font-medium text-gray-700 mb-1">Type *</label>
+              <select name="type" required defaultValue="incident"
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900">
-                <option value="it">IT</option>
-                <option value="hr">HR</option>
-                <option value="facilities">Facilities</option>
-                <option value="finance">Finance</option>
-                <option value="other">Other</option>
+                <option value="incident">Incident</option>
+                <option value="service_request">Service Request</option>
+                <option value="change">Change</option>
+                <option value="problem">Problem</option>
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Priority *</label>
-              <select name="priority" required defaultValue="medium"
+              <label className="block text-xs font-medium text-gray-700 mb-1">Priority</label>
+              <select name="priority" defaultValue="medium"
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900">
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
@@ -198,28 +153,21 @@ function NewTicketSlideOver({
               </select>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Requested by</label>
-              <input name="requestedBy"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Assigned to</label>
-              <input name="assignedTo"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
-            </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Requestor Name</label>
+            <input name="requestorName"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">SLA hours</label>
-            <input name="slaHours" type="number" min="1" defaultValue={24}
+            <label className="block text-xs font-medium text-gray-700 mb-1">SLA (e.g. 4h, 1d)</label>
+            <input name="sla" placeholder="e.g. 4h"
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
           </div>
           {error && <p className="text-xs text-red-500">{error}</p>}
           <div className="flex gap-3 pt-2">
             <button type="submit" disabled={saving}
               className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
-              {saving ? 'Creating…' : 'Create ticket'}
+              {saving ? 'Creating…' : 'Create Request'}
             </button>
             <button type="button" onClick={onClose}
               className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors">
@@ -232,381 +180,157 @@ function NewTicketSlideOver({
   );
 }
 
-// --- Ticket Detail Modal (Board view) ---
-function TicketModal({ ticket, onClose }: { ticket: Ticket; onClose: () => void }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="fixed inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative bg-white rounded-xl shadow-xl p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto">
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              {ticket.number && (
-                <span className="font-mono text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">#{ticket.number}</span>
-              )}
-              <PriorityBadge priority={ticket.priority} />
-              <StatusBadge status={ticket.status} />
-            </div>
-            <h3 className="text-base font-semibold text-gray-900">{ticket.title ?? '—'}</h3>
-          </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 ml-4"><X size={18} /></button>
-        </div>
-        {ticket.description && (
-          <p className="text-sm text-gray-600 mb-4">{ticket.description}</p>
-        )}
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          <div>
-            <p className="text-xs text-gray-400 mb-0.5">Category</p>
-            <p className="text-gray-700 capitalize">{ticket.category ?? '—'}</p>
-          </div>
-          <div>
-            <p className="text-xs text-gray-400 mb-0.5">Requested by</p>
-            <p className="text-gray-700">{ticket.requestedBy ?? '—'}</p>
-          </div>
-          <div>
-            <p className="text-xs text-gray-400 mb-0.5">Assigned to</p>
-            <p className="text-gray-700">{ticket.assignedTo ?? '—'}</p>
-          </div>
-          <div>
-            <p className="text-xs text-gray-400 mb-0.5">SLA</p>
-            <SlaIndicator ticket={ticket} />
-          </div>
-          <div>
-            <p className="text-xs text-gray-400 mb-0.5">Created</p>
-            <p className="text-gray-700">{fmtDate(ticket.createdAt)}</p>
-          </div>
-        </div>
-        <div className="mt-4 pt-4 border-t border-gray-100 text-right">
-          <a href={`/dashboard/service-desk/${ticket.id}`}
-            className="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
-            Open full detail →
-          </a>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// --- List View ---
-function ListView({
-  tickets,
-  onRefresh,
-}: {
-  tickets: Ticket[];
-  onRefresh: () => void;
-}) {
+// ─── Main Client ──────────────────────────────────────────────────────────────
+export function ServiceDeskListClient({ items }: { items: ServiceDeskItem[] }) {
   const router = useRouter();
-  const [, startTransition] = useTransition();
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [priorityFilter, setPriorityFilter] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
   const [showNew, setShowNew] = useState(false);
-  const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
 
-  useEffect(() => {
-    if (searchTimer.current) clearTimeout(searchTimer.current);
-    searchTimer.current = setTimeout(() => setDebouncedSearch(search), 300);
-    return () => { if (searchTimer.current) clearTimeout(searchTimer.current); };
-  }, [search]);
+  const total = items.length;
+  const newCount = items.filter((i) => i.data.status === 'new').length;
+  const inProgressCount = items.filter((i) => i.data.status === 'in_progress').length;
+  const slaBreached = items.filter(isSlaBreached).length;
 
-  const filtered = tickets.filter((t) => {
-    if (debouncedSearch) {
-      const q = debouncedSearch.toLowerCase();
-      if (
-        !t.title?.toLowerCase().includes(q) &&
-        !t.number?.toLowerCase().includes(q) &&
-        !t.requestedBy?.toLowerCase().includes(q)
-      ) return false;
-    }
-    if (statusFilter && t.status !== statusFilter) return false;
-    if (priorityFilter && t.priority !== priorityFilter) return false;
-    if (categoryFilter && t.category !== categoryFilter) return false;
+  const filtered = items.filter((item) => {
+    if (statusFilter !== 'all' && item.data.status !== statusFilter) return false;
+    if (typeFilter !== 'all' && item.data.type !== typeFilter) return false;
     return true;
   });
 
-  async function closeTicket(id: string) {
-    if (!confirm('Close this ticket?')) return;
-    setActionLoading(`${id}-close`);
-    try {
-      await fetch(`${API_BASE}/service-desk/tickets/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'x-tenant-id': TENANT_ID },
-        body: JSON.stringify({ status: 'closed' }),
-      });
-      startTransition(() => { router.refresh(); onRefresh(); });
-    } finally {
-      setActionLoading(null);
-    }
-  }
-
-  async function assignTicket(id: string, assignee: string) {
-    setActionLoading(`${id}-assign`);
-    try {
-      await fetch(`${API_BASE}/service-desk/tickets/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'x-tenant-id': TENANT_ID },
-        body: JSON.stringify({ assignedTo: assignee, status: 'in_progress' }),
-      });
-      startTransition(() => { router.refresh(); onRefresh(); });
-    } finally {
-      setActionLoading(null);
-    }
-  }
-
-  return (
-    <>
-      {/* Filter bar */}
-      <div className="flex items-center gap-3 mb-4">
-        <div className="relative flex-1 max-w-xs">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search tickets…"
-            className="w-full border border-gray-200 rounded-lg pl-8 pr-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
-          />
-        </div>
-        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-          className="border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900">
-          <option value="">All statuses</option>
-          {['open', 'in_progress', 'waiting', 'resolved', 'closed'].map((s) => (
-            <option key={s} value={s}>{s.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}</option>
-          ))}
-        </select>
-        <select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)}
-          className="border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900">
-          <option value="">All priorities</option>
-          {['critical', 'high', 'medium', 'low'].map((p) => (
-            <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>
-          ))}
-        </select>
-        <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}
-          className="border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900">
-          <option value="">All categories</option>
-          {['it', 'hr', 'facilities', 'finance', 'other'].map((c) => (
-            <option key={c} value={c}>{c.toUpperCase()}</option>
-          ))}
-        </select>
-        <button onClick={() => setShowNew(true)}
-          className="ml-auto flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
-          <Plus size={15} />
-          New ticket
-        </button>
-      </div>
-
-      {filtered.length === 0 ? (
-        <div className="bg-white border border-gray-200 rounded-xl px-8 py-16 text-center">
-          <LifeBuoy size={32} className="mx-auto mb-3 text-gray-300" />
-          <p className="text-gray-400 text-sm">No tickets found.</p>
-        </div>
-      ) : (
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-100 bg-gray-50">
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Number</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Title</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Category</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Priority</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Requested by</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Assigned to</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">SLA</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Created</th>
-                <th className="px-4 py-3" />
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((t) => (
-                <tr key={t.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
-                  <td className="px-4 py-3">
-                    <span className="font-mono text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
-                      #{t.number ?? t.id.slice(0, 6).toUpperCase()}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <a href={`/dashboard/service-desk/${t.id}`}
-                      className="font-medium text-gray-900 hover:underline">
-                      {t.title ?? '—'}
-                    </a>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-1.5">
-                      {CATEGORY_ICONS[t.category ?? 'other'] ?? CATEGORY_ICONS.other}
-                      <span className="text-xs text-gray-600 uppercase">{t.category ?? '—'}</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3"><PriorityBadge priority={t.priority} /></td>
-                  <td className="px-4 py-3"><StatusBadge status={t.status} /></td>
-                  <td className="px-4 py-3 text-xs text-gray-600">{t.requestedBy ?? '—'}</td>
-                  <td className="px-4 py-3 text-xs text-gray-600">{t.assignedTo ?? '—'}</td>
-                  <td className="px-4 py-3"><SlaIndicator ticket={t} /></td>
-                  <td className="px-4 py-3 text-xs text-gray-400">{fmtDate(t.createdAt)}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-1">
-                      <a href={`/dashboard/service-desk/${t.id}`}
-                        className="text-xs text-gray-500 hover:text-gray-900 px-2 py-1 rounded hover:bg-gray-100">
-                        View
-                      </a>
-                      {t.status !== 'closed' && t.status !== 'resolved' && (
-                        <button
-                          onClick={() => void closeTicket(t.id)}
-                          disabled={actionLoading !== null}
-                          className="text-xs text-gray-500 hover:text-gray-900 px-2 py-1 rounded hover:bg-gray-100 disabled:opacity-50">
-                          Close
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {showNew && (
-        <NewTicketSlideOver
-          open={showNew}
-          onClose={() => setShowNew(false)}
-          onSaved={() => { startTransition(() => { router.refresh(); onRefresh(); }); }}
-        />
-      )}
-    </>
-  );
-}
-
-// --- Board View (Kanban) ---
-const BOARD_COLUMNS = [
-  { key: 'open', label: 'Open', color: 'bg-blue-50 border-blue-200' },
-  { key: 'in_progress', label: 'In Progress', color: 'bg-indigo-50 border-indigo-200' },
-  { key: 'waiting', label: 'Waiting', color: 'bg-purple-50 border-purple-200' },
-  { key: 'resolved', label: 'Resolved', color: 'bg-green-50 border-green-200' },
-] as const;
-
-function BoardView({ tickets }: { tickets: Ticket[] }) {
-  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
-
-  return (
-    <>
-      <div className="grid grid-cols-4 gap-4">
-        {BOARD_COLUMNS.map((col) => {
-          const colTickets = tickets.filter((t) => (t.status ?? 'open') === col.key);
-          return (
-            <div key={col.key} className={`rounded-xl border ${col.color} p-3 min-h-80`}>
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wider">{col.label}</h3>
-                <span className="text-xs font-bold text-gray-500 bg-white/70 px-2 py-0.5 rounded-full">{colTickets.length}</span>
-              </div>
-              <div className="space-y-2">
-                {colTickets.map((t) => (
-                  <button
-                    key={t.id}
-                    onClick={() => setSelectedTicket(t)}
-                    className="w-full text-left bg-white rounded-lg border border-gray-200 p-3 hover:shadow-sm transition-shadow">
-                    <div className="flex items-center gap-1.5 mb-1.5">
-                      <span className={`w-2 h-2 rounded-full flex-shrink-0 ${PRIORITY_DOTS[t.priority ?? 'medium'] ?? 'bg-gray-400'}`} />
-                      <span className="font-mono text-xs text-gray-400">#{t.number ?? t.id.slice(0, 6).toUpperCase()}</span>
-                    </div>
-                    <p className="text-xs font-medium text-gray-900 leading-snug line-clamp-2 mb-2">{t.title ?? '—'}</p>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs text-gray-400 uppercase">{t.category ?? '—'}</span>
-                      {t.slaBreached && (
-                        <span className="ml-auto inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">
-                          <AlertCircle size={9} />
-                          SLA
-                        </span>
-                      )}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {selectedTicket && (
-        <TicketModal ticket={selectedTicket} onClose={() => setSelectedTicket(null)} />
-      )}
-    </>
-  );
-}
-
-// --- Main Client Component ---
-export function ServiceDeskClient({
-  tickets: initialTickets,
-  summary,
-}: {
-  tickets: Ticket[];
-  summary: ServiceDeskSummary;
-}) {
-  const [view, setView] = useState<'list' | 'board'>('list');
-  const [tickets, setTickets] = useState(initialTickets);
-
-  const open = summary.open ?? tickets.filter((t) => t.status === 'open').length;
-  const inProgress = summary.inProgress ?? tickets.filter((t) => t.status === 'in_progress').length;
-  const resolvedToday = summary.resolvedToday ?? 0;
-  const slaBreached = summary.slaBreached ?? tickets.filter((t) => t.slaBreached).length;
+  const STATUS_TABS = ['all', 'new', 'assigned', 'in_progress', 'pending', 'resolved'] as const;
 
   return (
     <div className="px-8 py-8 max-w-7xl">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
-            <LifeBuoy size={22} className="text-gray-600" />
-            Service Desk
-          </h1>
-          <p className="text-sm text-gray-500 mt-0.5">{tickets.length} ticket{tickets.length !== 1 ? 's' : ''}</p>
+          <h1 className="text-2xl font-semibold text-gray-900">Service Desk</h1>
+          <p className="text-sm text-gray-500 mt-0.5">{total} requests</p>
         </div>
-        {/* View toggle */}
-        <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
-          <button
-            onClick={() => setView('list')}
-            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${view === 'list' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
-            List
-          </button>
-          <button
-            onClick={() => setView('board')}
-            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${view === 'board' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
-            Board
-          </button>
-        </div>
+        <button
+          onClick={() => setShowNew(true)}
+          className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+        >
+          <Plus size={15} />
+          New Request
+        </button>
       </div>
 
-      {/* Summary bar */}
-      <div className="flex flex-wrap gap-3 mb-6">
-        <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl">
-          <span className="w-2 h-2 rounded-full bg-blue-500" />
-          <span className="text-sm text-gray-600">Open</span>
-          <span className="text-sm font-bold text-gray-900">{open}</span>
-        </div>
-        <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl">
-          <span className="w-2 h-2 rounded-full bg-indigo-500" />
-          <span className="text-sm text-gray-600">In Progress</span>
-          <span className="text-sm font-bold text-gray-900">{inProgress}</span>
-        </div>
-        <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl">
-          <CheckCircle2 size={14} className="text-green-500" />
-          <span className="text-sm text-gray-600">Resolved today</span>
-          <span className="text-sm font-bold text-gray-900">{resolvedToday}</span>
-        </div>
-        <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border ${slaBreached > 0 ? 'bg-red-50 border-red-200' : 'bg-white border-gray-200'}`}>
-          <AlertCircle size={14} className={slaBreached > 0 ? 'text-red-500' : 'text-gray-400'} />
-          <span className={`text-sm ${slaBreached > 0 ? 'text-red-700' : 'text-gray-600'}`}>SLA Breached</span>
-          <span className={`text-sm font-bold ${slaBreached > 0 ? 'text-red-700' : 'text-gray-900'}`}>{slaBreached}</span>
-        </div>
+      {/* Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+        {[
+          { label: 'Total Requests', value: total, color: 'text-gray-900' },
+          { label: 'New', value: newCount, color: 'text-blue-600' },
+          { label: 'In Progress', value: inProgressCount, color: 'text-yellow-600' },
+          { label: 'SLA Breached', value: slaBreached, color: slaBreached > 0 ? 'text-red-600' : 'text-gray-400' },
+        ].map((s) => (
+          <div key={s.label} className="bg-white border border-gray-200 rounded-xl px-5 py-4 shadow-sm">
+            <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
+            <p className="text-xs text-gray-500 mt-0.5">{s.label}</p>
+          </div>
+        ))}
       </div>
 
-      {view === 'list' && (
-        <ListView tickets={tickets} onRefresh={() => setTickets(initialTickets)} />
+      {/* Filters */}
+      <div className="flex items-center gap-3 mb-5 flex-wrap">
+        <div className="flex gap-1 flex-wrap">
+          {STATUS_TABS.map((s) => (
+            <button
+              key={s}
+              onClick={() => setStatusFilter(s)}
+              className={`text-xs px-3 py-1.5 rounded-full border transition-colors capitalize ${
+                statusFilter === s
+                  ? 'bg-gray-900 text-white border-gray-900'
+                  : 'border-gray-200 text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              {s.replace(/_/g, ' ')}
+            </button>
+          ))}
+        </div>
+        <select
+          value={typeFilter}
+          onChange={(e) => setTypeFilter(e.target.value)}
+          className="ml-auto border border-gray-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+        >
+          <option value="all">All Types</option>
+          <option value="incident">Incident</option>
+          <option value="service_request">Service Request</option>
+          <option value="change">Change</option>
+          <option value="problem">Problem</option>
+        </select>
+      </div>
+
+      {/* Table */}
+      {filtered.length === 0 ? (
+        <div className="bg-white border border-gray-200 rounded-xl px-8 py-16 text-center shadow-sm">
+          <p className="text-gray-400 text-sm">No requests found.</p>
+        </div>
+      ) : (
+        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-100 bg-gray-50">
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">#</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Title</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Type</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Priority</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Requestor</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Assigned To</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">SLA Due</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">SLA</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((item) => {
+                const d = item.data;
+                return (
+                  <tr
+                    key={item.id}
+                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 cursor-pointer"
+                    onClick={() => router.push(`/dashboard/service-desk/${item.id}`)}
+                  >
+                    <td className="px-4 py-3">
+                      <span className="font-mono text-xs text-gray-400">
+                        {d.requestNumber ?? item.id.slice(0, 8).toUpperCase()}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 max-w-xs">
+                      <span className="font-medium text-gray-900 truncate block">{d.title ?? '—'}</span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${TYPE_COLORS[d.type ?? ''] ?? 'bg-gray-100 text-gray-600'}`}>
+                        {(d.type ?? '—').replace(/_/g, ' ')}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${PRIORITY_COLORS[d.priority ?? 'medium'] ?? 'bg-gray-100 text-gray-600'}`}>
+                        {d.priority ?? '—'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[d.status ?? 'new'] ?? 'bg-gray-100 text-gray-600'}`}>
+                        {(d.status ?? 'new').replace(/_/g, ' ')}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-xs text-gray-500">{d.requestorName ?? '—'}</td>
+                    <td className="px-4 py-3 text-xs text-gray-500">{d.assignedTo ?? '—'}</td>
+                    <td className="px-4 py-3 text-xs text-gray-400">
+                      {d.dueBy ? new Date(d.dueBy).toLocaleString() : '—'}
+                    </td>
+                    <td className="px-4 py-3">
+                      <SlaChip item={item} />
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       )}
-      {view === 'board' && (
-        <BoardView tickets={tickets} />
-      )}
+
+      <NewRequestSlideOver open={showNew} onClose={() => setShowNew(false)} />
     </div>
   );
 }

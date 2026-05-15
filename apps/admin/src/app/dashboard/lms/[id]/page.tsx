@@ -1,34 +1,29 @@
+import Link from 'next/link';
 import { apiFetch } from '@/lib/api.js';
 import { CourseDetailClient } from './_components.js';
-import type { LMSCourse, LMSEnrollment } from '../page.js';
+import type { Course } from '../page.js';
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const tenantId = process.env.VESKA_TENANT_ID ?? 'demo-tenant';
+  const tenantId = 'demo-tenant';
 
-  let course: LMSCourse | null = null;
-  let enrollments: LMSEnrollment[] = [];
-
+  let course: Course | null = null;
   try {
-    course = await apiFetch<LMSCourse>(`/lms/courses/${id}`, tenantId);
+    course = await apiFetch<Course>(`/api/v1/lms/${id}`, tenantId);
   } catch {
     course = null;
   }
 
-  try {
-    const res = await apiFetch<LMSEnrollment[]>(`/lms/enrollments?courseId=${id}`, tenantId);
-    enrollments = Array.isArray(res) ? res : [];
-  } catch {
-    enrollments = [];
-  }
-
   if (!course) {
     return (
-      <div className="px-8 py-16 text-center">
-        <p className="text-gray-500">Course not found.</p>
+      <div className="px-8 py-8 max-w-4xl">
+        <Link href="/dashboard/lms" className="text-xs text-gray-400 hover:text-gray-700">
+          ← LMS
+        </Link>
+        <p className="text-gray-500 text-sm mt-4">Course not found.</p>
       </div>
     );
   }
 
-  return <CourseDetailClient course={course} enrollments={enrollments} />;
+  return <CourseDetailClient course={course} />;
 }

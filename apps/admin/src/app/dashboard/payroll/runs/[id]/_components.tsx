@@ -1,69 +1,78 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+const TENANT_ID = 'demo-tenant';
 
-interface StatusButtonsProps {
-  runId: string;
-  tenantId: string;
-  currentStatus: string;
+function apiHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'X-Veska-Tenant-Id': TENANT_ID,
+    'X-Veska-Identity-Id': process.env.NEXT_PUBLIC_ADMIN_IDENTITY_ID ?? 'admin',
+  };
 }
 
-export function StatusButtons({ runId, tenantId, currentStatus }: StatusButtonsProps) {
+export function ProcessRunButton({ runId, status }: { runId: string; status: string }) {
   const router = useRouter();
-  const [loading, setLoading] = useState<string | null>(null);
+  const [, startTransition] = useTransition();
+  const [loading, setLoading] = useState(false);
 
-  async function transition(status: string) {
-    setLoading(status);
+  if (status !== 'draft') return null;
+
+  async function handleProcess() {
+    setLoading(true);
     try {
-      await fetch(`${API_BASE}/api/v1/payroll/runs/${runId}`, {
+      await fetch(`${API_BASE}/api/v1/payroll/runs/${runId}/process`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Veska-Tenant-Id': tenantId,
-          'X-Veska-Identity-Id': process.env.NEXT_PUBLIC_ADMIN_IDENTITY_ID ?? 'admin',
-        },
-        body: JSON.stringify({ status }),
+        headers: apiHeaders(),
       });
-      router.refresh();
+      startTransition(() => router.refresh());
     } finally {
-      setLoading(null);
+      setLoading(false);
     }
   }
 
-  if (currentStatus === 'completed' || currentStatus === 'cancelled') {
-    return null;
+  return (
+    <button
+      onClick={() => void handleProcess()}
+      disabled={loading}
+      className="bg-blue-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+    >
+      {loading ? 'Processing…' : 'Process Run'}
+    </button>
+  );
+}
+
+export function DownloadCSVButton({ runId, payslips }: { runId: string; payslips: Array<{ employeeName?: string; grossPay?: number; tax?: number; netPay?: number; status?: string }> }) {
+  function handleDownload() {
+    const rows = [
+      ['Employee', 'Gross Pay', 'Tax', 'Net Pay', 'Status'],
+      ...payslips.map((p) => [
+        p.employeeName ?? '',
+        String(p.grossPay ?? 0),
+        String(p.tax ?? 0),
+        String(p.netPay ?? 0),
+        p.status ?? '',
+      ]),
+    ];
+    const csv = rows.map((r) => r.map((c) => `"${c}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `payroll-run-${runId}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   return (
-    <div className="flex gap-2">
-      {currentStatus === 'draft' && (
-        <button
-          onClick={() => void transition('processing')}
-          disabled={loading !== null}
-          className="text-sm px-4 py-2 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 transition-colors disabled:opacity-50"
-        >
-          {loading === 'processing' ? 'Processing…' : 'Process'}
-        </button>
-      )}
-      {currentStatus === 'processing' && (
-        <button
-          onClick={() => void transition('completed')}
-          disabled={loading !== null}
-          className="text-sm px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors disabled:opacity-50"
-        >
-          {loading === 'completed' ? 'Completing…' : 'Complete'}
-        </button>
-      )}
-      <button
-        onClick={() => void transition('cancelled')}
-        disabled={loading !== null}
-        className="text-sm px-4 py-2 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
-      >
-        {loading === 'cancelled' ? 'Cancelling…' : 'Cancel'}
-      </button>
-    </div>
+    <button
+      onClick={handleDownload}
+      className="border border-gray-200 text-gray-700 text-sm px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+    >
+      Download CSV
+    </button>
   );
 }

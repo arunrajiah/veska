@@ -1,5 +1,5 @@
-import ProjectForm from './project-form.js';
+import { redirect } from 'next/navigation';
 
 export default function NewProjectPage() {
-  return <ProjectForm />;
+  redirect('/dashboard/projects?new=true');
 }

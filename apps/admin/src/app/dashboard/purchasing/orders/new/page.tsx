@@ -1,5 +1,5 @@
-import OrderForm from './order-form.js';
+import { redirect } from 'next/navigation';
 
 export default function NewOrderPage() {
-  return <OrderForm />;
+  redirect('/dashboard/purchasing/orders?new=true');
 }
