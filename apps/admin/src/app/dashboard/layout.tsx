@@ -45,6 +45,7 @@ import {
   Globe,
   RefreshCw,
   Sliders,
+  ShieldCheck,
 } from 'lucide-react';
 import NotificationBell from '@/components/notification-bell.js';
 
@@ -151,6 +152,13 @@ const NAV_SECTIONS = [
     ],
   },
   {
+    label: 'Platform',
+    items: [
+      { href: '/dashboard/integrations', icon: Plug, label: 'Integrations' },
+      { href: '/dashboard/settings/privacy', icon: ShieldCheck, label: 'Privacy & GDPR' },
+    ],
+  },
+  {
     label: 'Developer',
     items: [
       { href: '/dashboard/developer/api-keys', icon: Key, label: 'API Keys' },
@@ -172,7 +180,6 @@ const NAV_SECTIONS = [
       { href: '/dashboard/config', icon: Wand2, label: 'Config AI' },
       { href: '/dashboard/workflows', icon: GitBranch, label: 'Workflows' },
       { href: '/dashboard/settings/approvals', icon: GitBranch, label: 'Approval Chains' },
-      { href: '/dashboard/integrations', icon: Plug, label: 'Integrations' },
       { href: '/dashboard/webhooks', icon: Bell, label: 'Webhooks' },
       { href: '/dashboard/settings/notifications', icon: Bell, label: 'Notifications' },
       { href: '/dashboard/settings/currency', icon: Globe, label: 'Currency' },
