@@ -55,6 +55,7 @@ import {
   Wrench,
   Lock,
   Brain,
+  Zap,
 } from 'lucide-react';
 import NotificationBell from '@/components/notification-bell.js';
 
@@ -255,6 +256,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             >
               <BarChart2 size={15} className="flex-shrink-0" />
               Analytics
+            </Link>
+            <Link
+              href="/dashboard/workflows"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+            >
+              <Zap size={15} className="flex-shrink-0" />
+              Workflows
             </Link>
             <Link
               href="/dashboard/notifications"

@@ -3,6 +3,7 @@
 export type JobName =
   | 'process.inbound_message'
   | 'workflow.execute_step'
+  | 'workflow.test_run'
   | 'channel.send_message'
   | 'magic_link.prune_expired'
   | 'ai.enrich_entity'
@@ -72,9 +73,16 @@ export interface PortalSendInviteJob {
   portalUrl: string;
 }
 
+export interface WorkflowTestRunJob {
+  tenantId: string;
+  workflowId: string;
+  triggeredBy: 'manual_test';
+}
+
 export type JobPayload<T extends JobName> =
   T extends 'process.inbound_message' ? InboundMessageJob :
   T extends 'workflow.execute_step' ? WorkflowStepJob :
+  T extends 'workflow.test_run' ? WorkflowTestRunJob :
   T extends 'channel.send_message' ? SendMessageJob :
   T extends 'ai.enrich_entity' ? EnrichEntityJob :
   T extends 'ai.anomaly_summary' ? AnomalySummaryJob :
