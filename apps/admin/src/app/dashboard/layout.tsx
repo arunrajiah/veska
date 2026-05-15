@@ -52,6 +52,7 @@ import {
   GraduationCap,
   DoorOpen,
   Wrench,
+  Lock,
 } from 'lucide-react';
 import NotificationBell from '@/components/notification-bell.js';
 
@@ -103,6 +104,7 @@ const NAV_SECTIONS = [
     label: 'Sales',
     items: [
       { href: '/dashboard/sales/orders', icon: ShoppingBag, label: 'Orders' },
+      { href: '/dashboard/catalog', icon: ShoppingBag, label: 'Product Catalog' },
     ],
   },
   {
@@ -272,6 +274,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         <div className="px-4 py-3 border-t border-gray-100">
           <p className="text-xs text-gray-400">Veska</p>
+          <Link
+            href="/super-admin"
+            className="flex items-center gap-1.5 mt-2 text-xs text-slate-400 hover:text-slate-600 transition-colors"
+          >
+            <Lock size={11} className="flex-shrink-0" />
+            Super Admin
+          </Link>
         </div>
       </aside>
 
