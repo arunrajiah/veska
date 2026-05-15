@@ -145,6 +145,13 @@ const NAV_SECTIONS = [
     ],
   },
   {
+    label: 'Documents & Assets',
+    items: [
+      { href: '/dashboard/templates', icon: FileText, label: 'Templates' },
+      { href: '/dashboard/assets', icon: Building2, label: 'Assets' },
+    ],
+  },
+  {
     label: 'Developer',
     items: [
       { href: '/dashboard/developer/api-keys', icon: Key, label: 'API Keys' },
