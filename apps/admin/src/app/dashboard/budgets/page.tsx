@@ -1,23 +1,33 @@
-import Link from 'next/link';
-import { Plus } from 'lucide-react';
 import { apiFetch } from '@/lib/api.js';
 import { BudgetsClient } from './_components.js';
 
 export interface Budget {
   id: string;
-  name: string;
+  name?: string;
   description?: string;
-  fiscalYear: number;
-  period: 'annual' | 'quarterly' | 'monthly';
+  fiscalYear?: number;
+  period?: 'annual' | 'quarterly' | 'monthly';
   quarter?: number;
   month?: number;
-  currency: string;
-  status: 'draft' | 'approved' | 'active' | 'closed';
-  createdAt: string;
+  currency?: string;
+  status?: 'draft' | 'approved' | 'active' | 'closed';
+  createdAt?: string;
   updatedAt?: string;
-  // legacy shape fallback
+  // generic entity shape fallback
   entityType?: string;
-  data?: Record<string, unknown>;
+  data?: {
+    name?: string;
+    category?: string;
+    period?: string;
+    totalBudget?: number;
+    spent?: number;
+    status?: string;
+    currency?: string;
+    year?: number;
+    quarter?: number;
+    month?: number;
+    [key: string]: unknown;
+  };
 }
 
 export interface BudgetSummary {
@@ -27,48 +37,46 @@ export interface BudgetSummary {
   activeBudgets: Array<{ id: string; name: string }>;
 }
 
-export default async function BudgetsPage() {
-  const tenantId = process.env.VESKA_TENANT_ID ?? '';
+async function fetchBudgets(tenantId: string): Promise<Budget[]> {
+  try {
+    const res = await apiFetch<Budget[] | { data: Budget[] }>(
+      '/api/v1/budgets?limit=20',
+      tenantId,
+    );
+    return Array.isArray(res) ? res : (res as { data: Budget[] }).data ?? [];
+  } catch {
+    return [];
+  }
+}
 
-  let budgets: Budget[] = [];
-  let summary: BudgetSummary = {
-    totalBudgeted: 0,
-    totalActuals: 0,
-    utilizationPct: 0,
-    activeBudgets: [],
+async function fetchSummary(tenantId: string): Promise<BudgetSummary> {
+  try {
+    return await apiFetch<BudgetSummary>('/api/v1/budgets/summary', tenantId);
+  } catch {
+    return { totalBudgeted: 0, totalActuals: 0, utilizationPct: 0, activeBudgets: [] };
+  }
+}
+
+export default async function BudgetsPage() {
+  const tenantId = process.env.VESKA_TENANT_ID ?? 'demo-tenant';
+  const [budgets, summary] = await Promise.all([
+    fetchBudgets(tenantId),
+    fetchSummary(tenantId),
+  ]);
+
+  // Compute derived summary from budget data if API didn't provide it
+  const derivedSummary: BudgetSummary = {
+    totalBudgeted: summary.totalBudgeted || budgets.reduce((s, b) => {
+      const v = b.data?.totalBudget ?? 0;
+      return s + (typeof v === 'number' ? v : parseFloat(String(v)) || 0);
+    }, 0),
+    totalActuals: summary.totalActuals || budgets.reduce((s, b) => {
+      const v = b.data?.spent ?? 0;
+      return s + (typeof v === 'number' ? v : parseFloat(String(v)) || 0);
+    }, 0),
+    utilizationPct: summary.utilizationPct ?? 0,
+    activeBudgets: summary.activeBudgets ?? [],
   };
 
-  try {
-    const res = await apiFetch<Budget[] | { data: Budget[] }>('/api/v1/budgets', tenantId);
-    budgets = Array.isArray(res) ? res : (res as { data: Budget[] }).data ?? [];
-  } catch {
-    budgets = [];
-  }
-
-  try {
-    const res = await apiFetch<BudgetSummary>('/api/v1/budgets/summary', tenantId);
-    summary = res;
-  } catch {
-    // keep defaults
-  }
-
-  return (
-    <div className="px-8 py-8 max-w-6xl">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Budgets</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{budgets.length} budget{budgets.length !== 1 ? 's' : ''}</p>
-        </div>
-        <Link
-          href="/dashboard/budgets/new"
-          className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
-        >
-          <Plus size={15} />
-          New budget
-        </Link>
-      </div>
-
-      <BudgetsClient budgets={budgets} summary={summary} />
-    </div>
-  );
+  return <BudgetsClient budgets={budgets} summary={derivedSummary} tenantId={tenantId} />;
 }

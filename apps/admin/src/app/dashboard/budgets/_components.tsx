@@ -1,80 +1,96 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Plus, PieChart, TrendingUp, TrendingDown } from 'lucide-react';
+import { Plus, X, PieChart, TrendingUp, TrendingDown } from 'lucide-react';
 import type { Budget, BudgetSummary } from './page.js';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
-function fmt(amount: number, currency = 'USD') {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);
-}
-
-function StatusBadge({ status }: { status?: string }) {
-  const map: Record<string, string> = {
-    draft: 'bg-gray-100 text-gray-600',
-    approved: 'bg-blue-50 text-blue-700',
-    active: 'bg-green-50 text-green-700',
-    closed: 'bg-gray-100 text-gray-500',
+function authHeaders(tenantId: string): HeadersInit {
+  return {
+    'Content-Type': 'application/json',
+    'X-Veska-Tenant-Id': tenantId,
+    'X-Veska-Identity-Id': process.env.NEXT_PUBLIC_ADMIN_IDENTITY_ID ?? 'admin',
   };
-  const cls = map[status ?? ''] ?? 'bg-gray-100 text-gray-600';
-  return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${cls}`}>
-      {status ?? 'draft'}
-    </span>
-  );
 }
 
-function PeriodBadge({ budget }: { budget: Budget }) {
-  const period = budget.period ?? (budget.data?.['period'] as string) ?? 'annual';
-  const year = budget.fiscalYear ?? (budget.data?.['year'] as number) ?? new Date().getFullYear();
-  const quarter = budget.quarter ?? (budget.data?.['quarter'] as number);
-  const month = budget.month ?? (budget.data?.['month'] as number);
+function fmt(value: unknown, currency = 'USD'): string {
+  const num = typeof value === 'number' ? value : parseFloat(String(value ?? '0'));
+  if (isNaN(num)) return '$0.00';
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(num);
+}
 
-  let label = `${period} ${year}`;
-  if (period === 'quarterly' && quarter) label = `Q${quarter} ${year}`;
-  if (period === 'monthly' && month) {
-    const d = new Date(year, month - 1);
-    label = `${d.toLocaleString('en-US', { month: 'short' })} ${year}`;
-  }
+function getBudgetName(b: Budget): string {
+  return b.name ?? b.data?.name ?? '—';
+}
 
+function getBudgetCategory(b: Budget): string {
+  return (b.data?.category as string) ?? '—';
+}
+
+function getBudgetPeriod(b: Budget): string {
+  return b.period ?? (b.data?.period as string) ?? 'annual';
+}
+
+function getBudgetAllocated(b: Budget): number {
+  const v = b.data?.totalBudget ?? 0;
+  return typeof v === 'number' ? v : parseFloat(String(v)) || 0;
+}
+
+function getBudgetSpent(b: Budget): number {
+  const v = b.data?.spent ?? 0;
+  return typeof v === 'number' ? v : parseFloat(String(v)) || 0;
+}
+
+function getBudgetStatus(b: Budget): string {
+  return b.status ?? (b.data?.status as string) ?? 'draft';
+}
+
+function getBudgetCurrency(b: Budget): string {
+  return b.currency ?? (b.data?.currency as string) ?? 'USD';
+}
+
+const STATUS_COLORS: Record<string, string> = {
+  draft: 'bg-gray-100 text-gray-600',
+  approved: 'bg-blue-50 text-blue-700',
+  active: 'bg-green-50 text-green-700',
+  closed: 'bg-gray-100 text-gray-500',
+};
+
+function ProgressBar({ pct }: { pct: number }) {
+  const color = pct > 90 ? 'bg-red-500' : pct > 70 ? 'bg-yellow-400' : 'bg-green-500';
   return (
-    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 capitalize">
-      {label}
-    </span>
+    <div className="flex items-center gap-2">
+      <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+        <div
+          className={`h-full rounded-full transition-all ${color}`}
+          style={{ width: `${Math.min(pct, 100)}%` }}
+        />
+      </div>
+      <span className="text-xs text-gray-500 w-10 text-right">{pct.toFixed(0)}%</span>
+    </div>
   );
 }
 
 // ---------------------------------------------------------------------------
-// New Budget Slide-over / Modal Form
+// New Budget Slide-over
 // ---------------------------------------------------------------------------
-const PERIODS = [
-  { value: 'annual', label: 'Annual' },
-  { value: 'quarterly', label: 'Quarterly' },
-  { value: 'monthly', label: 'Monthly' },
-];
-
-interface NewBudgetFormProps {
-  tenantId?: string;
+interface NewBudgetSlideoverProps {
+  tenantId: string;
   onClose: () => void;
   onCreated: (b: Budget) => void;
 }
 
-function NewBudgetForm({ onClose, onCreated }: NewBudgetFormProps) {
-  const curYear = new Date().getFullYear();
+function NewBudgetSlideover({ tenantId, onClose, onCreated }: NewBudgetSlideoverProps) {
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState('');
   const [form, setForm] = useState({
     name: '',
-    description: '',
-    fiscalYear: String(curYear),
-    period: 'annual',
-    quarter: '',
-    month: '',
-    currency: 'USD',
-    status: 'draft',
+    category: '',
+    totalBudget: '',
+    period: 'monthly',
+    notes: '',
   });
 
   const set = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -82,34 +98,32 @@ function NewBudgetForm({ onClose, onCreated }: NewBudgetFormProps) {
     setForm((p) => ({ ...p, [name]: value }));
   };
 
-  const submit = async () => {
-    if (!form.name.trim()) { setError('Name is required.'); return; }
-    setSaving(true); setError(null);
+  const handleSubmit = async (ev: React.FormEvent) => {
+    ev.preventDefault();
+    if (!form.name.trim()) { setError('Name is required'); return; }
+    if (!form.totalBudget || isNaN(parseFloat(form.totalBudget))) { setError('Valid budget amount is required'); return; }
+    setSaving(true);
+    setError('');
     try {
-      const body: Record<string, unknown> = {
+      const body = {
         name: form.name,
-        description: form.description || undefined,
-        fiscalYear: Number(form.fiscalYear),
+        category: form.category || undefined,
+        totalBudget: parseFloat(form.totalBudget),
         period: form.period,
-        currency: form.currency,
-        status: form.status,
+        notes: form.notes || undefined,
+        status: 'draft',
+        spent: 0,
       };
-      if (form.period === 'quarterly' && form.quarter) body.quarter = Number(form.quarter);
-      if (form.period === 'monthly' && form.month) body.month = Number(form.month);
-
       const res = await fetch(`${API_BASE}/api/v1/budgets`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-tenant-id': 'demo-tenant',
-        },
+        headers: authHeaders(tenantId),
         body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error(await res.text());
       const created = await res.json() as Budget;
       onCreated(created);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong.');
+      setError(err instanceof Error ? err.message : 'Failed to create budget');
     } finally {
       setSaving(false);
     }
@@ -119,93 +133,75 @@ function NewBudgetForm({ onClose, onCreated }: NewBudgetFormProps) {
     <div className="fixed inset-0 z-50 flex">
       <div className="absolute inset-0 bg-black/30" onClick={onClose} />
       <div className="relative ml-auto w-full max-w-md bg-white h-full overflow-y-auto shadow-2xl flex flex-col">
-        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
           <h2 className="text-sm font-semibold text-gray-900">New Budget</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-700 text-xl leading-none">&times;</button>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-700">
+            <X size={18} />
+          </button>
         </div>
 
-        <div className="flex-1 divide-y divide-gray-50 overflow-y-auto">
-          {[
-            { id: 'name', label: 'Name *', type: 'text', placeholder: 'e.g. FY2026 Marketing' },
-            { id: 'description', label: 'Description', type: 'text', placeholder: 'Optional description' },
-          ].map(({ id, label, placeholder }) => (
-            <div key={id} className="px-5 py-3">
-              <label className="block text-xs text-gray-500 mb-1">{label}</label>
+        <form id="new-budget-form" onSubmit={(e) => void handleSubmit(e)} className="flex-1 overflow-y-auto divide-y divide-gray-50">
+          <div className="px-5 py-4 space-y-3">
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Name *</label>
               <input
-                name={id}
-                type="text"
-                value={(form as Record<string, string>)[id]}
+                name="name"
+                value={form.name}
                 onChange={set}
-                placeholder={placeholder}
+                required
+                placeholder="e.g. Q2 Marketing"
                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400"
               />
             </div>
-          ))}
-
-          <div className="px-5 py-3">
-            <label className="block text-xs text-gray-500 mb-1">Fiscal Year</label>
-            <input
-              name="fiscalYear"
-              type="number"
-              min="2000"
-              max="2100"
-              value={form.fiscalYear}
-              onChange={set}
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400"
-            />
-          </div>
-
-          <div className="px-5 py-3">
-            <label className="block text-xs text-gray-500 mb-1">Period</label>
-            <select name="period" value={form.period} onChange={set}
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 bg-white">
-              {PERIODS.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
-            </select>
-          </div>
-
-          {form.period === 'quarterly' && (
-            <div className="px-5 py-3">
-              <label className="block text-xs text-gray-500 mb-1">Quarter</label>
-              <select name="quarter" value={form.quarter} onChange={set}
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 bg-white">
-                <option value="">Select quarter</option>
-                {[1,2,3,4].map(q => <option key={q} value={q}>Q{q}</option>)}
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Category</label>
+              <input
+                name="category"
+                value={form.category}
+                onChange={set}
+                placeholder="e.g. Marketing, Engineering"
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Total Budget *</label>
+              <input
+                name="totalBudget"
+                type="number"
+                min="0"
+                step="0.01"
+                value={form.totalBudget}
+                onChange={set}
+                required
+                placeholder="0.00"
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Period</label>
+              <select
+                name="period"
+                value={form.period}
+                onChange={set}
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 bg-white"
+              >
+                <option value="monthly">Monthly</option>
+                <option value="quarterly">Quarterly</option>
+                <option value="annual">Annual</option>
               </select>
             </div>
-          )}
-
-          {form.period === 'monthly' && (
-            <div className="px-5 py-3">
-              <label className="block text-xs text-gray-500 mb-1">Month</label>
-              <select name="month" value={form.month} onChange={set}
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 bg-white">
-                <option value="">Select month</option>
-                {['January','February','March','April','May','June','July','August','September','October','November','December'].map((m, i) => (
-                  <option key={i+1} value={i+1}>{m}</option>
-                ))}
-              </select>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Notes</label>
+              <textarea
+                name="notes"
+                value={form.notes}
+                onChange={set}
+                rows={3}
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 resize-none"
+              />
             </div>
-          )}
-
-          <div className="px-5 py-3">
-            <label className="block text-xs text-gray-500 mb-1">Currency</label>
-            <select name="currency" value={form.currency} onChange={set}
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 bg-white">
-              {['USD','EUR','GBP','INR','CAD','AUD'].map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
           </div>
-
-          <div className="px-5 py-3">
-            <label className="block text-xs text-gray-500 mb-1">Status</label>
-            <select name="status" value={form.status} onChange={set}
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 bg-white">
-              <option value="draft">Draft</option>
-              <option value="approved">Approved</option>
-              <option value="active">Active</option>
-              <option value="closed">Closed</option>
-            </select>
-          </div>
-        </div>
+        </form>
 
         {error && (
           <div className="px-5 py-2 bg-red-50 border-t border-red-100">
@@ -213,14 +209,22 @@ function NewBudgetForm({ onClose, onCreated }: NewBudgetFormProps) {
           </div>
         )}
 
-        <div className="px-5 py-4 border-t border-gray-100 flex items-center justify-end gap-3">
-          <button onClick={onClose} disabled={saving}
-            className="text-sm px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50">
+        <div className="px-5 py-4 border-t border-gray-100 flex justify-end gap-3 sticky bottom-0 bg-white">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={saving}
+            className="text-sm px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+          >
             Cancel
           </button>
-          <button onClick={() => void submit()} disabled={saving}
-            className="text-sm px-4 py-2 rounded-lg bg-gray-900 text-white hover:bg-gray-700 transition-colors disabled:opacity-50">
-            {saving ? 'Creating…' : 'Create budget'}
+          <button
+            type="submit"
+            form="new-budget-form"
+            disabled={saving}
+            className="text-sm px-4 py-2 rounded-lg bg-gray-900 text-white hover:bg-gray-700 transition-colors disabled:opacity-50"
+          >
+            {saving ? 'Creating…' : 'Create Budget'}
           </button>
         </div>
       </div>
@@ -234,172 +238,149 @@ function NewBudgetForm({ onClose, onCreated }: NewBudgetFormProps) {
 export function BudgetsClient({
   budgets: initialBudgets,
   summary,
+  tenantId,
 }: {
   budgets: Budget[];
   summary: BudgetSummary;
+  tenantId: string;
 }) {
-  const router = useRouter();
   const [budgets, setBudgets] = useState(initialBudgets);
-  const [showForm, setShowForm] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [showNew, setShowNew] = useState(false);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Delete this budget?')) return;
-    setDeletingId(id);
-    try {
-      const res = await fetch(`${API_BASE}/api/v1/budgets/${id}`, {
-        method: 'DELETE',
-        headers: { 'x-tenant-id': 'demo-tenant' },
-      });
-      if (res.ok) setBudgets((prev) => prev.filter((b) => b.id !== id));
-    } finally {
-      setDeletingId(null);
-    }
-  };
-
-  const util = summary.utilizationPct ?? 0;
-  const utilColor = util >= 100 ? 'text-red-600' : util >= 80 ? 'text-yellow-600' : 'text-green-700';
+  // Compute stats
+  const totalAllocated = budgets.reduce((s, b) => s + getBudgetAllocated(b), 0) || summary.totalBudgeted;
+  const totalSpent = budgets.reduce((s, b) => s + getBudgetSpent(b), 0) || summary.totalActuals;
+  const utilPct = totalAllocated > 0 ? (totalSpent / totalAllocated) * 100 : summary.utilizationPct;
+  const utilColor = utilPct >= 90 ? 'text-red-600' : utilPct >= 70 ? 'text-yellow-600' : 'text-green-700';
 
   return (
-    <>
-      {showForm && (
-        <NewBudgetForm
-          onClose={() => setShowForm(false)}
+    <div className="px-8 py-8 max-w-6xl">
+      {showNew && (
+        <NewBudgetSlideover
+          tenantId={tenantId}
+          onClose={() => setShowNew(false)}
           onCreated={(b) => {
             setBudgets((prev) => [b, ...prev]);
-            setShowForm(false);
+            setShowNew(false);
           }}
         />
       )}
 
-      {/* Summary bar */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-semibold text-gray-900">Budgets</h1>
+        <button
+          onClick={() => setShowNew(true)}
+          className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+        >
+          <Plus size={15} />
+          New Budget
+        </button>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-4 gap-4 mb-6">
         <div className="bg-white border border-gray-200 rounded-xl px-5 py-4">
           <div className="flex items-center gap-2 mb-1">
-            <PieChart size={14} className="text-gray-400" />
-            <p className="text-xs text-gray-500">Total Budgeted</p>
+            <PieChart size={13} className="text-gray-400" />
+            <p className="text-xs text-gray-500">Total Budgets</p>
           </div>
-          <p className="text-2xl font-semibold text-gray-900">{fmt(summary.totalBudgeted ?? 0)}</p>
-          <p className="text-xs text-gray-400 mt-0.5">across {budgets.length} budget{budgets.length !== 1 ? 's' : ''}</p>
+          <p className="text-xl font-semibold text-gray-900">{budgets.length}</p>
         </div>
         <div className="bg-white border border-gray-200 rounded-xl px-5 py-4">
           <div className="flex items-center gap-2 mb-1">
-            <TrendingUp size={14} className="text-gray-400" />
-            <p className="text-xs text-gray-500">Total Actuals</p>
+            <TrendingUp size={13} className="text-gray-400" />
+            <p className="text-xs text-gray-500">Total Allocated</p>
           </div>
-          <p className="text-2xl font-semibold text-gray-900">{fmt(summary.totalActuals ?? 0)}</p>
-          <p className="text-xs text-gray-400 mt-0.5">actual spend to date</p>
+          <p className="text-xl font-semibold text-gray-900">{fmt(totalAllocated)}</p>
         </div>
         <div className="bg-white border border-gray-200 rounded-xl px-5 py-4">
           <div className="flex items-center gap-2 mb-1">
-            {util >= 100 ? <TrendingDown size={14} className="text-red-400" /> : <TrendingUp size={14} className="text-green-400" />}
-            <p className="text-xs text-gray-500">Utilization</p>
+            <TrendingDown size={13} className="text-gray-400" />
+            <p className="text-xs text-gray-500">Total Spent</p>
           </div>
-          <p className={`text-2xl font-semibold ${utilColor}`}>{util.toFixed(1)}%</p>
+          <p className="text-xl font-semibold text-gray-900">{fmt(totalSpent)}</p>
+        </div>
+        <div className="bg-white border border-gray-200 rounded-xl px-5 py-4">
+          <p className="text-xs text-gray-500 mb-1">% Utilization</p>
+          <p className={`text-xl font-semibold ${utilColor}`}>{utilPct.toFixed(1)}%</p>
           <div className="mt-2 h-1.5 bg-gray-100 rounded-full overflow-hidden">
             <div
-              className={`h-full rounded-full ${util >= 100 ? 'bg-red-500' : util >= 80 ? 'bg-yellow-400' : 'bg-green-500'}`}
-              style={{ width: `${Math.min(util, 100)}%` }}
+              className={`h-full rounded-full ${utilPct >= 90 ? 'bg-red-500' : utilPct >= 70 ? 'bg-yellow-400' : 'bg-green-500'}`}
+              style={{ width: `${Math.min(utilPct, 100)}%` }}
             />
           </div>
         </div>
-      </div>
-
-      {/* Active budgets badges */}
-      {summary.activeBudgets && summary.activeBudgets.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-6">
-          <span className="text-xs text-gray-500 self-center">Active:</span>
-          {summary.activeBudgets.map((ab) => (
-            <Link
-              key={ab.id}
-              href={`/dashboard/budgets/${ab.id}`}
-              className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 hover:bg-green-100 transition-colors"
-            >
-              {ab.name}
-            </Link>
-          ))}
-        </div>
-      )}
-
-      {/* Quick-add button */}
-      <div className="flex items-center justify-between mb-4">
-        <p className="text-sm text-gray-500">{budgets.length} budget{budgets.length !== 1 ? 's' : ''}</p>
-        <button
-          onClick={() => setShowForm(true)}
-          className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
-        >
-          <Plus size={14} /> Quick add
-        </button>
       </div>
 
       {/* Table */}
       {budgets.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-xl px-8 py-16 text-center">
           <p className="text-gray-400 text-sm">No budgets yet.</p>
-          <Link
-            href="/dashboard/budgets/new"
+          <button
+            onClick={() => setShowNew(true)}
             className="mt-4 inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900"
           >
-            <Plus size={14} /> Create your first budget
-          </Link>
+            <Plus size={14} /> Create first budget
+          </button>
         </div>
       ) : (
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Name</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Fiscal Year</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Budget Name</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Category</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Period</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Allocated</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Spent</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Remaining</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 w-36">Progress</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Currency</th>
-                <th className="px-4 py-3 text-xs font-medium text-gray-500 text-right">Actions</th>
+                <th className="px-4 py-3" />
               </tr>
             </thead>
             <tbody>
               {budgets.map((b) => {
-                const name = b.name ?? (b.data?.['name'] as string) ?? '—';
-                const year = b.fiscalYear ?? (b.data?.['year'] as number) ?? '—';
-                const status = b.status ?? (b.data?.['status'] as string) ?? 'draft';
-                const currency = b.currency ?? (b.data?.['currency'] as string) ?? 'USD';
+                const allocated = getBudgetAllocated(b);
+                const spent = getBudgetSpent(b);
+                const remaining = allocated - spent;
+                const pct = allocated > 0 ? (spent / allocated) * 100 : 0;
+                const currency = getBudgetCurrency(b);
+                const status = getBudgetStatus(b);
                 return (
                   <tr key={b.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
                     <td className="px-4 py-3">
-                      <p className="font-medium text-gray-900">{name}</p>
-                      {b.description && (
-                        <p className="text-xs text-gray-400 mt-0.5 truncate max-w-xs">{b.description}</p>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-gray-500 text-xs">{year}</td>
-                    <td className="px-4 py-3">
-                      <PeriodBadge budget={b} />
+                      <p className="font-medium text-gray-900">{getBudgetName(b)}</p>
                     </td>
                     <td className="px-4 py-3">
-                      <StatusBadge status={status} />
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 capitalize">
+                        {getBudgetCategory(b)}
+                      </span>
                     </td>
-                    <td className="px-4 py-3 text-gray-500 text-xs">{currency}</td>
+                    <td className="px-4 py-3 text-xs text-gray-500 capitalize">{getBudgetPeriod(b)}</td>
+                    <td className="px-4 py-3 text-right text-gray-900">{fmt(allocated, currency)}</td>
+                    <td className="px-4 py-3 text-right text-gray-900">{fmt(spent, currency)}</td>
+                    <td className={`px-4 py-3 text-right font-medium ${remaining < 0 ? 'text-red-600' : 'text-gray-900'}`}>
+                      {fmt(remaining, currency)}
+                    </td>
+                    <td className="px-4 py-3 w-36">
+                      <ProgressBar pct={pct} />
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-600'}`}
+                      >
+                        {status}
+                      </span>
+                    </td>
                     <td className="px-4 py-3 text-right">
-                      <div className="flex items-center gap-2 justify-end">
-                        <Link
-                          href={`/dashboard/budgets/${b.id}`}
-                          className="text-xs text-gray-500 hover:text-gray-900 px-2 py-1 rounded hover:bg-gray-100"
-                        >
-                          View
-                        </Link>
-                        <Link
-                          href={`/dashboard/budgets/${b.id}`}
-                          className="text-xs text-blue-500 hover:text-blue-700 px-2 py-1 rounded hover:bg-blue-50"
-                        >
-                          Edit
-                        </Link>
-                        <button
-                          onClick={() => void handleDelete(b.id)}
-                          disabled={deletingId === b.id}
-                          className="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50 disabled:opacity-40"
-                        >
-                          {deletingId === b.id ? '…' : 'Delete'}
-                        </button>
-                      </div>
+                      <Link
+                        href={`/dashboard/budgets/${b.id}`}
+                        className="text-xs text-gray-500 hover:text-gray-900"
+                      >
+                        View →
+                      </Link>
                     </td>
                   </tr>
                 );
@@ -408,6 +389,6 @@ export function BudgetsClient({
           </table>
         </div>
       )}
-    </>
+    </div>
   );
 }
