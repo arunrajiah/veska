@@ -33,7 +33,6 @@ import {
   BarChart3,
   PieChart,
   Activity,
-  PiggyBank,
   DollarSign,
   FileText,
   PackageCheck,
@@ -79,7 +78,7 @@ const NAV_SECTIONS = [
       { href: '/dashboard/finance/invoices', icon: Receipt, label: 'Invoices' },
       { href: '/dashboard/finance/recurring', icon: RefreshCw, label: 'Recurring' },
       { href: '/dashboard/expenses', icon: Receipt, label: 'Expenses' },
-      { href: '/dashboard/budgets', icon: PiggyBank, label: 'Budgets' },
+      { href: '/dashboard/budgets', icon: PieChart, label: 'Budgets' },
     ],
   },
   {
@@ -183,6 +182,7 @@ const NAV_SECTIONS = [
       { href: '/dashboard/channels', icon: Radio, label: 'Channels' },
       { href: '/dashboard/settings/security', icon: Shield, label: 'Security' },
       { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
+      { href: '/dashboard/status', icon: Activity, label: 'Status' },
     ],
   },
 ];
