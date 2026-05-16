@@ -66,6 +66,8 @@ import { productCatalogRouter } from './routes/product-catalog.js';
 import { tenantSettingsRouter } from './routes/tenant-settings.js';
 import { taxRatesRouter } from './routes/tax-rates.js';
 import { emailLogRouter } from './routes/email-log.js';
+import { inboundChannelsRouter } from './routes/inbound-channels.js';
+import { setupRouter } from './routes/setup.js';
 import { registerEmailWorker } from './workers/email-worker.js';
 import { standardLimit, aiLimit, authLimit } from '@veska-cloud/rate-limit';
 import { tenantContext } from './middleware/tenant-context.js';
@@ -101,6 +103,14 @@ app.route('/health', healthRouter);
 app.route('/api/v1/tenants', tenantsRouter);
 app.route('/ml', magicLinksRouter);
 app.route('/portal', portalRouter);
+
+// Inbound channel webhooks — authenticate via signing secrets, NOT Bearer tokens.
+// Must be mounted BEFORE the requireSession() middleware on the `api` sub-app.
+app.route('/api/v1/channels/inbound', inboundChannelsRouter);
+
+// Magic link creation (POST) is also available as a session-protected API route
+// via the api sub-app below (/api/v1 → magic-links).
+// The /ml prefix is kept for token verification (public, no auth required).
 
 // Inbound channel webhooks — enqueue for async processing
 app.post('/webhooks/email', async (c) => {
@@ -203,6 +213,8 @@ api.route('/privacy', dataPrivacyRouter);
 api.route('/audit', auditRouter);
 api.route('/webhooks', webhooksRouter);
 api.route('/api-keys', apiKeysRouter);
+api.route('/magic-links', magicLinksRouter);
+api.route('/setup', setupRouter);
 app.route('/api/v1', api);
 app.route('/api/v1/users', usersRouter);
 app.route('/api/v1/roles', rolesRouter);

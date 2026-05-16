@@ -255,7 +255,11 @@ function useUserPermissions(): string[] {
   }, []);
 }
 
-export function SidebarNav() {
+interface SidebarNavProps {
+  onAIClick?: () => void;
+}
+
+export function SidebarNav({ onAIClick }: SidebarNavProps) {
   const userPermissions = useUserPermissions();
   const isAdmin = userPermissions.includes('*');
 
@@ -272,15 +276,17 @@ export function SidebarNav() {
 
   return (
     <nav className="flex-1 overflow-y-auto py-3 px-2">
-      {/* AI Assistant — pinned at top */}
+      {/* AI Assistant — pinned at top, opens floating panel */}
       <div className="mb-4 space-y-1">
-        <Link
-          href="/dashboard/ai"
-          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors"
+        <button
+          onClick={onAIClick}
+          type="button"
+          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors"
         >
           <Bot size={15} className="flex-shrink-0 text-indigo-600" />
           AI Assistant
-        </Link>
+          <span className="ml-auto text-xs font-normal text-indigo-400">⌘K</span>
+        </button>
         <Link
           href="/dashboard/analytics"
           className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
