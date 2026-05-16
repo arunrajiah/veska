@@ -171,26 +171,110 @@ importExportRouter.post('/import/employees', async (c) => {
     const text = await file.text();
     const rows = parseCSV(text);
     let imported = 0;
+    let skipped = 0;
     const errors: string[] = [];
 
     for (const row of rows) {
+      const name = (row['name'] ?? '').trim();
+      const email = (row['email'] ?? '').trim();
+
+      if (!name || !email) {
+        skipped++;
+        continue;
+      }
+
+      const parts = name.split(' ');
+      const firstName = parts[0] ?? name;
+      const lastName = parts.slice(1).join(' ') || '';
+
       try {
         await db.insert(schema.entityRecords).values({
           id: randomUUID(),
           tenantId,
           entityType: 'employee',
-          data: row,
+          data: {
+            firstName,
+            lastName,
+            email,
+            department: row['department'] ?? '',
+            position: row['role'] ?? '',
+            salary: row['salary'] ? parseFloat(row['salary']) : undefined,
+            startDate: row['startDate'] ?? '',
+            status: 'active',
+            source: 'csv_import',
+          },
           createdBy: identityId,
         });
         imported++;
       } catch (err) {
-        errors.push(`Row for "${row['name'] ?? row['email'] ?? '?'}": ${String(err)}`);
+        errors.push(`Row for "${name}" (${email}): ${String(err)}`);
       }
     }
 
-    return c.json({ imported, errors });
+    return c.json({ imported, skipped, errors });
   } catch (err) {
     return handleRouteError(c, err, 'POST /import/employees');
+  }
+});
+
+// ── Import: Contacts ────────────────────────────────────────
+
+importExportRouter.post('/import/contacts', async (c) => {
+  try {
+    const { db, tenantId, identityId } = c.get('tenantCtx');
+    const body = await c.req.parseBody();
+    const file = body['file'] as File | undefined;
+
+    if (!file || typeof file === 'string') {
+      return c.json({ error: 'file field is required' }, 400);
+    }
+
+    const text = await file.text();
+    const rows = parseCSV(text);
+    let imported = 0;
+    let skipped = 0;
+    const errors: string[] = [];
+
+    for (const row of rows) {
+      const name = (row['name'] ?? '').trim();
+      const email = (row['email'] ?? '').trim();
+
+      if (!name || !email) {
+        skipped++;
+        continue;
+      }
+
+      // Split name into first/last
+      const parts = name.split(' ');
+      const firstName = parts[0] ?? name;
+      const lastName = parts.slice(1).join(' ') || '';
+
+      try {
+        await db.insert(schema.entityRecords).values({
+          id: randomUUID(),
+          tenantId,
+          entityType: 'Contact',
+          data: {
+            firstName,
+            lastName,
+            email,
+            phone: row['phone'] ?? '',
+            company: row['company'] ?? '',
+            title: row['role'] ?? '',
+            source: 'csv_import',
+            status: 'active',
+          },
+          createdBy: identityId,
+        });
+        imported++;
+      } catch (err) {
+        errors.push(`Row "${name}" (${email}): ${String(err)}`);
+      }
+    }
+
+    return c.json({ imported, skipped, errors });
+  } catch (err) {
+    return handleRouteError(c, err, 'POST /import/contacts');
   }
 });
 
@@ -209,9 +293,11 @@ importExportRouter.post('/import/inventory', async (c) => {
     const text = await file.text();
     const rows = parseCSV(text);
     let imported = 0;
+    let skipped = 0;
     const errors: string[] = [];
 
     for (const row of rows) {
+      if (!row['name']) { skipped++; continue; }
       try {
         await db.insert(schema.entityRecords).values({
           id: randomUUID(),
@@ -226,8 +312,59 @@ importExportRouter.post('/import/inventory', async (c) => {
       }
     }
 
-    return c.json({ imported, errors });
+    return c.json({ imported, skipped, errors });
   } catch (err) {
     return handleRouteError(c, err, 'POST /import/inventory');
+  }
+});
+
+// ── Import: Products ─────────────────────────────────────────
+
+importExportRouter.post('/import/products', async (c) => {
+  try {
+    const { db, tenantId, identityId } = c.get('tenantCtx');
+    const body = await c.req.parseBody();
+    const file = body['file'] as File | undefined;
+
+    if (!file || typeof file === 'string') {
+      return c.json({ error: 'file field is required' }, 400);
+    }
+
+    const text = await file.text();
+    const rows = parseCSV(text);
+    let imported = 0;
+    let skipped = 0;
+    const errors: string[] = [];
+
+    for (const row of rows) {
+      const name = (row['name'] ?? '').trim();
+      if (!name) { skipped++; continue; }
+
+      try {
+        await db.insert(schema.entityRecords).values({
+          id: randomUUID(),
+          tenantId,
+          entityType: 'inventory_item',
+          data: {
+            name,
+            sku: row['sku'] ?? '',
+            price: row['price'] ? parseFloat(row['price']) : undefined,
+            stockQuantity: row['stock'] ? parseInt(row['stock'], 10) : 0,
+            category: row['category'] ?? '',
+            status: 'active',
+            currency: 'USD',
+            source: 'csv_import',
+          },
+          createdBy: identityId,
+        });
+        imported++;
+      } catch (err) {
+        errors.push(`Row "${name}": ${String(err)}`);
+      }
+    }
+
+    return c.json({ imported, skipped, errors });
+  } catch (err) {
+    return handleRouteError(c, err, 'POST /import/products');
   }
 });

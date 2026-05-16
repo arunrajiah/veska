@@ -219,18 +219,17 @@ export const ERP_TOOLS: Anthropic.Tool[] = [
   // ── Write tools ───────────────────────────────────────────────
   {
     name: 'create_expense',
-    description: 'Create a new expense record for an employee.',
+    description: 'Log a new expense. Use when user says they spent money on something.',
     input_schema: {
       type: 'object' as const,
       properties: {
-        description: { type: 'string', description: 'Expense description' },
-        amount: { type: 'number', description: 'Expense amount' },
-        currency: { type: 'string', description: 'Currency code (e.g. USD, EUR)' },
-        category: { type: 'string', description: 'Expense category' },
-        date: { type: 'string', description: 'Expense date in YYYY-MM-DD format' },
-        employeeId: { type: 'string', description: 'The employee ID this expense belongs to' },
+        title: { type: 'string', description: 'Expense title/description' },
+        amount: { type: 'number', description: 'Amount spent' },
+        currency: { type: 'string', description: 'Currency code (e.g. USD, EUR)', default: 'USD' },
+        category: { type: 'string', description: 'Expense category, e.g. Travel, Meals, Software' },
+        date: { type: 'string', description: 'Date in YYYY-MM-DD format, defaults to today' },
       },
-      required: ['description', 'amount', 'currency', 'category', 'date', 'employeeId'],
+      required: ['title', 'amount'],
     },
   },
   {
@@ -281,6 +280,72 @@ export const ERP_TOOLS: Anthropic.Tool[] = [
         expenseId: { type: 'string', description: 'The expense record ID to approve' },
       },
       required: ['expenseId'],
+    },
+  },
+
+  // ── New write tools ───────────────────────────────────────────
+  {
+    name: 'create_invoice',
+    description: 'Create a new invoice for a customer. Use when user asks to create, generate, or raise an invoice.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        customerName: { type: 'string', description: 'Name of the customer or company' },
+        customerEmail: { type: 'string', description: 'Customer email address' },
+        amount: { type: 'number', description: 'Invoice total amount' },
+        currency: { type: 'string', description: 'Currency code, e.g. USD', default: 'USD' },
+        description: { type: 'string', description: 'What the invoice is for' },
+        dueDate: { type: 'string', description: 'Due date in YYYY-MM-DD format' },
+      },
+      required: ['customerName', 'amount', 'description'],
+    },
+  },
+  {
+    name: 'approve_item',
+    description: 'Approve a pending approval request (expense, leave request, invoice, or purchase order).',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        triggerId: { type: 'string', description: 'The approval trigger ID to approve' },
+        reason: { type: 'string', description: 'Optional reason for approval' },
+      },
+      required: ['triggerId'],
+    },
+  },
+  {
+    name: 'send_invoice',
+    description: 'Send a draft invoice to the customer via email.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        invoiceId: { type: 'string', description: 'ID of the invoice to send' },
+      },
+      required: ['invoiceId'],
+    },
+  },
+  {
+    name: 'flag_overdue_invoices',
+    description: 'Find and list overdue invoices for the tenant.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        limit: { type: 'number', description: 'Max number to return', default: 10 },
+      },
+    },
+  },
+  {
+    name: 'run_report',
+    description: 'Run a financial or operational report. Supports: revenue_vs_expenses, top_customers, expense_breakdown, overdue_invoices, headcount_summary.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        reportType: {
+          type: 'string',
+          enum: ['revenue_vs_expenses', 'top_customers', 'expense_breakdown', 'overdue_invoices', 'headcount_summary'],
+        },
+        period: { type: 'string', description: 'Period: this_month, last_month, this_quarter, this_year', default: 'this_month' },
+      },
+      required: ['reportType'],
     },
   },
 ];

@@ -2,8 +2,9 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, Upload } from 'lucide-react';
 import Link from 'next/link';
+import { ImportModal } from '@/components/import-modal.js';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = 'demo-tenant';
@@ -180,6 +181,7 @@ export function EmployeesClient({ employees: initial }: { employees: EmployeeRec
   const router = useRouter();
   const [, startTransition] = useTransition();
   const [showAdd, setShowAdd] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const employees = initial;
 
   const total = employees.length;
@@ -213,11 +215,28 @@ export function EmployeesClient({ employees: initial }: { employees: EmployeeRec
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-semibold text-gray-900">Employees</h1>
-        <button onClick={() => setShowAdd(true)}
-          className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
-          <Plus size={15} /> Add Employee
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setShowImport(true)}
+            className="flex items-center gap-1.5 border border-gray-200 text-gray-700 text-sm px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+            <Upload size={15} /> Import CSV
+          </button>
+          <button onClick={() => setShowAdd(true)}
+            className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+            <Plus size={15} /> Add Employee
+          </button>
+        </div>
       </div>
+      {showImport && (
+        <ImportModal
+          entityType="employees"
+          onComplete={({ imported, skipped }) => {
+            setShowImport(false);
+            startTransition(() => router.refresh());
+            void imported; void skipped;
+          }}
+          onClose={() => setShowImport(false)}
+        />
+      )}
 
       {/* Table */}
       {employees.length === 0 ? (

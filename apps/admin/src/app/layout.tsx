@@ -5,6 +5,9 @@ import { ThemeProvider } from '@/components/theme-provider.js';
 export const metadata: Metadata = {
   title: 'Veska',
   description: 'AI-native operations platform',
+  manifest: '/manifest.json',
+  appleWebApp: { capable: true, statusBarStyle: 'default', title: 'Veska' },
+  icons: { icon: '/favicon.ico', apple: '/apple-touch-icon.png' },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

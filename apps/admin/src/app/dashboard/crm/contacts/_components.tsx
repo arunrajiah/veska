@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, Upload } from 'lucide-react';
+import { ImportModal } from '@/components/import-modal.js';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = 'demo-tenant';
@@ -141,6 +142,7 @@ interface ContactsTableProps {
 export function ContactsTable({ initialContacts }: ContactsTableProps) {
   const router = useRouter();
   const [showForm, setShowForm] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [, startTransition] = useTransition();
 
@@ -156,6 +158,12 @@ export function ContactsTable({ initialContacts }: ContactsTableProps) {
     startTransition(() => router.refresh());
   };
 
+  const handleImportComplete = ({ imported, skipped }: { imported: number; skipped: number }) => {
+    setShowImport(false);
+    addToast(`${imported} contacts imported${skipped > 0 ? `, ${skipped} skipped` : ''}`, 'success');
+    startTransition(() => router.refresh());
+  };
+
   return (
     <>
       <div className="flex items-center justify-between mb-6">
@@ -163,14 +171,30 @@ export function ContactsTable({ initialContacts }: ContactsTableProps) {
           <h1 className="text-2xl font-semibold text-gray-900">Contacts</h1>
           <p className="text-sm text-gray-500 mt-0.5">{initialContacts.length} contacts</p>
         </div>
-        <button
-          onClick={() => setShowForm(true)}
-          className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
-        >
-          <Plus size={15} />
-          New Contact
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowImport(true)}
+            className="flex items-center gap-1.5 border border-gray-200 text-gray-700 text-sm px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <Upload size={15} />
+            Import CSV
+          </button>
+          <button
+            onClick={() => setShowForm(true)}
+            className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+          >
+            <Plus size={15} />
+            New Contact
+          </button>
+        </div>
       </div>
+      {showImport && (
+        <ImportModal
+          entityType="contacts"
+          onComplete={handleImportComplete}
+          onClose={() => setShowImport(false)}
+        />
+      )}
 
       {initialContacts.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-8 py-16 text-center">

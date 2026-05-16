@@ -12,12 +12,20 @@ export interface AgentResponse {
   rawData?: unknown;
 }
 
-const SYSTEM_PROMPT = `You are Veska AI, an intelligent assistant for the Veska ERP system.
-You help users understand their business data by querying the ERP system and providing clear, concise answers.
-When asked about business data (invoices, expenses, inventory, employees, etc.), always use the available tools to fetch real data before answering.
+const SYSTEM_PROMPT = `You are Veska AI, an intelligent ERP assistant that can both answer questions AND take actions.
+
+You can:
+- Create invoices, expenses, and other records
+- Approve pending requests
+- Send invoices to customers
+- Run financial and operational reports
+- Search for specific records
+- Answer questions about your business data
+
+When a user asks you to do something (not just ask about something), use the appropriate tool to actually do it. Always confirm what you did after taking an action.
 Format numbers with proper currency symbols and thousands separators where appropriate.
 Be concise and business-focused. If data is empty, say so clearly.
-Today's date: ${new Date().toISOString().split('T')[0]}`;
+Current date: ${new Date().toISOString().split('T')[0]}`;
 
 export class ActionAgent {
   constructor(
@@ -185,12 +193,32 @@ export class ActionAgent {
 
         // ── Write tools ─────────────────────────────────────────
         case 'create_expense': {
+          const today = new Date().toISOString().split('T')[0]!;
           const r = await fetch(`${base}/expenses`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ tenantId: tid, ...input }),
+            body: JSON.stringify({
+              tenantId: tid,
+              description: String(input.title ?? input.description ?? ''),
+              amount: Number(input.amount),
+              currency: input.currency ? String(input.currency) : 'USD',
+              category: input.category ? String(input.category).toLowerCase() : 'other',
+              date: input.date ? String(input.date) : today,
+              status: 'draft',
+            }),
           });
-          return r.ok ? r.json() : { error: 'fetch failed' };
+          if (!r.ok) return { error: 'Failed to create expense' };
+          const created = await r.json() as { id?: string };
+          return {
+            success: true,
+            expenseId: created.id,
+            title: String(input.title ?? input.description ?? ''),
+            amount: Number(input.amount),
+            currency: input.currency ? String(input.currency) : 'USD',
+            category: input.category ? String(input.category) : 'other',
+            date: input.date ? String(input.date) : today,
+            status: 'draft',
+          };
         }
         case 'update_service_ticket_status': {
           const { ticketId, ...rest } = input;
@@ -224,6 +252,233 @@ export class ActionAgent {
             body: JSON.stringify({ tenantId: tid }),
           });
           return r.ok ? r.json() : { error: 'fetch failed' };
+        }
+
+        // ── New write tools ─────────────────────────────────────
+        case 'create_invoice': {
+          const today = new Date().toISOString().split('T')[0]!;
+          const dueDate = input.dueDate ? String(input.dueDate) : (() => {
+            const d = new Date();
+            d.setDate(d.getDate() + 30);
+            return d.toISOString().split('T')[0]!;
+          })();
+
+          // Generate sequential invoice number: query max existing + 1
+          const numRes = await fetch(`${base}/invoices?tenantId=${tid}&limit=1&_sort=number_desc`);
+          let invoiceNumber = 'INV-1001';
+          if (numRes.ok) {
+            const existing = await numRes.json() as Array<{ data?: Record<string, unknown> }>;
+            if (Array.isArray(existing) && existing.length > 0) {
+              const lastData = existing[0]?.data as Record<string, unknown> | undefined;
+              const lastNum = lastData?.['number'] ? String(lastData['number']) : '';
+              const match = lastNum.match(/(\d+)$/);
+              if (match) {
+                invoiceNumber = `INV-${String(Number(match[1]) + 1).padStart(4, '0')}`;
+              }
+            }
+          }
+
+          const r = await fetch(`${base}/invoices`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              tenantId: tid,
+              number: invoiceNumber,
+              customer_id: String(input.customerName),
+              issue_date: today,
+              due_date: dueDate,
+              currency: input.currency ? String(input.currency) : 'USD',
+              notes: input.customerEmail ? `Customer email: ${String(input.customerEmail)}` : undefined,
+              line_items: [
+                {
+                  description: String(input.description),
+                  quantity: 1,
+                  unit_price: Number(input.amount),
+                },
+              ],
+            }),
+          });
+          if (!r.ok) return { error: 'Failed to create invoice' };
+          const created = await r.json() as { id?: string; data?: Record<string, unknown> };
+          return {
+            success: true,
+            invoiceId: created.id,
+            invoiceNumber,
+            customerName: String(input.customerName),
+            amount: Number(input.amount),
+            currency: input.currency ? String(input.currency) : 'USD',
+            dueDate,
+            status: 'draft',
+          };
+        }
+
+        case 'approve_item': {
+          const r = await fetch(`${base}/approval-requests/${String(input.triggerId)}/approve`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              tenantId: tid,
+              comment: input.reason ? String(input.reason) : undefined,
+            }),
+          });
+          if (!r.ok) return { error: 'Failed to approve item' };
+          const result = await r.json() as Record<string, unknown>;
+          return { success: true, triggerId: String(input.triggerId), status: 'approved', ...result };
+        }
+
+        case 'send_invoice': {
+          const r = await fetch(`${base}/invoices/${String(input.invoiceId)}/send`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tenantId: tid }),
+          });
+          if (!r.ok) return { error: 'Failed to send invoice' };
+          const result = await r.json() as Record<string, unknown>;
+          return { success: true, invoiceId: String(input.invoiceId), status: 'sent', ...result };
+        }
+
+        case 'flag_overdue_invoices': {
+          const limit = input.limit ? Number(input.limit) : 10;
+          const today = new Date().toISOString().split('T')[0]!;
+          const params = new URLSearchParams({
+            tenantId: tid,
+            status: 'sent',
+            limit: String(limit),
+          });
+          const r = await fetch(`${base}/invoices?${params}`);
+          if (!r.ok) return { error: 'fetch failed' };
+          const invoices = await r.json() as Array<{ id: string; data?: Record<string, unknown> }>;
+          const overdue = (Array.isArray(invoices) ? invoices : []).filter((inv) => {
+            const d = inv.data as Record<string, unknown> | undefined;
+            const due = d?.['due_date'] ?? d?.['dueDate'];
+            return typeof due === 'string' && due < today;
+          });
+          overdue.sort((a, b) => {
+            const da = (a.data as Record<string, unknown>)?.['due_date'] ?? '';
+            const db2 = (b.data as Record<string, unknown>)?.['due_date'] ?? '';
+            return String(da) < String(db2) ? -1 : 1;
+          });
+          return { overdueCount: overdue.length, invoices: overdue.slice(0, limit) };
+        }
+
+        case 'run_report': {
+          const reportType = String(input.reportType);
+          const period = input.period ? String(input.period) : 'this_month';
+
+          // Compute date range for period
+          const now = new Date();
+          let fromDate: string;
+          let toDate: string = now.toISOString().split('T')[0]!;
+
+          switch (period) {
+            case 'last_month': {
+              const first = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+              const last = new Date(now.getFullYear(), now.getMonth(), 0);
+              fromDate = first.toISOString().split('T')[0]!;
+              toDate = last.toISOString().split('T')[0]!;
+              break;
+            }
+            case 'this_quarter': {
+              const q = Math.floor(now.getMonth() / 3);
+              fromDate = new Date(now.getFullYear(), q * 3, 1).toISOString().split('T')[0]!;
+              break;
+            }
+            case 'this_year': {
+              fromDate = `${now.getFullYear()}-01-01`;
+              break;
+            }
+            default: {
+              // this_month
+              fromDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]!;
+            }
+          }
+
+          switch (reportType) {
+            case 'revenue_vs_expenses': {
+              const [invRes, expRes] = await Promise.all([
+                fetch(`${base}/invoices?tenantId=${tid}&status=paid&limit=100`),
+                fetch(`${base}/expenses?tenantId=${tid}&status=approved&limit=100`),
+              ]);
+              const invoices = invRes.ok ? await invRes.json() as Array<{ data?: Record<string, unknown> }> : [];
+              const expenses = expRes.ok ? await expRes.json() as Array<{ data?: Record<string, unknown> }> : [];
+              const revenue = (Array.isArray(invoices) ? invoices : []).reduce((s, i) => {
+                const d = i.data as Record<string, unknown> | undefined;
+                return s + Number(d?.['total'] ?? d?.['amount'] ?? 0);
+              }, 0);
+              const expTotal = (Array.isArray(expenses) ? expenses : []).reduce((s, e) => {
+                const d = e.data as Record<string, unknown> | undefined;
+                return s + Number(d?.['amount'] ?? 0);
+              }, 0);
+              return { reportType, period, fromDate, toDate, revenue, expenses: expTotal, net: revenue - expTotal };
+            }
+
+            case 'top_customers': {
+              const invRes = await fetch(`${base}/invoices?tenantId=${tid}&status=paid&limit=100`);
+              const invoices = invRes.ok ? await invRes.json() as Array<{ data?: Record<string, unknown> }> : [];
+              const customerMap = new Map<string, number>();
+              for (const inv of Array.isArray(invoices) ? invoices : []) {
+                const d = inv.data as Record<string, unknown> | undefined;
+                const name = String(d?.['customer_id'] ?? d?.['customerName'] ?? 'Unknown');
+                const amt = Number(d?.['total'] ?? d?.['amount'] ?? 0);
+                customerMap.set(name, (customerMap.get(name) ?? 0) + amt);
+              }
+              const top = Array.from(customerMap.entries())
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10)
+                .map(([customer, total]) => ({ customer, total }));
+              return { reportType, period, fromDate, toDate, topCustomers: top };
+            }
+
+            case 'expense_breakdown': {
+              const expRes = await fetch(`${base}/expenses?tenantId=${tid}&limit=200`);
+              const expenses = expRes.ok ? await expRes.json() as Array<{ data?: Record<string, unknown> }> : [];
+              const byCategory = new Map<string, number>();
+              for (const exp of Array.isArray(expenses) ? expenses : []) {
+                const d = exp.data as Record<string, unknown> | undefined;
+                const cat = String(d?.['category'] ?? 'other');
+                const amt = Number(d?.['amount'] ?? 0);
+                byCategory.set(cat, (byCategory.get(cat) ?? 0) + amt);
+              }
+              const breakdown = Array.from(byCategory.entries())
+                .sort((a, b) => b[1] - a[1])
+                .map(([category, total]) => ({ category, total }));
+              return { reportType, period, fromDate, toDate, breakdown };
+            }
+
+            case 'overdue_invoices': {
+              const today2 = new Date().toISOString().split('T')[0]!;
+              const invRes = await fetch(`${base}/invoices?tenantId=${tid}&status=sent&limit=100`);
+              const invoices = invRes.ok ? await invRes.json() as Array<{ id: string; data?: Record<string, unknown> }> : [];
+              const overdue = (Array.isArray(invoices) ? invoices : []).filter((inv) => {
+                const d = inv.data as Record<string, unknown> | undefined;
+                const due = String(d?.['due_date'] ?? d?.['dueDate'] ?? '');
+                return due < today2;
+              });
+              const totalOwed = overdue.reduce((s, inv) => {
+                const d = inv.data as Record<string, unknown> | undefined;
+                return s + Number(d?.['total'] ?? d?.['amount'] ?? 0);
+              }, 0);
+              return { reportType, count: overdue.length, totalOwed, invoices: overdue.slice(0, 20) };
+            }
+
+            case 'headcount_summary': {
+              const empRes = await fetch(`${base}/employees?tenantId=${tid}&status=active`);
+              const employees = empRes.ok ? await empRes.json() as Array<{ data?: Record<string, unknown> }> : [];
+              const byDept = new Map<string, number>();
+              for (const emp of Array.isArray(employees) ? employees : []) {
+                const d = emp.data as Record<string, unknown> | undefined;
+                const dept = String(d?.['department'] ?? 'Unknown');
+                byDept.set(dept, (byDept.get(dept) ?? 0) + 1);
+              }
+              const departments = Array.from(byDept.entries())
+                .sort((a, b) => b[1] - a[1])
+                .map(([department, count]) => ({ department, count }));
+              return { reportType, totalHeadcount: Array.isArray(employees) ? employees.length : 0, departments };
+            }
+
+            default:
+              return { error: `Unknown report type: ${reportType}` };
+          }
         }
 
         default:

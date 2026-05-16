@@ -78,6 +78,12 @@ importers:
       '@hono/node-server':
         specifier: ^1.13.7
         version: 1.19.14(hono@4.12.18)
+      '@hono/swagger-ui':
+        specifier: ^0.6.1
+        version: 0.6.1(hono@4.12.18)
+      '@hono/zod-openapi':
+        specifier: ^1.4.0
+        version: 1.4.0(hono@4.12.18)(zod@3.25.76)
       '@hono/zod-validator':
         specifier: ^0.4.3
         version: 0.4.3(hono@4.12.18)(zod@3.25.76)
@@ -291,6 +297,9 @@ importers:
       drizzle-kit:
         specifier: ^0.30.1
         version: 0.30.6
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
@@ -442,6 +451,11 @@ packages:
     peerDependenciesMeta:
       zod:
         optional: true
+
+  '@asteasolutions/zod-to-openapi@8.5.0':
+    resolution: {integrity: sha512-SABbKiObg5dLRiTFnqiW1WWwGcg1BJfmHtT2asIBnBHg6Smy/Ms2KHc650+JI4Hw7lSkdiNebEGXpwoxfben8Q==}
+    peerDependencies:
+      zod: ^4.0.0
 
   '@babel/helper-string-parser@7.27.1':
     resolution: {integrity: sha512-qMlSxKbpRlAridDExk92nSobyDdpPijUq2DW6oDnUqd0iOGxmQjyqhMIihI9+zv4LPyZdRje2cavWPbCbWm3eA==}
@@ -1066,11 +1080,29 @@ packages:
     peerDependencies:
       hono: ^4
 
+  '@hono/swagger-ui@0.6.1':
+    resolution: {integrity: sha512-sJTvldu1GPeEPfyeLG7gRj+W4vEuD+JDi+JjJ3TJs/DvMUtBLs0KJO5yokGegWWdy5qrbdnQGekbhgNRmPmYKQ==}
+    peerDependencies:
+      hono: '>=4.0.0'
+
+  '@hono/zod-openapi@1.4.0':
+    resolution: {integrity: sha512-AFchqR1N/NxfI4hUOSGI2/g8zLROxA1OE7Oh5JJFlTaGxhrdRyH+93gd0tIBpb0z8s9r8hUoNnaOBfHbdb4NMw==}
+    engines: {node: '>=16.0.0'}
+    peerDependencies:
+      hono: '>=4.10.0'
+      zod: ^4.0.0
+
   '@hono/zod-validator@0.4.3':
     resolution: {integrity: sha512-xIgMYXDyJ4Hj6ekm9T9Y27s080Nl9NXHcJkOvkXPhubOLj8hZkOL8pDnnXfvCf5xEE8Q4oMFenQUZZREUY2gqQ==}
     peerDependencies:
       hono: '>=3.9.0'
       zod: ^3.19.1
+
+  '@hono/zod-validator@0.8.0':
+    resolution: {integrity: sha512-5uS4S1/LKtZQYvD4BtpPUFkOv8d1wNxHHrChm26buMiEYc1FrHWvDUaKVBwkiVtvSExHSpLGDvcnpI2Copyj9w==}
+    peerDependencies:
+      hono: '>=4.10.0'
+      zod: ^3.25.0 || ^4.0.0
 
   '@img/sharp-darwin-arm64@0.33.5':
     resolution: {integrity: sha512-UT4p+iz/2H4twwAoLCqfA9UH5pI6DggwKEGuaPy7nCVQ8ZsiY5PIcrRvD1DzuY3qYL07NtIQcWnBSY/heikIFQ==}
@@ -3019,6 +3051,9 @@ packages:
     resolution: {integrity: sha512-VXJjc87FScF88uafS3JllDgvAm+c/Slfz06lorj2uAY34rlUu0Nt+v8wreiImcrgAjjIHp1rXpTDlLOGw29WwQ==}
     engines: {node: '>=18'}
 
+  openapi3-ts@4.5.0:
+    resolution: {integrity: sha512-jaL+HgTq2Gj5jRcfdutgRGLosCy/hT8sQf6VOy+P+g36cZOjI1iukdPnijC+4CmeRzg/jEllJUboEic2FhxhtQ==}
+
   ora@8.2.0:
     resolution: {integrity: sha512-weP+BZ8MVNnlCm8c0Qdc1WSWq4Qn7I+9CJGm7Qali6g44e/PUzbjNqJX5NJ9ljlNMosfJvg1fKEGILklK9cwnw==}
     engines: {node: '>=18'}
@@ -3614,6 +3649,11 @@ packages:
   y18n@4.0.3:
     resolution: {integrity: sha512-JKhqTOwSrqNA1NY5lSztJ1GrBiUodLMmIZuLiDaMRJ+itFd+ABVE8XBjOvIWL+rSqNDC74LCSFmlb/U4UZ4hJQ==}
 
+  yaml@2.9.0:
+    resolution: {integrity: sha512-2AvhNX3mb8zd6Zy7INTtSpl1F15HW6Wnqj0srWlkKLcpYl/gMIMJiyuGq2KeI2YFxUPjdlB+3Lc10seMLtL4cA==}
+    engines: {node: '>= 14.6'}
+    hasBin: true
+
   yargs-parser@18.1.3:
     resolution: {integrity: sha512-o50j0JeToy/4K6OZcaQmW6lyXXKhq7csREXcDwk2omFPJEwUNOVtJKvmDr9EI1fAJZUyZcRF7kxGBWmRXudrCQ==}
     engines: {node: '>=6'}
@@ -3651,6 +3691,11 @@ snapshots:
       json-schema-to-ts: 3.1.1
       standardwebhooks: 1.0.0
     optionalDependencies:
+      zod: 3.25.76
+
+  '@asteasolutions/zod-to-openapi@8.5.0(zod@3.25.76)':
+    dependencies:
+      openapi3-ts: 4.5.0
       zod: 3.25.76
 
   '@babel/helper-string-parser@7.27.1': {}
@@ -3990,7 +4035,24 @@ snapshots:
     dependencies:
       hono: 4.12.18
 
+  '@hono/swagger-ui@0.6.1(hono@4.12.18)':
+    dependencies:
+      hono: 4.12.18
+
+  '@hono/zod-openapi@1.4.0(hono@4.12.18)(zod@3.25.76)':
+    dependencies:
+      '@asteasolutions/zod-to-openapi': 8.5.0(zod@3.25.76)
+      '@hono/zod-validator': 0.8.0(hono@4.12.18)(zod@3.25.76)
+      hono: 4.12.18
+      openapi3-ts: 4.5.0
+      zod: 3.25.76
+
   '@hono/zod-validator@0.4.3(hono@4.12.18)(zod@3.25.76)':
+    dependencies:
+      hono: 4.12.18
+      zod: 3.25.76
+
+  '@hono/zod-validator@0.8.0(hono@4.12.18)(zod@3.25.76)':
     dependencies:
       hono: 4.12.18
       zod: 3.25.76
@@ -5830,6 +5892,10 @@ snapshots:
     dependencies:
       mimic-function: 5.0.1
 
+  openapi3-ts@4.5.0:
+    dependencies:
+      yaml: 2.9.0
+
   ora@8.2.0:
     dependencies:
       chalk: 5.6.2
@@ -6436,6 +6502,8 @@ snapshots:
   ws@8.20.1: {}
 
   y18n@4.0.3: {}
+
+  yaml@2.9.0: {}
 
   yargs-parser@18.1.3:
     dependencies:

@@ -75,7 +75,8 @@ import { tenantContext } from './middleware/tenant-context.js';
 import { requireSession } from './middleware/session.js';
 import { requirePermission } from './middleware/rbac.js';
 import { authRouter } from './routes/auth.js';
-import { rateLimit } from './middleware/rate-limit.js';
+import { rateLimit, inMemoryRateLimit } from './middleware/rate-limit.js';
+import { docsRouter } from './routes/docs.js';
 import {
   sharedDb,
   sharedLlm,
@@ -102,6 +103,8 @@ app.route('/auth', authRouter);
 // Public routes
 app.route('/health', healthRouter);
 app.route('/api/v1/tenants', tenantsRouter);
+// OpenAPI docs — public, no auth required
+app.route('/', docsRouter);
 app.route('/ml', magicLinksRouter);
 app.route('/portal', portalRouter);
 
@@ -162,6 +165,13 @@ api.use('*', rateLimit(sharedRedis, { windowMs: 60_000, max: 120 }));
 // Sliding-window rate limiters (package: @veska-cloud/rate-limit)
 api.use('*', standardLimit());
 api.use('/ai/*', aiLimit());
+// Per-route in-memory limits (belt-and-suspenders on top of Redis limits)
+api.use('/conversations/*', inMemoryRateLimit({
+  windowMs: 60_000,
+  max: 20,
+  keyFn: (c) => c.get('tenantCtx')?.identityId ?? c.req.header('x-forwarded-for') ?? 'unknown',
+}));
+api.use('/import-export/*', inMemoryRateLimit({ windowMs: 60_000, max: 10 }));
 // Permission guards for sensitive modules
 api.use('/payroll/*', requirePermission('payroll:read'));
 api.use('/payroll-runs/*', requirePermission('payroll:read'));

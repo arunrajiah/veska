@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Bot, X, Send, Loader2 } from 'lucide-react';
+import { Bot, X, Send, Loader2, CheckCircle2 } from 'lucide-react';
 import { useAskVeska } from '@/hooks/useAskVeska.js';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -25,6 +25,48 @@ interface ChatResponse {
   reply?: string;
   answer?: string;
   toolsUsed?: string[];
+}
+
+// ─── Tool label maps ─────────────────────────────────────────────────────────
+
+const TOOL_LABELS: Record<string, string> = {
+  create_invoice: 'Creating invoice...',
+  approve_item: 'Approving...',
+  approve_expense: 'Approving expense...',
+  create_expense: 'Logging expense...',
+  send_invoice: 'Sending invoice...',
+  flag_overdue_invoices: 'Checking overdue invoices...',
+  run_report: 'Running report...',
+  create_crm_note: 'Adding note...',
+  update_service_ticket_status: 'Updating ticket...',
+  send_invoice_reminder: 'Sending reminder...',
+};
+
+const ACTION_TOOLS = new Set([
+  'create_invoice',
+  'approve_item',
+  'approve_expense',
+  'create_expense',
+  'send_invoice',
+  'create_crm_note',
+  'update_service_ticket_status',
+  'send_invoice_reminder',
+]);
+
+/** Routes for "View" links keyed by tool name. Receives the raw answer text so we can try to parse an ID from it. */
+function getEntityHref(tool: string, answerContent: string): string | null {
+  if (tool === 'create_invoice' || tool === 'send_invoice') {
+    const match = answerContent.match(/INV-\d+/);
+    if (match) return `/finance/invoices`;
+    return '/finance/invoices';
+  }
+  if (tool === 'create_expense' || tool === 'approve_expense') {
+    return '/finance/expenses';
+  }
+  if (tool === 'approve_item') {
+    return '/approvals';
+  }
+  return null;
 }
 
 // ─── Constants ──────────────────────────────────────────────────────────────
@@ -266,16 +308,42 @@ function AskVeskaPanelContent({ onClose }: { onClose: () => void }) {
                   {msg.role === 'assistant' &&
                     msg.toolsUsed !== undefined &&
                     msg.toolsUsed.length > 0 && (
-                      <div className="flex flex-wrap gap-1 px-1">
-                        <span className="text-xs text-gray-400 mr-0.5">Used:</span>
-                        {msg.toolsUsed.map((tool) => (
-                          <span
-                            key={tool}
-                            className="text-xs bg-indigo-50 text-indigo-700 rounded-full px-2 py-0.5"
-                          >
-                            {tool}
-                          </span>
-                        ))}
+                      <div className="flex flex-col gap-1.5 px-1 w-full">
+                        {/* Action cards for write tools */}
+                        {msg.toolsUsed.filter((t) => ACTION_TOOLS.has(t)).map((tool) => {
+                          const href = getEntityHref(tool, msg.content);
+                          return (
+                            <div
+                              key={`action-${tool}`}
+                              className="flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-200 rounded-xl text-xs text-green-800"
+                            >
+                              <CheckCircle2 size={13} className="text-green-600 flex-shrink-0" />
+                              <span className="flex-1">
+                                {TOOL_LABELS[tool] ?? tool}
+                              </span>
+                              {href && (
+                                <a
+                                  href={href}
+                                  className="text-green-700 underline font-medium hover:text-green-900 flex-shrink-0"
+                                >
+                                  View
+                                </a>
+                              )}
+                            </div>
+                          );
+                        })}
+                        {/* Tool chips for all tools */}
+                        <div className="flex flex-wrap gap-1">
+                          <span className="text-xs text-gray-400 mr-0.5">Used:</span>
+                          {msg.toolsUsed.map((tool) => (
+                            <span
+                              key={tool}
+                              className="text-xs bg-indigo-50 text-indigo-700 rounded-full px-2 py-0.5"
+                            >
+                              {TOOL_LABELS[tool] ?? tool}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     )}
                 </div>

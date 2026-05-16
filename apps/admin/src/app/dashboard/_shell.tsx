@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Lock, UserCog, Menu, X, Sun, Moon, Monitor } from 'lucide-react';
 import { SidebarNav } from './_sidebar-nav.js';
 import { AskVeskaPanel } from '@/components/ask-veska/panel.js';
 import { AskVeskaContext, useAskVeskaState } from '@/hooks/useAskVeska.js';
 import { GlobalSearchBar } from './search/_components.js';
+import { GlobalSearch, GlobalSearchTrigger } from '@/components/global-search.js';
 import NotificationBell from '@/components/notification-bell.js';
 import { useTheme, type Theme } from '@/components/theme-provider.js';
 
@@ -47,6 +48,19 @@ function ThemeToggle() {
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const askVeska = useAskVeskaState();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  // Cmd+/ (or Ctrl+/) opens global search
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === '/' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setSearchOpen((o) => !o);
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   return (
     <AskVeskaContext.Provider value={askVeska}>
@@ -119,13 +133,17 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             >
               <Menu size={20} />
             </button>
-            <span className="font-semibold text-gray-900 dark:text-white tracking-tight">Veska</span>
+            <span className="font-semibold text-gray-900 dark:text-white tracking-tight flex-1">Veska</span>
+            <GlobalSearchTrigger onClick={() => setSearchOpen(true)} />
           </header>
           <main className="flex-1 min-w-0">{children}</main>
         </div>
 
         {/* Ask Veska floating panel — accessible from every dashboard page */}
         <AskVeskaPanel />
+
+        {/* Global search modal */}
+        <GlobalSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
       </div>
     </AskVeskaContext.Provider>
   );

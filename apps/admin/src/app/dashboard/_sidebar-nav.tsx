@@ -228,6 +228,7 @@ const NAV_SECTIONS: NavSection[] = [
       { href: '/dashboard/settings/approvals', icon: GitBranch, label: 'Approval Chains' },
       { href: '/dashboard/webhooks', icon: Bell, label: 'Webhooks' },
       { href: '/dashboard/settings/notifications', icon: Bell, label: 'Notifications' },
+      { href: '/dashboard/settings/webhooks', icon: Webhook, label: 'Webhooks' },
       { href: '/dashboard/settings/currency', icon: Globe, label: 'Currency' },
       { href: '/dashboard/settings/custom-fields', icon: Sliders, label: 'Custom Fields' },
       { href: '/dashboard/plugins', icon: Puzzle, label: 'Plugins' },

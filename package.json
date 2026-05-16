@@ -21,7 +21,9 @@
     "clean": "turbo run clean && rm -rf node_modules",
     "db:generate": "turbo run db:generate --filter=@veska/core",
     "db:migrate": "turbo run db:migrate --filter=@veska/core",
-    "db:push": "turbo run db:push --filter=@veska/core"
+    "db:push": "turbo run db:push --filter=@veska/core",
+    "seed": "pnpm --filter @veska/core seed",
+    "seed:clear": "pnpm --filter @veska/core seed:clear"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
