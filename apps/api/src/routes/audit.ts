@@ -44,13 +44,16 @@ export async function logAudit(
 auditRouter.get('/', async (c) => {
   const { tenantId } = c.get('tenantCtx');
 
-  const entityType = c.req.query('entityType');
-  const action     = c.req.query('action');
-  const actorId    = c.req.query('actorId');
-  const from       = c.req.query('from');
-  const to         = c.req.query('to');
-  const limitParam = c.req.query('limit');
-  const limit      = Math.min(parseInt(limitParam ?? '50', 10), 200);
+  const entityType  = c.req.query('entityType');
+  const action      = c.req.query('action');
+  // accept both actorId (legacy) and userId (new)
+  const actorId     = c.req.query('actorId') ?? c.req.query('userId');
+  const from        = c.req.query('from');
+  const to          = c.req.query('to');
+  const limitParam  = c.req.query('limit');
+  const offsetParam = c.req.query('offset');
+  const limit       = Math.min(parseInt(limitParam ?? '50', 10), 200);
+  const offset      = Math.max(parseInt(offsetParam ?? '0', 10), 0);
 
   // Build optional filter clauses
   const entityTypeClause = entityType
@@ -79,6 +82,7 @@ auditRouter.get('/', async (c) => {
     ${toClause}
     ORDER BY "createdAt" DESC
     LIMIT ${limit}
+    OFFSET ${offset}
   `);
 
   const countResult = await sharedDb.execute(sql`

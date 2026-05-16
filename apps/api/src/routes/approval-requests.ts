@@ -5,6 +5,7 @@ import { sql } from 'drizzle-orm';
 import { ApprovalService } from '@veska/core';
 import type { TenantContext } from '../middleware/tenant-context.js';
 import { dispatchWebhookEvent } from '../middleware/webhook-events.js';
+import { sendApprovalDecisionEmail, sendApprovalRequestedEmail } from '../lib/notification-mailer.js';
 
 /** Map entityType → new status after approval/rejection */
 const ENTITY_STATUS_MAP: Record<string, { approved: string; rejected: string }> = {
@@ -339,6 +340,56 @@ approvalRequestsRouter.patch(
             AND "tenantId" = ${tenantId}::uuid
         `);
       }
+
+      // Look up requester email and send decision notification (fire-and-forget)
+      void (async () => {
+        try {
+          const triggerRow = (await db.execute(sql`
+            SELECT "requestedBy" FROM "approvalTriggers"
+            WHERE id = ${triggerId}::uuid
+              AND "tenantId" = ${tenantId}::uuid
+          `) as unknown as { rows: Array<{ requestedBy: string | null }> }).rows[0];
+
+          const requestedBy = triggerRow?.requestedBy;
+          if (!requestedBy) return;
+
+          const userRow = (await db.execute(sql`
+            SELECT data->>'email' AS email,
+                   COALESCE(data->>'name', data->>'full_name', data->>'firstName') AS name
+            FROM "entityRecords"
+            WHERE id = ${requestedBy}::uuid
+              AND "tenantId" = ${tenantId}::uuid
+            LIMIT 1
+          `) as unknown as { rows: Array<{ email: string | null; name: string | null }> }).rows[0];
+
+          const email = userRow?.email;
+          if (!email) return;
+
+          const entityData = (await db.execute(sql`
+            SELECT data->>'number' AS ref,
+                   COALESCE(data->>'title', data->>'description', data->>'number') AS ref2
+            FROM "entityRecords"
+            WHERE id = ${trigger.entityId}::uuid
+              AND "tenantId" = ${tenantId}::uuid
+            LIMIT 1
+          `) as unknown as { rows: Array<{ ref: string | null; ref2: string | null }> }).rows[0];
+
+          const entityRef = entityData?.ref ?? entityData?.ref2 ?? trigger.entityId;
+          const dashboardUrl = `${process.env['ADMIN_BASE_URL'] ?? 'http://localhost:3000'}/dashboard`;
+
+          await sendApprovalDecisionEmail({
+            to: email,
+            recipientName: userRow?.name ?? 'there',
+            entityType: trigger.entityType,
+            entityRef,
+            decision: body.decision,
+            reason: body.reason,
+            dashboardUrl,
+          });
+        } catch (err) {
+          console.error('[approval-requests] decision email failed:', err);
+        }
+      })();
     }
 
     const webhookEvent = body.decision === 'approved' ? 'approval.approved' : 'approval.rejected';

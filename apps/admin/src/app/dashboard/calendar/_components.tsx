@@ -66,8 +66,10 @@ const EVENT_TYPE_COLORS: Record<string, { pill: string; dot: string }> = {
   general:  { pill: 'bg-gray-100 text-gray-600',    dot: 'bg-gray-400' },
 };
 
-function typeColors(type?: string) {
-  return EVENT_TYPE_COLORS[type ?? 'general'] ?? EVENT_TYPE_COLORS.general;
+const DEFAULT_TYPE_COLORS: { pill: string; dot: string } = { pill: 'bg-gray-100 text-gray-600', dot: 'bg-gray-400' };
+
+function typeColors(type?: string): { pill: string; dot: string } {
+  return EVENT_TYPE_COLORS[type ?? 'general'] ?? EVENT_TYPE_COLORS['general'] ?? DEFAULT_TYPE_COLORS;
 }
 
 const MONTHS = [

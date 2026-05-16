@@ -8,7 +8,9 @@ import {
   Smartphone,
   ChevronRight,
   Copy,
+  Palette,
 } from 'lucide-react';
+import { useTheme, type Theme } from '@/components/theme-provider.js';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
@@ -691,6 +693,50 @@ function SsoConfigSection({ showToast }: { showToast: (m: string, t?: 'success' 
 }
 
 // ---------------------------------------------------------------------------
+// Theme Section
+// ---------------------------------------------------------------------------
+const THEME_OPTIONS: { value: Theme; label: string; description: string }[] = [
+  { value: 'light', label: 'Light', description: 'Always use light mode' },
+  { value: 'dark',  label: 'Dark',  description: 'Always use dark mode' },
+  { value: 'system', label: 'System', description: 'Follow your OS preference' },
+];
+
+function ThemeSection() {
+  const { theme, setTheme } = useTheme();
+
+  return (
+    <section className="bg-white border border-gray-200 rounded-xl p-6">
+      <div className="flex items-center gap-3 mb-5">
+        <div className="p-2 bg-indigo-50 rounded-lg">
+          <Palette size={18} className="text-indigo-600" />
+        </div>
+        <div>
+          <h2 className="text-sm font-semibold text-gray-900">Theme</h2>
+          <p className="text-xs text-gray-500">Choose your preferred color scheme</p>
+        </div>
+      </div>
+      <div className="flex gap-3 flex-wrap">
+        {THEME_OPTIONS.map((opt) => (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => setTheme(opt.value)}
+            className={`flex flex-col gap-0.5 px-4 py-3 rounded-xl border text-left transition-colors ${
+              theme === opt.value
+                ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                : 'border-gray-200 text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            <span className="text-sm font-medium">{opt.label}</span>
+            <span className="text-xs text-gray-500">{opt.description}</span>
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Root export
 // ---------------------------------------------------------------------------
 export function SecuritySettingsClient() {
@@ -706,6 +752,7 @@ export function SecuritySettingsClient() {
       </div>
 
       <div className="space-y-6">
+        <ThemeSection />
         <TwoFactorSection showToast={showToast} />
         <ActiveSessionsSection showToast={showToast} />
         <SsoConfigSection showToast={showToast} />

@@ -431,7 +431,7 @@ const PURPOSE_LABELS: Record<Purpose, string> = {
   ai_training: 'AI Training',
 };
 
-function ConsentCell({ val }: { val?: { granted: boolean; date: string } | null }) {
+function ConsentCell({ val }: { val?: { granted: boolean; date: string } | null | undefined }) {
   if (!val) return <span className="text-gray-300 text-xs">—</span>;
   return (
     <div className="flex items-center gap-1.5">

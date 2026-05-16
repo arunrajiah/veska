@@ -154,7 +154,7 @@ export default async function CatalogPage() {
 
           <div className="mt-4 pt-4 border-t border-gray-100">
             <Link
-              href={`${ADMIN_URL}/dashboard/catalog`}
+              href={`${ADMIN_URL}/dashboard/catalog` as any}
               className="inline-flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-700 font-medium transition-colors"
             >
               View catalog
@@ -214,7 +214,7 @@ export default async function CatalogPage() {
 
           <div className="mt-4 pt-4 border-t border-gray-100">
             <Link
-              href={`${ADMIN_URL}/dashboard/catalog`}
+              href={`${ADMIN_URL}/dashboard/catalog` as any}
               className="inline-flex items-center gap-1.5 text-sm text-emerald-600 hover:text-emerald-700 font-medium transition-colors"
             >
               Manage prices
@@ -285,7 +285,7 @@ export default async function CatalogPage() {
 
         <div className="mt-4 pt-4 border-t border-gray-100">
           <Link
-            href={`${ADMIN_URL}/dashboard/catalog`}
+            href={`${ADMIN_URL}/dashboard/catalog` as any}
             className="inline-flex items-center gap-1.5 text-sm text-orange-600 hover:text-orange-700 font-medium transition-colors"
           >
             Manage discounts

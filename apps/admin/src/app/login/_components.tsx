@@ -122,7 +122,7 @@ export function LoginClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
       {/* Toast */}
       {toast && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white text-sm px-4 py-2.5 rounded-lg shadow-lg">
@@ -130,7 +130,7 @@ export function LoginClient() {
         </div>
       )}
 
-      <div className="w-full max-w-sm bg-white shadow-lg rounded-2xl p-8">
+      <div className="w-full max-w-sm bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-8">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
           <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center mb-3">
@@ -170,7 +170,7 @@ export function LoginClient() {
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="block text-sm font-medium text-gray-700">Password</label>
-                <Link href="/forgot-password" className="text-xs text-indigo-600 hover:text-indigo-700">
+                <Link href={"/forgot-password" as any} className="text-xs text-indigo-600 hover:text-indigo-700">
                   Forgot password?
                 </Link>
               </div>

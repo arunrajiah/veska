@@ -63,14 +63,18 @@ docker compose up --build
 |---|---|
 | API | http://localhost:3001 |
 | Admin UI | http://localhost:3000 |
+| Marketing site | http://localhost:3002 |
+| Marketplace | http://localhost:3003 |
 
 The compose file uses `develop.watch` for live reload during development — run `docker compose up --watch` to enable it.
 
 **Individual image builds** (from repo root, passing the full monorepo context):
 
 ```bash
-docker build -f apps/api/Dockerfile   -t veska-api   .
-docker build -f apps/admin/Dockerfile -t veska-admin .
+docker build -f apps/api/Dockerfile         -t veska-api         .
+docker build -f apps/admin/Dockerfile       -t veska-admin       .
+docker build -f apps/marketing/Dockerfile   -t veska-marketing   .
+docker build -f apps/marketplace/Dockerfile -t veska-marketplace .
 ```
 
 ## Quick start

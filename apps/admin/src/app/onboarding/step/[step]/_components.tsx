@@ -836,7 +836,7 @@ export function OnboardingWizard({ step }: { step: number }) {
 
   function goTo(targetStep: number) {
     setOnboardingStep(targetStep);
-    router.push(`/onboarding/step/${targetStep}`);
+    router.push(`/onboarding/step/${targetStep}` as any);
   }
 
   function next() { goTo(step + 1); }

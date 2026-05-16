@@ -138,7 +138,7 @@ export default async function NotificationsPage() {
 
                   {/* Edit */}
                   <Link
-                    href={`/dashboard/settings/notifications/${channel.id}/edit`}
+                    href={`/dashboard/settings/notifications/${channel.id}/edit` as any}
                     className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-800 transition-colors"
                     aria-label="Edit channel"
                   >

@@ -31,15 +31,15 @@ const TENANT_HEADERS = {
 // ---------------------------------------------------------------------------
 
 export interface Workflow {
-  id?: string;
+  id?: string | undefined;
   name: string;
-  status?: 'active' | 'inactive' | 'draft';
-  enabled?: boolean;
-  trigger?: WorkflowTrigger;
-  conditions?: WorkflowCondition[];
-  actions?: WorkflowAction[];
-  lastRunAt?: string;
-  createdAt?: string;
+  status?: 'active' | 'inactive' | 'draft' | undefined;
+  enabled?: boolean | undefined;
+  trigger?: WorkflowTrigger | undefined;
+  conditions?: WorkflowCondition[] | undefined;
+  actions?: WorkflowAction[] | undefined;
+  lastRunAt?: string | undefined;
+  createdAt?: string | undefined;
 }
 
 interface WorkflowTrigger {
@@ -124,7 +124,7 @@ function uid() {
 export function cronToHuman(cron: string): string {
   const parts = cron.trim().split(/\s+/);
   if (parts.length !== 5) return cron;
-  const [min, hour, dom, month, dow] = parts;
+  const [min, hour, dom, month, dow] = parts as [string, string, string, string, string];
   if (dom === '*' && month === '*' && dow === '*') {
     if (min === '0' && hour !== '*') return `Every day at ${hour}:00`;
     if (min !== '*' && hour !== '*') return `Every day at ${hour}:${min.padStart(2, '0')}`;
@@ -1011,7 +1011,7 @@ function ActionFields({
                   value={row.key}
                   onChange={(e) => {
                     const d = [...(action.recordData ?? [])];
-                    d[i] = { ...d[i], key: e.target.value };
+                    d[i] = { key: e.target.value, value: row.value };
                     onChange({ recordData: d });
                   }}
                   placeholder="key"
@@ -1021,7 +1021,7 @@ function ActionFields({
                   value={row.value}
                   onChange={(e) => {
                     const d = [...(action.recordData ?? [])];
-                    d[i] = { ...d[i], value: e.target.value };
+                    d[i] = { key: row.key, value: e.target.value };
                     onChange({ recordData: d });
                   }}
                   placeholder="value"
@@ -1087,7 +1087,7 @@ function ActionFields({
                   value={row.key}
                   onChange={(e) => {
                     const h = [...(action.webhookHeaders ?? [])];
-                    h[i] = { ...h[i], key: e.target.value };
+                    h[i] = { key: e.target.value, value: row.value };
                     onChange({ webhookHeaders: h });
                   }}
                   placeholder="Header-Name"
@@ -1097,7 +1097,7 @@ function ActionFields({
                   value={row.value}
                   onChange={(e) => {
                     const h = [...(action.webhookHeaders ?? [])];
-                    h[i] = { ...h[i], value: e.target.value };
+                    h[i] = { key: row.key, value: e.target.value };
                     onChange({ webhookHeaders: h });
                   }}
                   placeholder="value"
@@ -1309,7 +1309,7 @@ const MOCK_TEMPLATES: WorkflowTemplate[] = [
     category: 'finance',
     trigger: { type: 'entity_updated', entityType: 'Invoice', fieldName: 'status', newValue: 'overdue' },
     conditions: [{ field: 'amount', operator: 'gt', value: '0' }],
-    actions: [{ id: '', type: 'send_email', emailTemplate: 'invoice_reminder' }],
+    actions: [{ type: 'send_email', emailTemplate: 'invoice_reminder' }],
   },
   {
     id: 'tpl-2',
@@ -1318,7 +1318,7 @@ const MOCK_TEMPLATES: WorkflowTemplate[] = [
     category: 'hr',
     trigger: { type: 'entity_created', entityType: 'Employee' },
     conditions: [],
-    actions: [{ id: '', type: 'send_email', emailTemplate: 'welcome_employee' }],
+    actions: [{ type: 'send_email', emailTemplate: 'welcome_employee' }],
   },
   {
     id: 'tpl-3',
@@ -1327,7 +1327,7 @@ const MOCK_TEMPLATES: WorkflowTemplate[] = [
     category: 'sales',
     trigger: { type: 'entity_created', entityType: 'CRMContact' },
     conditions: [],
-    actions: [{ id: '', type: 'send_notification', message: 'A new lead has been added to CRM.' }],
+    actions: [{ type: 'send_notification', message: 'A new lead has been added to CRM.' }],
   },
   {
     id: 'tpl-4',
@@ -1336,7 +1336,7 @@ const MOCK_TEMPLATES: WorkflowTemplate[] = [
     category: 'finance',
     trigger: { type: 'entity_updated', entityType: 'Contract', fieldName: 'status', newValue: 'expiring_soon' },
     conditions: [],
-    actions: [{ id: '', type: 'send_email', emailTemplate: 'contract_expiry' }],
+    actions: [{ type: 'send_email', emailTemplate: 'contract_expiry' }],
   },
   {
     id: 'tpl-5',
@@ -1346,8 +1346,8 @@ const MOCK_TEMPLATES: WorkflowTemplate[] = [
     trigger: { type: 'entity_updated', entityType: 'ServiceTicket', fieldName: 'priority', newValue: 'critical' },
     conditions: [{ field: 'status', operator: 'ne', value: 'resolved' }],
     actions: [
-      { id: '', type: 'send_notification', message: 'Critical ticket requires immediate attention.' },
-      { id: '', type: 'update_field', fieldName: 'assignee', fieldValue: 'escalation-team' },
+      { type: 'send_notification', message: 'Critical ticket requires immediate attention.' },
+      { type: 'update_field', fieldName: 'assignee', fieldValue: 'escalation-team' },
     ],
   },
   {
@@ -1357,7 +1357,7 @@ const MOCK_TEMPLATES: WorkflowTemplate[] = [
     category: 'sales',
     trigger: { type: 'entity_updated', entityType: 'CRMDeal', fieldName: 'stage', newValue: 'won' },
     conditions: [],
-    actions: [{ id: '', type: 'send_notification', message: 'A deal was just marked as Won!' }],
+    actions: [{ type: 'send_notification', message: 'A deal was just marked as Won!' }],
   },
   {
     id: 'tpl-7',
@@ -1366,7 +1366,7 @@ const MOCK_TEMPLATES: WorkflowTemplate[] = [
     category: 'finance',
     trigger: { type: 'schedule', cron: '0 8 * * *' },
     conditions: [],
-    actions: [{ id: '', type: 'ai_analysis', prompt: 'Summarise today\'s outstanding invoices and flag any anomalies.', outputField: 'finance_digest' }],
+    actions: [{ type: 'ai_analysis', prompt: 'Summarise today\'s outstanding invoices and flag any anomalies.', outputField: 'finance_digest' }],
   },
   {
     id: 'tpl-8',
@@ -1375,7 +1375,7 @@ const MOCK_TEMPLATES: WorkflowTemplate[] = [
     category: 'hr',
     trigger: { type: 'entity_updated', entityType: 'Employee', fieldName: 'status', newValue: 'active' },
     conditions: [],
-    actions: [{ id: '', type: 'send_email', emailTemplate: 'portal_invite' }],
+    actions: [{ type: 'send_email', emailTemplate: 'portal_invite' }],
   },
 ];
 

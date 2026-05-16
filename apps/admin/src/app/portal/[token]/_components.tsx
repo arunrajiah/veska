@@ -88,7 +88,7 @@ export function PortalHome({ contact, token }: { contact: PortalContact; token: 
           {cards.map((card) => (
             <button
               key={card.href}
-              onClick={() => router.push(card.href)}
+              onClick={() => router.push(card.href as any)}
               className={`text-left p-6 rounded-xl border bg-white transition-all ${card.colorClasses}`}
             >
               <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-4 ${card.iconClasses}`}>

@@ -166,7 +166,7 @@ export default async function ChannelsPage() {
 
       <p className="mt-6 text-xs text-gray-400">
         Need help? Check the{' '}
-        <Link href="/docs/channels" className="underline hover:text-gray-600">
+        <Link href={"/docs/channels" as any} className="underline hover:text-gray-600">
           channel setup guide
         </Link>
         .

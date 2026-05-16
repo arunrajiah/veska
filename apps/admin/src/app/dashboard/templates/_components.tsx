@@ -56,7 +56,8 @@ function extractVariables(html: string): string[] {
   const matches = html.matchAll(/\{\{(\s*[\w.]+\s*)\}}/g);
   const vars = new Set<string>();
   for (const m of matches) {
-    vars.add(m[1].trim());
+    const group = m[1];
+    if (group !== undefined) vars.add(group.trim());
   }
   return Array.from(vars);
 }

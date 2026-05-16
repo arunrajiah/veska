@@ -54,7 +54,7 @@ function RunResultsPanel({ results }: { results: RunResult }) {
     );
   }
 
-  const columns = Object.keys(rows[0]);
+  const columns = Object.keys(rows[0] ?? {});
 
   return (
     <div className="space-y-4">

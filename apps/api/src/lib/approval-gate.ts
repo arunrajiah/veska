@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm';
 import { ApprovalService } from '@veska/core';
 import type { sharedDb } from '../shared.js';
+import { sendApprovalRequestedEmail } from './notification-mailer.js';
 
 type Database = typeof sharedDb;
 
@@ -64,6 +65,83 @@ export async function checkApprovalRequired(
     ...(amount !== undefined ? { amount } : {}),
   };
   const { triggerId } = await approvalSvc.trigger(triggerReq);
+
+  // Notify approvers fire-and-forget
+  void (async () => {
+    try {
+      // Look up the entity reference for the email subject
+      const entityRow = (await db.execute(sql`
+        SELECT data->>'number' AS ref,
+               COALESCE(data->>'title', data->>'description', data->>'number') AS ref2
+        FROM "entityRecords"
+        WHERE id = ${entityId}::uuid
+          AND "tenantId" = ${tenantId}::uuid
+        LIMIT 1
+      `) as unknown as { rows: Array<{ ref: string | null; ref2: string | null }> }).rows[0];
+
+      const entityRef = entityRow?.ref ?? entityRow?.ref2 ?? entityId;
+
+      // Look up requester details
+      const requesterRow = (await db.execute(sql`
+        SELECT data->>'email' AS email,
+               COALESCE(data->>'name', data->>'full_name', data->>'firstName') AS name
+        FROM "entityRecords"
+        WHERE id = ${triggeredBy}::uuid
+          AND "tenantId" = ${tenantId}::uuid
+        LIMIT 1
+      `) as unknown as { rows: Array<{ email: string | null; name: string | null }> }).rows[0];
+
+      const requesterName = requesterRow?.name ?? 'A team member';
+
+      // Look up approvers from the chain's steps
+      const chainStepsRow = (await db.execute(sql`
+        SELECT ac."steps"
+        FROM "approvalTriggers" at2
+        JOIN "approvalChains" ac ON ac."id" = at2."chainId"
+        WHERE at2."id" = ${triggerId}::uuid
+        LIMIT 1
+      `) as unknown as { rows: Array<{ steps: unknown }> }).rows[0];
+
+      const steps: Array<{ approverEmail?: string; approverId?: string; approverName?: string }> =
+        Array.isArray(chainStepsRow?.steps) ? chainStepsRow.steps as Array<{ approverEmail?: string; approverId?: string; approverName?: string }> : [];
+
+      const approvalsUrl = `${process.env['ADMIN_BASE_URL'] ?? 'http://localhost:3000'}/dashboard/approvals`;
+
+      for (const step of steps) {
+        // Use inline email if present, otherwise look up from entityRecords
+        let approverEmail = step.approverEmail ?? null;
+        let approverName = step.approverName ?? null;
+
+        if (!approverEmail && step.approverId) {
+          const approverRow = (await db.execute(sql`
+            SELECT data->>'email' AS email,
+                   COALESCE(data->>'name', data->>'full_name', data->>'firstName') AS name
+            FROM "entityRecords"
+            WHERE id = ${step.approverId}::uuid
+              AND "tenantId" = ${tenantId}::uuid
+            LIMIT 1
+          `) as unknown as { rows: Array<{ email: string | null; name: string | null }> }).rows[0];
+
+          approverEmail = approverRow?.email ?? null;
+          approverName = approverName ?? approverRow?.name ?? null;
+        }
+
+        if (!approverEmail) continue;
+
+        await sendApprovalRequestedEmail({
+          to: approverEmail,
+          approverName: approverName ?? 'Approver',
+          requesterName,
+          entityType,
+          entityRef,
+          amount,
+          approvalsUrl,
+        });
+      }
+    } catch (err) {
+      console.error('[approval-gate] approver notification failed:', err);
+    }
+  })();
 
   return { required: true, triggerId };
 }

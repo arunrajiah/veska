@@ -45,7 +45,8 @@ export default function TaskForm({ projectId, returnTo }: TaskFormProps) {
       });
       if (!res.ok) throw new Error(await res.text());
       const dest = returnTo ?? (pid ? `/dashboard/projects/${pid}` : '/dashboard/projects/tasks');
-      router.push(dest);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      router.push(dest as any);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create task');

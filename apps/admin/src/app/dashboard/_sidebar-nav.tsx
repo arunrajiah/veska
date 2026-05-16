@@ -209,7 +209,7 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/dashboard/developer/api-keys', icon: Key, label: 'API Keys', requiredPermission: 'admin:read' },
       { href: '/dashboard/developer/webhooks', icon: Webhook, label: 'Webhooks', requiredPermission: 'admin:read' },
-      { href: '/dashboard/developer/audit', icon: ClipboardList, label: 'Audit Log', requiredPermission: 'admin:read' },
+      { href: '/dashboard/settings/audit-log', icon: ClipboardList, label: 'Audit Log', requiredPermission: 'admin:read' },
       { href: '/dashboard/import-export', icon: ArrowUpDown, label: 'Import / Export', requiredPermission: 'admin:read' },
     ],
   },
@@ -231,7 +231,7 @@ const NAV_SECTIONS: NavSection[] = [
       { href: '/dashboard/settings/currency', icon: Globe, label: 'Currency' },
       { href: '/dashboard/settings/custom-fields', icon: Sliders, label: 'Custom Fields' },
       { href: '/dashboard/plugins', icon: Puzzle, label: 'Plugins' },
-      { href: '/dashboard/audit', icon: ScrollText, label: 'Audit log' },
+      { href: '/dashboard/settings/audit-log', icon: ScrollText, label: 'Audit log' },
       { href: '/dashboard/channels', icon: Radio, label: 'Channels' },
       { href: '/dashboard/settings/security', icon: Shield, label: 'Security' },
       { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
@@ -313,7 +313,7 @@ export function SidebarNav({ onAIClick }: SidebarNavProps) {
         <button
           onClick={onAIClick}
           type="button"
-          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors"
+          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors"
         >
           <Bot size={15} className="flex-shrink-0 text-indigo-600" />
           AI Assistant
@@ -321,21 +321,21 @@ export function SidebarNav({ onAIClick }: SidebarNavProps) {
         </button>
         <Link
           href="/dashboard/analytics"
-          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors"
         >
           <BarChart2 size={15} className="flex-shrink-0" />
           Analytics
         </Link>
         <Link
           href="/dashboard/workflows"
-          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors"
         >
           <Zap size={15} className="flex-shrink-0" />
           Workflows
         </Link>
         <Link
           href="/dashboard/notifications"
-          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors"
         >
           <Bell size={15} className="flex-shrink-0" />
           <span className="flex-1">Notifications</span>
@@ -345,7 +345,7 @@ export function SidebarNav({ onAIClick }: SidebarNavProps) {
       {visibleSections.map((section, si) => (
         <div key={si} className="mb-3">
           {section.label && (
-            <p className="px-2 mb-1 text-xs font-medium text-gray-400 uppercase tracking-wider">
+            <p className="px-2 mb-1 text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider">
               {section.label}
             </p>
           )}
@@ -353,7 +353,7 @@ export function SidebarNav({ onAIClick }: SidebarNavProps) {
             <Link
               key={item.href}
               href={item.href as any}
-              className="flex items-center gap-2.5 px-2.5 py-2 text-sm text-gray-600 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-colors"
+              className="flex items-center gap-2.5 px-2.5 py-2 text-sm text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors"
             >
               <item.icon size={15} className="flex-shrink-0" />
               <span className="flex-1">{item.label}</span>

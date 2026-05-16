@@ -101,7 +101,7 @@ export default async function LeaveDetailPage({ params }: { params: { id: string
         </dl>
       </div>
 
-      {d['notes'] && (
+      {d['notes'] != null && d['notes'] !== '' && (
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
           <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
             <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Notes</h2>

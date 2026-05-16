@@ -83,7 +83,7 @@ function ServiceCard({
   svc,
 }: {
   name: string;
-  svc?: { status: string; latencyMs?: number };
+  svc?: { status: string; latencyMs?: number } | undefined;
 }) {
   const { ok, label, latency } = serviceStatus(svc);
   return (

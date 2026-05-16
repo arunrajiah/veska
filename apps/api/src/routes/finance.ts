@@ -8,6 +8,7 @@ import { sharedQueueService } from '../shared.js';
 import type { TenantContext } from '../middleware/tenant-context.js';
 import { dispatchWebhookEvent } from '../middleware/webhook-events.js';
 import { checkApprovalRequired } from '../lib/approval-gate.js';
+import { sendInvoiceSentEmail } from '../lib/notification-mailer.js';
 
 export const financeRouter = new Hono<{ Variables: TenantContext }>();
 
@@ -307,6 +308,37 @@ financeRouter.patch('/invoices/:id/send', async (c) => {
     resourceId: id,
     data: { id, tenantId, status: 'sent' },
   });
+
+  // Send invoice email to customer (fire-and-forget)
+  void (async () => {
+    try {
+      const customerEmail =
+        (invoiceData['customerEmail'] as string | undefined) ??
+        (invoiceData['customer_email'] as string | undefined) ??
+        ((invoiceData['customer'] as Record<string, unknown> | undefined)?.['email'] as string | undefined);
+
+      if (!customerEmail) return;
+
+      const portalBaseUrl = process.env['PORTAL_BASE_URL'] ?? 'http://localhost:3000';
+      const portalUrl = `${portalBaseUrl}/invoices/${id}`;
+
+      await sendInvoiceSentEmail({
+        to: customerEmail,
+        customerName:
+          (invoiceData['customer_name'] as string | undefined) ??
+          (invoiceData['clientName'] as string | undefined) ??
+          ((invoiceData['customer'] as Record<string, unknown> | undefined)?.['name'] as string | undefined) ??
+          'Valued Customer',
+        invoiceNumber: (invoiceData['number'] as string | undefined) ?? id,
+        amount: (invoiceData['total'] as number | undefined) ?? 0,
+        currency: (invoiceData['currency'] as string | undefined) ?? 'USD',
+        dueDate: (invoiceData['due_date'] as string | undefined) ?? '',
+        portalUrl,
+      });
+    } catch (err) {
+      console.error('[finance] invoice sent email failed:', err);
+    }
+  })();
 
   return c.json(updated);
 });

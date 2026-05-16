@@ -142,7 +142,7 @@ export default async function DashboardOverviewPage() {
 
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-baseline gap-2">
-        <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Good morning, Veska Admin</h1>
+        <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-gray-100">Good morning, Veska Admin</h1>
         <span className="text-sm text-gray-400 hidden sm:inline">&middot; {todayLabel()}</span>
       </div>
 
@@ -155,12 +155,12 @@ export default async function DashboardOverviewPage() {
       {/* ── Top stat chips ──────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {/* Outstanding invoices */}
-        <div className="bg-white border border-gray-200 rounded-xl px-5 py-4 flex items-center gap-3 flex-1">
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-5 py-4 flex items-center gap-3 flex-1">
           <div className="w-9 h-9 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0">
             <DollarSign size={18} className="text-orange-500" />
           </div>
           <div>
-            <p className="text-lg font-semibold text-gray-900">
+            <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               {s ? formatCurrency(s.finance.totalOutstandingInvoices) : dash}
             </p>
             <p className="text-xs text-gray-500">Outstanding</p>
@@ -168,12 +168,12 @@ export default async function DashboardOverviewPage() {
         </div>
 
         {/* Active employees */}
-        <div className="bg-white border border-gray-200 rounded-xl px-5 py-4 flex items-center gap-3 flex-1">
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-5 py-4 flex items-center gap-3 flex-1">
           <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
             <Users size={18} className="text-blue-500" />
           </div>
           <div>
-            <p className="text-lg font-semibold text-gray-900">
+            <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               {s ? s.hr.activeEmployees : dash}
             </p>
             <p className="text-xs text-gray-500">Employees</p>
@@ -181,12 +181,12 @@ export default async function DashboardOverviewPage() {
         </div>
 
         {/* Open orders */}
-        <div className="bg-white border border-gray-200 rounded-xl px-5 py-4 flex items-center gap-3 flex-1">
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-5 py-4 flex items-center gap-3 flex-1">
           <div className="w-9 h-9 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
             <ShoppingCart size={18} className="text-green-600" />
           </div>
           <div>
-            <p className="text-lg font-semibold text-gray-900">
+            <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               {s ? s.sales.openOrdersCount : dash}
             </p>
             <p className="text-xs text-gray-500">Open Orders</p>
@@ -194,13 +194,13 @@ export default async function DashboardOverviewPage() {
         </div>
 
         {/* Pending approvals */}
-        <div className="bg-white border border-gray-200 rounded-xl px-5 py-4 flex items-center gap-3 flex-1">
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-5 py-4 flex items-center gap-3 flex-1">
           <div className="w-9 h-9 rounded-lg bg-indigo-100 flex items-center justify-center flex-shrink-0">
             <CheckSquare size={18} className="text-indigo-500" />
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <p className="text-lg font-semibold text-gray-900">
+              <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 {s ? s.purchasing.pendingApprovals : dash}
               </p>
               {s && s.purchasing.pendingApprovals > 0 && (
@@ -313,7 +313,7 @@ export default async function DashboardOverviewPage() {
         </div>
 
         {/* Right column — Activity Feed */}
-        <div className="bg-white border border-gray-200 rounded-xl p-5 h-full">
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 h-full">
           <div className="flex items-center gap-2 mb-4">
             <Clock size={15} className="text-gray-400" />
             <h2 className="text-sm font-semibold text-gray-900">Recent Activity</h2>
@@ -360,7 +360,7 @@ export default async function DashboardOverviewPage() {
         ].map((action) => (
           <Link
             key={action.label}
-            href={action.href}
+            href={action.href as any}
             className="bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition-colors"
           >
             {action.label}
@@ -383,12 +383,12 @@ function KpiCard({
 }: {
   label: string;
   value: string;
-  valueColor?: string;
+  valueColor?: string | undefined;
 }) {
   return (
-    <div className="bg-white border border-gray-100 rounded-xl px-4 py-4">
-      <p className={`text-2xl font-semibold ${valueColor ?? 'text-gray-900'}`}>{value}</p>
-      <p className="text-xs text-gray-500 mt-0.5">{label}</p>
+    <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl px-4 py-4">
+      <p className={`text-2xl font-semibold ${valueColor ?? 'text-gray-900 dark:text-gray-100'}`}>{value}</p>
+      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{label}</p>
     </div>
   );
 }

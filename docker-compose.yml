@@ -78,6 +78,37 @@ services:
           path: ./apps/admin/src
           target: /app/apps/admin/src
 
+  marketing:
+    build:
+      context: .
+      dockerfile: apps/marketing/Dockerfile
+    restart: unless-stopped
+    ports:
+      - '3002:3002'
+    environment:
+      NODE_ENV: production
+    develop:
+      watch:
+        - action: sync
+          path: ./apps/marketing/src
+          target: /app/apps/marketing/src
+
+  marketplace:
+    build:
+      context: .
+      dockerfile: apps/marketplace/Dockerfile
+    restart: unless-stopped
+    ports:
+      - '3003:3003'
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+      NODE_ENV: production
+    develop:
+      watch:
+        - action: sync
+          path: ./apps/marketplace/src
+          target: /app/apps/marketplace/src
+
 volumes:
   postgres_data:
   redis_data:

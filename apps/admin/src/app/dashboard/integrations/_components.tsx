@@ -199,7 +199,7 @@ interface AddSlideoverProps {
   open: boolean;
   onClose: () => void;
   onAdded: () => void;
-  defaultProvider?: string;
+  defaultProvider?: string | undefined;
   showToast: (m: string, t?: 'success' | 'error') => void;
   editIntegration?: Integration | null;
 }
@@ -342,7 +342,7 @@ function AddSlideover({ open, onClose, onAdded, defaultProvider, showToast, edit
 // ---------------------------------------------------------------------------
 // Test status badge
 // ---------------------------------------------------------------------------
-function TestStatusBadge({ status }: { status?: string | null }) {
+function TestStatusBadge({ status }: { status?: string | null | undefined }) {
   if (!status) return <span className="text-xs text-gray-400">—</span>;
   const map: Record<string, string> = {
     success: 'bg-green-50 text-green-700 border-green-200',
@@ -506,7 +506,7 @@ export function IntegrationsClient() {
       const d = (await res.json()) as { status?: string; message?: string };
       const status = res.ok ? (d.status ?? 'success') : 'failed';
       setIntegrations((prev) =>
-        prev.map((x) => x.id === id ? { ...x, testStatus: status as Integration['testStatus'], lastTestedAt: new Date().toISOString() } : x)
+        prev.map((x) => x.id === id ? { ...x, testStatus: status as 'success' | 'pending' | 'failed' | null, lastTestedAt: new Date().toISOString() } : x)
       );
       showToast(res.ok ? 'Test passed' : (d.message ?? 'Test failed'), res.ok ? 'success' : 'error');
     } catch {

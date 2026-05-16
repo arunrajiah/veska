@@ -79,17 +79,17 @@ function StatusBadge({ status }: { status: string }) {
 function normalizeItems(run: PayrollRunDetail): PayrollRunItem[] {
   if (run.items && run.items.length > 0) return run.items;
   if (run.payslips && run.payslips.length > 0) {
-    return run.payslips.map((ps) => ({
+    return run.payslips.map((ps): PayrollRunItem => ({
       id: ps.id,
-      employeeName: ps.data?.employee_name,
-      employeeEmail: ps.data?.employee_email,
-      hoursWorked: ps.data?.hours_worked,
-      grossPay: ps.data?.gross_pay,
-      tax: ps.data?.tax,
-      socialSecurity: ps.data?.social_security,
-      medicare: ps.data?.medicare,
-      totalDeductions: ps.data?.total_deductions,
-      netPay: ps.data?.net_pay,
+      ...(ps.data?.employee_name !== undefined && { employeeName: ps.data.employee_name }),
+      ...(ps.data?.employee_email !== undefined && { employeeEmail: ps.data.employee_email }),
+      ...(ps.data?.hours_worked !== undefined && { hoursWorked: ps.data.hours_worked }),
+      ...(ps.data?.gross_pay !== undefined && { grossPay: ps.data.gross_pay }),
+      ...(ps.data?.tax !== undefined && { tax: ps.data.tax }),
+      ...(ps.data?.social_security !== undefined && { socialSecurity: ps.data.social_security }),
+      ...(ps.data?.medicare !== undefined && { medicare: ps.data.medicare }),
+      ...(ps.data?.total_deductions !== undefined && { totalDeductions: ps.data.total_deductions }),
+      ...(ps.data?.net_pay !== undefined && { netPay: ps.data.net_pay }),
     }));
   }
   return [];

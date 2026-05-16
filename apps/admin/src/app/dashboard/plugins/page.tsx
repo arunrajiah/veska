@@ -42,7 +42,7 @@ export default async function PluginsPage() {
           </div>
         </div>
         <Link
-          href="/dashboard/plugins/marketplace"
+          href={"/dashboard/plugins/marketplace" as any}
           className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
         >
           Browse marketplace
@@ -56,7 +56,7 @@ export default async function PluginsPage() {
           <p className="text-gray-400 text-sm">
             Browse the{' '}
             <Link
-              href="/dashboard/plugins/marketplace"
+              href={"/dashboard/plugins/marketplace" as any}
               className="text-gray-600 underline hover:text-gray-900"
             >
               marketplace
@@ -98,7 +98,7 @@ export default async function PluginsPage() {
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <Link
-                    href={`/dashboard/plugins/${plugin.pluginId}/run`}
+                    href={`/dashboard/plugins/${plugin.pluginId}/run` as any}
                     className="text-xs text-gray-500 hover:text-gray-900 px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
                   >
                     Run function

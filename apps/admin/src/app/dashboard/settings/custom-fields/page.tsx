@@ -88,7 +88,7 @@ export default async function CustomFieldsPage() {
       ) : (
         <div className="space-y-6">
           {entityTypes.map((entityType) => {
-            const entityDefs = grouped[entityType].sort(
+            const entityDefs = (grouped[entityType] ?? []).sort(
               (a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0),
             );
             const label = ENTITY_LABELS[entityType] ?? entityType;
@@ -173,7 +173,7 @@ export default async function CustomFieldsPage() {
                             <td className="px-4 py-3">
                               <div className="flex items-center justify-end gap-2">
                                 <Link
-                                  href={`/dashboard/settings/custom-fields/${def.id}/edit`}
+                                  href={`/dashboard/settings/custom-fields/${def.id}/edit` as any}
                                   className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-gray-900 border border-gray-200 px-2 py-1 rounded-lg transition-colors"
                                 >
                                   <Pencil size={11} />

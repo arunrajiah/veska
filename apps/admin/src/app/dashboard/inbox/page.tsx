@@ -78,7 +78,7 @@ export default async function InboxPage() {
             events.map((event) => {
               const meta = event.metadata ?? {};
               const channelKey = (meta.channelName ?? meta.channel ?? 'default').toLowerCase();
-              const Icon = CHANNEL_ICONS[channelKey] ?? CHANNEL_ICONS.default;
+              const Icon = CHANNEL_ICONS[channelKey] ?? CHANNEL_ICONS['default'] ?? MessageSquare;
               const sender = meta.senderChannelId ?? meta.identityId ?? event.action;
               const preview = meta.response
                 ? truncate(meta.response, 80)

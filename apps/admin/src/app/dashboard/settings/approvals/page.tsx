@@ -151,7 +151,7 @@ export default async function ApprovalsSettingsPage() {
 
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <Link
-                    href={`/dashboard/settings/approvals/${chain.id}/edit`}
+                    href={`/dashboard/settings/approvals/${chain.id}/edit` as any}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
                   >
                     <Pencil size={13} />

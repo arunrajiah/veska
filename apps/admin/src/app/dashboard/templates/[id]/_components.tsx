@@ -55,7 +55,7 @@ export function TemplateDetailClient({ template, documents: initialDocs }: Props
   const [viewHtml, setViewHtml] = useState('');
 
   const vars = template.variables ?? [];
-  const badge = TYPE_BADGE[template.type] ?? TYPE_BADGE.custom;
+  const badge = TYPE_BADGE[template.type] ?? TYPE_BADGE['custom'] ?? { bg: 'bg-gray-100', text: 'text-gray-600' };
 
   async function handleRender(e: React.FormEvent) {
     e.preventDefault();

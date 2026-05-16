@@ -34,7 +34,7 @@ export function ResetPasswordClient() {
             Invalid or missing reset link.
           </div>
           <Link
-            href="/forgot-password"
+            href={"/forgot-password" as any}
             className="block w-full text-center text-sm text-indigo-600 hover:text-indigo-700 font-medium py-2"
           >
             Request a new reset link
@@ -126,7 +126,7 @@ export function ResetPasswordClient() {
             {error === 'This reset link has expired or already been used. Request a new one.' && (
               <>
                 {' '}
-                <Link href="/forgot-password" className="underline font-medium">
+                <Link href={"/forgot-password" as any} className="underline font-medium">
                   Request a new one.
                 </Link>
               </>

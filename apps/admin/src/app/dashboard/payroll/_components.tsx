@@ -361,13 +361,14 @@ function AnalyticsTab({ summary }: { summary: PayrollSummary }) {
         <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-5">Monthly Payroll Cost</h3>
         <div className="flex items-end gap-2 h-40">
           {MONTHS.map((m, i) => {
-            const h = totals[i] > 0 ? Math.max(4, Math.round((totals[i] / maxVal) * 100)) : 2;
+            const total = totals[i] ?? 0;
+            const h = total > 0 ? Math.max(4, Math.round((total / maxVal) * 100)) : 2;
             return (
               <div key={m} className="flex-1 flex flex-col items-center gap-1">
                 <div
                   className="w-full rounded-t bg-indigo-500 transition-all"
-                  style={{ height: `${h}%`, minHeight: totals[i] > 0 ? '6px' : '2px' }}
-                  title={fmt(totals[i])}
+                  style={{ height: `${h}%`, minHeight: total > 0 ? '6px' : '2px' }}
+                  title={fmt(total)}
                 />
                 <span className="text-xs text-gray-400">{m}</span>
               </div>
@@ -386,7 +387,7 @@ export function PayrollClient({ runs: initialRuns, summary }: { runs: PayrollRun
   const router = useRouter();
 
   const ytd = summary.ytdTotal ?? runs.reduce((s, r) => s + (r.totalGross ?? 0), 0);
-  const headcount = summary.headcount ?? (runs.length > 0 ? runs[runs.length - 1].employeeCount : 0);
+  const headcount = summary.headcount ?? (runs.length > 0 ? (runs[runs.length - 1]?.employeeCount ?? 0) : 0);
   const lastPaid = summary.lastPaidDate
     ?? runs.filter((r) => r.status === 'paid').sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0]?.periodEnd;
 

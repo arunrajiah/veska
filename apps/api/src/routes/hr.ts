@@ -5,6 +5,7 @@ import { eq, and, isNull, sql } from 'drizzle-orm';
 import { schema, ApprovalService } from '@veska/core';
 import type { TenantContext } from '../middleware/tenant-context.js';
 import { dispatchWebhookEvent } from '../middleware/webhook-events.js';
+import { sendLeaveDecisionEmail } from '../lib/notification-mailer.js';
 
 export const hrRouter = new Hono<{ Variables: TenantContext }>();
 
@@ -328,6 +329,47 @@ hrRouter.patch(
       })
       .where(eq(schema.entityRecords.id, id))
       .returning();
+
+    // Send leave decision email to employee (fire-and-forget)
+    if (status === 'approved' || status === 'rejected') {
+      const leaveData = leave.data as Record<string, unknown>;
+      const employeeId = leaveData['employee_id'] as string | undefined;
+      const employeeName = (leaveData['employee_name'] as string | undefined) ?? 'there';
+
+      void (async () => {
+        try {
+          let email: string | null = null;
+          let resolvedName = employeeName;
+
+          if (employeeId) {
+            const empRow = (await db.execute(sql`
+              SELECT data->>'email' AS email,
+                     COALESCE(data->>'name', data->>'full_name', data->>'first_name') AS name
+              FROM "entityRecords"
+              WHERE id = ${employeeId}::uuid
+                AND "tenantId" = ${tenantId}::uuid
+              LIMIT 1
+            `) as unknown as { rows: Array<{ email: string | null; name: string | null }> }).rows[0];
+
+            email = empRow?.email ?? null;
+            resolvedName = empRow?.name ?? resolvedName;
+          }
+
+          if (!email) return;
+
+          await sendLeaveDecisionEmail({
+            to: email,
+            employeeName: resolvedName,
+            leaveType: (leaveData['leave_type'] as string | undefined) ?? 'annual',
+            startDate: (leaveData['start_date'] as string | undefined) ?? '',
+            endDate: (leaveData['end_date'] as string | undefined) ?? '',
+            decision: status,
+          });
+        } catch (err) {
+          console.error('[hr] leave decision email failed:', err);
+        }
+      })();
+    }
 
     return c.json(updated);
   },

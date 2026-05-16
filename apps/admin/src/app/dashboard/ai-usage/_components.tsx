@@ -322,7 +322,7 @@ export function AIUsageClient() {
           </span>
         </div>
         <Link
-          href="/dashboard/billing"
+          href={"/dashboard/billing" as any}
           className="flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
         >
           Upgrade plan
@@ -455,7 +455,7 @@ export function AIUsageClient() {
           </div>
           {!(quota?.anomalyDetection ?? false) && (
             <Link
-              href="/dashboard/billing"
+              href={"/dashboard/billing" as any}
               className="text-xs font-medium text-indigo-600 hover:text-indigo-800 transition-colors border border-indigo-200 rounded-lg px-3 py-1.5 hover:bg-indigo-50"
             >
               Upgrade to Business

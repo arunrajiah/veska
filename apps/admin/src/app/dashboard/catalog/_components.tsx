@@ -907,7 +907,7 @@ function PriceResolver({ products, priceLists }: { products: Product[]; priceLis
           quantity: parseInt(quantity, 10) || 1,
         }),
       });
-      setResult({ effectivePrice: data.effective_price, discount: data.discount_percent });
+      setResult({ effectivePrice: data.effective_price, ...(data.discount_percent !== undefined && { discount: data.discount_percent }) });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to resolve price');
     } finally {
