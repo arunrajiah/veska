@@ -90,11 +90,19 @@ lmsRouter.get('/summary', async (c) => {
   }
 });
 
+const coursesQuerySchema = z.object({
+  status: z.string().optional(),
+  category: z.string().optional(),
+  level: z.string().optional(),
+  limit: z.coerce.number().min(1).max(100).default(50),
+  offset: z.coerce.number().min(0).default(0),
+});
+
 // GET /lms/courses
-lmsRouter.get('/courses', async (c) => {
+lmsRouter.get('/courses', zValidator('query', coursesQuerySchema), async (c) => {
   try {
     const { tenantId } = c.get('tenantCtx');
-    const { status, category, level } = c.req.query();
+    const { status, category, level } = c.req.valid('query');
 
     const rows = await sharedDb.execute(sql`
       SELECT c.*,
@@ -268,11 +276,19 @@ lmsRouter.put('/courses/:id/publish', async (c) => {
 
 // ── Enrollments ───────────────────────────────────────────────
 
+const enrollmentsQuerySchema = z.object({
+  courseId: z.string().optional(),
+  userId: z.string().optional(),
+  status: z.string().optional(),
+  limit: z.coerce.number().min(1).max(100).default(50),
+  offset: z.coerce.number().min(0).default(0),
+});
+
 // GET /lms/enrollments
-lmsRouter.get('/enrollments', async (c) => {
+lmsRouter.get('/enrollments', zValidator('query', enrollmentsQuerySchema), async (c) => {
   try {
     const { tenantId } = c.get('tenantCtx');
-    const { courseId, userId, status } = c.req.query();
+    const { courseId, userId, status } = c.req.valid('query');
 
     const rows = await sharedDb.execute(sql`
       SELECT e.*, c.title AS "courseTitle", c."passingScore"
@@ -451,11 +467,18 @@ lmsRouter.put(
 
 // ── Certifications ────────────────────────────────────────────
 
+const certificationsQuerySchema = z.object({
+  userId: z.string().optional(),
+  courseId: z.string().optional(),
+  limit: z.coerce.number().min(1).max(100).default(50),
+  offset: z.coerce.number().min(0).default(0),
+});
+
 // GET /lms/certifications
-lmsRouter.get('/certifications', async (c) => {
+lmsRouter.get('/certifications', zValidator('query', certificationsQuerySchema), async (c) => {
   try {
     const { tenantId } = c.get('tenantCtx');
-    const { userId, courseId } = c.req.query();
+    const { userId, courseId } = c.req.valid('query');
 
     const rows = await sharedDb.execute(sql`
       SELECT * FROM "lmsCertifications"

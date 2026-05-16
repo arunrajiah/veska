@@ -10,7 +10,10 @@ import {
   CheckCircle,
   Sparkles,
   X,
+  Zap,
 } from 'lucide-react';
+import { useRealtimeEvents } from '@/hooks/useRealtimeEvents.js';
+import type { RealtimeEvent } from '@/hooks/useRealtimeEvents.js';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? '';
@@ -79,6 +82,28 @@ function iconBg(type: string): string {
   }
 }
 
+const MAX_LIVE_EVENTS = 20;
+
+interface LiveEvent {
+  id: string;
+  type: string;
+  receivedAt: string;
+  read: boolean;
+}
+
+function liveEventLabel(type: string): string {
+  const map: Record<string, string> = {
+    'invoice.created': 'Invoice created',
+    'invoice.sent': 'Invoice sent',
+    'invoice.paid': 'Invoice paid',
+    'expense.submitted': 'Expense submitted',
+    'expense.approved': 'Expense approved',
+    'ticket.created': 'Support ticket created',
+    'ticket.updated': 'Support ticket updated',
+  };
+  return map[type] ?? type;
+}
+
 export default function NotificationBell({ userId = 'demo-user' }: { userId?: string }) {
   const router = useRouter();
   const [count, setCount] = useState(0);
@@ -87,6 +112,26 @@ export default function NotificationBell({ userId = 'demo-user' }: { userId?: st
   const [loadingList, setLoadingList] = useState(false);
   const [markingAll, setMarkingAll] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // In-memory live SSE events (session only, no backend persistence)
+  const [liveEvents, setLiveEvents] = useState<LiveEvent[]>([]);
+  const unreadLive = liveEvents.filter((e) => !e.read).length;
+
+  useRealtimeEvents(
+    (event: RealtimeEvent) => {
+      setLiveEvents((prev) => {
+        const next: LiveEvent = {
+          id: `${event.type}-${Date.now()}`,
+          type: event.type,
+          receivedAt: new Date().toISOString(),
+          read: false,
+        };
+        // FIFO: keep max MAX_LIVE_EVENTS
+        return [next, ...prev].slice(0, MAX_LIVE_EVENTS);
+      });
+    },
+    { enabled: true },
+  );
 
   const fetchCount = useCallback(async () => {
     try {
@@ -163,7 +208,8 @@ export default function NotificationBell({ userId = 'demo-user' }: { userId?: st
     }
     if (actionUrl) {
       setOpen(false);
-      router.push(actionUrl);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      router.push(actionUrl as any);
     }
   }
 
@@ -183,6 +229,12 @@ export default function NotificationBell({ userId = 'demo-user' }: { userId?: st
     }
   }
 
+  const totalUnread = count + unreadLive;
+
+  function markAllLiveRead() {
+    setLiveEvents((prev) => prev.map((e) => ({ ...e, read: true })));
+  }
+
   return (
     <div ref={containerRef} className="relative">
       <button
@@ -191,9 +243,9 @@ export default function NotificationBell({ userId = 'demo-user' }: { userId?: st
         aria-label="Notifications"
       >
         <Bell size={15} />
-        {count > 0 && (
+        {totalUnread > 0 && (
           <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-0.5 leading-none">
-            {count > 99 ? '99+' : count}
+            {totalUnread > 99 ? '99+' : totalUnread}
           </span>
         )}
       </button>
@@ -205,7 +257,7 @@ export default function NotificationBell({ userId = 'demo-user' }: { userId?: st
             <span className="text-sm font-semibold text-gray-900">Notifications</span>
             <div className="flex items-center gap-2">
               <button
-                onClick={() => void markAllRead()}
+                onClick={() => { void markAllRead(); markAllLiveRead(); }}
                 disabled={markingAll}
                 className="text-xs text-indigo-600 hover:text-indigo-800 disabled:opacity-50 transition-colors"
               >
@@ -220,11 +272,44 @@ export default function NotificationBell({ userId = 'demo-user' }: { userId?: st
             </div>
           </div>
 
-          {/* List */}
-          <div className="max-h-96 overflow-y-auto">
+          <div className="max-h-[28rem] overflow-y-auto">
+            {/* Live SSE events section */}
+            {liveEvents.length > 0 && (
+              <>
+                <div className="px-4 py-2 bg-gray-50 border-b border-gray-100 flex items-center gap-1.5">
+                  <Zap size={11} className="text-amber-500" />
+                  <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">
+                    Live activity
+                  </span>
+                </div>
+                {liveEvents.slice(0, 5).map((ev) => (
+                  <div
+                    key={ev.id}
+                    className={`flex items-start gap-3 px-4 py-2.5 border-b border-gray-50 ${
+                      !ev.read ? 'bg-amber-50/40' : ''
+                    }`}
+                  >
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center">
+                      <Zap size={11} className="text-amber-600" />
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-gray-900 truncate">
+                        {liveEventLabel(ev.type)}
+                      </p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">{timeAgo(ev.receivedAt)}</p>
+                    </div>
+                    {!ev.read && (
+                      <span className="flex-shrink-0 w-2 h-2 rounded-full bg-amber-400 mt-1.5" />
+                    )}
+                  </div>
+                ))}
+              </>
+            )}
+
+            {/* Persisted notifications from API */}
             {loadingList ? (
               <div className="px-4 py-8 text-center text-xs text-gray-400">Loading…</div>
-            ) : notifications.length === 0 ? (
+            ) : notifications.length === 0 && liveEvents.length === 0 ? (
               <div className="px-4 py-8 text-center text-xs text-gray-400">
                 No notifications yet.
               </div>

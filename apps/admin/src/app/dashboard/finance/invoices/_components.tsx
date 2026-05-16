@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useTransition, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Plus, Trash2, Send, X } from 'lucide-react';
+import { useRealtimeEvents } from '@/hooks/useRealtimeEvents.js';
 import type { Invoice } from './page.js';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
@@ -393,6 +394,8 @@ export function InvoicesClient({
   const [showNew, setShowNew] = useState(openNew);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [sendingId, setSendingId] = useState<string | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [, startTransition] = useTransition();
 
   useEffect(() => {
     if (toast) {
@@ -400,6 +403,20 @@ export function InvoicesClient({
       return () => clearTimeout(t);
     }
   }, [toast]);
+
+  // Realtime: refresh invoice list when invoice events arrive via SSE
+  const handleRealtimeUpdate = useCallback(() => {
+    setIsUpdating(true);
+    startTransition(() => {
+      router.refresh();
+    });
+    setTimeout(() => setIsUpdating(false), 1_500);
+  }, [router]);
+
+  useRealtimeEvents(
+    ['invoice.created', 'invoice.sent', 'invoice.paid'],
+    handleRealtimeUpdate,
+  );
 
   const filtered =
     activeTab === 'all'
@@ -470,7 +487,12 @@ export function InvoicesClient({
 
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900">Invoices</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-semibold text-gray-900">Invoices</h1>
+          {isUpdating && (
+            <span className="text-xs text-gray-400 animate-pulse">Updating…</span>
+          )}
+        </div>
         <button
           onClick={() => setShowNew(true)}
           className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"

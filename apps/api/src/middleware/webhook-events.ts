@@ -5,6 +5,7 @@
 
 import { WebhookDispatcherService } from '@veska/core';
 import type { Database } from '@veska/core';
+import { broadcastToTenant } from '../routes/sse.js';
 
 export interface WebhookEventOpts {
   tenantId: string;
@@ -21,6 +22,15 @@ export interface WebhookEventOpts {
  */
 export function dispatchWebhookEvent(opts: WebhookEventOpts): void {
   const svc = new WebhookDispatcherService(opts.db);
+  // Broadcast immediately to any connected SSE subscribers for this tenant
+  broadcastToTenant(opts.tenantId, {
+    type: opts.event,
+    payload: {
+      resourceId: opts.resourceId,
+      data: opts.data,
+    },
+  });
+
   void svc
     .dispatch({
       event: opts.event,

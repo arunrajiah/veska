@@ -7,15 +7,22 @@ import { schema } from '@veska/core';
 import { sharedQueueService } from '../shared.js';
 import type { TenantContext } from '../middleware/tenant-context.js';
 import { dispatchWebhookEvent } from '../middleware/webhook-events.js';
+import { checkApprovalRequired } from '../lib/approval-gate.js';
 
 export const financeRouter = new Hono<{ Variables: TenantContext }>();
 
 // ── Invoices ──────────────────────────────────────────────────
 
-financeRouter.get('/invoices', async (c) => {
+const invoicesQuerySchema = z.object({
+  status: z.string().optional(),
+  customer_id: z.string().optional(),
+  limit: z.coerce.number().min(1).max(100).default(50),
+  offset: z.coerce.number().min(0).default(0),
+});
+
+financeRouter.get('/invoices', zValidator('query', invoicesQuerySchema), async (c) => {
   const { db, tenantId } = c.get('tenantCtx');
-  const status = c.req.query('status');
-  const customerId = c.req.query('customer_id');
+  const { status, customer_id: customerId } = c.req.valid('query');
 
   const conditions = [
     eq(schema.entityRecords.tenantId, tenantId),
@@ -115,7 +122,7 @@ financeRouter.get('/invoices/:id', async (c) => {
 
 financeRouter.patch('/invoices/:id/send', async (c) => {
   const id = c.req.param('id');
-  const { db, tenantId } = c.get('tenantCtx');
+  const { db, tenantId, identityId } = c.get('tenantCtx');
 
   const invoice = await db.query.entityRecords.findFirst({
     where: and(
@@ -129,6 +136,23 @@ financeRouter.patch('/invoices/:id/send', async (c) => {
   if (!invoice) return c.json({ error: 'Invoice not found' }, 404);
 
   const invoiceData = invoice.data as Record<string, unknown>;
+  const invoiceTotal = typeof invoiceData['total'] === 'number' ? invoiceData['total'] : undefined;
+
+  // Check if an approval chain is configured for invoices
+  const approvalCheck = await checkApprovalRequired(db, tenantId, 'invoice', id, identityId, invoiceTotal);
+  if (approvalCheck.required) {
+    const [pendingInvoice] = await db
+      .update(schema.entityRecords)
+      .set({
+        data: { ...invoiceData, status: 'pending_approval' },
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.entityRecords.id, id))
+      .returning();
+
+    return c.json({ status: 'pending_approval', approvalTriggerId: approvalCheck.triggerId, invoice: pendingInvoice });
+  }
+
   const [updated] = await db
     .update(schema.entityRecords)
     .set({
@@ -263,11 +287,17 @@ financeRouter.patch(
 
 // ── Ledger ────────────────────────────────────────────────────
 
-financeRouter.get('/ledger', async (c) => {
+const ledgerQuerySchema = z.object({
+  account_code: z.string().optional(),
+  period_year: z.string().optional(),
+  period_month: z.string().optional(),
+  limit: z.coerce.number().min(1).max(100).default(50),
+  offset: z.coerce.number().min(0).default(0),
+});
+
+financeRouter.get('/ledger', zValidator('query', ledgerQuerySchema), async (c) => {
   const { db, tenantId } = c.get('tenantCtx');
-  const accountCode = c.req.query('account_code');
-  const periodYear = c.req.query('period_year');
-  const periodMonth = c.req.query('period_month');
+  const { account_code: accountCode, period_year: periodYear, period_month: periodMonth } = c.req.valid('query');
 
   const conditions = [eq(schema.ledgerEntries.tenantId, tenantId)];
 

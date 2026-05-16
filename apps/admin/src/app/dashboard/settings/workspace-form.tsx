@@ -2,70 +2,66 @@
 
 import { useState } from 'react';
 
-// NOTE: There is no tenant settings PUT endpoint in the current API.
-// When one is available, replace the simulated save below with:
-//   await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/tenants/${tenantId}/settings`, {
-//     method: 'PATCH',
-//     headers: { 'Content-Type': 'application/json', ... },
-//     body: JSON.stringify(form),
-//   });
-// For now we simulate a 500ms save delay and show success state.
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 interface WorkspaceFormValues {
-  name: string;
-  slug: string;
+  companyName: string;
   timezone: string;
   currency: string;
 }
 
 const DEFAULTS: WorkspaceFormValues = {
-  name: 'My Business',
-  slug: 'my-business',
+  companyName: '',
   timezone: 'UTC',
   currency: 'USD',
 };
 
-export function WorkspaceForm() {
-  const [form, setForm] = useState<WorkspaceFormValues>(DEFAULTS);
-  const [status, setStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+export function WorkspaceForm({ initial }: { initial?: Partial<WorkspaceFormValues> }) {
+  const [form, setForm] = useState<WorkspaceFormValues>({ ...DEFAULTS, ...initial });
+  const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
   function handleChange(field: keyof WorkspaceFormValues) {
     return (e: React.ChangeEvent<HTMLInputElement>) => {
       setForm((prev) => ({ ...prev, [field]: e.target.value }));
-      if (status === 'saved') setStatus('idle');
+      if (status !== 'idle') setStatus('idle');
     };
   }
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     setStatus('saving');
-
-    // Simulated save — replace with real API call when endpoint is available
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    setStatus('saved');
-    setTimeout(() => setStatus('idle'), 2500);
+    try {
+      const res = await fetch(`${API_BASE}/tenant-settings`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-tenant-id': 'demo-tenant',
+        },
+        body: JSON.stringify({
+          companyName: form.companyName || undefined,
+          timezone: form.timezone || undefined,
+          currency: form.currency || undefined,
+        }),
+      });
+      if (!res.ok) throw new Error('Save failed');
+      setStatus('saved');
+      setTimeout(() => setStatus('idle'), 2500);
+    } catch {
+      setStatus('error');
+      setTimeout(() => setStatus('idle'), 3000);
+    }
   }
 
   return (
-    <form onSubmit={handleSave}>
+    <form onSubmit={(e) => void handleSave(e)}>
       <div className="space-y-4">
         <div>
           <label className="block text-xs text-gray-500 mb-1">Business name</label>
           <input
             type="text"
-            value={form.name}
-            onChange={handleChange('name')}
+            value={form.companyName}
+            onChange={handleChange('companyName')}
             className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
-          />
-        </div>
-        <div>
-          <label className="block text-xs text-gray-500 mb-1">Slug</label>
-          <input
-            type="text"
-            value={form.slug}
-            onChange={handleChange('slug')}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 font-mono"
           />
         </div>
         <div>
@@ -95,7 +91,7 @@ export function WorkspaceForm() {
         disabled={status === 'saving'}
         className="mt-4 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        {status === 'saving' ? 'Saving…' : status === 'saved' ? 'Saved ✓' : 'Save changes'}
+        {status === 'saving' ? 'Saving…' : status === 'saved' ? 'Saved' : status === 'error' ? 'Error — retry?' : 'Save changes'}
       </button>
     </form>
   );

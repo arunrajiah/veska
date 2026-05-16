@@ -9,6 +9,7 @@ import {
   Clock,
 } from 'lucide-react';
 import { AIInsightsWidget } from './_components.js';
+import { DashboardRealtimeRefresh } from './_realtime-refresh.js';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -136,6 +137,9 @@ export default async function DashboardOverviewPage() {
 
   return (
     <div className="px-4 sm:px-6 py-6 sm:py-8 max-w-screen-xl mx-auto space-y-6">
+      {/* Realtime SSE listener — triggers router.refresh() on entity changes */}
+      <DashboardRealtimeRefresh />
+
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-baseline gap-2">
         <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Good morning, Veska Admin</h1>

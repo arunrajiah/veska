@@ -259,11 +259,19 @@ knowledgeBaseRouter.get('/articles/by-slug/:slug', async (c) => {
   }
 });
 
+const articlesQuerySchema = z.object({
+  status: z.string().optional(),
+  categoryId: z.string().optional(),
+  search: z.string().optional(),
+  limit: z.coerce.number().min(1).max(100).default(50),
+  offset: z.coerce.number().min(0).default(0),
+});
+
 // GET /kb/articles
-knowledgeBaseRouter.get('/articles', async (c) => {
+knowledgeBaseRouter.get('/articles', zValidator('query', articlesQuerySchema), async (c) => {
   try {
     const { tenantId } = c.get('tenantCtx');
-    const { status, categoryId, search } = c.req.query();
+    const { status, categoryId, search } = c.req.valid('query');
 
     const effectiveStatus = status ?? 'published';
 

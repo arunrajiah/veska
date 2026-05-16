@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   LayoutDashboard,
@@ -254,6 +254,38 @@ function useUserPermissions(): string[] {
   }, []);
 }
 
+function usePendingApprovalCount(): number {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchCount() {
+      try {
+        const tenantId = typeof window !== 'undefined' ? localStorage.getItem('veska_tenant_id') ?? '' : '';
+        const identityId = typeof window !== 'undefined' ? localStorage.getItem('veska_identity_id') ?? '' : '';
+        const res = await fetch('/api/v1/approval-requests/pending-count', {
+          headers: {
+            'X-Veska-Tenant-Id': tenantId,
+            'X-Veska-Identity-Id': identityId,
+          },
+        });
+        if (!res.ok || cancelled) return;
+        const json = await res.json() as { count: number };
+        setCount(json.count ?? 0);
+      } catch {
+        // silently ignore — badge simply won't show
+      }
+    }
+
+    void fetchCount();
+    const interval = setInterval(() => { void fetchCount(); }, 30_000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, []);
+
+  return count;
+}
+
 interface SidebarNavProps {
   onAIClick?: () => void;
 }
@@ -261,6 +293,7 @@ interface SidebarNavProps {
 export function SidebarNav({ onAIClick }: SidebarNavProps) {
   const userPermissions = useUserPermissions();
   const isAdmin = userPermissions.includes('*');
+  const pendingApprovalCount = usePendingApprovalCount();
 
   const visibleSections = useMemo(() => {
     return NAV_SECTIONS.map((section) => ({
@@ -324,8 +357,10 @@ export function SidebarNav({ onAIClick }: SidebarNavProps) {
             >
               <item.icon size={15} className="flex-shrink-0" />
               <span className="flex-1">{item.label}</span>
-              {item.badge && (
-                <span className="w-2 h-2 rounded-full bg-indigo-500 flex-shrink-0" />
+              {item.badge && pendingApprovalCount > 0 && (
+                <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-semibold flex items-center justify-center flex-shrink-0">
+                  {pendingApprovalCount > 99 ? '99+' : pendingApprovalCount}
+                </span>
               )}
             </Link>
           ))}

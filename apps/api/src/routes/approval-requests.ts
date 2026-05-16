@@ -6,6 +6,17 @@ import { ApprovalService } from '@veska/core';
 import type { TenantContext } from '../middleware/tenant-context.js';
 import { dispatchWebhookEvent } from '../middleware/webhook-events.js';
 
+/** Map entityType → new status after approval/rejection */
+const ENTITY_STATUS_MAP: Record<string, { approved: string; rejected: string }> = {
+  invoice:        { approved: 'sent',     rejected: 'rejected' },
+  Invoice:        { approved: 'sent',     rejected: 'rejected' },
+  purchase_order: { approved: 'approved', rejected: 'rejected' },
+  PurchaseOrder:  { approved: 'approved', rejected: 'rejected' },
+  Expense:        { approved: 'approved', rejected: 'rejected' },
+  expense:        { approved: 'approved', rejected: 'rejected' },
+  LeaveRequest:   { approved: 'approved', rejected: 'rejected' },
+};
+
 export const approvalRequestsRouter = new Hono<{ Variables: TenantContext }>();
 
 // ── Inbox (must be before /:id) ───────────────────────────────
@@ -261,6 +272,22 @@ approvalRequestsRouter.post('/:id/cancel', async (c) => {
   return c.json(request);
 });
 
+// ── GET /pending-count — count of pending triggers for tenant ──
+
+approvalRequestsRouter.get('/pending-count', async (c) => {
+  const { tenantId, db } = c.get('tenantCtx');
+
+  const result = await db.execute(sql`
+    SELECT COUNT(*)::int AS count
+    FROM "approvalTriggers"
+    WHERE "tenantId" = ${tenantId}::uuid
+      AND status = 'pending'
+  `) as unknown as { rows: Array<{ count: number }> };
+
+  const count = result.rows[0]?.count ?? 0;
+  return c.json({ count });
+});
+
 // ── GET /triggers — list pending approvalTriggers ──────────────
 
 approvalRequestsRouter.get('/triggers', async (c) => {
@@ -286,7 +313,33 @@ approvalRequestsRouter.patch(
     const triggerId = c.req.param('id');
     const body = c.req.valid('json');
     const approvalSvc = new ApprovalService(db);
+
+    // Fetch trigger before deciding so we know the entityType + entityId
+    const triggerResult = await db.execute(sql`
+      SELECT "entityType", "entityId"
+      FROM "approvalTriggers"
+      WHERE id = ${triggerId}::uuid
+        AND "tenantId" = ${tenantId}::uuid
+    `) as unknown as { rows: Array<{ entityType: string; entityId: string }> };
+
+    const trigger = triggerResult.rows[0];
+
     await approvalSvc.decide(triggerId, tenantId, body.decision, identityId, body.reason);
+
+    // Auto-advance the originating entity's status
+    if (trigger) {
+      const mapping = ENTITY_STATUS_MAP[trigger.entityType];
+      if (mapping) {
+        const newStatus = body.decision === 'approved' ? mapping.approved : mapping.rejected;
+        await db.execute(sql`
+          UPDATE "entityRecords"
+          SET data = data || ${JSON.stringify({ status: newStatus })}::jsonb,
+              "updatedAt" = now()
+          WHERE id = ${trigger.entityId}::uuid
+            AND "tenantId" = ${tenantId}::uuid
+        `);
+      }
+    }
 
     const webhookEvent = body.decision === 'approved' ? 'approval.approved' : 'approval.rejected';
     dispatchWebhookEvent({

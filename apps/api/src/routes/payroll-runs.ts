@@ -187,18 +187,24 @@ payrollRunsRouter.get('/summary', async (c) => {
 
 // ── List runs ──────────────────────────────────────────────────
 
-payrollRunsRouter.get('/', async (c) => {
+const listRunsQuerySchema = z.object({
+  status: z.string().optional(),
+  year: z.coerce.number().int().min(2000).max(2100).optional(),
+  limit: z.coerce.number().min(1).max(100).default(50),
+  offset: z.coerce.number().min(0).default(0),
+});
+
+payrollRunsRouter.get('/', zValidator('query', listRunsQuerySchema), async (c) => {
   try {
     const { tenantId } = c.get('tenantCtx');
-    const status = c.req.query('status');
-    const year = c.req.query('year');
+    const { status, year: yearNum } = c.req.valid('query');
 
     const result = await sharedDb.execute(sql`
       SELECT *
       FROM "payrollRuns"
       WHERE "tenantId" = ${tenantId}
         AND (${status ?? null} IS NULL OR status = ${status ?? null})
-        AND (${year ?? null} IS NULL OR EXTRACT(YEAR FROM "periodStart") = ${year ? parseInt(year, 10) : null}::integer)
+        AND (${yearNum ?? null} IS NULL OR EXTRACT(YEAR FROM "periodStart") = ${yearNum ?? null}::integer)
       ORDER BY "createdAt" DESC
     `);
 

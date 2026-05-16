@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Plus, X, AlertTriangle } from 'lucide-react';
+import { useRealtimeEvents } from '@/hooks/useRealtimeEvents.js';
 import type { Ticket } from './page.js';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
@@ -151,6 +152,18 @@ export function TicketsClient({ tickets: initialTickets }: { tickets: Ticket[] }
   const [showNew, setShowNew] = useState(searchParams.get('new') === 'true');
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Realtime: refresh ticket list when ticket events arrive via SSE
+  const handleRealtimeUpdate = useCallback(() => {
+    setIsUpdating(true);
+    startTransition(() => {
+      router.refresh();
+    });
+    setTimeout(() => setIsUpdating(false), 1_500);
+  }, [router]);
+
+  useRealtimeEvents(['ticket.created', 'ticket.updated'], handleRealtimeUpdate);
 
   const filtered = initialTickets.filter((t) => {
     if (statusFilter !== 'all' && t.data.status !== statusFilter) return false;
@@ -174,7 +187,12 @@ export function TicketsClient({ tickets: initialTickets }: { tickets: Ticket[] }
     <div className="px-8 py-8 max-w-7xl">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Support Tickets</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-semibold text-gray-900">Support Tickets</h1>
+            {isUpdating && (
+              <span className="text-xs text-gray-400 animate-pulse">Updating…</span>
+            )}
+          </div>
           <p className="text-sm text-gray-500 mt-0.5">{openCount} open tickets</p>
         </div>
         <button

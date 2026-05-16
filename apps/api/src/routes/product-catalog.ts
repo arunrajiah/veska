@@ -93,11 +93,17 @@ const ValidateDiscountSchema = z.object({
 
 // ── Products (via entityRecords) ──────────────────────────────
 
+const productsQuerySchema = z.object({
+  search: z.string().optional(),
+  limit: z.coerce.number().min(1).max(100).default(50),
+  offset: z.coerce.number().min(0).default(0),
+});
+
 // GET /catalog/products
-productCatalogRouter.get('/products', async (c) => {
+productCatalogRouter.get('/products', zValidator('query', productsQuerySchema), async (c) => {
   try {
     const { tenantId } = c.get('tenantCtx');
-    const search = c.req.query('search');
+    const { search } = c.req.valid('query');
 
     const searchClause = search
       ? sql`AND er.data->>'name' ILIKE ${'%' + search + '%'}`
@@ -915,11 +921,17 @@ productCatalogRouter.post(
   },
 );
 
+const discountsQuerySchema = z.object({
+  status: z.string().optional(),
+  limit: z.coerce.number().min(1).max(100).default(50),
+  offset: z.coerce.number().min(0).default(0),
+});
+
 // GET /catalog/discounts
-productCatalogRouter.get('/discounts', async (c) => {
+productCatalogRouter.get('/discounts', zValidator('query', discountsQuerySchema), async (c) => {
   try {
     const { tenantId } = c.get('tenantCtx');
-    const status = c.req.query('status');
+    const { status } = c.req.valid('query');
 
     const statusClause = status
       ? sql`AND status = ${status}`

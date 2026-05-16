@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { eq, and, isNull, sql } from 'drizzle-orm';
 import { schema } from '@veska/core';
 import type { TenantContext } from '../middleware/tenant-context.js';
+import { checkApprovalRequired } from '../lib/approval-gate.js';
 
 export const purchasingRouter = new Hono<{ Variables: TenantContext }>();
 
@@ -209,10 +210,47 @@ purchasingRouter.patch(
       );
     }
 
+    const orderData = order.data as Record<string, unknown>;
+    const poTotal = typeof orderData['total'] === 'number' ? orderData['total'] : undefined;
+
+    // When submitting for approval (draft → pending_approval), check if chain exists
+    if (newStatus === 'pending_approval') {
+      const approvalCheck = await checkApprovalRequired(db, tenantId, 'purchase_order', id, identityId, poTotal);
+      if (approvalCheck.required) {
+        // Approval chain found — status stays pending_approval and trigger is created
+        const [updated] = await db
+          .update(schema.entityRecords)
+          .set({
+            data: { ...orderData, status: 'pending_approval' },
+            updatedAt: new Date(),
+          })
+          .where(eq(schema.entityRecords.id, id))
+          .returning();
+        return c.json({ status: 'pending_approval', approvalTriggerId: approvalCheck.required ? approvalCheck.triggerId : undefined, order: updated });
+      }
+      // No chain — allow direct transition
+    }
+
+    // When approving directly (no chain), check if chain exists first
+    if (newStatus === 'approved' && currentStatus !== 'pending_approval') {
+      const approvalCheck = await checkApprovalRequired(db, tenantId, 'purchase_order', id, identityId, poTotal);
+      if (approvalCheck.required) {
+        const [updated] = await db
+          .update(schema.entityRecords)
+          .set({
+            data: { ...orderData, status: 'pending_approval' },
+            updatedAt: new Date(),
+          })
+          .where(eq(schema.entityRecords.id, id))
+          .returning();
+        return c.json({ status: 'pending_approval', approvalTriggerId: approvalCheck.triggerId, order: updated });
+      }
+    }
+
     const [updated] = await db
       .update(schema.entityRecords)
       .set({
-        data: { ...(order.data as Record<string, unknown>), status: newStatus },
+        data: { ...orderData, status: newStatus },
         updatedAt: new Date(),
       })
       .where(eq(schema.entityRecords.id, id))
@@ -220,7 +258,7 @@ purchasingRouter.patch(
 
     // Insert approval notification when PO is approved
     if (newStatus === 'approved') {
-      const poNumber = String((order.data as Record<string, unknown>)['number'] ?? id.slice(0, 8).toUpperCase());
+      const poNumber = String(orderData['number'] ?? id.slice(0, 8).toUpperCase());
       await db.insert(schema.entityRecords).values({
         tenantId,
         entityType: 'Notification',

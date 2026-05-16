@@ -13,11 +13,17 @@ const TASK_PRIORITIES = ['low', 'medium', 'high', 'urgent'] as const;
 
 // ── Tasks (registered before /:id to avoid route conflict) ────
 
-projectsRouter.get('/tasks', async (c) => {
+const tasksQuerySchema = z.object({
+  projectId: z.string().optional(),
+  assigneeId: z.string().optional(),
+  status: z.string().optional(),
+  limit: z.coerce.number().min(1).max(100).default(50),
+  offset: z.coerce.number().min(0).default(0),
+});
+
+projectsRouter.get('/tasks', zValidator('query', tasksQuerySchema), async (c) => {
   const { db, tenantId } = c.get('tenantCtx');
-  const projectId = c.req.query('projectId');
-  const assigneeId = c.req.query('assigneeId');
-  const status = c.req.query('status');
+  const { projectId, assigneeId, status } = c.req.valid('query');
 
   const conditions = [
     eq(schema.entityRecords.tenantId, tenantId),
@@ -134,9 +140,15 @@ projectsRouter.patch(
 
 // ── Milestones (registered before /:id to avoid route conflict) ──
 
-projectsRouter.get('/milestones', async (c) => {
+const milestonesQuerySchema = z.object({
+  projectId: z.string().optional(),
+  limit: z.coerce.number().min(1).max(100).default(50),
+  offset: z.coerce.number().min(0).default(0),
+});
+
+projectsRouter.get('/milestones', zValidator('query', milestonesQuerySchema), async (c) => {
   const { db, tenantId } = c.get('tenantCtx');
-  const projectId = c.req.query('projectId');
+  const { projectId } = c.req.valid('query');
 
   const conditions = [
     eq(schema.entityRecords.tenantId, tenantId),
@@ -221,9 +233,15 @@ projectsRouter.patch(
 
 // ── Projects (/:id must come after static sub-routes) ─────────
 
-projectsRouter.get('/', async (c) => {
+const projectsQuerySchema = z.object({
+  status: z.string().optional(),
+  limit: z.coerce.number().min(1).max(100).default(50),
+  offset: z.coerce.number().min(0).default(0),
+});
+
+projectsRouter.get('/', zValidator('query', projectsQuerySchema), async (c) => {
   const { db, tenantId } = c.get('tenantCtx');
-  const status = c.req.query('status');
+  const { status } = c.req.valid('query');
 
   const conditions = [
     eq(schema.entityRecords.tenantId, tenantId),

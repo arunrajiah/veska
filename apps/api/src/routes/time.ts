@@ -118,14 +118,20 @@ timeRouter.get('/entries/summary', async (c) => {
 
 // ── List ─────────────────────────────────────────────────────
 
-timeRouter.get('/entries', async (c) => {
+const timeEntriesQuerySchema = z.object({
+  employeeId: z.string().optional(),
+  projectId: z.string().optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+  status: z.string().optional(),
+  billable: z.string().optional(),
+  limit: z.coerce.number().min(1).max(100).default(50),
+  offset: z.coerce.number().min(0).default(0),
+});
+
+timeRouter.get('/entries', zValidator('query', timeEntriesQuerySchema), async (c) => {
   const { db, tenantId } = c.get('tenantCtx');
-  const employeeId = c.req.query('employeeId');
-  const projectId = c.req.query('projectId');
-  const startDate = c.req.query('startDate');
-  const endDate = c.req.query('endDate');
-  const status = c.req.query('status');
-  const billable = c.req.query('billable');
+  const { employeeId, projectId, startDate, endDate, status, billable } = c.req.valid('query');
 
   const conditions = [
     eq(schema.entityRecords.tenantId, tenantId),

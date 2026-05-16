@@ -19,6 +19,11 @@ import {
   Calculator,
   ChevronRight,
   AlertTriangle,
+  Shield,
+  Bell,
+  Key,
+  ListChecks,
+  Sliders,
 } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
@@ -32,11 +37,11 @@ function tenantHeaders(extra?: HeadersInit): HeadersInit {
 export interface TenantSettings {
   companyName?: string;
   companyEmail?: string;
-  phone?: string;
-  address?: string;
-  city?: string;
-  country?: string;
-  postcode?: string;
+  companyPhone?: string;
+  companyAddress?: string;
+  companyCity?: string;
+  companyCountry?: string;
+  companyPostcode?: string;
   website?: string;
   taxId?: string;
   logoUrl?: string;
@@ -47,10 +52,11 @@ export interface TenantSettings {
   dateFormat?: string;
   smtpHost?: string;
   smtpPort?: number;
-  smtpUsername?: string;
-  smtpPasswordConfigured?: boolean;
-  fromName?: string;
-  fromEmail?: string;
+  smtpUser?: string;
+  /** true when API returns '***' for smtpPassEncrypted */
+  smtpPassEncrypted?: string;
+  smtpFromName?: string;
+  smtpFromEmail?: string;
   enabledModules?: string[];
 }
 
@@ -176,11 +182,11 @@ function CompanyProfileTab({
   const [form, setForm] = useState({
     companyName: settings.companyName ?? '',
     companyEmail: settings.companyEmail ?? '',
-    phone: settings.phone ?? '',
-    address: settings.address ?? '',
-    city: settings.city ?? '',
-    country: settings.country ?? '',
-    postcode: settings.postcode ?? '',
+    companyPhone: settings.companyPhone ?? '',
+    companyAddress: settings.companyAddress ?? '',
+    companyCity: settings.companyCity ?? '',
+    companyCountry: settings.companyCountry ?? '',
+    companyPostcode: settings.companyPostcode ?? '',
     website: settings.website ?? '',
     taxId: settings.taxId ?? '',
     logoUrl: settings.logoUrl ?? '',
@@ -243,13 +249,13 @@ function CompanyProfileTab({
       <div className="grid grid-cols-2 gap-4">
         <Field label="Company Name" value={form.companyName} onChange={set('companyName')} />
         <Field label="Company Email" value={form.companyEmail} onChange={set('companyEmail')} type="email" />
-        <Field label="Phone" value={form.phone} onChange={set('phone')} type="tel" />
+        <Field label="Phone" value={form.companyPhone} onChange={set('companyPhone')} type="tel" />
         <Field label="Website" value={form.website} onChange={set('website')} type="url" />
         <Field label="Tax ID (VAT/EIN)" value={form.taxId} onChange={set('taxId')} />
-        <Field label="Address" value={form.address} onChange={set('address')} />
-        <Field label="City" value={form.city} onChange={set('city')} />
-        <Field label="Country" value={form.country} onChange={set('country')} />
-        <Field label="Postcode" value={form.postcode} onChange={set('postcode')} />
+        <Field label="Address" value={form.companyAddress} onChange={set('companyAddress')} />
+        <Field label="City" value={form.companyCity} onChange={set('companyCity')} />
+        <Field label="Country" value={form.companyCountry} onChange={set('companyCountry')} />
+        <Field label="Postcode" value={form.companyPostcode} onChange={set('companyPostcode')} />
       </div>
 
       <SaveButton saving={saving} />
@@ -763,10 +769,10 @@ function EmailSmtpTab({
   const [form, setForm] = useState({
     smtpHost: settings.smtpHost ?? '',
     smtpPort: settings.smtpPort?.toString() ?? '587',
-    smtpUsername: settings.smtpUsername ?? '',
-    smtpPassword: '',
-    fromName: settings.fromName ?? '',
-    fromEmail: settings.fromEmail ?? '',
+    smtpUser: settings.smtpUser ?? '',
+    smtpPass: '',
+    smtpFromName: settings.smtpFromName ?? '',
+    smtpFromEmail: settings.smtpFromEmail ?? '',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -784,15 +790,15 @@ function EmailSmtpTab({
       e.preventDefault();
       setSaving(true);
       try {
-        const payload: Partial<TenantSettings> & { smtpPassword?: string } = {
+        const payload: Partial<TenantSettings> & { smtpPass?: string } = {
           smtpHost: form.smtpHost,
           smtpPort: parseInt(form.smtpPort, 10) || 587,
-          smtpUsername: form.smtpUsername,
-          fromName: form.fromName,
-          fromEmail: form.fromEmail,
+          smtpUser: form.smtpUser,
+          smtpFromName: form.smtpFromName,
+          smtpFromEmail: form.smtpFromEmail,
         };
-        if (form.smtpPassword) {
-          payload.smtpPassword = form.smtpPassword;
+        if (form.smtpPass) {
+          payload.smtpPass = form.smtpPass;
         }
         await onSave(payload);
       } finally {
@@ -812,9 +818,9 @@ function EmailSmtpTab({
         body: JSON.stringify({
           smtpHost: form.smtpHost,
           smtpPort: parseInt(form.smtpPort, 10) || 587,
-          smtpUsername: form.smtpUsername,
-          smtpPassword: form.smtpPassword || undefined,
-          fromEmail: form.fromEmail,
+          smtpUser: form.smtpUser,
+          smtpPass: form.smtpPass || undefined,
+          smtpFromEmail: form.smtpFromEmail,
         }),
       });
       const data = await res.json();
@@ -843,15 +849,15 @@ function EmailSmtpTab({
       <div className="grid grid-cols-2 gap-4">
         <Field label="SMTP Host" value={form.smtpHost} onChange={set('smtpHost')} placeholder="smtp.example.com" />
         <Field label="Port" value={form.smtpPort} onChange={set('smtpPort')} type="number" placeholder="587" />
-        <Field label="Username" value={form.smtpUsername} onChange={set('smtpUsername')} placeholder="user@example.com" />
+        <Field label="Username" value={form.smtpUser} onChange={set('smtpUser')} placeholder="user@example.com" />
         <div>
           <label className="block text-xs font-medium text-gray-600 mb-1">Password</label>
           <div className="relative">
             <input
               type={showPassword ? 'text' : 'password'}
-              value={form.smtpPassword}
-              onChange={set('smtpPassword')}
-              placeholder={settings.smtpPasswordConfigured ? '••••••••' : 'Enter password'}
+              value={form.smtpPass}
+              onChange={set('smtpPass')}
+              placeholder={settings.smtpPassEncrypted === '***' ? '••••••••' : 'Enter password'}
               className="w-full border border-gray-200 rounded-lg px-3 py-2 pr-10 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
             />
             <button
@@ -864,8 +870,8 @@ function EmailSmtpTab({
           </div>
           <p className="text-xs text-gray-400 mt-1">Leave blank to keep existing password</p>
         </div>
-        <Field label="From Name" value={form.fromName} onChange={set('fromName')} placeholder="Acme Inc" />
-        <Field label="From Email" value={form.fromEmail} onChange={set('fromEmail')} type="email" placeholder="noreply@example.com" />
+        <Field label="From Name" value={form.smtpFromName} onChange={set('smtpFromName')} placeholder="Acme Inc" />
+        <Field label="From Email" value={form.smtpFromEmail} onChange={set('smtpFromEmail')} type="email" placeholder="noreply@example.com" />
       </div>
 
       {/* Test result */}
@@ -1106,6 +1112,79 @@ function SaveButton({ saving }: { saving: boolean }) {
   );
 }
 
+// ─── Sub-section nav cards ────────────────────────────────────────────────────
+
+const SUB_SECTIONS = [
+  {
+    href: '/dashboard/settings/security',
+    icon: Shield,
+    label: 'Security',
+    description: '2FA, SSO, active sessions',
+    color: 'text-indigo-600',
+    bg: 'bg-indigo-50',
+  },
+  {
+    href: '/dashboard/settings/notifications',
+    icon: Bell,
+    label: 'Notifications',
+    description: 'Email, Slack, webhook channels',
+    color: 'text-purple-600',
+    bg: 'bg-purple-50',
+  },
+  {
+    href: '/dashboard/settings/api-keys',
+    icon: Key,
+    label: 'API Keys',
+    description: 'Manage API access tokens',
+    color: 'text-amber-600',
+    bg: 'bg-amber-50',
+  },
+  {
+    href: '/dashboard/settings/approvals',
+    icon: ListChecks,
+    label: 'Approvals',
+    description: 'Approval chains and policies',
+    color: 'text-green-600',
+    bg: 'bg-green-50',
+  },
+  {
+    href: '/dashboard/settings/custom-fields',
+    icon: Sliders,
+    label: 'Custom Fields',
+    description: 'Extend entity schemas',
+    color: 'text-rose-600',
+    bg: 'bg-rose-50',
+  },
+] as const;
+
+function SubSectionNav() {
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mb-6">
+      {SUB_SECTIONS.map((s) => {
+        const Icon = s.icon;
+        return (
+          <Link
+            key={s.href}
+            href={s.href}
+            className="flex flex-col gap-2 p-4 bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:shadow-sm transition-all group"
+          >
+            <div className={`w-8 h-8 rounded-lg ${s.bg} flex items-center justify-center`}>
+              <Icon size={16} className={s.color} />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-900 group-hover:text-indigo-700 transition-colors">
+                {s.label}
+              </p>
+              <p className="text-xs text-gray-500 leading-tight mt-0.5">{s.description}</p>
+            </div>
+            <ChevronRight size={12} className="text-gray-400 group-hover:text-indigo-500 mt-auto self-end transition-colors" />
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
 // ─── Main SettingsClient ───────────────────────────────────────────────────────
 
 export function SettingsClient({ initialSettings }: { initialSettings: TenantSettings }) {
@@ -1133,7 +1212,9 @@ export function SettingsClient({ initialSettings }: { initialSettings: TenantSet
 
   return (
     <div className="px-8 py-8">
-      <h1 className="text-2xl font-semibold text-gray-900 mb-6">Tenant Settings</h1>
+      <h1 className="text-2xl font-semibold text-gray-900 mb-6">Settings</h1>
+
+      <SubSectionNav />
 
       <div className="flex gap-6">
         {/* Vertical tab list */}

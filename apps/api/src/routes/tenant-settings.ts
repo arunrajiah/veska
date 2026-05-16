@@ -113,102 +113,122 @@ tenantSettingsRouter.get('/', async (c) => {
   }
 });
 
+// Shared upsert handler used by both PUT, PATCH, and the onboarding flow
+export async function upsertSettings(
+  tenantId: string,
+  body: z.infer<typeof UpdateSettingsSchema>,
+): Promise<Record<string, unknown>> {
+  // Compute encrypted password if provided
+  let smtpPassEncrypted: string | null | undefined = undefined;
+  if ('smtpPass' in body) {
+    smtpPassEncrypted = body.smtpPass ? encryptPassword(body.smtpPass) : null;
+  }
+
+  const enabledModulesJson =
+    body.enabledModules !== undefined ? JSON.stringify(body.enabledModules) : undefined;
+
+  await sharedDb.execute(sql`
+    INSERT INTO "tenantSettings" (
+      "tenantId",
+      "companyName",
+      "companyEmail",
+      "companyPhone",
+      "companyAddress",
+      "companyCity",
+      "companyCountry",
+      "companyPostcode",
+      "logoUrl",
+      "website",
+      "taxId",
+      timezone,
+      currency,
+      "dateFormat",
+      "primaryColor",
+      "accentColor",
+      "smtpHost",
+      "smtpPort",
+      "smtpUser",
+      "smtpPassEncrypted",
+      "smtpFromName",
+      "smtpFromEmail",
+      "enabledModules",
+      "updatedAt"
+    ) VALUES (
+      ${tenantId},
+      ${body.companyName ?? null},
+      ${body.companyEmail ?? null},
+      ${body.companyPhone ?? null},
+      ${body.companyAddress ?? null},
+      ${body.companyCity ?? null},
+      ${body.companyCountry ?? null},
+      ${body.companyPostcode ?? null},
+      ${body.logoUrl ?? null},
+      ${body.website ?? null},
+      ${body.taxId ?? null},
+      ${body.timezone ?? 'UTC'},
+      ${body.currency ?? 'USD'},
+      ${body.dateFormat ?? 'YYYY-MM-DD'},
+      ${body.primaryColor ?? '#6366f1'},
+      ${body.accentColor ?? '#8b5cf6'},
+      ${body.smtpHost ?? null},
+      ${body.smtpPort ?? 587},
+      ${body.smtpUser ?? null},
+      ${smtpPassEncrypted ?? null},
+      ${body.smtpFromName ?? null},
+      ${body.smtpFromEmail ?? null},
+      ${enabledModulesJson ? sql.raw(`'${enabledModulesJson}'::jsonb`) : sql`'["crm","finance","hr","inventory","projects"]'::jsonb`},
+      now()
+    )
+    ON CONFLICT ("tenantId") DO UPDATE SET
+      "companyName"       = COALESCE(EXCLUDED."companyName",       "tenantSettings"."companyName"),
+      "companyEmail"      = COALESCE(EXCLUDED."companyEmail",      "tenantSettings"."companyEmail"),
+      "companyPhone"      = COALESCE(EXCLUDED."companyPhone",      "tenantSettings"."companyPhone"),
+      "companyAddress"    = COALESCE(EXCLUDED."companyAddress",    "tenantSettings"."companyAddress"),
+      "companyCity"       = COALESCE(EXCLUDED."companyCity",       "tenantSettings"."companyCity"),
+      "companyCountry"    = COALESCE(EXCLUDED."companyCountry",    "tenantSettings"."companyCountry"),
+      "companyPostcode"   = COALESCE(EXCLUDED."companyPostcode",   "tenantSettings"."companyPostcode"),
+      "logoUrl"           = CASE WHEN ${body.logoUrl !== undefined} THEN EXCLUDED."logoUrl"       ELSE "tenantSettings"."logoUrl" END,
+      "website"           = CASE WHEN ${body.website !== undefined} THEN EXCLUDED."website"       ELSE "tenantSettings"."website" END,
+      "taxId"             = CASE WHEN ${body.taxId !== undefined} THEN EXCLUDED."taxId"           ELSE "tenantSettings"."taxId" END,
+      timezone            = COALESCE(EXCLUDED.timezone,            "tenantSettings".timezone),
+      currency            = COALESCE(EXCLUDED.currency,            "tenantSettings".currency),
+      "dateFormat"        = COALESCE(EXCLUDED."dateFormat",        "tenantSettings"."dateFormat"),
+      "primaryColor"      = COALESCE(EXCLUDED."primaryColor",      "tenantSettings"."primaryColor"),
+      "accentColor"       = COALESCE(EXCLUDED."accentColor",       "tenantSettings"."accentColor"),
+      "smtpHost"          = CASE WHEN ${body.smtpHost !== undefined} THEN EXCLUDED."smtpHost"     ELSE "tenantSettings"."smtpHost" END,
+      "smtpPort"          = COALESCE(EXCLUDED."smtpPort",          "tenantSettings"."smtpPort"),
+      "smtpUser"          = CASE WHEN ${body.smtpUser !== undefined} THEN EXCLUDED."smtpUser"     ELSE "tenantSettings"."smtpUser" END,
+      "smtpPassEncrypted" = CASE WHEN ${smtpPassEncrypted !== undefined} THEN EXCLUDED."smtpPassEncrypted" ELSE "tenantSettings"."smtpPassEncrypted" END,
+      "smtpFromName"      = CASE WHEN ${body.smtpFromName !== undefined} THEN EXCLUDED."smtpFromName" ELSE "tenantSettings"."smtpFromName" END,
+      "smtpFromEmail"     = CASE WHEN ${body.smtpFromEmail !== undefined} THEN EXCLUDED."smtpFromEmail" ELSE "tenantSettings"."smtpFromEmail" END,
+      "enabledModules"    = CASE WHEN ${enabledModulesJson !== undefined} THEN EXCLUDED."enabledModules" ELSE "tenantSettings"."enabledModules" END,
+      "updatedAt"         = now()
+  `);
+
+  const updated = await sharedDb.execute(
+    sql`SELECT * FROM "tenantSettings" WHERE "tenantId" = ${tenantId}`,
+  );
+  return (updated as unknown[])[0] as Record<string, unknown>;
+}
+
+// PATCH /tenant-settings — merge-update (partial)
+tenantSettingsRouter.patch('/', zValidator('json', UpdateSettingsSchema), async (c) => {
+  const { tenantId } = c.get('tenantCtx');
+  const body = c.req.valid('json');
+  try {
+    const row = await upsertSettings(tenantId, body);
+    return c.json(sanitizeRow(row));
+  } catch (error) {
+    return c.json({ error }, 500);
+  }
+});
+
 // PUT /tenant-settings
 tenantSettingsRouter.put('/', zValidator('json', UpdateSettingsSchema), async (c) => {
   const { tenantId } = c.get('tenantCtx');
   const body = c.req.valid('json');
   try {
-    // Compute encrypted password if provided
-    let smtpPassEncrypted: string | null | undefined = undefined;
-    if ('smtpPass' in body) {
-      smtpPassEncrypted = body.smtpPass ? encryptPassword(body.smtpPass) : null;
-    }
-
-    const enabledModulesJson =
-      body.enabledModules !== undefined ? JSON.stringify(body.enabledModules) : undefined;
-
-    await sharedDb.execute(sql`
-      INSERT INTO "tenantSettings" (
-        "tenantId",
-        "companyName",
-        "companyEmail",
-        "companyPhone",
-        "companyAddress",
-        "companyCity",
-        "companyCountry",
-        "companyPostcode",
-        "logoUrl",
-        "website",
-        "taxId",
-        timezone,
-        currency,
-        "dateFormat",
-        "primaryColor",
-        "accentColor",
-        "smtpHost",
-        "smtpPort",
-        "smtpUser",
-        "smtpPassEncrypted",
-        "smtpFromName",
-        "smtpFromEmail",
-        "enabledModules",
-        "updatedAt"
-      ) VALUES (
-        ${tenantId},
-        ${body.companyName ?? null},
-        ${body.companyEmail ?? null},
-        ${body.companyPhone ?? null},
-        ${body.companyAddress ?? null},
-        ${body.companyCity ?? null},
-        ${body.companyCountry ?? null},
-        ${body.companyPostcode ?? null},
-        ${body.logoUrl ?? null},
-        ${body.website ?? null},
-        ${body.taxId ?? null},
-        ${body.timezone ?? 'UTC'},
-        ${body.currency ?? 'USD'},
-        ${body.dateFormat ?? 'YYYY-MM-DD'},
-        ${body.primaryColor ?? '#6366f1'},
-        ${body.accentColor ?? '#8b5cf6'},
-        ${body.smtpHost ?? null},
-        ${body.smtpPort ?? 587},
-        ${body.smtpUser ?? null},
-        ${smtpPassEncrypted ?? null},
-        ${body.smtpFromName ?? null},
-        ${body.smtpFromEmail ?? null},
-        ${enabledModulesJson ? sql.raw(`'${enabledModulesJson}'::jsonb`) : sql`'["crm","finance","hr","inventory","projects"]'::jsonb`},
-        now()
-      )
-      ON CONFLICT ("tenantId") DO UPDATE SET
-        "companyName"       = COALESCE(EXCLUDED."companyName",       "tenantSettings"."companyName"),
-        "companyEmail"      = COALESCE(EXCLUDED."companyEmail",      "tenantSettings"."companyEmail"),
-        "companyPhone"      = COALESCE(EXCLUDED."companyPhone",      "tenantSettings"."companyPhone"),
-        "companyAddress"    = COALESCE(EXCLUDED."companyAddress",    "tenantSettings"."companyAddress"),
-        "companyCity"       = COALESCE(EXCLUDED."companyCity",       "tenantSettings"."companyCity"),
-        "companyCountry"    = COALESCE(EXCLUDED."companyCountry",    "tenantSettings"."companyCountry"),
-        "companyPostcode"   = COALESCE(EXCLUDED."companyPostcode",   "tenantSettings"."companyPostcode"),
-        "logoUrl"           = CASE WHEN ${body.logoUrl !== undefined} THEN EXCLUDED."logoUrl"       ELSE "tenantSettings"."logoUrl" END,
-        "website"           = CASE WHEN ${body.website !== undefined} THEN EXCLUDED."website"       ELSE "tenantSettings"."website" END,
-        "taxId"             = CASE WHEN ${body.taxId !== undefined} THEN EXCLUDED."taxId"           ELSE "tenantSettings"."taxId" END,
-        timezone            = COALESCE(EXCLUDED.timezone,            "tenantSettings".timezone),
-        currency            = COALESCE(EXCLUDED.currency,            "tenantSettings".currency),
-        "dateFormat"        = COALESCE(EXCLUDED."dateFormat",        "tenantSettings"."dateFormat"),
-        "primaryColor"      = COALESCE(EXCLUDED."primaryColor",      "tenantSettings"."primaryColor"),
-        "accentColor"       = COALESCE(EXCLUDED."accentColor",       "tenantSettings"."accentColor"),
-        "smtpHost"          = CASE WHEN ${body.smtpHost !== undefined} THEN EXCLUDED."smtpHost"     ELSE "tenantSettings"."smtpHost" END,
-        "smtpPort"          = COALESCE(EXCLUDED."smtpPort",          "tenantSettings"."smtpPort"),
-        "smtpUser"          = CASE WHEN ${body.smtpUser !== undefined} THEN EXCLUDED."smtpUser"     ELSE "tenantSettings"."smtpUser" END,
-        "smtpPassEncrypted" = CASE WHEN ${smtpPassEncrypted !== undefined} THEN EXCLUDED."smtpPassEncrypted" ELSE "tenantSettings"."smtpPassEncrypted" END,
-        "smtpFromName"      = CASE WHEN ${body.smtpFromName !== undefined} THEN EXCLUDED."smtpFromName" ELSE "tenantSettings"."smtpFromName" END,
-        "smtpFromEmail"     = CASE WHEN ${body.smtpFromEmail !== undefined} THEN EXCLUDED."smtpFromEmail" ELSE "tenantSettings"."smtpFromEmail" END,
-        "enabledModules"    = CASE WHEN ${enabledModulesJson !== undefined} THEN EXCLUDED."enabledModules" ELSE "tenantSettings"."enabledModules" END,
-        "updatedAt"         = now()
-    `);
-
-    const updated = await sharedDb.execute(
-      sql`SELECT * FROM "tenantSettings" WHERE "tenantId" = ${tenantId}`,
-    );
-    const row = (updated as unknown[])[0] as Record<string, unknown>;
+    const row = await upsertSettings(tenantId, body);
     return c.json(sanitizeRow(row));
   } catch (error) {
     return c.json({ error }, 500);

@@ -19,11 +19,17 @@ const DEAL_STAGES = [
 
 // ── Leads ─────────────────────────────────────────────────────
 
-crmRouter.get('/leads', async (c) => {
+const leadsQuerySchema = z.object({
+  status: z.string().optional(),
+  assigned_to: z.string().optional(),
+  q: z.string().optional(),
+  limit: z.coerce.number().min(1).max(100).default(50),
+  offset: z.coerce.number().min(0).default(0),
+});
+
+crmRouter.get('/leads', zValidator('query', leadsQuerySchema), async (c) => {
   const { db, tenantId } = c.get('tenantCtx');
-  const status = c.req.query('status');
-  const assignedTo = c.req.query('assigned_to');
-  const q = c.req.query('q');
+  const { status, assigned_to: assignedTo, q } = c.req.valid('query');
 
   const conditions = [
     eq(schema.entityRecords.tenantId, tenantId),
@@ -145,9 +151,15 @@ crmRouter.patch(
 
 // ── Contacts ──────────────────────────────────────────────────
 
-crmRouter.get('/contacts', async (c) => {
+const contactsQuerySchema = z.object({
+  q: z.string().optional(),
+  limit: z.coerce.number().min(1).max(100).default(50),
+  offset: z.coerce.number().min(0).default(0),
+});
+
+crmRouter.get('/contacts', zValidator('query', contactsQuerySchema), async (c) => {
   const { db, tenantId } = c.get('tenantCtx');
-  const q = c.req.query('q');
+  const { q } = c.req.valid('query');
 
   const conditions = [
     eq(schema.entityRecords.tenantId, tenantId),
@@ -239,9 +251,15 @@ crmRouter.post(
 
 // ── Deals ─────────────────────────────────────────────────────
 
-crmRouter.get('/deals', async (c) => {
+const dealsQuerySchema = z.object({
+  stage: z.string().optional(),
+  limit: z.coerce.number().min(1).max(100).default(50),
+  offset: z.coerce.number().min(0).default(0),
+});
+
+crmRouter.get('/deals', zValidator('query', dealsQuerySchema), async (c) => {
   const { db, tenantId } = c.get('tenantCtx');
-  const stage = c.req.query('stage');
+  const { stage } = c.req.valid('query');
 
   const conditions = [
     eq(schema.entityRecords.tenantId, tenantId),

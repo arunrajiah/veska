@@ -6,6 +6,7 @@ import type { TenantContext } from '../middleware/tenant-context.js';
 import { sharedMagicLinkService } from '../shared.js';
 import { sendMagicLinkEmail } from '../lib/magic-link-mailer.js';
 import { handleRouteError } from '../lib/api-error.js';
+import { upsertSettings } from './tenant-settings.js';
 
 export const setupRouter = new Hono<{ Variables: TenantContext }>();
 
@@ -54,6 +55,19 @@ setupRouter.post(
           },
           createdBy: identityId,
         });
+
+      // Seed tenant settings from onboarding company profile so
+      // /dashboard/settings/general is pre-populated after onboarding.
+      if (body.company) {
+        void upsertSettings(tenantId, {
+          companyName: body.company.name,
+          companyCountry: body.company.country,
+          currency: body.company.currency,
+          ...(body.modules ? { enabledModules: body.modules } : {}),
+        }).catch((err) =>
+          console.warn('[setup/onboarding] Failed to seed tenant settings:', err),
+        );
+      }
 
       // Fire-and-forget magic-link invite emails for each team member
       if (body.teamMembers && body.teamMembers.length > 0) {

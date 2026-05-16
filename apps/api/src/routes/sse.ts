@@ -19,6 +19,17 @@ export function broadcast(tenantId: string, event: { type: string; payload: unkn
   }
 }
 
+/**
+ * Broadcast an entity change event to all SSE subscribers of a tenant.
+ * Alias of `broadcast` with a clearer name for use outside this module.
+ */
+export function broadcastToTenant(
+  tenantId: string,
+  event: { type: string; payload: unknown },
+): void {
+  broadcast(tenantId, event);
+}
+
 // GET /api/v1/events/stream
 sseRouter.get('/stream', async (c) => {
   const tenantId = c.req.header('X-Veska-Tenant-Id') ?? 'demo-tenant';

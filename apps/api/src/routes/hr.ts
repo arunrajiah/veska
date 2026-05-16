@@ -10,9 +10,15 @@ export const hrRouter = new Hono<{ Variables: TenantContext }>();
 
 // ── Employees ────────────────────────────────────────────────
 
-hrRouter.get('/employees', async (c) => {
+const employeesQuerySchema = z.object({
+  status: z.string().optional(),
+  limit: z.coerce.number().min(1).max(100).default(50),
+  offset: z.coerce.number().min(0).default(0),
+});
+
+hrRouter.get('/employees', zValidator('query', employeesQuerySchema), async (c) => {
   const { db, tenantId } = c.get('tenantCtx');
-  const status = c.req.query('status');
+  const { status } = c.req.valid('query');
 
   const conditions = [
     eq(schema.entityRecords.tenantId, tenantId),
@@ -135,10 +141,16 @@ hrRouter.post(
 
 // ── Leave Requests ───────────────────────────────────────────
 
-hrRouter.get('/leave', async (c) => {
+const leaveQuerySchema = z.object({
+  employeeId: z.string().optional(),
+  status: z.string().optional(),
+  limit: z.coerce.number().min(1).max(100).default(50),
+  offset: z.coerce.number().min(0).default(0),
+});
+
+hrRouter.get('/leave', zValidator('query', leaveQuerySchema), async (c) => {
   const { db, tenantId } = c.get('tenantCtx');
-  const employeeId = c.req.query('employeeId');
-  const status = c.req.query('status');
+  const { employeeId, status } = c.req.valid('query');
 
   const conditions = [
     eq(schema.entityRecords.tenantId, tenantId),

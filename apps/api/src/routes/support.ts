@@ -20,12 +20,18 @@ const TICKET_STATUSES = [
 
 // ── Tickets ───────────────────────────────────────────────────
 
-supportRouter.get('/tickets', async (c) => {
+const ticketsQuerySchema = z.object({
+  status: z.string().optional(),
+  priority: z.string().optional(),
+  assignee_id: z.string().optional(),
+  q: z.string().optional(),
+  limit: z.coerce.number().min(1).max(100).default(50),
+  offset: z.coerce.number().min(0).default(0),
+});
+
+supportRouter.get('/tickets', zValidator('query', ticketsQuerySchema), async (c) => {
   const { db, tenantId } = c.get('tenantCtx');
-  const status = c.req.query('status');
-  const priority = c.req.query('priority');
-  const assigneeId = c.req.query('assignee_id');
-  const q = c.req.query('q');
+  const { status, priority, assignee_id: assigneeId, q } = c.req.valid('query');
 
   const conditions = [
     eq(schema.entityRecords.tenantId, tenantId),
