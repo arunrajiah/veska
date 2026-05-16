@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { sql } from 'drizzle-orm';
 import { sharedDb } from '../shared.js';
 import type { TenantContext } from '../middleware/tenant-context.js';
+import { handleRouteError } from '../lib/api-error.js';
 
 export const payrollRunsRouter = new Hono<{ Variables: TenantContext }>();
 
@@ -142,61 +143,69 @@ async function insertItemsAndUpdateTotals(
 // ── Summary (must be before /:id) ─────────────────────────────
 
 payrollRunsRouter.get('/summary', async (c) => {
-  const { tenantId } = c.get('tenantCtx');
-  const currentYear = new Date().getFullYear();
+  try {
+    const { tenantId } = c.get('tenantCtx');
+    const currentYear = new Date().getFullYear();
 
-  const monthlyResult = await sharedDb.execute(sql`
-    SELECT
-      EXTRACT(MONTH FROM r."periodStart")::int AS month,
-      COALESCE(SUM(i."grossPay"), 0) AS "totalGross",
-      COUNT(DISTINCT i."employeeId") AS headcount
-    FROM "payrollRuns" r
-    JOIN "payrollItems" i ON i."runId" = r.id AND i."tenantId" = r."tenantId"
-    WHERE r."tenantId" = ${tenantId}
-      AND r.status = 'paid'
-      AND EXTRACT(YEAR FROM r."periodStart") = ${currentYear}
-    GROUP BY 1
-    ORDER BY 1
-  `);
+    const monthlyResult = await sharedDb.execute(sql`
+      SELECT
+        EXTRACT(MONTH FROM r."periodStart")::int AS month,
+        COALESCE(SUM(i."grossPay"), 0) AS "totalGross",
+        COUNT(DISTINCT i."employeeId") AS headcount
+      FROM "payrollRuns" r
+      JOIN "payrollItems" i ON i."runId" = r.id AND i."tenantId" = r."tenantId"
+      WHERE r."tenantId" = ${tenantId}
+        AND r.status = 'paid'
+        AND EXTRACT(YEAR FROM r."periodStart") = ${currentYear}
+      GROUP BY 1
+      ORDER BY 1
+    `);
 
-  const ytdResult = await sharedDb.execute(sql`
-    SELECT COALESCE(SUM(i."grossPay"), 0) AS "ytdTotal"
-    FROM "payrollRuns" r
-    JOIN "payrollItems" i ON i."runId" = r.id AND i."tenantId" = r."tenantId"
-    WHERE r."tenantId" = ${tenantId}
-      AND r.status = 'paid'
-      AND EXTRACT(YEAR FROM r."periodStart") = ${currentYear}
-  `);
+    const ytdResult = await sharedDb.execute(sql`
+      SELECT COALESCE(SUM(i."grossPay"), 0) AS "ytdTotal"
+      FROM "payrollRuns" r
+      JOIN "payrollItems" i ON i."runId" = r.id AND i."tenantId" = r."tenantId"
+      WHERE r."tenantId" = ${tenantId}
+        AND r.status = 'paid'
+        AND EXTRACT(YEAR FROM r."periodStart") = ${currentYear}
+    `);
 
-  type MonthRow = { month: number; totalGross: string; headcount: string };
-  const byMonth = (monthlyResult.rows as MonthRow[]).map((r) => ({
-    month: r.month,
-    totalGross: Number(r.totalGross),
-    headcount: Number(r.headcount),
-  }));
+    type MonthRow = { month: number; totalGross: string; headcount: string };
+    const byMonth = (monthlyResult.rows as MonthRow[]).map((r) => ({
+      month: r.month,
+      totalGross: Number(r.totalGross),
+      headcount: Number(r.headcount),
+    }));
 
-  const ytdTotal = Number((ytdResult.rows[0] as { ytdTotal: string } | undefined)?.ytdTotal ?? 0);
+    const ytdTotal = Number((ytdResult.rows[0] as { ytdTotal: string } | undefined)?.ytdTotal ?? 0);
 
-  return c.json({ byMonth, ytdTotal, year: currentYear });
+    return c.json({ byMonth, ytdTotal, year: currentYear });
+  } catch (err) {
+    return handleRouteError(c, err, 'GET /payroll-runs/summary');
+  }
 });
 
 // ── List runs ──────────────────────────────────────────────────
 
 payrollRunsRouter.get('/', async (c) => {
-  const { tenantId } = c.get('tenantCtx');
-  const status = c.req.query('status');
-  const year = c.req.query('year');
+  try {
+    const { tenantId } = c.get('tenantCtx');
+    const status = c.req.query('status');
+    const year = c.req.query('year');
 
-  const result = await sharedDb.execute(sql`
-    SELECT *
-    FROM "payrollRuns"
-    WHERE "tenantId" = ${tenantId}
-      AND (${status ?? null} IS NULL OR status = ${status ?? null})
-      AND (${year ?? null} IS NULL OR EXTRACT(YEAR FROM "periodStart") = ${year ? parseInt(year, 10) : null}::integer)
-    ORDER BY "createdAt" DESC
-  `);
+    const result = await sharedDb.execute(sql`
+      SELECT *
+      FROM "payrollRuns"
+      WHERE "tenantId" = ${tenantId}
+        AND (${status ?? null} IS NULL OR status = ${status ?? null})
+        AND (${year ?? null} IS NULL OR EXTRACT(YEAR FROM "periodStart") = ${year ? parseInt(year, 10) : null}::integer)
+      ORDER BY "createdAt" DESC
+    `);
 
-  return c.json(result.rows);
+    return c.json(result.rows);
+  } catch (err) {
+    return handleRouteError(c, err, 'GET /payroll-runs');
+  }
 });
 
 // ── Create run ─────────────────────────────────────────────────
@@ -211,55 +220,63 @@ const createRunSchema = z.object({
 });
 
 payrollRunsRouter.post('/', zValidator('json', createRunSchema), async (c) => {
-  const { tenantId } = c.get('tenantCtx');
-  const body = c.req.valid('json');
+  try {
+    const { tenantId } = c.get('tenantCtx');
+    const body = c.req.valid('json');
 
-  // Create the run record
-  const runResult = await sharedDb.execute(sql`
-    INSERT INTO "payrollRuns" (
-      "tenantId", name, period, "periodStart", "periodEnd", currency, notes
-    ) VALUES (
-      ${tenantId}, ${body.name}, ${body.period},
-      ${body.periodStart}::date, ${body.periodEnd}::date,
-      ${body.currency}, ${body.notes ?? null}
-    )
-    RETURNING *
-  `);
+    // Create the run record
+    const runResult = await sharedDb.execute(sql`
+      INSERT INTO "payrollRuns" (
+        "tenantId", name, period, "periodStart", "periodEnd", currency, notes
+      ) VALUES (
+        ${tenantId}, ${body.name}, ${body.period},
+        ${body.periodStart}::date, ${body.periodEnd}::date,
+        ${body.currency}, ${body.notes ?? null}
+      )
+      RETURNING *
+    `);
 
-  const run = runResult.rows[0] as { id: string } | undefined;
-  if (!run) return c.json({ error: 'Failed to create payroll run' }, 500);
+    const run = runResult.rows[0] as { id: string } | undefined;
+    if (!run) return c.json({ error: 'Failed to create payroll run' }, 500);
 
-  // Build and insert payroll items
-  const items = await buildPayrollItems(tenantId, run.id, body.period, body.periodStart, body.periodEnd);
-  await insertItemsAndUpdateTotals(tenantId, run.id, items);
+    // Build and insert payroll items
+    const items = await buildPayrollItems(tenantId, run.id, body.period, body.periodStart, body.periodEnd);
+    await insertItemsAndUpdateTotals(tenantId, run.id, items);
 
-  // Return run with items
-  const updatedRun = await sharedDb.execute(sql`
-    SELECT * FROM "payrollRuns" WHERE id = ${run.id} AND "tenantId" = ${tenantId} LIMIT 1
-  `);
-  const itemsResult = await sharedDb.execute(sql`
-    SELECT * FROM "payrollItems" WHERE "runId" = ${run.id} AND "tenantId" = ${tenantId} ORDER BY "employeeName"
-  `);
+    // Return run with items
+    const updatedRun = await sharedDb.execute(sql`
+      SELECT * FROM "payrollRuns" WHERE id = ${run.id} AND "tenantId" = ${tenantId} LIMIT 1
+    `);
+    const itemsResult = await sharedDb.execute(sql`
+      SELECT * FROM "payrollItems" WHERE "runId" = ${run.id} AND "tenantId" = ${tenantId} ORDER BY "employeeName"
+    `);
 
-  return c.json({ ...updatedRun.rows[0], items: itemsResult.rows }, 201);
+    return c.json({ ...updatedRun.rows[0], items: itemsResult.rows }, 201);
+  } catch (err) {
+    return handleRouteError(c, err, 'POST /payroll-runs');
+  }
 });
 
 // ── Get run with items ─────────────────────────────────────────
 
 payrollRunsRouter.get('/:id', async (c) => {
-  const { tenantId } = c.get('tenantCtx');
-  const id = c.req.param('id');
+  try {
+    const { tenantId } = c.get('tenantCtx');
+    const id = c.req.param('id');
 
-  const runResult = await sharedDb.execute(sql`
-    SELECT * FROM "payrollRuns" WHERE id = ${id} AND "tenantId" = ${tenantId} LIMIT 1
-  `);
-  if (!runResult.rows[0]) return c.json({ error: 'Not found' }, 404);
+    const runResult = await sharedDb.execute(sql`
+      SELECT * FROM "payrollRuns" WHERE id = ${id} AND "tenantId" = ${tenantId} LIMIT 1
+    `);
+    if (!runResult.rows[0]) return c.json({ error: 'Not found' }, 404);
 
-  const itemsResult = await sharedDb.execute(sql`
-    SELECT * FROM "payrollItems" WHERE "runId" = ${id} AND "tenantId" = ${tenantId} ORDER BY "employeeName"
-  `);
+    const itemsResult = await sharedDb.execute(sql`
+      SELECT * FROM "payrollItems" WHERE "runId" = ${id} AND "tenantId" = ${tenantId} ORDER BY "employeeName"
+    `);
 
-  return c.json({ ...runResult.rows[0], items: itemsResult.rows });
+    return c.json({ ...runResult.rows[0], items: itemsResult.rows });
+  } catch (err) {
+    return handleRouteError(c, err, 'GET /payroll-runs/:id');
+  }
 });
 
 // ── Update run metadata ────────────────────────────────────────
@@ -271,47 +288,55 @@ const updateRunSchema = z.object({
 });
 
 payrollRunsRouter.put('/:id', zValidator('json', updateRunSchema), async (c) => {
-  const { tenantId } = c.get('tenantCtx');
-  const id = c.req.param('id');
-  const body = c.req.valid('json');
+  try {
+    const { tenantId } = c.get('tenantCtx');
+    const id = c.req.param('id');
+    const body = c.req.valid('json');
 
-  const check = await sharedDb.execute(sql`
-    SELECT id, status FROM "payrollRuns" WHERE id = ${id} AND "tenantId" = ${tenantId} LIMIT 1
-  `);
-  const existing = check.rows[0] as { id: string; status: string } | undefined;
-  if (!existing) return c.json({ error: 'Not found' }, 404);
-  if (existing.status === 'paid') return c.json({ error: 'Cannot update a paid payroll run' }, 400);
+    const check = await sharedDb.execute(sql`
+      SELECT id, status FROM "payrollRuns" WHERE id = ${id} AND "tenantId" = ${tenantId} LIMIT 1
+    `);
+    const existing = check.rows[0] as { id: string; status: string } | undefined;
+    if (!existing) return c.json({ error: 'Not found' }, 404);
+    if (existing.status === 'paid') return c.json({ error: 'Cannot update a paid payroll run' }, 400);
 
-  const result = await sharedDb.execute(sql`
-    UPDATE "payrollRuns"
-    SET
-      name       = COALESCE(${body.name ?? null}, name),
-      notes      = COALESCE(${body.notes ?? null}, notes),
-      currency   = COALESCE(${body.currency ?? null}, currency),
-      "updatedAt" = now()
-    WHERE id = ${id} AND "tenantId" = ${tenantId}
-    RETURNING *
-  `);
+    const result = await sharedDb.execute(sql`
+      UPDATE "payrollRuns"
+      SET
+        name       = COALESCE(${body.name ?? null}, name),
+        notes      = COALESCE(${body.notes ?? null}, notes),
+        currency   = COALESCE(${body.currency ?? null}, currency),
+        "updatedAt" = now()
+      WHERE id = ${id} AND "tenantId" = ${tenantId}
+      RETURNING *
+    `);
 
-  return c.json(result.rows[0]);
+    return c.json(result.rows[0]);
+  } catch (err) {
+    return handleRouteError(c, err, 'PUT /payroll-runs/:id');
+  }
 });
 
 // ── Delete run ─────────────────────────────────────────────────
 
 payrollRunsRouter.delete('/:id', async (c) => {
-  const { tenantId } = c.get('tenantCtx');
-  const id = c.req.param('id');
+  try {
+    const { tenantId } = c.get('tenantCtx');
+    const id = c.req.param('id');
 
-  const check = await sharedDb.execute(sql`
-    SELECT id, status FROM "payrollRuns" WHERE id = ${id} AND "tenantId" = ${tenantId} LIMIT 1
-  `);
-  const existing = check.rows[0] as { id: string; status: string } | undefined;
-  if (!existing) return c.json({ error: 'Not found' }, 404);
-  if (existing.status !== 'draft') return c.json({ error: 'Only draft payroll runs can be deleted' }, 400);
+    const check = await sharedDb.execute(sql`
+      SELECT id, status FROM "payrollRuns" WHERE id = ${id} AND "tenantId" = ${tenantId} LIMIT 1
+    `);
+    const existing = check.rows[0] as { id: string; status: string } | undefined;
+    if (!existing) return c.json({ error: 'Not found' }, 404);
+    if (existing.status !== 'draft') return c.json({ error: 'Only draft payroll runs can be deleted' }, 400);
 
-  await sharedDb.execute(sql`DELETE FROM "payrollRuns" WHERE id = ${id} AND "tenantId" = ${tenantId}`);
+    await sharedDb.execute(sql`DELETE FROM "payrollRuns" WHERE id = ${id} AND "tenantId" = ${tenantId}`);
 
-  return c.json({ success: true });
+    return c.json({ success: true });
+  } catch (err) {
+    return handleRouteError(c, err, 'DELETE /payroll-runs/:id');
+  }
 });
 
 // ── Update status ──────────────────────────────────────────────
@@ -328,135 +353,144 @@ const updateStatusSchema = z.object({
 });
 
 payrollRunsRouter.put('/:id/status', zValidator('json', updateStatusSchema), async (c) => {
-  const { tenantId } = c.get('tenantCtx');
-  const id = c.req.param('id');
-  const { status, approvedBy } = c.req.valid('json');
+  try {
+    const { tenantId } = c.get('tenantCtx');
+    const id = c.req.param('id');
+    const { status, approvedBy } = c.req.valid('json');
 
-  const check = await sharedDb.execute(sql`
-    SELECT id, status FROM "payrollRuns" WHERE id = ${id} AND "tenantId" = ${tenantId} LIMIT 1
-  `);
-  const existing = check.rows[0] as { id: string; status: string } | undefined;
-  if (!existing) return c.json({ error: 'Not found' }, 404);
+    const check = await sharedDb.execute(sql`
+      SELECT id, status FROM "payrollRuns" WHERE id = ${id} AND "tenantId" = ${tenantId} LIMIT 1
+    `);
+    const existing = check.rows[0] as { id: string; status: string } | undefined;
+    if (!existing) return c.json({ error: 'Not found' }, 404);
 
-  const allowed = VALID_TRANSITIONS[existing.status] ?? [];
-  if (!allowed.includes(status)) {
-    return c.json({ error: `Cannot transition from '${existing.status}' to '${status}'` }, 400);
+    const allowed = VALID_TRANSITIONS[existing.status] ?? [];
+    if (!allowed.includes(status)) {
+      return c.json({ error: `Cannot transition from '${existing.status}' to '${status}'` }, 400);
+    }
+
+    const isApproving = status === 'approved';
+    const isPaying = status === 'paid';
+
+    const result = await sharedDb.execute(sql`
+      UPDATE "payrollRuns"
+      SET
+        status      = ${status},
+        "approvedBy" = CASE WHEN ${isApproving} THEN COALESCE(${approvedBy ?? null}, "approvedBy") ELSE "approvedBy" END,
+        "approvedAt" = CASE WHEN ${isApproving} AND "approvedAt" IS NULL THEN now() ELSE "approvedAt" END,
+        "paidAt"    = CASE WHEN ${isPaying} AND "paidAt" IS NULL THEN now() ELSE "paidAt" END,
+        "updatedAt" = now()
+      WHERE id = ${id} AND "tenantId" = ${tenantId}
+      RETURNING *
+    `);
+
+    return c.json(result.rows[0]);
+  } catch (err) {
+    return handleRouteError(c, err, 'PUT /payroll-runs/:id/status');
   }
-
-  const isApproving = status === 'approved';
-  const isPaying = status === 'paid';
-
-  const result = await sharedDb.execute(sql`
-    UPDATE "payrollRuns"
-    SET
-      status      = ${status},
-      "approvedBy" = CASE WHEN ${isApproving} THEN COALESCE(${approvedBy ?? null}, "approvedBy") ELSE "approvedBy" END,
-      "approvedAt" = CASE WHEN ${isApproving} AND "approvedAt" IS NULL THEN now() ELSE "approvedAt" END,
-      "paidAt"    = CASE WHEN ${isPaying} AND "paidAt" IS NULL THEN now() ELSE "paidAt" END,
-      "updatedAt" = now()
-    WHERE id = ${id} AND "tenantId" = ${tenantId}
-    RETURNING *
-  `);
-
-  return c.json(result.rows[0]);
 });
 
 // ── Recalculate ────────────────────────────────────────────────
 
 payrollRunsRouter.post('/:id/recalculate', async (c) => {
-  const { tenantId } = c.get('tenantCtx');
-  const id = c.req.param('id');
+  try {
+    const { tenantId } = c.get('tenantCtx');
+    const id = c.req.param('id');
 
-  const check = await sharedDb.execute(sql`
-    SELECT id, status, period, "periodStart", "periodEnd"
-    FROM "payrollRuns"
-    WHERE id = ${id} AND "tenantId" = ${tenantId}
-    LIMIT 1
-  `);
-  const run = check.rows[0] as {
-    id: string;
-    status: string;
-    period: string;
-    periodStart: string;
-    periodEnd: string;
-  } | undefined;
+    const check = await sharedDb.execute(sql`
+      SELECT id, status, period, "periodStart", "periodEnd"
+      FROM "payrollRuns"
+      WHERE id = ${id} AND "tenantId" = ${tenantId}
+      LIMIT 1
+    `);
+    const run = check.rows[0] as {
+      id: string;
+      status: string;
+      period: string;
+      periodStart: string;
+      periodEnd: string;
+    } | undefined;
 
-  if (!run) return c.json({ error: 'Not found' }, 404);
-  if (!['draft', 'processing'].includes(run.status)) {
-    return c.json({ error: 'Recalculation only allowed for draft or processing runs' }, 400);
+    if (!run) return c.json({ error: 'Not found' }, 404);
+    if (!['draft', 'processing'].includes(run.status)) {
+      return c.json({ error: 'Recalculation only allowed for draft or processing runs' }, 400);
+    }
+
+    // Delete existing items
+    await sharedDb.execute(sql`
+      DELETE FROM "payrollItems" WHERE "runId" = ${id} AND "tenantId" = ${tenantId}
+    `);
+
+    const periodStart = typeof run.periodStart === 'string'
+      ? run.periodStart.slice(0, 10)
+      : new Date(run.periodStart as unknown as string).toISOString().slice(0, 10);
+    const periodEnd = typeof run.periodEnd === 'string'
+      ? run.periodEnd.slice(0, 10)
+      : new Date(run.periodEnd as unknown as string).toISOString().slice(0, 10);
+
+    const items = await buildPayrollItems(tenantId, id, run.period, periodStart, periodEnd);
+    await insertItemsAndUpdateTotals(tenantId, id, items);
+
+    const updatedRun = await sharedDb.execute(sql`
+      SELECT * FROM "payrollRuns" WHERE id = ${id} AND "tenantId" = ${tenantId} LIMIT 1
+    `);
+    const itemsResult = await sharedDb.execute(sql`
+      SELECT * FROM "payrollItems" WHERE "runId" = ${id} AND "tenantId" = ${tenantId} ORDER BY "employeeName"
+    `);
+
+    return c.json({ ...updatedRun.rows[0], items: itemsResult.rows });
+  } catch (err) {
+    return handleRouteError(c, err, 'POST /payroll-runs/:id/recalculate');
   }
-
-  // Delete existing items
-  await sharedDb.execute(sql`
-    DELETE FROM "payrollItems" WHERE "runId" = ${id} AND "tenantId" = ${tenantId}
-  `);
-
-  const periodStart = typeof run.periodStart === 'string'
-    ? run.periodStart.slice(0, 10)
-    : new Date(run.periodStart as unknown as string).toISOString().slice(0, 10);
-  const periodEnd = typeof run.periodEnd === 'string'
-    ? run.periodEnd.slice(0, 10)
-    : new Date(run.periodEnd as unknown as string).toISOString().slice(0, 10);
-
-  const items = await buildPayrollItems(tenantId, id, run.period, periodStart, periodEnd);
-  await insertItemsAndUpdateTotals(tenantId, id, items);
-
-  const updatedRun = await sharedDb.execute(sql`
-    SELECT * FROM "payrollRuns" WHERE id = ${id} AND "tenantId" = ${tenantId} LIMIT 1
-  `);
-  const itemsResult = await sharedDb.execute(sql`
-    SELECT * FROM "payrollItems" WHERE "runId" = ${id} AND "tenantId" = ${tenantId} ORDER BY "employeeName"
-  `);
-
-  return c.json({ ...updatedRun.rows[0], items: itemsResult.rows });
 });
 
 // ── Generate payslip HTML ──────────────────────────────────────
 
 payrollRunsRouter.get('/:id/payslip/:itemId', async (c) => {
-  const { tenantId } = c.get('tenantCtx');
-  const runId = c.req.param('id');
-  const itemId = c.req.param('itemId');
+  try {
+    const { tenantId } = c.get('tenantCtx');
+    const runId = c.req.param('id');
+    const itemId = c.req.param('itemId');
 
-  const runResult = await sharedDb.execute(sql`
-    SELECT * FROM "payrollRuns" WHERE id = ${runId} AND "tenantId" = ${tenantId} LIMIT 1
-  `);
-  const run = runResult.rows[0] as {
-    name: string;
-    period: string;
-    periodStart: string;
-    periodEnd: string;
-    currency: string;
-  } | undefined;
-  if (!run) return c.json({ error: 'Run not found' }, 404);
+    const runResult = await sharedDb.execute(sql`
+      SELECT * FROM "payrollRuns" WHERE id = ${runId} AND "tenantId" = ${tenantId} LIMIT 1
+    `);
+    const run = runResult.rows[0] as {
+      name: string;
+      period: string;
+      periodStart: string;
+      periodEnd: string;
+      currency: string;
+    } | undefined;
+    if (!run) return c.json({ error: 'Run not found' }, 404);
 
-  const itemResult = await sharedDb.execute(sql`
-    SELECT * FROM "payrollItems"
-    WHERE id = ${itemId} AND "runId" = ${runId} AND "tenantId" = ${tenantId}
-    LIMIT 1
-  `);
-  const item = itemResult.rows[0] as {
-    employeeName: string;
-    employeeEmail: string | null;
-    baseSalary: string;
-    hoursWorked: string | null;
-    grossPay: string;
-    taxDeduction: string;
-    socialSecurity: string;
-    medicare: string;
-    otherDeductions: string;
-    totalDeductions: string;
-    netPay: string;
-  } | undefined;
-  if (!item) return c.json({ error: 'Payslip item not found' }, 404);
+    const itemResult = await sharedDb.execute(sql`
+      SELECT * FROM "payrollItems"
+      WHERE id = ${itemId} AND "runId" = ${runId} AND "tenantId" = ${tenantId}
+      LIMIT 1
+    `);
+    const item = itemResult.rows[0] as {
+      employeeName: string;
+      employeeEmail: string | null;
+      baseSalary: string;
+      hoursWorked: string | null;
+      grossPay: string;
+      taxDeduction: string;
+      socialSecurity: string;
+      medicare: string;
+      otherDeductions: string;
+      totalDeductions: string;
+      netPay: string;
+    } | undefined;
+    if (!item) return c.json({ error: 'Payslip item not found' }, 404);
 
-  const fmt = (n: string | number) =>
-    Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmt = (n: string | number) =>
+      Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-  const periodLabel = `${run.periodStart} — ${run.periodEnd}`;
-  const currency = run.currency;
+    const periodLabel = `${run.periodStart} — ${run.periodEnd}`;
+    const currency = run.currency;
 
-  const html = `<!DOCTYPE html>
+    const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -551,10 +585,13 @@ payrollRunsRouter.get('/:id/payslip/:itemId', async (c) => {
 </body>
 </html>`;
 
-  // Mark payslip as generated
-  await sharedDb.execute(sql`
-    UPDATE "payrollItems" SET "payslipGenerated" = true WHERE id = ${itemId} AND "tenantId" = ${tenantId}
-  `);
+    // Mark payslip as generated
+    await sharedDb.execute(sql`
+      UPDATE "payrollItems" SET "payslipGenerated" = true WHERE id = ${itemId} AND "tenantId" = ${tenantId}
+    `);
 
-  return c.json({ html, employeeName: item.employeeName, period: periodLabel });
+    return c.json({ html, employeeName: item.employeeName, period: periodLabel });
+  } catch (err) {
+    return handleRouteError(c, err, 'GET /payroll-runs/:id/payslip/:itemId');
+  }
 });
