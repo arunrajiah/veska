@@ -46,6 +46,7 @@ export function LoginClient() {
         mfaRequired?: boolean;
         tempToken?: string;
         message?: string;
+        user?: { id: string; tenantId: string; permissions?: string[]; role?: string };
       };
 
       if (!res.ok) {
@@ -62,6 +63,9 @@ export function LoginClient() {
       if (data.token) {
         localStorage.setItem('veska_token', data.token);
         document.cookie = `veska_session=${data.token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+        if (data.user) {
+          localStorage.setItem('veska_user', JSON.stringify(data.user));
+        }
         router.push('/dashboard');
       }
     } catch {
@@ -81,7 +85,11 @@ export function LoginClient() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tempToken, code: mfaCode }),
       });
-      const data = (await res.json()) as { token?: string; message?: string };
+      const data = (await res.json()) as {
+        token?: string;
+        message?: string;
+        user?: { id: string; tenantId: string; permissions?: string[]; role?: string };
+      };
 
       if (!res.ok) {
         setError(data.message ?? 'Invalid verification code.');
@@ -91,6 +99,9 @@ export function LoginClient() {
       if (data.token) {
         localStorage.setItem('veska_token', data.token);
         document.cookie = `veska_session=${data.token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+        if (data.user) {
+          localStorage.setItem('veska_user', JSON.stringify(data.user));
+        }
         router.push('/dashboard');
       }
     } catch {

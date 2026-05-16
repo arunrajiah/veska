@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import {
   Brain,
   MessageSquare,
@@ -12,9 +13,43 @@ import {
   ArrowRight,
   BarChart2,
   Globe,
+  Loader2,
 } from 'lucide-react';
 
-// Mock usage data — Growth plan
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+const TENANT_ID = 'demo-tenant';
+
+function apiHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'X-Veska-Tenant-Id': TENANT_ID,
+    'X-Veska-Identity-Id': process.env.NEXT_PUBLIC_ADMIN_IDENTITY_ID ?? 'admin',
+  };
+}
+
+interface FeatureSummary {
+  feature: string;
+  calls: string;
+  tokens: string;
+  promptTokens: string;
+  completionTokens: string;
+  avgDurationMs: string;
+  lastUsed: string;
+}
+
+interface DailyUsage {
+  date: string;
+  calls: string;
+  tokens: string;
+  users: string;
+}
+
+interface UsageData {
+  summary: FeatureSummary[];
+  daily: DailyUsage[];
+}
+
+// Static mock usage data — Growth plan limits
 const USAGE = {
   conversations: { used: 847, limit: 500 },
   insights: { used: 12, limit: 20 },
@@ -26,139 +61,25 @@ const USAGE = {
 
 const CURRENT_PLAN = 'Growth';
 
-// Feature comparison table data
 const FEATURE_ROWS = [
-  {
-    feature: 'AI Conversations / mo',
-    free: '10',
-    starter: '100',
-    growth: '500',
-    business: '2,000',
-    enterprise: 'Unlimited',
-  },
-  {
-    feature: 'AI Insights / day',
-    free: '1',
-    starter: '5',
-    growth: '20',
-    business: '100',
-    enterprise: 'Unlimited',
-  },
-  {
-    feature: 'Entity Enrichments / mo',
-    free: '0',
-    starter: '25',
-    growth: '200',
-    business: 'Unlimited',
-    enterprise: 'Unlimited',
-  },
-  {
-    feature: 'Write Actions',
-    free: '✗',
-    starter: '✗',
-    growth: '✓',
-    business: '✓',
-    enterprise: '✓',
-  },
-  {
-    feature: 'Anomaly Detection',
-    free: '✗',
-    starter: '✗',
-    growth: '✗',
-    business: '✓',
-    enterprise: '✓',
-  },
-  {
-    feature: 'Analytics Retention',
-    free: '30d',
-    starter: '90d',
-    growth: '1yr',
-    business: 'Unlimited',
-    enterprise: 'Unlimited',
-  },
-  {
-    feature: 'AI Reports / month',
-    free: '0',
-    starter: '10',
-    growth: '50',
-    business: '200',
-    enterprise: 'Unlimited',
-  },
-  {
-    feature: 'Saved Reports',
-    free: '3',
-    starter: '10',
-    growth: '50',
-    business: 'Unlimited',
-    enterprise: 'Unlimited',
-  },
-  {
-    feature: 'Data Exports / month',
-    free: '5',
-    starter: '50',
-    growth: '500',
-    business: 'Unlimited',
-    enterprise: 'Unlimited',
-  },
-  {
-    feature: 'Portal Users',
-    free: '0',
-    starter: '10',
-    growth: '100',
-    business: '500',
-    enterprise: 'Unlimited',
-  },
-  {
-    feature: 'Notification Retention',
-    free: '7d',
-    starter: '30d',
-    growth: '90d',
-    business: '1yr',
-    enterprise: 'Unlimited',
-  },
-  {
-    feature: 'Portal Custom Branding',
-    free: '✗',
-    starter: '✗',
-    growth: '✗',
-    business: '✓',
-    enterprise: '✓',
-  },
-  {
-    feature: 'Tax Rates',
-    free: '1',
-    starter: '5',
-    growth: '20',
-    business: 'Unlimited',
-    enterprise: 'Unlimited',
-  },
-  {
-    feature: 'Custom SMTP',
-    free: '✗',
-    starter: '✗',
-    growth: '✓',
-    business: '✓',
-    enterprise: '✓',
-  },
-  {
-    feature: 'Module Management',
-    free: '✗',
-    starter: '✓',
-    growth: '✓',
-    business: '✓',
-    enterprise: '✓',
-  },
+  { feature: 'AI Conversations / mo', free: '10', starter: '100', growth: '500', business: '2,000', enterprise: 'Unlimited' },
+  { feature: 'AI Insights / day', free: '1', starter: '5', growth: '20', business: '100', enterprise: 'Unlimited' },
+  { feature: 'Entity Enrichments / mo', free: '0', starter: '25', growth: '200', business: 'Unlimited', enterprise: 'Unlimited' },
+  { feature: 'Write Actions', free: '✗', starter: '✗', growth: '✓', business: '✓', enterprise: '✓' },
+  { feature: 'Anomaly Detection', free: '✗', starter: '✗', growth: '✗', business: '✓', enterprise: '✓' },
+  { feature: 'Analytics Retention', free: '30d', starter: '90d', growth: '1yr', business: 'Unlimited', enterprise: 'Unlimited' },
+  { feature: 'AI Reports / month', free: '0', starter: '10', growth: '50', business: '200', enterprise: 'Unlimited' },
+  { feature: 'Saved Reports', free: '3', starter: '10', growth: '50', business: 'Unlimited', enterprise: 'Unlimited' },
+  { feature: 'Data Exports / month', free: '5', starter: '50', growth: '500', business: 'Unlimited', enterprise: 'Unlimited' },
+  { feature: 'Portal Users', free: '0', starter: '10', growth: '100', business: '500', enterprise: 'Unlimited' },
+  { feature: 'Notification Retention', free: '7d', starter: '30d', growth: '90d', business: '1yr', enterprise: 'Unlimited' },
+  { feature: 'Portal Custom Branding', free: '✗', starter: '✗', growth: '✗', business: '✓', enterprise: '✓' },
+  { feature: 'Tax Rates', free: '1', starter: '5', growth: '20', business: 'Unlimited', enterprise: 'Unlimited' },
+  { feature: 'Custom SMTP', free: '✗', starter: '✗', growth: '✓', business: '✓', enterprise: '✓' },
+  { feature: 'Module Management', free: '✗', starter: '✓', growth: '✓', business: '✓', enterprise: '✓' },
 ];
 
-function ProgressBar({
-  used,
-  limit,
-  color,
-}: {
-  used: number;
-  limit: number | 'unlimited';
-  color: string;
-}) {
+function ProgressBar({ used, limit, color }: { used: number; limit: number | 'unlimited'; color: string }) {
   if (limit === 'unlimited') {
     return (
       <div className="h-1.5 bg-gray-100 rounded-full">
@@ -169,15 +90,152 @@ function ProgressBar({
   const pct = Math.min((used / limit) * 100, 100);
   return (
     <div className="h-1.5 bg-gray-100 rounded-full">
-      <div
-        className={`h-1.5 rounded-full transition-all ${color}`}
-        style={{ width: `${pct}%` }}
-      />
+      <div className={`h-1.5 rounded-full transition-all ${color}`} style={{ width: `${pct}%` }} />
+    </div>
+  );
+}
+
+// SVG bar chart for daily token usage
+function DailyTokenChart({ daily }: { daily: DailyUsage[] }) {
+  if (!daily.length) {
+    return (
+      <div className="flex items-center justify-center h-20 text-xs text-gray-400">
+        No usage data yet
+      </div>
+    );
+  }
+
+  const sorted = [...daily].sort((a, b) => a.date.localeCompare(b.date)).slice(-14);
+  const values = sorted.map(d => Number(d.tokens));
+  const maxVal = Math.max(...values, 1);
+  const chartH = 80;
+  const barW = 24;
+  const gap = 6;
+  const totalW = sorted.length * (barW + gap) - gap;
+
+  return (
+    <div className="overflow-x-auto">
+      <svg width={totalW} height={chartH + 24} className="overflow-visible">
+        {sorted.map((d, i) => {
+          const val = Number(d.tokens);
+          const barH = Math.max(2, Math.round((val / maxVal) * chartH));
+          const x = i * (barW + gap);
+          const y = chartH - barH;
+          const label = d.date ? String(d.date).slice(5) : '';
+          return (
+            <g key={d.date}>
+              <rect x={x} y={y} width={barW} height={barH} rx={3} fill="#818cf8" />
+              <title>{`${d.date}: ${Number(d.tokens).toLocaleString()} tokens, ${d.calls} calls`}</title>
+              {i % 2 === 0 && (
+                <text x={x + barW / 2} y={chartH + 14} textAnchor="middle" fontSize={9} fill="#9ca3af">
+                  {label}
+                </text>
+              )}
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
+function featureLabel(feature: string): string {
+  const map: Record<string, string> = {
+    action_agent: 'AI Chat Agent',
+    insights: 'AI Insights',
+    workflow_suggest: 'Workflow Suggest',
+    report_generate: 'Report Generate',
+    setup: 'Setup',
+  };
+  return map[feature] ?? feature;
+}
+
+function RealUsagePanel({ data }: { data: UsageData }) {
+  const totalTokens = data.summary.reduce((s, r) => s + Number(r.tokens), 0);
+  const totalCalls = data.summary.reduce((s, r) => s + Number(r.calls), 0);
+
+  return (
+    <div className="space-y-4">
+      {/* Summary stats */}
+      <div className="grid grid-cols-3 gap-4">
+        <div className="bg-white border border-gray-200 rounded-xl p-4 text-center">
+          <div className="text-2xl font-bold text-indigo-600">{totalTokens.toLocaleString()}</div>
+          <div className="text-xs text-gray-500 mt-1">Total Tokens (30d)</div>
+        </div>
+        <div className="bg-white border border-gray-200 rounded-xl p-4 text-center">
+          <div className="text-2xl font-bold text-violet-600">{totalCalls.toLocaleString()}</div>
+          <div className="text-xs text-gray-500 mt-1">Total LLM Calls (30d)</div>
+        </div>
+        <div className="bg-white border border-gray-200 rounded-xl p-4 text-center">
+          <div className="text-2xl font-bold text-emerald-600">{data.summary.length}</div>
+          <div className="text-xs text-gray-500 mt-1">Active Features</div>
+        </div>
+      </div>
+
+      {/* Daily chart */}
+      <div className="bg-white border border-gray-200 rounded-xl p-5">
+        <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">
+          Daily Token Usage (last 14 days)
+        </h3>
+        <DailyTokenChart daily={data.daily} />
+      </div>
+
+      {/* By feature */}
+      {data.summary.length > 0 && (
+        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+          <div className="px-5 py-3 border-b border-gray-100">
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Usage by Feature</h3>
+          </div>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-100">
+                <th className="text-left px-4 py-2.5 text-xs font-medium text-gray-500">Feature</th>
+                <th className="text-right px-4 py-2.5 text-xs font-medium text-gray-500">Calls</th>
+                <th className="text-right px-4 py-2.5 text-xs font-medium text-gray-500">Total Tokens</th>
+                <th className="text-right px-4 py-2.5 text-xs font-medium text-gray-500">Avg Duration</th>
+                <th className="text-right px-4 py-2.5 text-xs font-medium text-gray-500">Last Used</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {data.summary.map((row) => (
+                <tr key={row.feature} className="hover:bg-gray-50">
+                  <td className="px-4 py-3 font-medium text-gray-800">{featureLabel(row.feature)}</td>
+                  <td className="px-4 py-3 text-right text-gray-600">{Number(row.calls).toLocaleString()}</td>
+                  <td className="px-4 py-3 text-right text-gray-600">{Number(row.tokens).toLocaleString()}</td>
+                  <td className="px-4 py-3 text-right text-gray-500">
+                    {row.avgDurationMs ? `${Math.round(Number(row.avgDurationMs))}ms` : '—'}
+                  </td>
+                  <td className="px-4 py-3 text-right text-gray-500">
+                    {row.lastUsed ? new Date(row.lastUsed).toLocaleDateString() : '—'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {data.summary.length === 0 && (
+        <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-400 text-sm">
+          No AI usage data recorded yet. Start using AI features to see stats here.
+        </div>
+      )}
     </div>
   );
 }
 
 export function AIUsageClient() {
+  const [usageData, setUsageData] = useState<UsageData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/api/v1/ai/usage/summary?days=30`, { headers: apiHeaders() })
+      .then(r => r.ok ? r.json() as Promise<UsageData> : Promise.reject(r.status))
+      .then(data => setUsageData(data))
+      .catch(() => setUsageData({ summary: [], daily: [] }))
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6">
       {/* Page header */}
@@ -212,102 +270,119 @@ export function AIUsageClient() {
         </Link>
       </div>
 
-      {/* Usage cards — 2×2 grid */}
-      <div className="grid grid-cols-2 gap-4">
-        {/* AI Conversations */}
-        <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
-          <div className="flex items-center gap-2">
-            <MessageSquare size={16} className="text-indigo-500" />
-            <span className="text-sm font-medium text-gray-700">AI Conversations</span>
-          </div>
-          <div className="space-y-1.5">
-            <div className="flex justify-between text-sm">
-              <span className="font-semibold text-gray-900">
-                {USAGE.conversations.used.toLocaleString()}
-              </span>
-              <span className="text-gray-400">
-                / {USAGE.conversations.limit.toLocaleString()}
-              </span>
-            </div>
-            <ProgressBar
-              used={USAGE.conversations.used}
-              limit={USAGE.conversations.limit}
-              color="bg-indigo-500"
-            />
-          </div>
-          <p className="text-xs text-gray-400">this month</p>
+      {/* Real usage data section */}
+      <div>
+        <div className="flex items-center gap-2 mb-3">
+          <BarChart2 size={16} className="text-indigo-500" />
+          <span className="text-sm font-semibold text-gray-700">Live Usage Analytics</span>
         </div>
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 size={24} className="animate-spin text-indigo-400" />
+          </div>
+        ) : (
+          <RealUsagePanel data={usageData ?? { summary: [], daily: [] }} />
+        )}
+      </div>
 
-        {/* AI Insights */}
-        <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
-          <div className="flex items-center gap-2">
-            <Lightbulb size={16} className="text-violet-500" />
-            <span className="text-sm font-medium text-gray-700">AI Insights</span>
-          </div>
-          <div className="space-y-1.5">
-            <div className="flex justify-between text-sm">
-              <span className="font-semibold text-gray-900">
-                {USAGE.insights.used}
-              </span>
-              <span className="text-gray-400">/ {USAGE.insights.limit}</span>
-            </div>
-            <ProgressBar
-              used={USAGE.insights.used}
-              limit={USAGE.insights.limit}
-              color="bg-violet-500"
-            />
-          </div>
-          <p className="text-xs text-gray-400">today</p>
+      {/* Plan quota cards */}
+      <div>
+        <div className="flex items-center gap-2 mb-3">
+          <Zap size={16} className="text-amber-500" />
+          <span className="text-sm font-semibold text-gray-700">Plan Quotas</span>
         </div>
-
-        {/* Entity Enrichments */}
-        <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
-          <div className="flex items-center gap-2">
-            <Wand2 size={16} className="text-emerald-500" />
-            <span className="text-sm font-medium text-gray-700">Entity Enrichments</span>
-          </div>
-          <div className="space-y-1.5">
-            <div className="flex justify-between text-sm">
-              <span className="font-semibold text-gray-900">
-                {USAGE.enrichments.used}
-              </span>
-              <span className="text-gray-400">/ {USAGE.enrichments.limit}</span>
+        <div className="grid grid-cols-2 gap-4">
+          {/* AI Conversations */}
+          <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
+            <div className="flex items-center gap-2">
+              <MessageSquare size={16} className="text-indigo-500" />
+              <span className="text-sm font-medium text-gray-700">AI Conversations</span>
             </div>
-            <ProgressBar
-              used={USAGE.enrichments.used}
-              limit={USAGE.enrichments.limit}
-              color="bg-emerald-500"
-            />
+            <div className="space-y-1.5">
+              <div className="flex justify-between text-sm">
+                <span className="font-semibold text-gray-900">
+                  {USAGE.conversations.used.toLocaleString()}
+                </span>
+                <span className="text-gray-400">
+                  / {USAGE.conversations.limit.toLocaleString()}
+                </span>
+              </div>
+              <ProgressBar
+                used={USAGE.conversations.used}
+                limit={USAGE.conversations.limit}
+                color="bg-indigo-500"
+              />
+            </div>
+            <p className="text-xs text-gray-400">this month</p>
           </div>
-          <p className="text-xs text-gray-400">this month</p>
-        </div>
 
-        {/* Write Actions */}
-        <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
-          <div className="flex items-center gap-2">
-            <Zap size={16} className="text-amber-500" />
-            <span className="text-sm font-medium text-gray-700">Write Actions</span>
+          {/* AI Insights */}
+          <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
+            <div className="flex items-center gap-2">
+              <Lightbulb size={16} className="text-violet-500" />
+              <span className="text-sm font-medium text-gray-700">AI Insights</span>
+            </div>
+            <div className="space-y-1.5">
+              <div className="flex justify-between text-sm">
+                <span className="font-semibold text-gray-900">{USAGE.insights.used}</span>
+                <span className="text-gray-400">/ {USAGE.insights.limit}</span>
+              </div>
+              <ProgressBar
+                used={USAGE.insights.used}
+                limit={USAGE.insights.limit}
+                color="bg-violet-500"
+              />
+            </div>
+            <p className="text-xs text-gray-400">today</p>
           </div>
-          <div className="flex items-center gap-2 mt-1">
-            {USAGE.writeActions ? (
-              <>
-                <div className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100">
-                  <Check size={13} className="text-emerald-600" />
-                </div>
-                <span className="text-sm font-medium text-emerald-700">Enabled</span>
-              </>
-            ) : (
-              <>
-                <div className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100">
-                  <Lock size={13} className="text-gray-400" />
-                </div>
-                <span className="text-sm font-medium text-gray-400">Upgrade required</span>
-              </>
-            )}
+
+          {/* Entity Enrichments */}
+          <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
+            <div className="flex items-center gap-2">
+              <Wand2 size={16} className="text-emerald-500" />
+              <span className="text-sm font-medium text-gray-700">Entity Enrichments</span>
+            </div>
+            <div className="space-y-1.5">
+              <div className="flex justify-between text-sm">
+                <span className="font-semibold text-gray-900">{USAGE.enrichments.used}</span>
+                <span className="text-gray-400">/ {USAGE.enrichments.limit}</span>
+              </div>
+              <ProgressBar
+                used={USAGE.enrichments.used}
+                limit={USAGE.enrichments.limit}
+                color="bg-emerald-500"
+              />
+            </div>
+            <p className="text-xs text-gray-400">this month</p>
           </div>
-          <p className="text-xs text-gray-400">
-            Create expenses, update tickets &amp; more
-          </p>
+
+          {/* Write Actions */}
+          <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
+            <div className="flex items-center gap-2">
+              <Zap size={16} className="text-amber-500" />
+              <span className="text-sm font-medium text-gray-700">Write Actions</span>
+            </div>
+            <div className="flex items-center gap-2 mt-1">
+              {USAGE.writeActions ? (
+                <>
+                  <div className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100">
+                    <Check size={13} className="text-emerald-600" />
+                  </div>
+                  <span className="text-sm font-medium text-emerald-700">Enabled</span>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100">
+                    <Lock size={13} className="text-gray-400" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-400">Upgrade required</span>
+                </>
+              )}
+            </div>
+            <p className="text-xs text-gray-400">
+              Create expenses, update tickets &amp; more
+            </p>
+          </div>
         </div>
       </div>
 
@@ -330,9 +405,7 @@ export function AIUsageClient() {
 
         {USAGE.anomalyDetection ? (
           <div className="mt-2">
-            <span className="text-2xl font-bold text-gray-900">
-              {USAGE.alertsGenerated}
-            </span>
+            <span className="text-2xl font-bold text-gray-900">{USAGE.alertsGenerated}</span>
             <span className="ml-2 text-sm text-gray-500">AI alerts generated this month</span>
           </div>
         ) : (
@@ -362,7 +435,6 @@ export function AIUsageClient() {
           </Link>
         </div>
         <div className="grid grid-cols-2 gap-4">
-          {/* AI Reports */}
           <div className="space-y-1.5">
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">AI Reports</span>
@@ -375,7 +447,6 @@ export function AIUsageClient() {
             </div>
             <p className="text-xs text-gray-400">this month</p>
           </div>
-          {/* Data Exports */}
           <div className="space-y-1.5">
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Data Exports</span>
@@ -388,7 +459,6 @@ export function AIUsageClient() {
             </div>
             <p className="text-xs text-gray-400">this month</p>
           </div>
-          {/* Saved Reports */}
           <div className="space-y-1.5">
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Saved Reports</span>
@@ -401,7 +471,6 @@ export function AIUsageClient() {
             </div>
             <p className="text-xs text-gray-400">slots used</p>
           </div>
-          {/* Data Retention */}
           <div className="space-y-1.5">
             <span className="text-sm text-gray-600">Data Retention</span>
             <div>
@@ -430,7 +499,6 @@ export function AIUsageClient() {
           </Link>
         </div>
         <div className="grid grid-cols-2 gap-4">
-          {/* Portal Users */}
           <div className="space-y-1.5">
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Portal Users</span>
@@ -443,7 +511,6 @@ export function AIUsageClient() {
             </div>
             <p className="text-xs text-gray-400">active token slots</p>
           </div>
-          {/* Notification Retention */}
           <div className="space-y-1.5">
             <span className="text-sm text-gray-600">Notification Retention</span>
             <div>
@@ -453,7 +520,6 @@ export function AIUsageClient() {
             </div>
             <p className="text-xs text-gray-400">notification history window</p>
           </div>
-          {/* Custom Branding */}
           <div className="col-span-2 flex items-center gap-2 pt-1">
             <Lock size={14} className="text-gray-400 flex-shrink-0" />
             <p className="text-sm text-gray-500">

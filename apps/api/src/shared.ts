@@ -3,7 +3,7 @@
 
 import {
   createDatabase,
-  AnthropicProvider,
+  createLLMProvider,
   MagicLinkService,
   AuditService,
   QueueService,
@@ -12,7 +12,14 @@ import {
 import { Redis } from 'ioredis';
 
 if (!process.env['DATABASE_URL']) throw new Error('DATABASE_URL is required');
-if (!process.env['ANTHROPIC_API_KEY']) throw new Error('ANTHROPIC_API_KEY is required');
+
+if (!process.env['ANTHROPIC_API_KEY'] && !process.env['LLM_PROVIDER']) {
+  console.warn(
+    '[startup] No LLM provider configured. ' +
+      'Set LLM_PROVIDER=ollama for local AI, or set ANTHROPIC_API_KEY for Anthropic cloud AI. ' +
+      'AI features will be limited until a provider is configured.',
+  );
+}
 
 export const sharedDb: Database = createDatabase(process.env['DATABASE_URL']);
 
@@ -21,9 +28,7 @@ export const sharedRedis = new Redis(process.env['REDIS_URL'] ?? 'redis://localh
   enableReadyCheck: false,
 });
 
-export const sharedLlm = new AnthropicProvider({
-  apiKey: process.env['ANTHROPIC_API_KEY'],
-});
+export const sharedLlm = createLLMProvider();
 
 export const sharedMagicLinkService = new MagicLinkService(
   sharedDb,

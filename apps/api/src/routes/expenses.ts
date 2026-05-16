@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { eq, and, isNull, sql } from 'drizzle-orm';
-import { schema } from '@veska/core';
+import { schema, ApprovalService } from '@veska/core';
 import type { TenantContext } from '../middleware/tenant-context.js';
 
 export const expensesRouter = new Hono<{ Variables: TenantContext }>();
@@ -132,7 +132,62 @@ expensesRouter.post(
       .returning();
 
     if (!record) return c.json({ error: 'Failed to create expense' }, 500);
+
+    // Trigger approval flow if submitted
+    if (data.status === 'submitted') {
+      void new ApprovalService(db).trigger({
+        tenantId,
+        entityType: 'Expense',
+        entityId: record.id,
+        requestedBy: identityId,
+        amount: body.amount,
+        metadata: { description: body.description, amount: body.amount },
+      }).catch(err => console.error('[approval] trigger failed:', err));
+    }
+
     return c.json(record, 201);
+  },
+);
+
+// ── Submit ───────────────────────────────────────────────────
+
+expensesRouter.patch(
+  '/:id/submit',
+  async (c) => {
+    const id = c.req.param('id');
+    const { db, tenantId, identityId } = c.get('tenantCtx');
+
+    const expense = await db.query.entityRecords.findFirst({
+      where: and(
+        eq(schema.entityRecords.tenantId, tenantId),
+        eq(schema.entityRecords.entityType, 'Expense'),
+        eq(schema.entityRecords.id, id),
+        isNull(schema.entityRecords.deletedAt),
+      ),
+    });
+
+    if (!expense) return c.json({ error: 'Expense not found' }, 404);
+
+    const existing = expense.data as Record<string, unknown>;
+    const updated: Record<string, unknown> = { ...existing, status: 'submitted' };
+
+    const [result] = await db
+      .update(schema.entityRecords)
+      .set({ data: updated, updatedAt: new Date() })
+      .where(eq(schema.entityRecords.id, id))
+      .returning();
+
+    // Trigger approval flow
+    void new ApprovalService(db).trigger({
+      tenantId,
+      entityType: 'Expense',
+      entityId: id,
+      requestedBy: identityId,
+      amount: Number(existing['amount'] ?? 0),
+      metadata: { description: existing['description'], amount: existing['amount'] },
+    }).catch(err => console.error('[approval] trigger failed:', err));
+
+    return c.json(result);
   },
 );
 

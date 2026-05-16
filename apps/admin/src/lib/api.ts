@@ -1,21 +1,37 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+import { cookies } from 'next/headers';
 
-function headers(tenantId: string): HeadersInit {
-  return {
-    'Content-Type': 'application/json',
-    'X-Veska-Tenant-Id': tenantId,
-    'X-Veska-Identity-Id': process.env.NEXT_PUBLIC_ADMIN_IDENTITY_ID ?? 'admin',
-  };
-}
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 export async function apiFetch<T>(
   path: string,
   tenantId: string,
   init?: RequestInit,
 ): Promise<T> {
+  let token: string | null = null;
+
+  // Server-side (RSC): read session token from the cookie store
+  if (typeof window === 'undefined') {
+    try {
+      const cookieStore = await cookies();
+      token = cookieStore.get('veska_session')?.value ?? null;
+    } catch {
+      token = null;
+    }
+  } else {
+    // Client-side: read from localStorage
+    token = localStorage.getItem('veska_token');
+  }
+
+  const authHeaders: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
+
   const res = await fetch(`${API_BASE}${path}`, {
     ...init,
-    headers: { ...headers(tenantId), ...(init?.headers ?? {}) },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Veska-Tenant-Id': tenantId,
+      ...authHeaders,
+      ...(init?.headers ?? {}),
+    },
     cache: 'no-store',
   });
   if (!res.ok) {

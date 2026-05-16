@@ -5,6 +5,7 @@ import type { LLMMessage } from '@veska-cloud/ai';
 import { aiLimit } from '@veska-cloud/rate-limit';
 import type { TenantContext } from '../middleware/tenant-context.js';
 import { sharedLlm, sharedQueueService } from '../shared.js';
+import { AIUsageService } from '@veska/core';
 
 export const aiRouter = new Hono<{ Variables: TenantContext }>();
 
@@ -96,12 +97,14 @@ aiRouter.post('/insights', aiLimit(), async (c) => {
 
   let insights: unknown[] = [];
 
+  const insightsStart = Date.now();
   try {
     const completion = await sharedLlm.complete({
       system: systemPrompt,
       messages: [{ role: 'user', content: userMessage }],
       maxTokens: 1024,
     });
+    const insightsDuration = Date.now() - insightsStart;
     const rawAnswer = completion.content;
 
     const jsonText = rawAnswer
@@ -111,6 +114,18 @@ aiRouter.post('/insights', aiLimit(), async (c) => {
       .trim();
 
     insights = JSON.parse(jsonText) as unknown[];
+
+    // Fire-and-forget usage log
+    void new AIUsageService(db).log({
+      tenantId,
+      feature: 'insights',
+      model: process.env['ANTHROPIC_MODEL'] ?? process.env['OLLAMA_MODEL'] ?? 'claude-sonnet-4-5',
+      promptTokens: 0,
+      completionTokens: 0,
+      durationMs: insightsDuration,
+      requestSummary: `Insights focus=${focus ?? 'all'}`,
+      isLocal: ['ollama', 'local'].includes(process.env['LLM_PROVIDER'] ?? ''),
+    }).catch(() => {});
   } catch (err) {
     console.error('[AI /insights] LLM or parse error:', err);
     insights = [];
@@ -305,6 +320,7 @@ aiRouter.post('/conversations/:id/chat', async (c) => {
   let answer: string;
   let toolsUsed: string[];
 
+  const chatStart = Date.now();
   try {
     const result = await agent.run(userMessage, history);
     answer = result.answer;
@@ -312,6 +328,22 @@ aiRouter.post('/conversations/:id/chat', async (c) => {
   } catch (err) {
     return c.json({ error: `Agent error: ${String(err)}` }, 500);
   }
+  const chatDuration = Date.now() - chatStart;
+
+  // Fire-and-forget usage log
+  void new AIUsageService(db).log({
+    tenantId,
+    userId: c.get('tenantCtx').identityId,
+    sessionId: conversationId,
+    feature: 'action_agent',
+    model: process.env['ANTHROPIC_MODEL'] ?? process.env['OLLAMA_MODEL'] ?? 'claude-sonnet-4-5',
+    promptTokens: 0,
+    completionTokens: 0,
+    durationMs: chatDuration,
+    toolsUsed,
+    requestSummary: userMessage.slice(0, 100),
+    isLocal: ['ollama', 'local'].includes(process.env['LLM_PROVIDER'] ?? ''),
+  }).catch(() => {});
 
   // Save user message
   await db.execute(sql`
@@ -332,6 +364,51 @@ aiRouter.post('/conversations/:id/chat', async (c) => {
   `);
 
   return c.json({ answer, toolsUsed, conversationId });
+});
+
+// ── GET /usage/summary — AI usage analytics ───────────────────
+
+aiRouter.get('/usage/summary', async (c) => {
+  const { tenantId, db } = c.get('tenantCtx');
+  const days = Number(c.req.query('days') ?? '30');
+  const usageSvc = new AIUsageService(db);
+  const [summary, daily] = await Promise.all([
+    usageSvc.getUsageSummary(tenantId, days),
+    usageSvc.getDailyUsage(tenantId, days),
+  ]);
+  return c.json({ summary, daily });
+});
+
+// ── GET /provider-info — current LLM provider configuration ──
+
+aiRouter.get('/provider-info', async (c) => {
+  const provider = process.env['LLM_PROVIDER'] ?? 'anthropic';
+  const isLocal = ['ollama', 'local'].includes(provider);
+
+  let model: string;
+  switch (provider) {
+    case 'ollama':
+    case 'local':
+      model = process.env['OLLAMA_MODEL'] ?? 'llama3.1';
+      break;
+    case 'openai':
+    case 'azure':
+    case 'groq':
+    case 'together':
+      model = process.env['OPENAI_MODEL'] ?? 'gpt-4o-mini';
+      break;
+    default:
+      model = process.env['ANTHROPIC_MODEL'] ?? 'claude-sonnet-4-6';
+  }
+
+  return c.json({
+    provider,
+    model,
+    isLocal,
+    ollamaUrl: isLocal
+      ? (process.env['OLLAMA_BASE_URL'] ?? 'http://localhost:11434')
+      : null,
+  });
 });
 
 // ── DELETE /conversations/:id ─────────────────────────────────

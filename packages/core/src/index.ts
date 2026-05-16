@@ -11,6 +11,9 @@ export { createDatabase, type Database, schema } from './db/index.js';
 // AI
 export { type LLMProvider, type CompletionParams, type CompletionResult, type Tool } from './ai/provider.js';
 export { AnthropicProvider, type AnthropicProviderConfig } from './ai/anthropic-provider.js';
+export { OllamaProvider, type OllamaProviderConfig } from './ai/ollama-provider.js';
+export { OpenAICompatProvider, type OpenAICompatProviderConfig } from './ai/openai-compat-provider.js';
+export { createLLMProvider, type ProviderName } from './ai/provider-factory.js';
 export { ConfigAgent, type ConfigDiff, type ConfigChange, type ApplyResult } from './ai/config-agent.js';
 export { ActionAgent, type ActionAgentResult } from './ai/action-agent.js';
 
@@ -39,6 +42,8 @@ export { TenantService, type CreateTenantParams, type BootstrapResult } from './
 export { MagicLinkService, type MagicLinkParams, type MagicLinkVerifyResult } from './services/magic-link.service.js';
 export { AuditService, type AuditEvent } from './services/audit.service.js';
 export { WebhookDispatcherService, type WebhookEvent } from './services/webhook-dispatcher.service.js';
+export { AIUsageService, type AIUsageRecord } from './services/ai-usage.service.js';
+export { ApprovalService, type ApprovalRequest as ApprovalTriggerRequest } from './services/approval.service.js';
 
 // Queue
 export { QueueService } from './queue/queue.service.js';

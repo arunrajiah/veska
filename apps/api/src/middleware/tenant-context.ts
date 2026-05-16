@@ -2,6 +2,7 @@ import type { MiddlewareHandler } from 'hono';
 import { eq } from 'drizzle-orm';
 import { schema, ConfigAgent } from '@veska/core';
 import { sharedDb, sharedLlm } from '../shared.js';
+import type { SessionContext } from './session.js';
 
 export interface TenantContext {
   tenantCtx: {
@@ -12,12 +13,25 @@ export interface TenantContext {
   };
 }
 
-export const tenantContext: MiddlewareHandler<{ Variables: TenantContext }> = async (c, next) => {
-  const tenantId = c.req.header('X-Veska-Tenant-Id');
+export const tenantContext: MiddlewareHandler<{ Variables: TenantContext & SessionContext }> = async (c, next) => {
+  const session = c.get('session');
+  const headerTenantId = c.req.header('X-Veska-Tenant-Id');
   const identityId = c.req.header('X-Veska-Identity-Id');
 
-  if (!tenantId || !identityId) {
-    return c.json({ error: 'Missing tenant context headers' }, 401);
+  // Use session's tenantId as the authoritative source; don't trust the header alone
+  const tenantId = session?.tenantId ?? headerTenantId;
+
+  if (!tenantId) {
+    return c.json({ error: 'Missing tenant context' }, 401);
+  }
+
+  // If the header is present and contradicts the session tenant, reject the request
+  if (headerTenantId && session?.tenantId && headerTenantId !== session.tenantId) {
+    return c.json({ error: 'Tenant mismatch' }, 403);
+  }
+
+  if (!identityId) {
+    return c.json({ error: 'Missing identity context header' }, 401);
   }
 
   const tenant = await sharedDb.query.tenants.findFirst({

@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { sql } from 'drizzle-orm';
+import { ApprovalService } from '@veska/core';
 import type { TenantContext } from '../middleware/tenant-context.js';
 
 export const approvalRequestsRouter = new Hono<{ Variables: TenantContext }>();
@@ -258,3 +259,33 @@ approvalRequestsRouter.post('/:id/cancel', async (c) => {
   if (!request) return c.json({ error: 'Not found' }, 404);
   return c.json(request);
 });
+
+// ── GET /triggers — list pending approvalTriggers ──────────────
+
+approvalRequestsRouter.get('/triggers', async (c) => {
+  const { tenantId, db } = c.get('tenantCtx');
+  const approvalSvc = new ApprovalService(db);
+  const pending = await approvalSvc.getPending(tenantId);
+  return c.json({ data: pending, total: pending.length });
+});
+
+// ── PATCH /triggers/:id/decide — approve or reject a trigger ──
+
+approvalRequestsRouter.patch(
+  '/triggers/:id/decide',
+  zValidator(
+    'json',
+    z.object({
+      decision: z.enum(['approved', 'rejected']),
+      reason: z.string().optional(),
+    }),
+  ),
+  async (c) => {
+    const { tenantId, db, identityId } = c.get('tenantCtx');
+    const triggerId = c.req.param('id');
+    const body = c.req.valid('json');
+    const approvalSvc = new ApprovalService(db);
+    await approvalSvc.decide(triggerId, tenantId, body.decision, identityId, body.reason);
+    return c.json({ success: true });
+  },
+);

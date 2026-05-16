@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { eq, and, isNull, sql } from 'drizzle-orm';
-import { schema } from '@veska/core';
+import { schema, ApprovalService } from '@veska/core';
 import type { TenantContext } from '../middleware/tenant-context.js';
 
 export const hrRouter = new Hono<{ Variables: TenantContext }>();
@@ -198,6 +198,20 @@ hrRouter.post(
       .returning();
 
     if (!record) return c.json({ error: 'Failed to create leave request' }, 500);
+
+    // Trigger approval flow for all leave requests
+    void new ApprovalService(db).trigger({
+      tenantId,
+      entityType: 'LeaveRequest',
+      entityId: record.id,
+      requestedBy: identityId,
+      metadata: {
+        leaveType: body.leave_type,
+        startDate: body.start_date,
+        endDate: body.end_date,
+      },
+    }).catch(() => {});
+
     return c.json(record, 201);
   },
 );

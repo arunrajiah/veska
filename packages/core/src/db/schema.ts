@@ -3,6 +3,7 @@ import {
   uuid,
   text,
   boolean,
+  integer,
   timestamp,
   jsonb,
   index,
@@ -328,4 +329,55 @@ export const magicLinks = pgTable('magic_links', {
 }, (t) => [
   unique('magic_links_token_key').on(t.token),
   index('magic_links_expires_at_idx').on(t.expiresAt),
+]);
+
+// ──────────────────────────────────────────────────────────────
+// AI Usage Logs — tracks token usage per LLM call
+// ──────────────────────────────────────────────────────────────
+
+export const aiUsageLogs = pgTable('aiUsageLogs', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: uuid('tenantId').notNull(),
+  userId: text('userId'),
+  sessionId: text('sessionId'),
+  feature: text('feature').notNull(),
+  model: text('model').notNull(),
+  promptTokens: integer('promptTokens').notNull().default(0),
+  completionTokens: integer('completionTokens').notNull().default(0),
+  totalTokens: integer('totalTokens').notNull().default(0),
+  durationMs: integer('durationMs'),
+  toolsUsed: jsonb('toolsUsed').notNull().default(sql`'[]'::jsonb`),
+  requestSummary: text('requestSummary'),
+  isLocal: boolean('isLocal').notNull().default(false),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index('aiUsageLogs_tenantId_idx').on(t.tenantId),
+  index('aiUsageLogs_createdAt_idx').on(t.createdAt),
+  index('aiUsageLogs_feature_idx').on(t.feature),
+]);
+
+// ──────────────────────────────────────────────────────────────
+// Approval Triggers — links entity records to approval flows
+// ──────────────────────────────────────────────────────────────
+
+export const approvalTriggers = pgTable('approvalTriggers', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: uuid('tenantId').notNull(),
+  entityType: text('entityType').notNull(),
+  entityId: uuid('entityId').notNull(),
+  chainId: uuid('chainId'),
+  requestedBy: text('requestedBy').notNull(),
+  status: text('status').notNull().default('pending'),
+  currentStep: integer('currentStep').notNull().default(0),
+  approvers: jsonb('approvers').notNull().default(sql`'[]'::jsonb`),
+  approvedBy: text('approvedBy'),
+  rejectedBy: text('rejectedBy'),
+  rejectionReason: text('rejectionReason'),
+  metadata: jsonb('metadata').notNull().default(sql`'{}'::jsonb`),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index('approvalTriggers_tenantId_idx').on(t.tenantId),
+  index('approvalTriggers_entityId_idx').on(t.entityId),
+  index('approvalTriggers_status_idx').on(t.status),
 ]);

@@ -69,6 +69,8 @@ import { emailLogRouter } from './routes/email-log.js';
 import { registerEmailWorker } from './workers/email-worker.js';
 import { standardLimit, aiLimit, authLimit } from '@veska-cloud/rate-limit';
 import { tenantContext } from './middleware/tenant-context.js';
+import { requireSession } from './middleware/session.js';
+import { requirePermission } from './middleware/rbac.js';
 import { authRouter } from './routes/auth.js';
 import { rateLimit } from './middleware/rate-limit.js';
 import {
@@ -138,11 +140,22 @@ app.post('/webhooks/telegram', async (c) => {
 
 // Tenant-scoped API routes
 const api = new Hono();
+// All /api/v1/* routes require a valid session (Bearer token)
+api.use('*', requireSession());
 api.use('*', tenantContext);
 api.use('*', rateLimit(sharedRedis, { windowMs: 60_000, max: 120 }));
 // Sliding-window rate limiters (package: @veska-cloud/rate-limit)
 api.use('*', standardLimit());
 api.use('/ai/*', aiLimit());
+// Permission guards for sensitive modules
+api.use('/payroll/*', requirePermission('payroll:read'));
+api.use('/payroll-runs/*', requirePermission('payroll:read'));
+api.use('/hr/*', requirePermission('hr:read'));
+api.use('/finance/*', requirePermission('invoices:read'));
+api.use('/budgets/*', requirePermission('invoices:read'));
+api.use('/contracts/*', requirePermission('invoices:read'));
+api.use('/reports/*', requirePermission('reports:read'));
+api.use('/analytics/*', requirePermission('reports:read'));
 api.route('/config', configRouter);
 api.route('/entities', entitiesRouter);
 api.route('/channels', channelsRouter);
