@@ -25,6 +25,13 @@ export default defineConfig({
         // These services require a live DB — covered by integration tests
         'src/services/audit.service.ts',
         'src/services/tenant.service.ts',
+        'src/services/webhook-dispatcher.service.ts',
+        // Plugin runtime requires a loaded plugin sandbox — covered by integration tests
+        'src/plugins/**',
+        // Workflow engine requires a live DB + Redis — covered by integration tests
+        'src/engine/**',
+        // Stripe integration requires live credentials — covered by integration tests
+        'src/integrations/**',
         // Pure interface/type files — no runnable logic to cover
         'src/primitives/channel.ts',
         'src/primitives/integration.ts',

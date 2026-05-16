@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { eq, and, isNull, sql } from 'drizzle-orm';
 import { schema, ApprovalService } from '@veska/core';
 import type { TenantContext } from '../middleware/tenant-context.js';
+import { dispatchWebhookEvent } from '../middleware/webhook-events.js';
 
 export const expensesRouter = new Hono<{ Variables: TenantContext }>();
 
@@ -133,6 +134,14 @@ expensesRouter.post(
 
     if (!record) return c.json({ error: 'Failed to create expense' }, 500);
 
+    dispatchWebhookEvent({
+      tenantId,
+      db,
+      event: 'expense.created',
+      resourceId: record.id,
+      data: { id: record.id, tenantId, status: data.status, amount: body.amount },
+    });
+
     // Trigger approval flow if submitted
     if (data.status === 'submitted') {
       void new ApprovalService(db).trigger({
@@ -186,6 +195,14 @@ expensesRouter.patch(
       amount: Number(existing['amount'] ?? 0),
       metadata: { description: existing['description'], amount: existing['amount'] },
     }).catch(err => console.error('[approval] trigger failed:', err));
+
+    dispatchWebhookEvent({
+      tenantId,
+      db,
+      event: 'expense.submitted',
+      resourceId: id,
+      data: { id, tenantId, status: 'submitted', amount: existing['amount'] },
+    });
 
     return c.json(result);
   },

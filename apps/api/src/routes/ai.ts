@@ -5,7 +5,7 @@ import type { LLMMessage } from '@veska-cloud/ai';
 import { aiLimit } from '@veska-cloud/rate-limit';
 import type { TenantContext } from '../middleware/tenant-context.js';
 import { sharedLlm, sharedQueueService } from '../shared.js';
-import { AIUsageService } from '@veska/core';
+import { AIUsageService, maskPII, unmaskPII } from '@veska/core';
 
 export const aiRouter = new Hono<{ Variables: TenantContext }>();
 
@@ -312,7 +312,17 @@ aiRouter.post('/conversations/:id/chat', async (c) => {
     return c.json({ answer: mockAnswer, toolsUsed: [], conversationId });
   }
 
-  // Run the ActionAgent
+  // Mask PII before sending to the agent — store the ORIGINAL in the DB
+  const { masked: maskedUserMessage, mappings: piiMappings } = maskPII(userMessage);
+  const piiDetected = Object.keys(piiMappings).length > 0;
+
+  // Also mask PII in history messages
+  const maskedHistory: LLMMessage[] = history.map((msg) => {
+    const { masked } = maskPII(msg.content);
+    return { role: msg.role, content: masked };
+  });
+
+  // Run the ActionAgent with the masked message and masked history
   const llm = new AnthropicProvider();
   const apiBaseUrl = process.env['API_BASE_URL'] ?? 'http://localhost:3001/api/v1';
   const agent = new ActionAgent(llm, { tenantId, apiBaseUrl });
@@ -322,15 +332,16 @@ aiRouter.post('/conversations/:id/chat', async (c) => {
 
   const chatStart = Date.now();
   try {
-    const result = await agent.run(userMessage, history);
-    answer = result.answer;
+    const result = await agent.run(maskedUserMessage, maskedHistory);
+    // Unmask PII in the AI response so the UI sees real values
+    answer = unmaskPII(result.answer, piiMappings);
     toolsUsed = result.toolsUsed;
   } catch (err) {
     return c.json({ error: `Agent error: ${String(err)}` }, 500);
   }
   const chatDuration = Date.now() - chatStart;
 
-  // Fire-and-forget usage log
+  // Fire-and-forget usage log (includes piiDetected flag)
   void new AIUsageService(db).log({
     tenantId,
     userId: c.get('tenantCtx').identityId,
@@ -343,9 +354,10 @@ aiRouter.post('/conversations/:id/chat', async (c) => {
     toolsUsed,
     requestSummary: userMessage.slice(0, 100),
     isLocal: ['ollama', 'local'].includes(process.env['LLM_PROVIDER'] ?? ''),
+    metadata: { piiDetected },
   }).catch(() => {});
 
-  // Save user message
+  // Save ORIGINAL (unmasked) user message in the DB
   await db.execute(sql`
     INSERT INTO "aiMessages" ("conversationId", role, content, "toolsUsed")
     VALUES (${conversationId}::uuid, 'user', ${userMessage}, '{}')

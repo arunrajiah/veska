@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { sql } from 'drizzle-orm';
 import { ApprovalService } from '@veska/core';
 import type { TenantContext } from '../middleware/tenant-context.js';
+import { dispatchWebhookEvent } from '../middleware/webhook-events.js';
 
 export const approvalRequestsRouter = new Hono<{ Variables: TenantContext }>();
 
@@ -286,6 +287,16 @@ approvalRequestsRouter.patch(
     const body = c.req.valid('json');
     const approvalSvc = new ApprovalService(db);
     await approvalSvc.decide(triggerId, tenantId, body.decision, identityId, body.reason);
+
+    const webhookEvent = body.decision === 'approved' ? 'approval.approved' : 'approval.rejected';
+    dispatchWebhookEvent({
+      tenantId,
+      db,
+      event: webhookEvent,
+      resourceId: triggerId,
+      data: { triggerId, tenantId, decision: body.decision, reason: body.reason, decidedBy: identityId },
+    });
+
     return c.json({ success: true });
   },
 );

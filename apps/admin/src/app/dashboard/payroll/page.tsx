@@ -1,5 +1,18 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { apiFetch } from '@/lib/api.js';
+import {
+  DollarSign,
+  Users,
+  Calendar,
+  TrendingUp,
+  Play,
+  Eye,
+  FileText,
+  Settings,
+  ChevronRight,
+} from 'lucide-react';
 
 interface PayrollRun {
   id: string;
@@ -16,159 +29,212 @@ interface PayrollRun {
   };
 }
 
-interface PayrollItem {
-  id: string;
-  data: {
-    employeeId?: string;
-    employeeName?: string;
-    runId?: string;
-    period?: string;
-    grossPay?: number;
-    netPay?: number;
-    tax?: number;
-    status?: 'draft' | 'paid';
-  };
+const STATUS_STYLES: Record<string, string> = {
+  draft: 'bg-gray-100 text-gray-700',
+  processing: 'bg-blue-100 text-blue-700',
+  completed: 'bg-green-100 text-green-700',
+  failed: 'bg-red-100 text-red-700',
+};
+
+function fmt(n: number) {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
 }
 
-function usd(v?: number) {
-  if (v == null) return '—';
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(v);
+function fmtDate(s?: string) {
+  if (!s) return '—';
+  return new Date(s).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-function fmtDate(d?: string) {
-  if (!d) return '—';
-  return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-}
+export default function PayrollPage() {
+  const [runs, setRuns] = useState<PayrollRun[]>([]);
+  const [loading, setLoading] = useState(true);
 
-function StatusBadge({ status }: { status?: string }) {
-  const map: Record<string, string> = {
-    draft: 'bg-gray-100 text-gray-600',
-    processing: 'bg-blue-50 text-blue-700',
-    completed: 'bg-green-50 text-green-700',
-    failed: 'bg-red-50 text-red-600',
-  };
-  const label = status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Draft';
-  return (
-    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${map[status ?? 'draft'] ?? 'bg-gray-100 text-gray-600'}`}>
-      {label}
-    </span>
-  );
-}
+  useEffect(() => {
+    async function load() {
+      try {
+        const res = await fetch('/api/v1/payroll/runs?limit=10', {
+          headers: { 'x-tenant-id': 'demo-tenant' },
+        });
+        if (res.ok) {
+          const json = await res.json() as { data?: PayrollRun[] } | PayrollRun[];
+          const data = Array.isArray(json) ? json : (json.data ?? []);
+          setRuns(data);
+        }
+      } catch {
+        // leave empty
+      } finally {
+        setLoading(false);
+      }
+    }
+    void load();
+  }, []);
 
-export default async function PayrollPage() {
-  const tenantId = 'demo-tenant';
+  const completedRuns = runs.filter((r) => r.data.status === 'completed');
+  const lastRun = completedRuns[0] ?? runs[0];
+  const totalHeadcount = lastRun?.data.employeeCount ?? 0;
+  const totalCostThisMonth = completedRuns.reduce((s, r) => s + (r.data.totalNet ?? 0), 0);
 
-  let runs: PayrollRun[] = [];
-  let payslips: PayrollItem[] = [];
-
-  try {
-    const res = await apiFetch<{ data: PayrollRun[] }>('/api/v1/payroll/runs?limit=20', tenantId);
-    runs = Array.isArray(res?.data) ? res.data : [];
-  } catch {
-    runs = [];
-  }
-
-  try {
-    const res = await apiFetch<{ data: PayrollItem[] }>('/api/v1/payroll?limit=50', tenantId);
-    payslips = Array.isArray(res?.data) ? res.data : [];
-  } catch {
-    payslips = [];
-  }
-
-  const lastRun = runs[0];
-  const lastRunDate = lastRun?.data?.processedAt ?? lastRun?.data?.period;
-  const totalEmployeesPaid = runs
-    .filter((r) => r.data?.status === 'completed')
-    .reduce((s, r) => Math.max(s, r.data?.employeeCount ?? 0), 0);
-
-  // Total net this month
+  // Guess next payroll date: last day of current month
   const now = new Date();
-  const monthStr = now.toISOString().slice(0, 7); // "YYYY-MM"
-  const thisMonthNet = runs
-    .filter((r) => r.data?.status === 'completed' && r.data?.period?.startsWith(monthStr))
-    .reduce((s, r) => s + (r.data?.totalNet ?? 0), 0);
-
-  const recentRuns = runs.slice(0, 5);
+  const nextPayroll = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
   return (
-    <div className="px-8 py-8 max-w-7xl">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">Payroll</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Manage payroll runs and payslips</p>
+          <p className="text-sm text-gray-500 mt-0.5">Manage pay runs, payslips, and payroll settings</p>
         </div>
         <Link
-          href="/dashboard/payroll/runs"
-          className="bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+          href="/dashboard/payroll/runs/new"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
         >
-          View All Runs
+          <Play size={14} />
+          Run Payroll
         </Link>
       </div>
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-5 py-4">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Total Runs</p>
-          <p className="text-2xl font-semibold text-gray-900">{runs.length}</p>
+      {/* Summary cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white rounded-xl border border-gray-200 p-5 flex items-start gap-4">
+          <div className="p-2 bg-indigo-50 rounded-lg">
+            <Users size={20} className="text-indigo-600" />
+          </div>
+          <div>
+            <p className="text-sm text-gray-500">Total Headcount</p>
+            <p className="text-2xl font-semibold text-gray-900 mt-0.5">{totalHeadcount || '—'}</p>
+          </div>
         </div>
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-5 py-4">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Last Run Date</p>
-          <p className="text-lg font-semibold text-gray-900">{lastRunDate ? fmtDate(lastRunDate) : '—'}</p>
+        <div className="bg-white rounded-xl border border-gray-200 p-5 flex items-start gap-4">
+          <div className="p-2 bg-green-50 rounded-lg">
+            <Calendar size={20} className="text-green-600" />
+          </div>
+          <div>
+            <p className="text-sm text-gray-500">Last Payroll Run</p>
+            <p className="text-lg font-semibold text-gray-900 mt-0.5">
+              {lastRun ? fmtDate(lastRun.data.processedAt ?? lastRun.data.period) : '—'}
+            </p>
+          </div>
         </div>
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-5 py-4">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Employees Paid</p>
-          <p className="text-2xl font-semibold text-gray-900">{totalEmployeesPaid || '—'}</p>
+        <div className="bg-white rounded-xl border border-gray-200 p-5 flex items-start gap-4">
+          <div className="p-2 bg-blue-50 rounded-lg">
+            <TrendingUp size={20} className="text-blue-600" />
+          </div>
+          <div>
+            <p className="text-sm text-gray-500">Next Payroll Date</p>
+            <p className="text-lg font-semibold text-gray-900 mt-0.5">
+              {nextPayroll.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            </p>
+          </div>
         </div>
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-5 py-4">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Total Net This Month</p>
-          <p className="text-2xl font-semibold text-gray-900">{thisMonthNet > 0 ? usd(thisMonthNet) : '—'}</p>
+        <div className="bg-white rounded-xl border border-gray-200 p-5 flex items-start gap-4">
+          <div className="p-2 bg-amber-50 rounded-lg">
+            <DollarSign size={20} className="text-amber-600" />
+          </div>
+          <div>
+            <p className="text-sm text-gray-500">Total Payroll Cost This Month</p>
+            <p className="text-2xl font-semibold text-gray-900 mt-0.5">
+              {totalCostThisMonth > 0 ? fmt(totalCostThisMonth) : '—'}
+            </p>
+          </div>
         </div>
       </div>
 
       {/* Recent payroll runs */}
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Recent Payroll Runs</h2>
-          <Link href="/dashboard/payroll/runs" className="text-xs text-gray-500 hover:text-gray-900">
-            View all →
+      <div className="bg-white rounded-xl border border-gray-200">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+          <h2 className="text-sm font-semibold text-gray-900">Recent Payroll Runs</h2>
+          <Link href="/dashboard/payroll/runs" className="text-xs text-indigo-600 hover:text-indigo-700 font-medium">
+            View all
           </Link>
         </div>
-        {recentRuns.length === 0 ? (
-          <p className="px-6 py-12 text-sm text-gray-400 text-center">No payroll runs yet.</p>
+
+        {loading ? (
+          <div className="p-8 text-center text-sm text-gray-400">Loading payroll runs…</div>
+        ) : runs.length === 0 ? (
+          <div className="p-8 text-center">
+            <DollarSign size={32} className="mx-auto text-gray-300 mb-2" />
+            <p className="text-sm text-gray-500 font-medium">No payroll runs yet</p>
+            <p className="text-xs text-gray-400 mt-1">Start your first pay run to see it here.</p>
+            <Link
+              href="/dashboard/payroll/runs/new"
+              className="mt-4 inline-flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+            >
+              <Play size={13} /> Run Payroll
+            </Link>
+          </div>
         ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-100 bg-gray-50">
-                <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Run #</th>
-                <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Period</th>
-                <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Employees</th>
-                <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Total Gross</th>
-                <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Total Net</th>
-                <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Status</th>
-                <th className="px-5 py-3" />
-              </tr>
-            </thead>
-            <tbody>
-              {recentRuns.map((run) => (
-                <tr key={run.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
-                  <td className="px-5 py-3 font-medium text-gray-900">
-                    #{run.data?.runNumber ?? run.id.slice(0, 6)}
-                  </td>
-                  <td className="px-5 py-3 text-gray-600">{run.data?.period ?? '—'}</td>
-                  <td className="px-5 py-3 text-gray-600">{run.data?.employeeCount ?? '—'}</td>
-                  <td className="px-5 py-3 text-gray-600">{usd(run.data?.totalGross)}</td>
-                  <td className="px-5 py-3 text-gray-600">{usd(run.data?.totalNet)}</td>
-                  <td className="px-5 py-3"><StatusBadge {...(run.data?.status ? { status: run.data.status } : {})} /></td>
-                  <td className="px-5 py-3 text-right">
-                    <Link href={`/dashboard/payroll/runs/${run.id}`} className="text-xs text-gray-500 hover:text-gray-900">
-                      View →
-                    </Link>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-xs text-gray-500 border-b border-gray-100 bg-gray-50">
+                  <th className="text-left px-5 py-3 font-medium">Period</th>
+                  <th className="text-left px-5 py-3 font-medium">Status</th>
+                  <th className="text-left px-5 py-3 font-medium">Employee Count</th>
+                  <th className="text-right px-5 py-3 font-medium">Total Amount</th>
+                  <th className="text-right px-5 py-3 font-medium">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {runs.slice(0, 8).map((run) => (
+                  <tr key={run.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-5 py-3 font-medium text-gray-900">
+                      {run.data.period ?? '—'}
+                    </td>
+                    <td className="px-5 py-3">
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_STYLES[run.data.status ?? ''] ?? 'bg-gray-100 text-gray-700'}`}
+                      >
+                        {run.data.status ?? 'unknown'}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3 text-gray-600">
+                      {run.data.employeeCount ?? '—'}
+                    </td>
+                    <td className="px-5 py-3 text-right font-medium text-gray-900">
+                      {run.data.totalNet != null ? fmt(run.data.totalNet) : '—'}
+                    </td>
+                    <td className="px-5 py-3 text-right">
+                      <Link
+                        href={`/dashboard/payroll/runs/${run.id}`}
+                        className="inline-flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+                      >
+                        <Eye size={13} /> View
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
+      </div>
+
+      {/* Quick links */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {[
+          { href: '/dashboard/payroll/runs', icon: Play, label: 'Payroll Runs', desc: 'Manage and process pay runs' },
+          { href: '/dashboard/payroll/payslips', icon: FileText, label: 'Payslips', desc: 'View and download payslips' },
+          { href: '/dashboard/settings', icon: Settings, label: 'Settings', desc: 'Configure payroll settings' },
+        ].map((link) => (
+          <Link
+            key={link.href}
+            href={link.href as any}
+            className="bg-white rounded-xl border border-gray-200 p-5 flex items-center justify-between hover:border-indigo-200 hover:bg-indigo-50/30 transition-colors group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-indigo-50 rounded-lg group-hover:bg-indigo-100 transition-colors">
+                <link.icon size={18} className="text-indigo-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">{link.label}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{link.desc}</p>
+              </div>
+            </div>
+            <ChevronRight size={16} className="text-gray-400 group-hover:text-indigo-500 transition-colors" />
+          </Link>
+        ))}
       </div>
     </div>
   );

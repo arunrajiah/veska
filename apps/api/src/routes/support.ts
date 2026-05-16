@@ -6,6 +6,7 @@ import { schema } from '@veska/core';
 import { sharedQueueService, sharedAuditService } from '../shared.js';
 import { broadcast } from './sse.js';
 import type { TenantContext } from '../middleware/tenant-context.js';
+import { dispatchWebhookEvent } from '../middleware/webhook-events.js';
 
 export const supportRouter = new Hono<{ Variables: TenantContext }>();
 
@@ -82,6 +83,16 @@ supportRouter.post(
     // Broadcast ticket creation to SSE subscribers
     broadcast(tenantId, { type: 'ticket.created', payload: { id: record?.id } });
 
+    if (record) {
+      dispatchWebhookEvent({
+        tenantId,
+        db,
+        event: 'ticket.created',
+        resourceId: record.id,
+        data: { id: record.id, tenantId, subject: body.subject, priority: body.priority, status: 'open' },
+      });
+    }
+
     return c.json(record, 201);
   },
 );
@@ -151,6 +162,14 @@ supportRouter.patch(
       before,
       after,
       metadata: { note },
+    });
+
+    dispatchWebhookEvent({
+      tenantId,
+      db,
+      event: 'ticket.updated',
+      resourceId: id,
+      data: { id, tenantId, status, note },
     });
 
     return c.json(updated);

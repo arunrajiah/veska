@@ -7,8 +7,8 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get('veska_session')?.value;
   const onboardingDone = request.cookies.get('veska_onboarding_done')?.value;
 
-  // Protect /dashboard routes
-  if (pathname.startsWith('/dashboard')) {
+  // Protect /dashboard and /super-admin routes
+  if (pathname.startsWith('/dashboard') || pathname.startsWith('/super-admin')) {
     if (!token) {
       const loginUrl = new URL('/login', request.url);
       loginUrl.searchParams.set('next', pathname);

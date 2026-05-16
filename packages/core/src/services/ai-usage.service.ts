@@ -13,6 +13,8 @@ export interface AIUsageRecord {
   toolsUsed?: string[];
   requestSummary?: string;
   isLocal?: boolean;
+  /** Extra key-value pairs stored alongside the log (e.g. piiDetected) */
+  metadata?: Record<string, unknown>;
 }
 
 export class AIUsageService {

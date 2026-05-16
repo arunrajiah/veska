@@ -153,7 +153,6 @@ const NAV_SECTIONS: NavSection[] = [
     label: 'Purchasing',
     items: [
       { href: '/dashboard/purchasing/vendors', icon: Truck, label: 'Vendors' },
-      { href: '/dashboard/vendors', icon: Truck, label: 'Vendor Management' },
       { href: '/dashboard/purchasing/orders', icon: ShoppingCart, label: 'Purchase Orders' },
       { href: '/dashboard/purchasing/grn', icon: PackageCheck, label: 'Received (GRN)' },
     ],

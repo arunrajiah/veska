@@ -45,6 +45,9 @@ export { WebhookDispatcherService, type WebhookEvent } from './services/webhook-
 export { AIUsageService, type AIUsageRecord } from './services/ai-usage.service.js';
 export { ApprovalService, type ApprovalRequest as ApprovalTriggerRequest } from './services/approval.service.js';
 
+// Lib utilities
+export { maskPII, unmaskPII, type MaskResult } from './lib/pii-masker.js';
+
 // Queue
 export { QueueService } from './queue/queue.service.js';
 export type { JobName, JobPayload, InboundMessageJob, WorkflowStepJob, SendMessageJob, EnrichEntityJob, AnomalyRecord, AnomalySummaryJob, InvoiceSendReminderJob } from './queue/jobs.js';

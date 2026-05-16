@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { eq, and, isNull, sql } from 'drizzle-orm';
 import { schema, ApprovalService } from '@veska/core';
 import type { TenantContext } from '../middleware/tenant-context.js';
+import { dispatchWebhookEvent } from '../middleware/webhook-events.js';
 
 export const hrRouter = new Hono<{ Variables: TenantContext }>();
 
@@ -198,6 +199,22 @@ hrRouter.post(
       .returning();
 
     if (!record) return c.json({ error: 'Failed to create leave request' }, 500);
+
+    dispatchWebhookEvent({
+      tenantId,
+      db,
+      event: 'leave_request.created',
+      resourceId: record.id,
+      data: {
+        id: record.id,
+        tenantId,
+        employee_id: body.employee_id,
+        leave_type: body.leave_type,
+        start_date: body.start_date,
+        end_date: body.end_date,
+        status: 'pending',
+      },
+    });
 
     // Trigger approval flow for all leave requests
     void new ApprovalService(db).trigger({

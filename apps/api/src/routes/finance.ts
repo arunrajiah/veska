@@ -6,6 +6,7 @@ import { randomUUID } from 'node:crypto';
 import { schema } from '@veska/core';
 import { sharedQueueService } from '../shared.js';
 import type { TenantContext } from '../middleware/tenant-context.js';
+import { dispatchWebhookEvent } from '../middleware/webhook-events.js';
 
 export const financeRouter = new Hono<{ Variables: TenantContext }>();
 
@@ -81,6 +82,16 @@ financeRouter.post(
       .values({ tenantId, entityType: 'Invoice', data, createdBy: identityId })
       .returning();
 
+    if (record) {
+      dispatchWebhookEvent({
+        tenantId,
+        db,
+        event: 'invoice.created',
+        resourceId: record.id,
+        data: { id: record.id, tenantId, status: 'draft', total },
+      });
+    }
+
     return c.json(record, 201);
   },
 );
@@ -140,6 +151,14 @@ financeRouter.patch('/invoices/:id/send', async (c) => {
         url: `${process.env['MAGIC_LINK_BASE_URL'] ?? 'http://localhost:3001'}/invoices/${id}`,
       },
     },
+  });
+
+  dispatchWebhookEvent({
+    tenantId,
+    db,
+    event: 'invoice.sent',
+    resourceId: id,
+    data: { id, tenantId, status: 'sent' },
   });
 
   return c.json(updated);
@@ -229,6 +248,14 @@ financeRouter.patch(
       })
       .where(eq(schema.entityRecords.id, id))
       .returning();
+
+    dispatchWebhookEvent({
+      tenantId,
+      db,
+      event: 'invoice.paid',
+      resourceId: id,
+      data: { id, tenantId, status: 'paid', amount, payment_date, method },
+    });
 
     return c.json({ invoice: updated, journal_id: journalId });
   },
