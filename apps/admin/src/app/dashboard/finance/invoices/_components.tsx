@@ -213,7 +213,7 @@ function NewInvoiceSlideover({ onClose, onCreated, tenantId }: NewInvoiceSlideov
           {/* Dates + currency */}
           <div className="px-5 py-4 space-y-3">
             <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Details</h3>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="block text-xs text-gray-500 mb-1">Issue Date</label>
                 <input
@@ -449,7 +449,7 @@ export function InvoicesClient({
   const tabs: FilterTab[] = ['all', 'draft', 'sent', 'paid', 'overdue'];
 
   return (
-    <div className="px-8 py-8 max-w-6xl">
+    <div className="px-4 sm:px-8 py-8 max-w-6xl">
       {toast && <Toast message={toast.message} type={toast.type} />}
 
       {showNew && (
@@ -469,7 +469,7 @@ export function InvoicesClient({
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <h1 className="text-2xl font-semibold text-gray-900">Invoices</h1>
         <button
           onClick={() => setShowNew(true)}
@@ -481,7 +481,7 @@ export function InvoicesClient({
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {[
           { label: 'Total Invoiced', value: fmt(totalInvoiced) },
           { label: 'Outstanding', value: fmt(outstanding), color: 'text-blue-700' },
@@ -496,7 +496,7 @@ export function InvoicesClient({
       </div>
 
       {/* Filter tabs */}
-      <div className="flex gap-1 mb-4">
+      <div className="flex gap-1 mb-4 overflow-x-auto">
         {tabs.map((tab) => (
           <button
             key={tab}
@@ -525,6 +525,7 @@ export function InvoicesClient({
         </div>
       ) : (
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+          <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
@@ -532,8 +533,8 @@ export function InvoicesClient({
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Client</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
                 <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Amount</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Due Date</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Issued</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 hidden sm:table-cell">Due Date</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 hidden sm:table-cell">Issued</th>
                 <th className="px-4 py-3 text-xs font-medium text-gray-500 text-right">Actions</th>
               </tr>
             </thead>
@@ -561,8 +562,8 @@ export function InvoicesClient({
                     <td className="px-4 py-3 text-right font-semibold text-gray-900">
                       {fmt(inv.data.total, currency)}
                     </td>
-                    <td className="px-4 py-3 text-xs text-gray-500">{getDueDate(inv)}</td>
-                    <td className="px-4 py-3 text-xs text-gray-500">{getIssuedAt(inv)}</td>
+                    <td className="px-4 py-3 text-xs text-gray-500 hidden sm:table-cell">{getDueDate(inv)}</td>
+                    <td className="px-4 py-3 text-xs text-gray-500 hidden sm:table-cell">{getIssuedAt(inv)}</td>
                     <td
                       className="px-4 py-3 text-right"
                       onClick={(e) => e.stopPropagation()}
@@ -591,6 +592,7 @@ export function InvoicesClient({
               })}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

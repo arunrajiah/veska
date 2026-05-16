@@ -80,14 +80,14 @@ export default async function HRDashboard() {
   const pendingLeaveRecords = leaveRecords.filter((r) => (r.data.status ?? 'pending') === 'pending').slice(0, 5);
 
   return (
-    <div className="px-8 py-8 max-w-6xl">
+    <div className="px-4 sm:px-8 py-8 max-w-6xl">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-gray-900">HR Overview</h1>
         <p className="text-sm text-gray-500 mt-0.5">Human resources at a glance</p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
           { label: 'Total Employees', value: totalEmployees, href: '/dashboard/hr/employees' as Route },
           { label: 'Pending Leave', value: pendingLeave, href: '/dashboard/hr/leave' as Route },
@@ -101,7 +101,7 @@ export default async function HRDashboard() {
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Employees */}
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
           <div className="px-5 py-3 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
@@ -111,7 +111,7 @@ export default async function HRDashboard() {
           {recentEmployees.length === 0 ? (
             <p className="px-5 py-4 text-sm text-gray-400">No employees yet.</p>
           ) : (
-            <table className="w-full text-sm">
+            <div className="overflow-x-auto"><table className="w-full text-sm">
               <tbody>
                 {recentEmployees.map((emp) => {
                   const d = emp.data as Record<string, unknown>;
@@ -130,7 +130,7 @@ export default async function HRDashboard() {
                   );
                 })}
               </tbody>
-            </table>
+            </table></div>
           )}
         </div>
 
@@ -143,7 +143,7 @@ export default async function HRDashboard() {
           {pendingLeaveRecords.length === 0 ? (
             <p className="px-5 py-4 text-sm text-gray-400">No pending leave requests.</p>
           ) : (
-            <table className="w-full text-sm">
+            <div className="overflow-x-auto"><table className="w-full text-sm">
               <tbody>
                 {pendingLeaveRecords.map((record) => {
                   const d = record.data as Record<string, unknown>;
@@ -163,7 +163,7 @@ export default async function HRDashboard() {
                   );
                 })}
               </tbody>
-            </table>
+            </table></div>
           )}
         </div>
       </div>

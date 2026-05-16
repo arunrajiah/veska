@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { sql } from 'drizzle-orm';
 import { randomBytes, createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import { sharedDb } from '../shared.js';
+import { sendPasswordResetEmail } from '../lib/password-reset-mailer.js';
 
 export const authRouter = new Hono();
 
@@ -588,6 +589,211 @@ authRouter.post('/mfa/disable', async (c) => {
     return c.json({ success: true });
   } catch (err) {
     console.error('[auth/mfa/disable]', err);
+    return c.json({ error: 'Internal server error' }, 500);
+  }
+});
+
+// ── POST /auth/forgot-password ────────────────────────────────────────────────
+
+authRouter.post('/forgot-password', async (c) => {
+  try {
+    const body = await c.req.json<{ email?: string }>();
+    const { email } = body;
+
+    if (!email || typeof email !== 'string') {
+      return c.json({ error: 'email is required' }, 400);
+    }
+
+    // Look up user to get their name (for the email greeting), but don't reveal if not found
+    const userResult = await sharedDb.execute(sql`
+      SELECT id, name FROM users WHERE email = ${email} LIMIT 1
+    `);
+
+    if (userResult.rows.length) {
+      const user = userResult.rows[0] as { id: string; name?: string };
+      const token = randomBytes(32).toString('hex');
+      const expiresAt = new Date(Date.now() + 3600000); // 1 hour
+
+      await sharedDb.execute(sql`
+        INSERT INTO "passwordResetTokens" (token, email, "expiresAt", used)
+        VALUES (${token}, ${email}, ${expiresAt.toISOString()}, false)
+      `);
+
+      // Fire-and-forget
+      void sendPasswordResetEmail({
+        email,
+        token,
+        recipientName: typeof user.name === 'string' ? user.name : undefined,
+      });
+    }
+
+    // Always respond ok to prevent enumeration
+    return c.json({ ok: true });
+  } catch (err) {
+    console.error('[auth/forgot-password]', err);
+    return c.json({ error: 'Internal server error' }, 500);
+  }
+});
+
+// ── POST /auth/reset-password ─────────────────────────────────────────────────
+
+authRouter.post('/reset-password', async (c) => {
+  try {
+    const body = await c.req.json<{ token?: string; password?: string }>();
+    const { token, password } = body;
+
+    if (!token || typeof token !== 'string') {
+      return c.json({ error: 'invalid_token' }, 400);
+    }
+    if (!password || typeof password !== 'string' || password.length < 8) {
+      return c.json({ error: 'password must be at least 8 characters' }, 400);
+    }
+
+    // Look up the token record
+    const tokenResult = await sharedDb.execute(sql`
+      SELECT id, email, "expiresAt", used
+      FROM "passwordResetTokens"
+      WHERE token = ${token}
+      LIMIT 1
+    `);
+
+    if (!tokenResult.rows.length) {
+      return c.json({ error: 'invalid_token' }, 400);
+    }
+
+    const record = tokenResult.rows[0] as {
+      id: string;
+      email: string;
+      expiresAt: string;
+      used: boolean;
+    };
+
+    if (record.used || new Date(record.expiresAt) < new Date()) {
+      return c.json({ error: 'invalid_token' }, 400);
+    }
+
+    const passwordHash = createHash('sha256').update(password).digest('hex');
+
+    // Update user password
+    await sharedDb.execute(sql`
+      UPDATE users
+      SET "passwordHash" = ${passwordHash}
+      WHERE email = ${record.email}
+    `);
+
+    // Mark token as used
+    await sharedDb.execute(sql`
+      UPDATE "passwordResetTokens"
+      SET used = true
+      WHERE id = ${record.id}
+    `);
+
+    return c.json({ ok: true });
+  } catch (err) {
+    console.error('[auth/reset-password]', err);
+    return c.json({ error: 'Internal server error' }, 500);
+  }
+});
+
+// ── GET /auth/invite ──────────────────────────────────────────────────────────
+
+authRouter.get('/invite', async (c) => {
+  try {
+    const token = c.req.query('token');
+    if (!token) return c.json({ error: 'token is required' }, 400);
+
+    const result = await sharedDb.execute(sql`
+      SELECT it.email, it."expiresAt", it.used, t.name AS "tenantName"
+      FROM "inviteTokens" it
+      LEFT JOIN tenants t ON t.id = it."tenantId"
+      WHERE it.token = ${token}
+      LIMIT 1
+    `);
+
+    if (!result.rows.length) {
+      return c.json({ error: 'invalid_token' }, 404);
+    }
+
+    const record = result.rows[0] as {
+      email: string;
+      expiresAt: string;
+      used: boolean;
+      tenantName: string | null;
+    };
+
+    if (record.used || new Date(record.expiresAt) < new Date()) {
+      return c.json({ error: 'invalid_token' }, 404);
+    }
+
+    return c.json({ email: record.email, tenantName: record.tenantName ?? '' });
+  } catch (err) {
+    console.error('[auth/invite GET]', err);
+    return c.json({ error: 'Internal server error' }, 500);
+  }
+});
+
+// ── POST /auth/accept-invite ──────────────────────────────────────────────────
+
+authRouter.post('/accept-invite', async (c) => {
+  try {
+    const body = await c.req.json<{ token?: string; name?: string; password?: string }>();
+    const { token, name, password } = body;
+
+    if (!token || typeof token !== 'string') {
+      return c.json({ error: 'token is required' }, 400);
+    }
+    if (!name || typeof name !== 'string') {
+      return c.json({ error: 'name is required' }, 400);
+    }
+    if (!password || typeof password !== 'string' || password.length < 8) {
+      return c.json({ error: 'password must be at least 8 characters' }, 400);
+    }
+
+    const tokenResult = await sharedDb.execute(sql`
+      SELECT id, email, "tenantId", "expiresAt", used
+      FROM "inviteTokens"
+      WHERE token = ${token}
+      LIMIT 1
+    `);
+
+    if (!tokenResult.rows.length) {
+      return c.json({ error: 'invalid_token' }, 400);
+    }
+
+    const record = tokenResult.rows[0] as {
+      id: string;
+      email: string;
+      tenantId: string;
+      expiresAt: string;
+      used: boolean;
+    };
+
+    if (record.used || new Date(record.expiresAt) < new Date()) {
+      return c.json({ error: 'invalid_token' }, 400);
+    }
+
+    const passwordHash = createHash('sha256').update(password).digest('hex');
+
+    // Create the user
+    await sharedDb.execute(sql`
+      INSERT INTO users ("tenantId", email, name, "passwordHash", "isActive")
+      VALUES (${record.tenantId}, ${record.email}, ${name}, ${passwordHash}, true)
+      ON CONFLICT (email, "tenantId") DO UPDATE
+        SET name = EXCLUDED.name,
+            "passwordHash" = EXCLUDED."passwordHash",
+            "isActive" = true
+    `);
+
+    // Mark invite as used
+    await sharedDb.execute(sql`
+      UPDATE "inviteTokens"
+      SET used = true
+      WHERE id = ${record.id}
+    `);
+
+    return c.json({ ok: true });
+  } catch (err) {
+    console.error('[auth/accept-invite]', err);
     return c.json({ error: 'Internal server error' }, 500);
   }
 });

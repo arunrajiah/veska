@@ -7,20 +7,28 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 interface PortalInvoice {
   id: string;
+  invoiceNumber?: string;
   number?: string;
-  date?: string;
+  issuedAt?: string;
   dueDate?: string;
-  amount?: number;
+  total?: number;
   currency?: string;
-  status?: 'paid' | 'overdue' | 'pending' | 'draft';
+  status?: string;
 }
 
-export default function InvoicesPage({ params }: { params: Promise<{ token: string }> }) {
+export default function InvoicesPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ token: string }>;
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
   const { token } = use(params);
-  return <InvoicesPageInner token={token} />;
+  const sp = use(searchParams);
+  return <InvoicesPageInner token={token} payment={sp['payment']} />;
 }
 
-async function InvoicesPageInner({ token }: { token: string }) {
+async function InvoicesPageInner({ token, payment }: { token: string; payment?: string }) {
   let invoices: PortalInvoice[] = [];
   try {
     const res = await fetch(`${API_BASE}/portal/${encodeURIComponent(token)}/invoices`, {
@@ -35,5 +43,5 @@ async function InvoicesPageInner({ token }: { token: string }) {
     invoices = [];
   }
 
-  return <PortalInvoiceList invoices={invoices} token={token} />;
+  return <PortalInvoiceList invoices={invoices} token={token} payment={payment} />;
 }

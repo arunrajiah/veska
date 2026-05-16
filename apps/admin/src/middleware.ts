@@ -22,6 +22,7 @@ export function middleware(request: NextRequest) {
   }
 
   // Redirect logged-in users away from login/setup
+  // Note: /forgot-password, /reset-password, and /register are always public — no redirect needed
   if ((pathname === '/login' || pathname === '/setup' || pathname === '/') && token) {
     // If onboarding not done, send to onboarding; otherwise dashboard
     if (!onboardingDone) {

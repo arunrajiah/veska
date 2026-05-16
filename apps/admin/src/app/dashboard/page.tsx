@@ -135,11 +135,11 @@ export default async function DashboardOverviewPage() {
   const dash = '—';
 
   return (
-    <div className="px-6 py-8 max-w-screen-xl mx-auto space-y-6">
+    <div className="px-4 sm:px-6 py-6 sm:py-8 max-w-screen-xl mx-auto space-y-6">
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div className="flex items-baseline gap-2">
-        <h1 className="text-2xl font-semibold text-gray-900">Good morning, Veska Admin</h1>
-        <span className="text-sm text-gray-400">&middot; {todayLabel()}</span>
+      <div className="flex flex-wrap items-baseline gap-2">
+        <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Good morning, Veska Admin</h1>
+        <span className="text-sm text-gray-400 hidden sm:inline">&middot; {todayLabel()}</span>
       </div>
 
       {statsError && (
@@ -149,7 +149,7 @@ export default async function DashboardOverviewPage() {
       )}
 
       {/* ── Top stat chips ──────────────────────────────────────────────────── */}
-      <div className="flex gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {/* Outstanding invoices */}
         <div className="bg-white border border-gray-200 rounded-xl px-5 py-4 flex items-center gap-3 flex-1">
           <div className="w-9 h-9 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0">
@@ -209,9 +209,9 @@ export default async function DashboardOverviewPage() {
       </div>
 
       {/* ── Main content: KPIs (left) + Activity (right) ─────────────────────── */}
-      <div className="grid grid-cols-3 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Left column — KPI sections */}
-        <div className="col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-6">
           {/* Finance */}
           <section>
             <div className="flex items-center gap-2 mb-3">
@@ -220,7 +220,7 @@ export default async function DashboardOverviewPage() {
                 Finance
               </h2>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <KpiCard
                 label="Paid This Month"
                 value={s ? formatCurrency(s.finance.totalPaidThisMonth) : dash}
@@ -251,7 +251,7 @@ export default async function DashboardOverviewPage() {
                 HR &amp; People
               </h2>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <KpiCard
                 label="Active Employees"
                 value={s ? String(s.hr.activeEmployees) : dash}
@@ -280,7 +280,7 @@ export default async function DashboardOverviewPage() {
                 Inventory &amp; Operations
               </h2>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <KpiCard
                 label="Total Products"
                 value={s ? String(s.inventory.totalProducts) : dash}

@@ -11,6 +11,7 @@ import { Hono } from 'hono';
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { ApprovalService } from '@veska/core';
 import { sharedDb } from '../shared.js';
+import { handleRouteError } from '../lib/api-error.js';
 
 export const inboundChannelsRouter = new Hono();
 
@@ -70,6 +71,7 @@ async function routeApprovalKeyword(
 // ─────────────────────────────────────────────────────────────────────────────
 
 inboundChannelsRouter.post('/slack', async (c) => {
+  try {
   const signingSecret = process.env['SLACK_SIGNING_SECRET'];
 
   const rawBody = await c.req.text();
@@ -157,6 +159,9 @@ inboundChannelsRouter.post('/slack', async (c) => {
   })();
 
   return c.json({ ok: true });
+  } catch (err) {
+    return handleRouteError(c, err, 'POST /channels/inbound/slack');
+  }
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -164,6 +169,7 @@ inboundChannelsRouter.post('/slack', async (c) => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 inboundChannelsRouter.post('/whatsapp', async (c) => {
+  try {
   const authToken = process.env['TWILIO_AUTH_TOKEN'];
   const accountSid = process.env['TWILIO_ACCOUNT_SID'] ?? '';
 
@@ -208,6 +214,9 @@ inboundChannelsRouter.post('/whatsapp', async (c) => {
 
   // Twilio expects TwiML or empty 200
   return c.text('<Response/>', 200, { 'Content-Type': 'text/xml' });
+  } catch (err) {
+    return handleRouteError(c, err, 'POST /channels/inbound/whatsapp');
+  }
 });
 
 async function processWhatsAppBody(

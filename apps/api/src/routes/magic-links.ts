@@ -3,6 +3,7 @@ import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { sharedMagicLinkService } from '../shared.js';
 import { sendMagicLinkEmail } from '../lib/magic-link-mailer.js';
+import { handleRouteError } from '../lib/api-error.js';
 
 export const magicLinksRouter = new Hono();
 
@@ -22,51 +23,59 @@ const createMagicLinkSchema = z.object({
 });
 
 magicLinksRouter.post('/', zValidator('json', createMagicLinkSchema), async (c) => {
-  const body = c.req.valid('json');
+  try {
+    const body = c.req.valid('json');
 
-  const url = await sharedMagicLinkService.create({
-    tenantId: body.tenantId,
-    identityId: body.identityId,
-    resourceType: body.resourceType,
-    resourceId: body.resourceId,
-    action: body.action,
-    expiryMinutes: body.expiryMinutes,
-  });
-
-  // Extract raw token from the URL produced by MagicLinkService
-  // URL format: {baseUrl}/ml/{token}
-  const token = url.split('/ml/')[1] ?? url;
-
-  if (body.email) {
-    // Fire-and-forget — never awaited so it cannot block the response
-    void sendMagicLinkEmail({
-      email: body.email,
-      token,
+    const url = await sharedMagicLinkService.create({
+      tenantId: body.tenantId,
+      identityId: body.identityId,
       resourceType: body.resourceType,
-      recipientName: body.recipientName,
+      resourceId: body.resourceId,
+      action: body.action,
+      expiryMinutes: body.expiryMinutes,
     });
-  }
 
-  return c.json({ token, url }, 201);
+    // Extract raw token from the URL produced by MagicLinkService
+    // URL format: {baseUrl}/ml/{token}
+    const token = url.split('/ml/')[1] ?? url;
+
+    if (body.email) {
+      // Fire-and-forget — never awaited so it cannot block the response
+      void sendMagicLinkEmail({
+        email: body.email,
+        token,
+        resourceType: body.resourceType,
+        recipientName: body.recipientName,
+      });
+    }
+
+    return c.json({ token, url }, 201);
+  } catch (err) {
+    return handleRouteError(c, err, 'POST /magic-links');
+  }
 });
 
 // Verify and consume a magic link token
 magicLinksRouter.get('/verify/:token', async (c) => {
-  const token = c.req.param('token');
+  try {
+    const token = c.req.param('token');
 
-  if (!sharedMagicLinkService.isTokenFormatValid(token)) {
-    return c.json({ valid: false, reason: 'invalid_format' }, 400);
+    if (!sharedMagicLinkService.isTokenFormatValid(token)) {
+      return c.json({ valid: false, reason: 'invalid_format' }, 400);
+    }
+
+    const result = await sharedMagicLinkService.verify(token);
+
+    if (!result.valid) {
+      return c.json(result, 410);
+    }
+
+    // Redirect to the appropriate view based on resourceType + action
+    const redirectUrl = buildRedirectUrl(result);
+    return c.redirect(redirectUrl, 302);
+  } catch (err) {
+    return handleRouteError(c, err, 'GET /magic-links/verify/:token');
   }
-
-  const result = await sharedMagicLinkService.verify(token);
-
-  if (!result.valid) {
-    return c.json(result, 410);
-  }
-
-  // Redirect to the appropriate view based on resourceType + action
-  const redirectUrl = buildRedirectUrl(result);
-  return c.redirect(redirectUrl, 302);
 });
 
 function buildRedirectUrl(result: {

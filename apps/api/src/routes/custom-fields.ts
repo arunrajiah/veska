@@ -3,6 +3,7 @@ import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { sql } from 'drizzle-orm';
 import type { TenantContext } from '../middleware/tenant-context.js';
+import { handleRouteError } from '../lib/api-error.js';
 
 export const customFieldsRouter = new Hono<{ Variables: TenantContext }>();
 
@@ -45,107 +46,127 @@ const patchDefSchema = z.object({
 // ── GET /defs ─────────────────────────────────────────────────
 
 customFieldsRouter.get('/defs', async (c) => {
-  const { db } = c.get('tenantCtx');
-  const tenantId = c.req.query('tenantId');
-  const entityType = c.req.query('entityType');
+  try {
+    const { db } = c.get('tenantCtx');
+    const tenantId = c.req.query('tenantId');
+    const entityType = c.req.query('entityType');
 
-  if (!tenantId) {
-    return c.json({ error: 'tenantId is required' }, 400);
+    if (!tenantId) {
+      return c.json({ error: 'tenantId is required' }, 400);
+    }
+
+    const result = await db.execute(sql`
+      SELECT * FROM "customFieldDefs"
+      WHERE "tenantId" = ${tenantId}
+        ${entityType ? sql`AND "entityType" = ${entityType}` : sql``}
+        AND "enabled" = true
+      ORDER BY "entityType" ASC, "sortOrder" ASC
+    `);
+
+    return c.json(result.rows ?? []);
+  } catch (err) {
+    return handleRouteError(c, err, 'GET /custom-fields/defs');
   }
-
-  const result = await db.execute(sql`
-    SELECT * FROM "customFieldDefs"
-    WHERE "tenantId" = ${tenantId}
-      ${entityType ? sql`AND "entityType" = ${entityType}` : sql``}
-      AND "enabled" = true
-    ORDER BY "entityType" ASC, "sortOrder" ASC
-  `);
-
-  return c.json(result.rows ?? []);
 });
 
 // ── POST /defs ────────────────────────────────────────────────
 
 customFieldsRouter.post('/defs', zValidator('json', createDefSchema), async (c) => {
-  const { db } = c.get('tenantCtx');
-  const body = c.req.valid('json');
+  try {
+    const { db } = c.get('tenantCtx');
+    const body = c.req.valid('json');
 
-  const result = await db.execute(sql`
-    INSERT INTO "customFieldDefs"
-      ("tenantId", "entityType", "name", "label", "type", "options", "required", "sortOrder")
-    VALUES
-      (${body.tenantId}, ${body.entityType}, ${body.name}, ${body.label}, ${body.type},
-       ${body.options ?? null}, ${body.required}, ${body.sortOrder})
-    RETURNING *
-  `);
+    const result = await db.execute(sql`
+      INSERT INTO "customFieldDefs"
+        ("tenantId", "entityType", "name", "label", "type", "options", "required", "sortOrder")
+      VALUES
+        (${body.tenantId}, ${body.entityType}, ${body.name}, ${body.label}, ${body.type},
+         ${body.options ?? null}, ${body.required}, ${body.sortOrder})
+      RETURNING *
+    `);
 
-  const row = result.rows?.[0];
-  if (!row) return c.json({ error: 'Insert failed' }, 500);
-  return c.json(row, 201);
+    const row = result.rows?.[0];
+    if (!row) return c.json({ error: 'Insert failed' }, 500);
+    return c.json(row, 201);
+  } catch (err) {
+    return handleRouteError(c, err, 'POST /custom-fields/defs');
+  }
 });
 
 // ── GET /defs/:id ─────────────────────────────────────────────
 
 customFieldsRouter.get('/defs/:id', async (c) => {
-  const { db } = c.get('tenantCtx');
-  const id = c.req.param('id');
+  try {
+    const { db } = c.get('tenantCtx');
+    const id = c.req.param('id');
 
-  const result = await db.execute(sql`
-    SELECT * FROM "customFieldDefs" WHERE "id" = ${id}
-  `);
+    const result = await db.execute(sql`
+      SELECT * FROM "customFieldDefs" WHERE "id" = ${id}
+    `);
 
-  const row = result.rows?.[0];
-  if (!row) return c.json({ error: 'Not found' }, 404);
-  return c.json(row);
+    const row = result.rows?.[0];
+    if (!row) return c.json({ error: 'Not found' }, 404);
+    return c.json(row);
+  } catch (err) {
+    return handleRouteError(c, err, 'GET /custom-fields/defs/:id');
+  }
 });
 
 // ── PATCH /defs/:id ───────────────────────────────────────────
 
 customFieldsRouter.patch('/defs/:id', zValidator('json', patchDefSchema), async (c) => {
-  const { db } = c.get('tenantCtx');
-  const id = c.req.param('id');
-  const body = c.req.valid('json');
+  try {
+    const { db } = c.get('tenantCtx');
+    const id = c.req.param('id');
+    const body = c.req.valid('json');
 
-  // Build dynamic SET clause only for provided fields
-  const setClauses: any[] = [];
-  if (body.label !== undefined) setClauses.push(sql`"label" = ${body.label}`);
-  if (body.options !== undefined) setClauses.push(sql`"options" = ${body.options}`);
-  if (body.required !== undefined) setClauses.push(sql`"required" = ${body.required}`);
-  if (body.sortOrder !== undefined) setClauses.push(sql`"sortOrder" = ${body.sortOrder}`);
-  if (body.enabled !== undefined) setClauses.push(sql`"enabled" = ${body.enabled}`);
+    // Build dynamic SET clause only for provided fields
+    const setClauses: any[] = [];
+    if (body.label !== undefined) setClauses.push(sql`"label" = ${body.label}`);
+    if (body.options !== undefined) setClauses.push(sql`"options" = ${body.options}`);
+    if (body.required !== undefined) setClauses.push(sql`"required" = ${body.required}`);
+    if (body.sortOrder !== undefined) setClauses.push(sql`"sortOrder" = ${body.sortOrder}`);
+    if (body.enabled !== undefined) setClauses.push(sql`"enabled" = ${body.enabled}`);
 
-  if (setClauses.length === 0) {
-    return c.json({ error: 'No fields to update' }, 400);
+    if (setClauses.length === 0) {
+      return c.json({ error: 'No fields to update' }, 400);
+    }
+
+    setClauses.push(sql`"updatedAt" = now()`);
+
+    const setFragment = setClauses.reduce((acc, clause, i) =>
+      i === 0 ? clause : sql`${acc}, ${clause}`
+    );
+
+    const result = await db.execute(sql`
+      UPDATE "customFieldDefs"
+      SET ${setFragment}
+      WHERE "id" = ${id}
+      RETURNING *
+    `);
+
+    const row = result.rows?.[0];
+    if (!row) return c.json({ error: 'Not found' }, 404);
+    return c.json(row);
+  } catch (err) {
+    return handleRouteError(c, err, 'PATCH /custom-fields/defs/:id');
   }
-
-  setClauses.push(sql`"updatedAt" = now()`);
-
-  const setFragment = setClauses.reduce((acc, clause, i) =>
-    i === 0 ? clause : sql`${acc}, ${clause}`
-  );
-
-  const result = await db.execute(sql`
-    UPDATE "customFieldDefs"
-    SET ${setFragment}
-    WHERE "id" = ${id}
-    RETURNING *
-  `);
-
-  const row = result.rows?.[0];
-  if (!row) return c.json({ error: 'Not found' }, 404);
-  return c.json(row);
 });
 
 // ── DELETE /defs/:id ──────────────────────────────────────────
 
 customFieldsRouter.delete('/defs/:id', async (c) => {
-  const { db } = c.get('tenantCtx');
-  const id = c.req.param('id');
+  try {
+    const { db } = c.get('tenantCtx');
+    const id = c.req.param('id');
 
-  const result = await db.execute(sql`
-    DELETE FROM "customFieldDefs" WHERE "id" = ${id} RETURNING "id"
-  `);
+    const result = await db.execute(sql`
+      DELETE FROM "customFieldDefs" WHERE "id" = ${id} RETURNING "id"
+    `);
 
-  if (!result.rows?.[0]) return c.json({ error: 'Not found' }, 404);
-  return c.json({ deleted: true });
+    if (!result.rows?.[0]) return c.json({ error: 'Not found' }, 404);
+    return c.json({ deleted: true });
+  } catch (err) {
+    return handleRouteError(c, err, 'DELETE /custom-fields/defs/:id');
+  }
 });

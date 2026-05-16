@@ -243,7 +243,7 @@ function Step1({ onNext }: { onNext: () => void }) {
           {errors['industry'] && <p className={errorClass}>{errors['industry']}</p>}
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
             <select value={country} onChange={(e) => setCountry(e.target.value)} className={fieldClass}>
@@ -268,7 +268,7 @@ function Step1({ onNext }: { onNext: () => void }) {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Company size</label>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {COMPANY_SIZES.map((s) => (
               <button
                 key={s}
@@ -331,7 +331,7 @@ function Step2({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
         Select the modules your business needs. You can change this later.
       </p>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {MODULES.map((mod) => {
           const isOn = enabled.has(mod.id);
           return (
@@ -453,7 +453,7 @@ function Step3({ onNext, onBack, onSkip }: { onNext: () => void; onBack: () => v
 
       <div className="space-y-3">
         {members.map((member, idx) => (
-          <div key={idx} className="flex gap-2 items-center">
+          <div key={idx} className="flex flex-wrap sm:flex-nowrap gap-2 items-center">
             <input
               type="email"
               value={member.email}
@@ -852,7 +852,7 @@ export function OnboardingWizard({ step }: { step: number }) {
   }, [step]);
 
   return (
-    <div className="flex items-start justify-center min-h-[calc(100vh-2rem)] px-4 py-12">
+    <div className="flex items-start justify-center min-h-[calc(100vh-2rem)] px-4 sm:px-6 py-8 sm:py-12">
       <div className="w-full max-w-2xl">
         <div className="mb-6 text-center">
           <span className="text-xl font-bold text-indigo-600 tracking-tight">Veska</span>
@@ -861,7 +861,7 @@ export function OnboardingWizard({ step }: { step: number }) {
 
         <StepIndicator current={step} />
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 sm:p-8">
           {step === 1 && <Step1 onNext={next} />}
           {step === 2 && <Step2 onNext={next} onBack={back} />}
           {step === 3 && <Step3 onNext={next} onBack={back} onSkip={skip} />}

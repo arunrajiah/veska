@@ -5,6 +5,7 @@ import { eq, and, isNull } from 'drizzle-orm';
 import { schema, PluginManager, PluginRuntime } from '@veska/core';
 import { sharedDb, sharedAuditService, sharedQueueService } from '../shared.js';
 import type { TenantContext } from '../middleware/tenant-context.js';
+import { handleRouteError } from '../lib/api-error.js';
 
 export const pluginsRouter = new Hono<{ Variables: TenantContext }>();
 
@@ -14,9 +15,13 @@ const runtime = new PluginRuntime({ timeoutMs: 30_000 });
 // ── List installed plugins ────────────────────────────────────
 
 pluginsRouter.get('/', async (c) => {
-  const { tenantId } = c.get('tenantCtx');
-  const plugins = await pluginManager.list(tenantId);
-  return c.json({ plugins });
+  try {
+    const { tenantId } = c.get('tenantCtx');
+    const plugins = await pluginManager.list(tenantId);
+    return c.json({ plugins });
+  } catch (err) {
+    return handleRouteError(c, err, 'GET /plugins');
+  }
 });
 
 // ── Install a plugin ──────────────────────────────────────────
@@ -36,22 +41,30 @@ pluginsRouter.post(
     }),
   ),
   async (c) => {
-    const { tenantId } = c.get('tenantCtx');
-    const { manifest, code, config } = c.req.valid('json');
+    try {
+      const { tenantId } = c.get('tenantCtx');
+      const { manifest, code, config } = c.req.valid('json');
 
-    const plugin = await pluginManager.install(tenantId, manifest, code, config ?? {});
-    return c.json({ plugin }, 201);
+      const plugin = await pluginManager.install(tenantId, manifest, code, config ?? {});
+      return c.json({ plugin }, 201);
+    } catch (err) {
+      return handleRouteError(c, err, 'POST /plugins/install');
+    }
   },
 );
 
 // ── Uninstall a plugin ────────────────────────────────────────
 
 pluginsRouter.delete('/:pluginId', async (c) => {
-  const { tenantId } = c.get('tenantCtx');
-  const pluginId = c.req.param('pluginId');
+  try {
+    const { tenantId } = c.get('tenantCtx');
+    const pluginId = c.req.param('pluginId');
 
-  await pluginManager.uninstall(tenantId, pluginId);
-  return c.json({ success: true });
+    await pluginManager.uninstall(tenantId, pluginId);
+    return c.json({ success: true });
+  } catch (err) {
+    return handleRouteError(c, err, 'DELETE /plugins/:pluginId');
+  }
 });
 
 // ── Run a plugin function ─────────────────────────────────────
@@ -66,6 +79,7 @@ pluginsRouter.post(
     }),
   ),
   async (c) => {
+    try {
     const { tenantId } = c.get('tenantCtx');
     const pluginId = c.req.param('pluginId');
     const { functionName, input } = c.req.valid('json');
@@ -184,5 +198,8 @@ pluginsRouter.post(
     }
 
     return c.json({ result: result.result, durationMs: result.durationMs });
+    } catch (err) {
+      return handleRouteError(c, err, 'POST /plugins/:pluginId/run');
+    }
   },
 );

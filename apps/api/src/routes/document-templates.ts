@@ -3,6 +3,7 @@ import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { sql } from 'drizzle-orm';
 import type { TenantContext } from '../middleware/tenant-context.js';
+import { handleRouteError } from '../lib/api-error.js';
 
 export const documentTemplatesRouter = new Hono<{ Variables: TenantContext }>();
 
@@ -214,221 +215,253 @@ const templateUpdateSchema = templateCreateSchema.partial();
 
 // GET /document-templates
 documentTemplatesRouter.get('/', async (c) => {
-  const { db, tenantId } = c.get('tenantCtx');
-  const type = c.req.query('type');
+  try {
+    const { db, tenantId } = c.get('tenantCtx');
+    const type = c.req.query('type');
 
-  let result;
-  if (type) {
-    result = await db.execute(sql`
-      SELECT * FROM "documentTemplates"
-      WHERE "tenantId" = ${tenantId}
-        AND type = ${type}
-      ORDER BY "createdAt" DESC
-    `);
-  } else {
-    result = await db.execute(sql`
-      SELECT * FROM "documentTemplates"
-      WHERE "tenantId" = ${tenantId}
-      ORDER BY "createdAt" DESC
-    `);
+    let result;
+    if (type) {
+      result = await db.execute(sql`
+        SELECT * FROM "documentTemplates"
+        WHERE "tenantId" = ${tenantId}
+          AND type = ${type}
+        ORDER BY "createdAt" DESC
+      `);
+    } else {
+      result = await db.execute(sql`
+        SELECT * FROM "documentTemplates"
+        WHERE "tenantId" = ${tenantId}
+        ORDER BY "createdAt" DESC
+      `);
+    }
+
+    return c.json({ templates: result.rows ?? [] });
+  } catch (err) {
+    return handleRouteError(c, err, 'GET /document-templates');
   }
-
-  return c.json({ templates: result.rows ?? [] });
 });
 
 // POST /document-templates/seed  — must be before /:id
 documentTemplatesRouter.post('/seed', async (c) => {
-  const { db, tenantId } = c.get('tenantCtx');
+  try {
+    const { db, tenantId } = c.get('tenantCtx');
 
-  // Check if any templates already exist for this tenant
-  const existing = await db.execute(sql`
-    SELECT id FROM "documentTemplates"
-    WHERE "tenantId" = ${tenantId}
-    LIMIT 1
-  `);
+    // Check if any templates already exist for this tenant
+    const existing = await db.execute(sql`
+      SELECT id FROM "documentTemplates"
+      WHERE "tenantId" = ${tenantId}
+      LIMIT 1
+    `);
 
-  if ((existing.rows ?? []).length > 0) {
-    return c.json({ seeded: false, message: 'Templates already exist for this tenant' });
+    if ((existing.rows ?? []).length > 0) {
+      return c.json({ seeded: false, message: 'Templates already exist for this tenant' });
+    }
+
+    const seeded: unknown[] = [];
+    for (const tpl of SEED_TEMPLATES) {
+      const vars = mergeVariables(tpl.htmlBody, []);
+      const result = await db.execute(sql`
+        INSERT INTO "documentTemplates" (
+          "tenantId", name, type, description, "htmlBody", variables, "isDefault"
+        ) VALUES (
+          ${tenantId},
+          ${tpl.name},
+          ${tpl.type},
+          ${tpl.description},
+          ${tpl.htmlBody},
+          ${JSON.stringify(vars)}::jsonb,
+          ${tpl.isDefault}
+        )
+        RETURNING *
+      `);
+      const row = (result.rows ?? [])[0];
+      if (row) seeded.push(row);
+    }
+
+    return c.json({ seeded: true, count: seeded.length, templates: seeded }, 201);
+  } catch (err) {
+    return handleRouteError(c, err, 'POST /document-templates/seed');
   }
+});
 
-  const seeded: unknown[] = [];
-  for (const tpl of SEED_TEMPLATES) {
-    const vars = mergeVariables(tpl.htmlBody, []);
+// GET /document-templates/rendered  — must be before /:id
+documentTemplatesRouter.get('/rendered', async (c) => {
+  try {
+    const { db, tenantId } = c.get('tenantCtx');
+    const entityType = c.req.query('entityType');
+    const entityId = c.req.query('entityId');
+
+    let result;
+    if (entityType && entityId) {
+      result = await db.execute(sql`
+        SELECT * FROM "generatedDocuments"
+        WHERE "tenantId" = ${tenantId}
+          AND "entityType" = ${entityType}
+          AND "entityId" = ${entityId}
+        ORDER BY "createdAt" DESC
+      `);
+    } else if (entityType) {
+      result = await db.execute(sql`
+        SELECT * FROM "generatedDocuments"
+        WHERE "tenantId" = ${tenantId}
+          AND "entityType" = ${entityType}
+        ORDER BY "createdAt" DESC
+      `);
+    } else {
+      result = await db.execute(sql`
+        SELECT * FROM "generatedDocuments"
+        WHERE "tenantId" = ${tenantId}
+        ORDER BY "createdAt" DESC
+      `);
+    }
+
+    return c.json({ documents: result.rows ?? [] });
+  } catch (err) {
+    return handleRouteError(c, err, 'GET /document-templates/rendered');
+  }
+});
+
+// GET /document-templates/rendered/:docId
+documentTemplatesRouter.get('/rendered/:docId', async (c) => {
+  try {
+    const { db, tenantId } = c.get('tenantCtx');
+    const docId = c.req.param('docId');
+
+    const result = await db.execute(sql`
+      SELECT * FROM "generatedDocuments"
+      WHERE id = ${docId}
+        AND "tenantId" = ${tenantId}
+      LIMIT 1
+    `);
+
+    const row = (result.rows ?? [])[0];
+    if (!row) return c.json({ error: 'Not found' }, 404);
+    return c.json(row);
+  } catch (err) {
+    return handleRouteError(c, err, 'GET /document-templates/rendered/:docId');
+  }
+});
+
+// POST /document-templates
+documentTemplatesRouter.post('/', zValidator('json', templateCreateSchema), async (c) => {
+  try {
+    const { db, tenantId } = c.get('tenantCtx');
+    const body = c.req.valid('json');
+
+    const vars = mergeVariables(body.htmlBody, body.variables);
+
     const result = await db.execute(sql`
       INSERT INTO "documentTemplates" (
         "tenantId", name, type, description, "htmlBody", variables, "isDefault"
       ) VALUES (
         ${tenantId},
-        ${tpl.name},
-        ${tpl.type},
-        ${tpl.description},
-        ${tpl.htmlBody},
+        ${body.name},
+        ${body.type},
+        ${body.description ?? null},
+        ${body.htmlBody},
         ${JSON.stringify(vars)}::jsonb,
-        ${tpl.isDefault}
+        ${body.isDefault ?? false}
       )
       RETURNING *
     `);
+
     const row = (result.rows ?? [])[0];
-    if (row) seeded.push(row);
+    if (!row) return c.json({ error: 'Failed to create template' }, 500);
+    return c.json(row, 201);
+  } catch (err) {
+    return handleRouteError(c, err, 'POST /document-templates');
   }
-
-  return c.json({ seeded: true, count: seeded.length, templates: seeded }, 201);
-});
-
-// GET /document-templates/rendered  — must be before /:id
-documentTemplatesRouter.get('/rendered', async (c) => {
-  const { db, tenantId } = c.get('tenantCtx');
-  const entityType = c.req.query('entityType');
-  const entityId = c.req.query('entityId');
-
-  let result;
-  if (entityType && entityId) {
-    result = await db.execute(sql`
-      SELECT * FROM "generatedDocuments"
-      WHERE "tenantId" = ${tenantId}
-        AND "entityType" = ${entityType}
-        AND "entityId" = ${entityId}
-      ORDER BY "createdAt" DESC
-    `);
-  } else if (entityType) {
-    result = await db.execute(sql`
-      SELECT * FROM "generatedDocuments"
-      WHERE "tenantId" = ${tenantId}
-        AND "entityType" = ${entityType}
-      ORDER BY "createdAt" DESC
-    `);
-  } else {
-    result = await db.execute(sql`
-      SELECT * FROM "generatedDocuments"
-      WHERE "tenantId" = ${tenantId}
-      ORDER BY "createdAt" DESC
-    `);
-  }
-
-  return c.json({ documents: result.rows ?? [] });
-});
-
-// GET /document-templates/rendered/:docId
-documentTemplatesRouter.get('/rendered/:docId', async (c) => {
-  const { db, tenantId } = c.get('tenantCtx');
-  const docId = c.req.param('docId');
-
-  const result = await db.execute(sql`
-    SELECT * FROM "generatedDocuments"
-    WHERE id = ${docId}
-      AND "tenantId" = ${tenantId}
-    LIMIT 1
-  `);
-
-  const row = (result.rows ?? [])[0];
-  if (!row) return c.json({ error: 'Not found' }, 404);
-  return c.json(row);
-});
-
-// POST /document-templates
-documentTemplatesRouter.post('/', zValidator('json', templateCreateSchema), async (c) => {
-  const { db, tenantId } = c.get('tenantCtx');
-  const body = c.req.valid('json');
-
-  const vars = mergeVariables(body.htmlBody, body.variables);
-
-  const result = await db.execute(sql`
-    INSERT INTO "documentTemplates" (
-      "tenantId", name, type, description, "htmlBody", variables, "isDefault"
-    ) VALUES (
-      ${tenantId},
-      ${body.name},
-      ${body.type},
-      ${body.description ?? null},
-      ${body.htmlBody},
-      ${JSON.stringify(vars)}::jsonb,
-      ${body.isDefault ?? false}
-    )
-    RETURNING *
-  `);
-
-  const row = (result.rows ?? [])[0];
-  if (!row) return c.json({ error: 'Failed to create template' }, 500);
-  return c.json(row, 201);
 });
 
 // GET /document-templates/:id
 documentTemplatesRouter.get('/:id', async (c) => {
-  const { db, tenantId } = c.get('tenantCtx');
-  const id = c.req.param('id');
+  try {
+    const { db, tenantId } = c.get('tenantCtx');
+    const id = c.req.param('id');
 
-  const result = await db.execute(sql`
-    SELECT * FROM "documentTemplates"
-    WHERE id = ${id}
-      AND "tenantId" = ${tenantId}
-    LIMIT 1
-  `);
+    const result = await db.execute(sql`
+      SELECT * FROM "documentTemplates"
+      WHERE id = ${id}
+        AND "tenantId" = ${tenantId}
+      LIMIT 1
+    `);
 
-  const row = (result.rows ?? [])[0];
-  if (!row) return c.json({ error: 'Not found' }, 404);
-  return c.json(row);
+    const row = (result.rows ?? [])[0];
+    if (!row) return c.json({ error: 'Not found' }, 404);
+    return c.json(row);
+  } catch (err) {
+    return handleRouteError(c, err, 'GET /document-templates/:id');
+  }
 });
 
 // PUT /document-templates/:id
 documentTemplatesRouter.put('/:id', zValidator('json', templateUpdateSchema), async (c) => {
-  const { db, tenantId } = c.get('tenantCtx');
-  const id = c.req.param('id');
-  const body = c.req.valid('json');
+  try {
+    const { db, tenantId } = c.get('tenantCtx');
+    const id = c.req.param('id');
+    const body = c.req.valid('json');
 
-  // Fetch existing to merge
-  const existing = await db.execute(sql`
-    SELECT * FROM "documentTemplates"
-    WHERE id = ${id}
-      AND "tenantId" = ${tenantId}
-    LIMIT 1
-  `);
+    // Fetch existing to merge
+    const existing = await db.execute(sql`
+      SELECT * FROM "documentTemplates"
+      WHERE id = ${id}
+        AND "tenantId" = ${tenantId}
+      LIMIT 1
+    `);
 
-  const row = (existing.rows ?? [])[0] as Record<string, unknown> | undefined;
-  if (!row) return c.json({ error: 'Not found' }, 404);
+    const row = (existing.rows ?? [])[0] as Record<string, unknown> | undefined;
+    if (!row) return c.json({ error: 'Not found' }, 404);
 
-  const newHtmlBody = body.htmlBody ?? String(row['htmlBody'] ?? '');
-  const explicitVars = body.variables ?? (row['variables'] as Array<{ name: string; label?: string }>) ?? [];
-  const vars = mergeVariables(newHtmlBody, explicitVars);
+    const newHtmlBody = body.htmlBody ?? String(row['htmlBody'] ?? '');
+    const explicitVars = body.variables ?? (row['variables'] as Array<{ name: string; label?: string }>) ?? [];
+    const vars = mergeVariables(newHtmlBody, explicitVars);
 
-  const name = body.name ?? String(row['name'] ?? '');
-  const type = body.type ?? String(row['type'] ?? '');
-  const description = body.description !== undefined ? body.description : (row['description'] as string | null) ?? null;
-  const isDefault = body.isDefault !== undefined ? body.isDefault : Boolean(row['isDefault']);
+    const name = body.name ?? String(row['name'] ?? '');
+    const type = body.type ?? String(row['type'] ?? '');
+    const description = body.description !== undefined ? body.description : (row['description'] as string | null) ?? null;
+    const isDefault = body.isDefault !== undefined ? body.isDefault : Boolean(row['isDefault']);
 
-  const result = await db.execute(sql`
-    UPDATE "documentTemplates"
-    SET
-      name = ${name},
-      type = ${type},
-      description = ${description},
-      "htmlBody" = ${newHtmlBody},
-      variables = ${JSON.stringify(vars)}::jsonb,
-      "isDefault" = ${isDefault},
-      "updatedAt" = now()
-    WHERE id = ${id}
-      AND "tenantId" = ${tenantId}
-    RETURNING *
-  `);
+    const result = await db.execute(sql`
+      UPDATE "documentTemplates"
+      SET
+        name = ${name},
+        type = ${type},
+        description = ${description},
+        "htmlBody" = ${newHtmlBody},
+        variables = ${JSON.stringify(vars)}::jsonb,
+        "isDefault" = ${isDefault},
+        "updatedAt" = now()
+      WHERE id = ${id}
+        AND "tenantId" = ${tenantId}
+      RETURNING *
+    `);
 
-  const updated = (result.rows ?? [])[0];
-  if (!updated) return c.json({ error: 'Update failed' }, 500);
-  return c.json(updated);
+    const updated = (result.rows ?? [])[0];
+    if (!updated) return c.json({ error: 'Update failed' }, 500);
+    return c.json(updated);
+  } catch (err) {
+    return handleRouteError(c, err, 'PUT /document-templates/:id');
+  }
 });
 
 // DELETE /document-templates/:id
 documentTemplatesRouter.delete('/:id', async (c) => {
-  const { db, tenantId } = c.get('tenantCtx');
-  const id = c.req.param('id');
+  try {
+    const { db, tenantId } = c.get('tenantCtx');
+    const id = c.req.param('id');
 
-  const result = await db.execute(sql`
-    DELETE FROM "documentTemplates"
-    WHERE id = ${id}
-      AND "tenantId" = ${tenantId}
-    RETURNING id
-  `);
+    const result = await db.execute(sql`
+      DELETE FROM "documentTemplates"
+      WHERE id = ${id}
+        AND "tenantId" = ${tenantId}
+      RETURNING id
+    `);
 
-  if ((result.rows ?? []).length === 0) return c.json({ error: 'Not found' }, 404);
-  return c.json({ deleted: true, id });
+    if ((result.rows ?? []).length === 0) return c.json({ error: 'Not found' }, 404);
+    return c.json({ deleted: true, id });
+  } catch (err) {
+    return handleRouteError(c, err, 'DELETE /document-templates/:id');
+  }
 });
 
 // ── Template rendering ─────────────────────────────────────────
@@ -442,48 +475,52 @@ const renderSchema = z.object({
 
 // POST /document-templates/:id/render
 documentTemplatesRouter.post('/:id/render', zValidator('json', renderSchema), async (c) => {
-  const { db, tenantId, identityId } = c.get('tenantCtx');
-  const templateId = c.req.param('id');
-  const body = c.req.valid('json');
+  try {
+    const { db, tenantId, identityId } = c.get('tenantCtx');
+    const templateId = c.req.param('id');
+    const body = c.req.valid('json');
 
-  // Load template
-  const tplResult = await db.execute(sql`
-    SELECT * FROM "documentTemplates"
-    WHERE id = ${templateId}
-      AND "tenantId" = ${tenantId}
-    LIMIT 1
-  `);
+    // Load template
+    const tplResult = await db.execute(sql`
+      SELECT * FROM "documentTemplates"
+      WHERE id = ${templateId}
+        AND "tenantId" = ${tenantId}
+      LIMIT 1
+    `);
 
-  const tpl = (tplResult.rows ?? [])[0] as Record<string, unknown> | undefined;
-  if (!tpl) return c.json({ error: 'Template not found' }, 404);
+    const tpl = (tplResult.rows ?? [])[0] as Record<string, unknown> | undefined;
+    if (!tpl) return c.json({ error: 'Template not found' }, 404);
 
-  // Substitute variables
-  const htmlBody = String(tpl['htmlBody'] ?? '');
-  const substituted = substituteVariables(htmlBody, body.variables);
+    // Substitute variables
+    const htmlBody = String(tpl['htmlBody'] ?? '');
+    const substituted = substituteVariables(htmlBody, body.variables);
 
-  // Wrap in full HTML document
-  const htmlOutput = wrapHtml(body.name, substituted);
+    // Wrap in full HTML document
+    const htmlOutput = wrapHtml(body.name, substituted);
 
-  // Save to generatedDocuments
-  const saveResult = await db.execute(sql`
-    INSERT INTO "generatedDocuments" (
-      "tenantId", "templateId", name, variables, "htmlOutput",
-      "entityType", "entityId", "createdBy"
-    ) VALUES (
-      ${tenantId},
-      ${templateId},
-      ${body.name},
-      ${JSON.stringify(body.variables)}::jsonb,
-      ${htmlOutput},
-      ${body.entityType ?? null},
-      ${body.entityId ?? null},
-      ${identityId ?? null}
-    )
-    RETURNING id, name
-  `);
+    // Save to generatedDocuments
+    const saveResult = await db.execute(sql`
+      INSERT INTO "generatedDocuments" (
+        "tenantId", "templateId", name, variables, "htmlOutput",
+        "entityType", "entityId", "createdBy"
+      ) VALUES (
+        ${tenantId},
+        ${templateId},
+        ${body.name},
+        ${JSON.stringify(body.variables)}::jsonb,
+        ${htmlOutput},
+        ${body.entityType ?? null},
+        ${body.entityId ?? null},
+        ${identityId ?? null}
+      )
+      RETURNING id, name
+    `);
 
-  const saved = (saveResult.rows ?? [])[0] as Record<string, unknown> | undefined;
-  if (!saved) return c.json({ error: 'Failed to save generated document' }, 500);
+    const saved = (saveResult.rows ?? [])[0] as Record<string, unknown> | undefined;
+    if (!saved) return c.json({ error: 'Failed to save generated document' }, 500);
 
-  return c.json({ id: saved['id'], name: saved['name'], htmlOutput }, 201);
+    return c.json({ id: saved['id'], name: saved['name'], htmlOutput }, 201);
+  } catch (err) {
+    return handleRouteError(c, err, 'POST /document-templates/:id/render');
+  }
 });

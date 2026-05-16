@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Eye, EyeOff, Smartphone } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
@@ -164,9 +165,9 @@ export function LoginClient() {
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="block text-sm font-medium text-gray-700">Password</label>
-                <a href="#" className="text-xs text-indigo-600 hover:text-indigo-700">
+                <Link href="/forgot-password" className="text-xs text-indigo-600 hover:text-indigo-700">
                   Forgot password?
-                </a>
+                </Link>
               </div>
               <div className="relative">
                 <input

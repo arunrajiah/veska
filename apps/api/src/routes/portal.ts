@@ -3,6 +3,7 @@ import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { sql } from 'drizzle-orm';
 import { sharedDb } from '../shared.js';
+import { getStripe } from '../lib/stripe.js';
 
 export const portalRouter = new Hono();
 
@@ -131,6 +132,63 @@ portalRouter.get('/:token/invoices/:invoiceId', async (c) => {
     return c.json(invoice);
   } catch (error) {
     return c.json({ error }, 500);
+  }
+});
+
+// ── POST /portal/:token/invoices/:id/pay ─────────────────────
+
+portalRouter.post('/:token/invoices/:id/pay', async (c) => {
+  try {
+    const token = c.req.param('token');
+    const id = c.req.param('id');
+    const pt = await resolvePortalToken(token);
+    if (!pt) return c.json({ error: 'Invalid or expired portal token' }, 401);
+
+    const rows = await sharedDb.execute(sql`
+      SELECT *
+      FROM "entityRecords"
+      WHERE id = ${id}
+        AND "tenantId" = ${pt.tenantId}
+        AND "entityType" = 'Invoice'
+        AND (data->>'contactId' = ${pt.contactId} OR data->>'contactEmail' = ${pt.email})
+    `);
+
+    const invoice = (rows as unknown as Array<{ id: string; data: Record<string, unknown> }>)[0];
+    if (!invoice) return c.json({ error: 'Invoice not found' }, 404);
+
+    const invoiceData = invoice.data;
+    const status = invoiceData['status'] as string | undefined;
+    if (status === 'paid') {
+      return c.json({ error: 'Invoice is already paid' }, 400);
+    }
+
+    const stripe = getStripe();
+    const portalBase = process.env['PORTAL_BASE_URL'] ?? 'http://localhost:3000';
+    const invoiceNumber = (invoiceData['number'] as string | undefined) ?? (invoiceData['invoiceNumber'] as string | undefined) ?? id;
+    const currency = ((invoiceData['currency'] as string | undefined) ?? 'usd').toLowerCase();
+    const total = (invoiceData['total'] as number | undefined) ?? 0;
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency,
+            product_data: { name: `Invoice ${invoiceNumber}` },
+            unit_amount: Math.round(total * 100),
+          },
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      success_url: `${portalBase}/portal/${token}/invoices/${id}?payment=success`,
+      cancel_url: `${portalBase}/portal/${token}/invoices/${id}?payment=cancelled`,
+      metadata: { tenantId: pt.tenantId, invoiceId: id, portalToken: token },
+    });
+
+    return c.json({ checkoutUrl: session.url });
+  } catch (error) {
+    return c.json({ error: String(error) }, 500);
   }
 });
 

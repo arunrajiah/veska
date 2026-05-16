@@ -3,21 +3,26 @@ import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { sql } from 'drizzle-orm';
 import type { TenantContext } from '../middleware/tenant-context.js';
+import { handleRouteError } from '../lib/api-error.js';
 
 export const approvalChainsRouter = new Hono<{ Variables: TenantContext }>();
 
 // ── List ──────────────────────────────────────────────────────
 
 approvalChainsRouter.get('/', async (c) => {
-  const { db, tenantId } = c.get('tenantCtx');
+  try {
+    const { db, tenantId } = c.get('tenantCtx');
 
-  const result = await db.execute(sql`
-    SELECT * FROM "approvalChains"
-    WHERE "tenantId" = ${tenantId}
-    ORDER BY "createdAt" ASC
-  `);
+    const result = await db.execute(sql`
+      SELECT * FROM "approvalChains"
+      WHERE "tenantId" = ${tenantId}
+      ORDER BY "createdAt" ASC
+    `);
 
-  return c.json({ chains: result.rows ?? [] });
+    return c.json({ chains: result.rows ?? [] });
+  } catch (err) {
+    return handleRouteError(c, err, 'GET /approval-chains');
+  }
 });
 
 // ── Create ────────────────────────────────────────────────────
@@ -41,47 +46,55 @@ const createSchema = z.object({
 });
 
 approvalChainsRouter.post('/', zValidator('json', createSchema), async (c) => {
-  const { db, tenantId } = c.get('tenantCtx');
-  const body = c.req.valid('json');
+  try {
+    const { db, tenantId } = c.get('tenantCtx');
+    const body = c.req.valid('json');
 
-  const result = await db.execute(sql`
-    INSERT INTO "approvalChains" (
-      "tenantId", "name", "entityType",
-      "conditionField", "conditionOp", "conditionValue",
-      "steps", "enabled"
-    ) VALUES (
-      ${tenantId},
-      ${body.name},
-      ${body.entityType},
-      ${body.conditionField ?? null},
-      ${body.conditionOp ?? null},
-      ${body.conditionValue ?? null},
-      ${JSON.stringify(body.steps)}::jsonb,
-      ${body.enabled ?? true}
-    )
-    RETURNING *
-  `);
+    const result = await db.execute(sql`
+      INSERT INTO "approvalChains" (
+        "tenantId", "name", "entityType",
+        "conditionField", "conditionOp", "conditionValue",
+        "steps", "enabled"
+      ) VALUES (
+        ${tenantId},
+        ${body.name},
+        ${body.entityType},
+        ${body.conditionField ?? null},
+        ${body.conditionOp ?? null},
+        ${body.conditionValue ?? null},
+        ${JSON.stringify(body.steps)}::jsonb,
+        ${body.enabled ?? true}
+      )
+      RETURNING *
+    `);
 
-  const chain = (result.rows ?? [])[0];
-  if (!chain) return c.json({ error: 'Failed to create approval chain' }, 500);
-  return c.json(chain, 201);
+    const chain = (result.rows ?? [])[0];
+    if (!chain) return c.json({ error: 'Failed to create approval chain' }, 500);
+    return c.json(chain, 201);
+  } catch (err) {
+    return handleRouteError(c, err, 'POST /approval-chains');
+  }
 });
 
 // ── Get single ────────────────────────────────────────────────
 
 approvalChainsRouter.get('/:id', async (c) => {
-  const { db, tenantId } = c.get('tenantCtx');
-  const id = c.req.param('id');
+  try {
+    const { db, tenantId } = c.get('tenantCtx');
+    const id = c.req.param('id');
 
-  const result = await db.execute(sql`
-    SELECT * FROM "approvalChains"
-    WHERE "id" = ${id}::uuid
-      AND "tenantId" = ${tenantId}
-  `);
+    const result = await db.execute(sql`
+      SELECT * FROM "approvalChains"
+      WHERE "id" = ${id}::uuid
+        AND "tenantId" = ${tenantId}
+    `);
 
-  const chain = (result.rows ?? [])[0];
-  if (!chain) return c.json({ error: 'Not found' }, 404);
-  return c.json(chain);
+    const chain = (result.rows ?? [])[0];
+    if (!chain) return c.json({ error: 'Not found' }, 404);
+    return c.json(chain);
+  } catch (err) {
+    return handleRouteError(c, err, 'GET /approval-chains/:id');
+  }
 });
 
 // ── Update ────────────────────────────────────────────────────
@@ -103,81 +116,89 @@ const updateSchema = z.object({
 });
 
 approvalChainsRouter.patch('/:id', zValidator('json', updateSchema), async (c) => {
-  const { db, tenantId } = c.get('tenantCtx');
-  const id = c.req.param('id');
-  const body = c.req.valid('json');
+  try {
+    const { db, tenantId } = c.get('tenantCtx');
+    const id = c.req.param('id');
+    const body = c.req.valid('json');
 
-  // Build dynamic SET clauses
-  const setClauses: string[] = ['"updatedAt" = now()'];
-  const values: unknown[] = [];
-  let idx = 1;
+    // Build dynamic SET clauses
+    const setClauses: string[] = ['"updatedAt" = now()'];
+    const values: unknown[] = [];
+    let idx = 1;
 
-  if (body.name !== undefined) {
-    setClauses.push(`"name" = $${idx++}`);
-    values.push(body.name);
-  }
-  if ('conditionField' in body) {
-    setClauses.push(`"conditionField" = $${idx++}`);
-    values.push(body.conditionField ?? null);
-  }
-  if ('conditionOp' in body) {
-    setClauses.push(`"conditionOp" = $${idx++}`);
-    values.push(body.conditionOp ?? null);
-  }
-  if ('conditionValue' in body) {
-    setClauses.push(`"conditionValue" = $${idx++}`);
-    values.push(body.conditionValue ?? null);
-  }
-  if (body.steps !== undefined) {
-    setClauses.push(`"steps" = $${idx++}::jsonb`);
-    values.push(JSON.stringify(body.steps));
-  }
-  if (body.enabled !== undefined) {
-    setClauses.push(`"enabled" = $${idx++}`);
-    values.push(body.enabled);
-  }
+    if (body.name !== undefined) {
+      setClauses.push(`"name" = $${idx++}`);
+      values.push(body.name);
+    }
+    if ('conditionField' in body) {
+      setClauses.push(`"conditionField" = $${idx++}`);
+      values.push(body.conditionField ?? null);
+    }
+    if ('conditionOp' in body) {
+      setClauses.push(`"conditionOp" = $${idx++}`);
+      values.push(body.conditionOp ?? null);
+    }
+    if ('conditionValue' in body) {
+      setClauses.push(`"conditionValue" = $${idx++}`);
+      values.push(body.conditionValue ?? null);
+    }
+    if (body.steps !== undefined) {
+      setClauses.push(`"steps" = $${idx++}::jsonb`);
+      values.push(JSON.stringify(body.steps));
+    }
+    if (body.enabled !== undefined) {
+      setClauses.push(`"enabled" = $${idx++}`);
+      values.push(body.enabled);
+    }
 
-  values.push(id);
-  values.push(tenantId);
+    values.push(id);
+    values.push(tenantId);
 
-  const query = `
-    UPDATE "approvalChains"
-    SET ${setClauses.join(', ')}
-    WHERE "id" = $${idx++}::uuid
-      AND "tenantId" = $${idx}
-    RETURNING *
-  `;
+    const query = `
+      UPDATE "approvalChains"
+      SET ${setClauses.join(', ')}
+      WHERE "id" = $${idx++}::uuid
+        AND "tenantId" = $${idx}
+      RETURNING *
+    `;
 
-  const result = await db.execute(sql.raw(
-    query.replace(/\$(\d+)/g, (_, n) => {
-      const val = values[Number(n) - 1];
-      if (val === null) return 'NULL';
-      if (typeof val === 'boolean') return val ? 'true' : 'false';
-      if (typeof val === 'number') return String(val);
-      return `'${String(val).replace(/'/g, "''")}'`;
-    }),
-  ));
+    const result = await db.execute(sql.raw(
+      query.replace(/\$(\d+)/g, (_, n) => {
+        const val = values[Number(n) - 1];
+        if (val === null) return 'NULL';
+        if (typeof val === 'boolean') return val ? 'true' : 'false';
+        if (typeof val === 'number') return String(val);
+        return `'${String(val).replace(/'/g, "''")}'`;
+      }),
+    ));
 
-  const chain = (result.rows ?? [])[0];
-  if (!chain) return c.json({ error: 'Not found' }, 404);
-  return c.json(chain);
+    const chain = (result.rows ?? [])[0];
+    if (!chain) return c.json({ error: 'Not found' }, 404);
+    return c.json(chain);
+  } catch (err) {
+    return handleRouteError(c, err, 'PATCH /approval-chains/:id');
+  }
 });
 
 // ── Delete ────────────────────────────────────────────────────
 
 approvalChainsRouter.delete('/:id', async (c) => {
-  const { db, tenantId } = c.get('tenantCtx');
-  const id = c.req.param('id');
+  try {
+    const { db, tenantId } = c.get('tenantCtx');
+    const id = c.req.param('id');
 
-  const result = await db.execute(sql`
-    DELETE FROM "approvalChains"
-    WHERE "id" = ${id}::uuid
-      AND "tenantId" = ${tenantId}
-    RETURNING "id"
-  `);
+    const result = await db.execute(sql`
+      DELETE FROM "approvalChains"
+      WHERE "id" = ${id}::uuid
+        AND "tenantId" = ${tenantId}
+      RETURNING "id"
+    `);
 
-  if ((result.rows ?? []).length === 0) return c.json({ error: 'Not found' }, 404);
-  return c.json({ deleted: true });
+    if ((result.rows ?? []).length === 0) return c.json({ error: 'Not found' }, 404);
+    return c.json({ deleted: true });
+  } catch (err) {
+    return handleRouteError(c, err, 'DELETE /approval-chains/:id');
+  }
 });
 
 // ── Helper: find applicable chain ────────────────────────────

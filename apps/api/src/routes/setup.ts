@@ -5,6 +5,7 @@ import { schema } from '@veska/core';
 import type { TenantContext } from '../middleware/tenant-context.js';
 import { sharedMagicLinkService } from '../shared.js';
 import { sendMagicLinkEmail } from '../lib/magic-link-mailer.js';
+import { handleRouteError } from '../lib/api-error.js';
 
 export const setupRouter = new Hono<{ Variables: TenantContext }>();
 
@@ -35,51 +36,55 @@ setupRouter.post(
   '/onboarding',
   zValidator('json', OnboardingSchema),
   async (c) => {
-    const body = c.req.valid('json');
-    const { db, tenantId, identityId } = c.get('tenantCtx');
+    try {
+      const body = c.req.valid('json');
+      const { db, tenantId, identityId } = c.get('tenantCtx');
 
-    // Store the tenant config as an entity record
-    await db
-      .insert(schema.entityRecords)
-      .values({
-        tenantId,
-        entityType: 'TenantConfig',
-        data: {
-          company: body.company ?? null,
-          modules: body.modules ?? [],
-          aiEnabled: body.aiEnabled ?? true,
-          onboardingCompletedAt: new Date().toISOString(),
-        },
-        createdBy: identityId,
-      });
+      // Store the tenant config as an entity record
+      await db
+        .insert(schema.entityRecords)
+        .values({
+          tenantId,
+          entityType: 'TenantConfig',
+          data: {
+            company: body.company ?? null,
+            modules: body.modules ?? [],
+            aiEnabled: body.aiEnabled ?? true,
+            onboardingCompletedAt: new Date().toISOString(),
+          },
+          createdBy: identityId,
+        });
 
-    // Fire-and-forget magic-link invite emails for each team member
-    if (body.teamMembers && body.teamMembers.length > 0) {
-      for (const member of body.teamMembers) {
-        if (!member.email) continue;
-        void (async () => {
-          try {
-            const url = await sharedMagicLinkService.create({
-              tenantId,
-              identityId,
-              resourceType: 'TeamInvite',
-              action: 'accept',
-              expiryMinutes: 60 * 24 * 7, // 7 days
-            });
-            const token = url.split('/ml/')[1] ?? url;
-            void sendMagicLinkEmail({
-              email: member.email,
-              token,
-              resourceType: 'TeamInvite',
-              recipientName: undefined,
-            });
-          } catch (err) {
-            console.warn(`[setup/onboarding] Failed to send invite to ${member.email}:`, err);
-          }
-        })();
+      // Fire-and-forget magic-link invite emails for each team member
+      if (body.teamMembers && body.teamMembers.length > 0) {
+        for (const member of body.teamMembers) {
+          if (!member.email) continue;
+          void (async () => {
+            try {
+              const url = await sharedMagicLinkService.create({
+                tenantId,
+                identityId,
+                resourceType: 'TeamInvite',
+                action: 'accept',
+                expiryMinutes: 60 * 24 * 7, // 7 days
+              });
+              const token = url.split('/ml/')[1] ?? url;
+              void sendMagicLinkEmail({
+                email: member.email,
+                token,
+                resourceType: 'TeamInvite',
+                recipientName: undefined,
+              });
+            } catch (err) {
+              console.warn(`[setup/onboarding] Failed to send invite to ${member.email}:`, err);
+            }
+          })();
+        }
       }
-    }
 
-    return c.json({ success: true });
+      return c.json({ success: true });
+    } catch (err) {
+      return handleRouteError(c, err, 'POST /setup/onboarding');
+    }
   },
 );

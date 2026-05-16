@@ -67,7 +67,7 @@ export default async function CRMDashboardPage() {
   const recentDeals = deals.slice(0, 5);
 
   return (
-    <div className="px-4 py-8 max-w-6xl">
+    <div className="px-4 sm:px-6 py-8 max-w-6xl">
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-gray-900">CRM</h1>
         <p className="text-sm text-gray-500 mt-0.5">Overview of your pipeline and customer relationships</p>
