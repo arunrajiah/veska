@@ -245,6 +245,57 @@ hrRouter.post(
   },
 );
 
+hrRouter.post(
+  '/leave/bulk',
+  zValidator(
+    'json',
+    z.object({
+      ids: z.array(z.string()).min(1),
+      action: z.enum(['approve', 'reject']),
+    }),
+  ),
+  async (c) => {
+    const { db, tenantId } = c.get('tenantCtx');
+    const { ids, action } = c.req.valid('json');
+
+    let processed = 0;
+    const failed: { id: string; error: string }[] = [];
+
+    for (const id of ids) {
+      try {
+        const leave = await db.query.entityRecords.findFirst({
+          where: and(
+            eq(schema.entityRecords.tenantId, tenantId),
+            eq(schema.entityRecords.entityType, 'LeaveRequest'),
+            eq(schema.entityRecords.id, id),
+            isNull(schema.entityRecords.deletedAt),
+          ),
+        });
+
+        if (!leave) {
+          failed.push({ id, error: 'Leave request not found' });
+          continue;
+        }
+
+        const status = action === 'approve' ? 'approved' : 'rejected';
+        await db
+          .update(schema.entityRecords)
+          .set({
+            data: { ...(leave.data as Record<string, unknown>), status },
+            updatedAt: new Date(),
+          })
+          .where(eq(schema.entityRecords.id, id));
+
+        processed++;
+      } catch (err) {
+        failed.push({ id, error: err instanceof Error ? err.message : 'Unknown error' });
+      }
+    }
+
+    return c.json({ processed, failed });
+  },
+);
+
 hrRouter.patch(
   '/leave/:id',
   zValidator(

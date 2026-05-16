@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
-import { eq, and, isNull, sql } from 'drizzle-orm';
+import { eq, and, isNull, sql, inArray } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import { schema } from '@veska/core';
 import { sharedQueueService } from '../shared.js';
@@ -118,6 +118,129 @@ financeRouter.get('/invoices/:id', async (c) => {
 
   if (!record) return c.json({ error: 'Invoice not found' }, 404);
   return c.json(record);
+});
+
+// ── Bulk Invoice Operations ───────────────────────────────────
+
+financeRouter.post(
+  '/invoices/bulk',
+  zValidator(
+    'json',
+    z.object({
+      ids: z.array(z.string()).min(1),
+      action: z.enum(['send', 'void', 'delete']),
+    }),
+  ),
+  async (c) => {
+    const { db, tenantId, identityId } = c.get('tenantCtx');
+    const { ids, action } = c.req.valid('json');
+
+    let processed = 0;
+    const failed: { id: string; error: string }[] = [];
+
+    for (const id of ids) {
+      try {
+        const invoice = await db.query.entityRecords.findFirst({
+          where: and(
+            eq(schema.entityRecords.tenantId, tenantId),
+            eq(schema.entityRecords.entityType, 'Invoice'),
+            eq(schema.entityRecords.id, id),
+            isNull(schema.entityRecords.deletedAt),
+          ),
+        });
+
+        if (!invoice) {
+          failed.push({ id, error: 'Invoice not found' });
+          continue;
+        }
+
+        const invoiceData = invoice.data as Record<string, unknown>;
+
+        if (action === 'send') {
+          const approvalCheck = await checkApprovalRequired(
+            db, tenantId, 'invoice', id, identityId,
+            typeof invoiceData['total'] === 'number' ? invoiceData['total'] : undefined,
+          );
+          const newStatus = approvalCheck.required ? 'pending_approval' : 'sent';
+          await db
+            .update(schema.entityRecords)
+            .set({
+              data: { ...invoiceData, status: newStatus, sent_at: new Date().toISOString() },
+              updatedAt: new Date(),
+            })
+            .where(eq(schema.entityRecords.id, id));
+        } else if (action === 'void') {
+          await db
+            .update(schema.entityRecords)
+            .set({
+              data: { ...invoiceData, status: 'void' },
+              updatedAt: new Date(),
+            })
+            .where(eq(schema.entityRecords.id, id));
+        } else if (action === 'delete') {
+          await db
+            .update(schema.entityRecords)
+            .set({ deletedAt: new Date(), updatedAt: new Date() })
+            .where(eq(schema.entityRecords.id, id));
+        }
+
+        processed++;
+      } catch (err) {
+        failed.push({ id, error: err instanceof Error ? err.message : 'Unknown error' });
+      }
+    }
+
+    return c.json({ processed, failed });
+  },
+);
+
+// ── Invoice Export ────────────────────────────────────────────
+
+financeRouter.get('/invoices/export', async (c) => {
+  const { db, tenantId } = c.get('tenantCtx');
+  const format = c.req.query('format') ?? 'csv';
+  const idsParam = c.req.query('ids');
+
+  if (format !== 'csv') {
+    return c.json({ error: 'Only csv format is supported' }, 400);
+  }
+
+  const conditions = [
+    eq(schema.entityRecords.tenantId, tenantId),
+    eq(schema.entityRecords.entityType, 'Invoice'),
+    isNull(schema.entityRecords.deletedAt),
+  ];
+
+  if (idsParam) {
+    const idList = idsParam.split(',').map((s) => s.trim()).filter(Boolean);
+    if (idList.length > 0) {
+      conditions.push(inArray(schema.entityRecords.id, idList));
+    }
+  }
+
+  const records = await db.query.entityRecords.findMany({
+    where: and(...conditions),
+  });
+
+  const header = 'Invoice #,Customer,Date,Due Date,Amount,Status\n';
+  const rows = records.map((r) => {
+    const d = r.data as Record<string, unknown>;
+    const number = String(d['number'] ?? d['invoiceNumber'] ?? r.id.slice(0, 8).toUpperCase());
+    const customer = String(d['customer_name'] ?? d['clientName'] ?? d['customer'] ?? '');
+    const date = String(d['issue_date'] ?? d['issuedAt'] ?? r.createdAt ?? '').slice(0, 10);
+    const dueDate = String(d['due_date'] ?? d['dueDate'] ?? '').slice(0, 10);
+    const amount = String(d['total'] ?? '0');
+    const status = String(d['status'] ?? 'draft');
+    return [number, customer, date, dueDate, amount, status]
+      .map((v) => `"${v.replace(/"/g, '""')}"`)
+      .join(',');
+  });
+
+  const csv = header + rows.join('\n');
+
+  c.header('Content-Type', 'text/csv');
+  c.header('Content-Disposition', 'attachment; filename="invoices.csv"');
+  return c.body(csv);
 });
 
 financeRouter.patch('/invoices/:id/send', async (c) => {

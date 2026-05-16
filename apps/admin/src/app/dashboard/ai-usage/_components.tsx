@@ -49,15 +49,16 @@ interface UsageData {
   daily: DailyUsage[];
 }
 
-// Static mock usage data — Growth plan limits
-const USAGE = {
-  conversations: { used: 847, limit: 500 },
-  insights: { used: 12, limit: 20 },
-  enrichments: { used: 143, limit: 200 },
-  writeActions: true,
-  anomalyDetection: false,
-  alertsGenerated: 0,
-};
+// Growth plan static limits
+const PLAN_LIMITS = {
+  conversations: 500,
+  insights: 20,
+  enrichments: 200,
+  aiReports: 50,
+  dataExports: 500,
+  savedReports: 50,
+  portalUsers: 100,
+} as const;
 
 const CURRENT_PLAN = 'Growth';
 
@@ -224,16 +225,75 @@ function RealUsagePanel({ data }: { data: UsageData }) {
   );
 }
 
+interface QuotaData {
+  conversationsUsed: number;
+  insightsUsed: number;
+  enrichmentsUsed: number;
+  aiReportsUsed: number;
+  dataExportsUsed: number;
+  savedReportsUsed: number;
+  portalUsersUsed: number;
+  writeActions: boolean;
+  anomalyDetection: boolean;
+  alertsGenerated: number;
+}
+
 export function AIUsageClient() {
   const [usageData, setUsageData] = useState<UsageData | null>(null);
+  const [quota, setQuota] = useState<QuotaData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_BASE}/api/v1/ai/usage/summary?days=30`, { headers: apiHeaders() })
-      .then(r => r.ok ? r.json() as Promise<UsageData> : Promise.reject(r.status))
-      .then(data => setUsageData(data))
-      .catch(() => setUsageData({ summary: [], daily: [] }))
-      .finally(() => setLoading(false));
+    const fetchAll = async () => {
+      try {
+        const [aiUsage, portalTokens, savedReports] = await Promise.allSettled([
+          fetch(`${API_BASE}/api/v1/ai/usage/summary?days=30`, { headers: apiHeaders() })
+            .then(r => r.ok ? r.json() as Promise<UsageData> : Promise.reject(r.status)),
+          fetch(`${API_BASE}/api/v1/portal-mgmt/tokens`, { headers: apiHeaders() })
+            .then(r => r.ok ? r.json() as Promise<unknown[]> : Promise.reject(r.status)),
+          fetch(`${API_BASE}/api/v1/reports/saved`, { headers: apiHeaders() })
+            .then(r => r.ok ? r.json() as Promise<unknown[]> : Promise.reject(r.status)),
+        ]);
+
+        const data: UsageData = aiUsage.status === 'fulfilled'
+          ? aiUsage.value
+          : { summary: [], daily: [] };
+        setUsageData(data);
+
+        // Derive quota counts from real data
+        const convFeature = data.summary.find(s => s.feature === 'action_agent');
+        const insightsFeature = data.summary.find(s => s.feature === 'insights');
+        const enrichFeature = data.summary.find(s => s.feature === 'enrich_entity');
+        const reportFeature = data.summary.find(s => s.feature === 'report_generate');
+
+        const portalCount = portalTokens.status === 'fulfilled'
+          ? (Array.isArray(portalTokens.value) ? portalTokens.value.length : 0)
+          : 0;
+        const savedCount = savedReports.status === 'fulfilled'
+          ? (Array.isArray(savedReports.value) ? savedReports.value.length : 0)
+          : 0;
+
+        setQuota({
+          conversationsUsed: Number(convFeature?.calls ?? 0),
+          insightsUsed: Number(insightsFeature?.calls ?? 0),
+          enrichmentsUsed: Number(enrichFeature?.calls ?? 0),
+          aiReportsUsed: Number(reportFeature?.calls ?? 0),
+          dataExportsUsed: 0, // no export tracking endpoint yet
+          savedReportsUsed: savedCount,
+          portalUsersUsed: portalCount,
+          writeActions: true,
+          anomalyDetection: false,
+          alertsGenerated: 0,
+        });
+      } catch {
+        setUsageData({ summary: [], daily: [] });
+        setQuota(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void fetchAll();
   }, []);
 
   return (
@@ -301,15 +361,15 @@ export function AIUsageClient() {
             <div className="space-y-1.5">
               <div className="flex justify-between text-sm">
                 <span className="font-semibold text-gray-900">
-                  {USAGE.conversations.used.toLocaleString()}
+                  {(quota?.conversationsUsed ?? 0).toLocaleString()}
                 </span>
                 <span className="text-gray-400">
-                  / {USAGE.conversations.limit.toLocaleString()}
+                  / {PLAN_LIMITS.conversations.toLocaleString()}
                 </span>
               </div>
               <ProgressBar
-                used={USAGE.conversations.used}
-                limit={USAGE.conversations.limit}
+                used={quota?.conversationsUsed ?? 0}
+                limit={PLAN_LIMITS.conversations}
                 color="bg-indigo-500"
               />
             </div>
@@ -324,12 +384,12 @@ export function AIUsageClient() {
             </div>
             <div className="space-y-1.5">
               <div className="flex justify-between text-sm">
-                <span className="font-semibold text-gray-900">{USAGE.insights.used}</span>
-                <span className="text-gray-400">/ {USAGE.insights.limit}</span>
+                <span className="font-semibold text-gray-900">{quota?.insightsUsed ?? 0}</span>
+                <span className="text-gray-400">/ {PLAN_LIMITS.insights}</span>
               </div>
               <ProgressBar
-                used={USAGE.insights.used}
-                limit={USAGE.insights.limit}
+                used={quota?.insightsUsed ?? 0}
+                limit={PLAN_LIMITS.insights}
                 color="bg-violet-500"
               />
             </div>
@@ -344,12 +404,12 @@ export function AIUsageClient() {
             </div>
             <div className="space-y-1.5">
               <div className="flex justify-between text-sm">
-                <span className="font-semibold text-gray-900">{USAGE.enrichments.used}</span>
-                <span className="text-gray-400">/ {USAGE.enrichments.limit}</span>
+                <span className="font-semibold text-gray-900">{quota?.enrichmentsUsed ?? 0}</span>
+                <span className="text-gray-400">/ {PLAN_LIMITS.enrichments}</span>
               </div>
               <ProgressBar
-                used={USAGE.enrichments.used}
-                limit={USAGE.enrichments.limit}
+                used={quota?.enrichmentsUsed ?? 0}
+                limit={PLAN_LIMITS.enrichments}
                 color="bg-emerald-500"
               />
             </div>
@@ -363,7 +423,7 @@ export function AIUsageClient() {
               <span className="text-sm font-medium text-gray-700">Write Actions</span>
             </div>
             <div className="flex items-center gap-2 mt-1">
-              {USAGE.writeActions ? (
+              {(quota?.writeActions ?? true) ? (
                 <>
                   <div className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100">
                     <Check size={13} className="text-emerald-600" />
@@ -393,7 +453,7 @@ export function AIUsageClient() {
             <Brain size={16} className="text-gray-400" />
             <span className="text-sm font-medium text-gray-700">Anomaly Detection</span>
           </div>
-          {!USAGE.anomalyDetection && (
+          {!(quota?.anomalyDetection ?? false) && (
             <Link
               href="/dashboard/billing"
               className="text-xs font-medium text-indigo-600 hover:text-indigo-800 transition-colors border border-indigo-200 rounded-lg px-3 py-1.5 hover:bg-indigo-50"
@@ -403,9 +463,9 @@ export function AIUsageClient() {
           )}
         </div>
 
-        {USAGE.anomalyDetection ? (
+        {(quota?.anomalyDetection ?? false) ? (
           <div className="mt-2">
-            <span className="text-2xl font-bold text-gray-900">{USAGE.alertsGenerated}</span>
+            <span className="text-2xl font-bold text-gray-900">{quota?.alertsGenerated ?? 0}</span>
             <span className="ml-2 text-sm text-gray-500">AI alerts generated this month</span>
           </div>
         ) : (
@@ -439,11 +499,17 @@ export function AIUsageClient() {
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">AI Reports</span>
               <span className="text-gray-400">
-                <span className="font-semibold text-gray-900">18</span> / 50
+                <span className="font-semibold text-gray-900">
+                  {(quota?.aiReportsUsed ?? 0).toLocaleString()}
+                </span>{' '}
+                / {PLAN_LIMITS.aiReports}
               </span>
             </div>
             <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-              <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${(18 / 50) * 100}%` }} />
+              <div
+                className="h-full bg-indigo-500 rounded-full"
+                style={{ width: `${Math.min(((quota?.aiReportsUsed ?? 0) / PLAN_LIMITS.aiReports) * 100, 100)}%` }}
+              />
             </div>
             <p className="text-xs text-gray-400">this month</p>
           </div>
@@ -451,11 +517,17 @@ export function AIUsageClient() {
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Data Exports</span>
               <span className="text-gray-400">
-                <span className="font-semibold text-gray-900">127</span> / 500
+                <span className="font-semibold text-gray-900">
+                  {(quota?.dataExportsUsed ?? 0).toLocaleString()}
+                </span>{' '}
+                / {PLAN_LIMITS.dataExports}
               </span>
             </div>
             <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-              <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${(127 / 500) * 100}%` }} />
+              <div
+                className="h-full bg-indigo-500 rounded-full"
+                style={{ width: `${Math.min(((quota?.dataExportsUsed ?? 0) / PLAN_LIMITS.dataExports) * 100, 100)}%` }}
+              />
             </div>
             <p className="text-xs text-gray-400">this month</p>
           </div>
@@ -463,11 +535,17 @@ export function AIUsageClient() {
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Saved Reports</span>
               <span className="text-gray-400">
-                <span className="font-semibold text-gray-900">12</span> / 50
+                <span className="font-semibold text-gray-900">
+                  {quota?.savedReportsUsed ?? 0}
+                </span>{' '}
+                / {PLAN_LIMITS.savedReports}
               </span>
             </div>
             <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-              <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${(12 / 50) * 100}%` }} />
+              <div
+                className="h-full bg-indigo-500 rounded-full"
+                style={{ width: `${Math.min(((quota?.savedReportsUsed ?? 0) / PLAN_LIMITS.savedReports) * 100, 100)}%` }}
+              />
             </div>
             <p className="text-xs text-gray-400">slots used</p>
           </div>
@@ -503,11 +581,17 @@ export function AIUsageClient() {
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Portal Users</span>
               <span className="text-gray-400">
-                <span className="font-semibold text-gray-900">23</span> / 100
+                <span className="font-semibold text-gray-900">
+                  {quota?.portalUsersUsed ?? 0}
+                </span>{' '}
+                / {PLAN_LIMITS.portalUsers}
               </span>
             </div>
             <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-              <div className="h-full bg-blue-500 rounded-full" style={{ width: `${(23 / 100) * 100}%` }} />
+              <div
+                className="h-full bg-blue-500 rounded-full"
+                style={{ width: `${Math.min(((quota?.portalUsersUsed ?? 0) / PLAN_LIMITS.portalUsers) * 100, 100)}%` }}
+              />
             </div>
             <p className="text-xs text-gray-400">active token slots</p>
           </div>

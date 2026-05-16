@@ -3,8 +3,9 @@
 import { useState, useEffect, useTransition, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Plus, Trash2, Send, X } from 'lucide-react';
+import { Plus, Trash2, Send, X, Download } from 'lucide-react';
 import { useRealtimeEvents } from '@/hooks/useRealtimeEvents.js';
+import { BulkActionBar } from '@/components/bulk-action-bar.js';
 import type { Invoice } from './page.js';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
@@ -396,6 +397,8 @@ export function InvoicesClient({
   const [sendingId, setSendingId] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [, startTransition] = useTransition();
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkLoading, setBulkLoading] = useState(false);
 
   useEffect(() => {
     if (toast) {
@@ -422,6 +425,60 @@ export function InvoicesClient({
     activeTab === 'all'
       ? invoices
       : invoices.filter((inv) => getStatus(inv) === activeTab);
+
+  const allVisibleSelected = filtered.length > 0 && filtered.every((inv) => selected.has(inv.id));
+
+  const toggleAll = () => {
+    if (allVisibleSelected) {
+      setSelected((prev) => {
+        const next = new Set(prev);
+        filtered.forEach((inv) => next.delete(inv.id));
+        return next;
+      });
+    } else {
+      setSelected((prev) => {
+        const next = new Set(prev);
+        filtered.forEach((inv) => next.add(inv.id));
+        return next;
+      });
+    }
+  };
+
+  const toggleOne = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleBulkAction = async (action: 'send' | 'void' | 'delete') => {
+    if (selected.size === 0) return;
+    setBulkLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/finance/invoices/bulk`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ ids: Array.from(selected), action }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const result = await res.json() as { processed: number; failed: { id: string; error: string }[] };
+      const failCount = result.failed.length;
+      setToast({
+        message: failCount > 0
+          ? `${result.processed} processed, ${failCount} failed`
+          : `${result.processed} invoice${result.processed !== 1 ? 's' : ''} ${action === 'delete' ? 'deleted' : action === 'void' ? 'voided' : 'sent'}`,
+        type: failCount > 0 ? 'error' : 'success',
+      });
+      setSelected(new Set());
+      startTransition(() => router.refresh());
+    } catch (err) {
+      setToast({ message: err instanceof Error ? err.message : 'Bulk action failed', type: 'error' });
+    } finally {
+      setBulkLoading(false);
+    }
+  };
 
   // Stats
   const totalInvoiced = invoices.reduce((s, inv) => s + getTotal(inv), 0);
@@ -493,13 +550,22 @@ export function InvoicesClient({
             <span className="text-xs text-gray-400 animate-pulse">Updating…</span>
           )}
         </div>
-        <button
-          onClick={() => setShowNew(true)}
-          className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
-        >
-          <Plus size={15} />
-          New Invoice
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => window.open(`${API_BASE}/api/v1/finance/invoices/export?format=csv`, '_blank')}
+            className="flex items-center gap-1.5 border border-gray-200 text-gray-700 text-sm px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <Download size={15} />
+            Export CSV
+          </button>
+          <button
+            onClick={() => setShowNew(true)}
+            className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+          >
+            <Plus size={15} />
+            New Invoice
+          </button>
+        </div>
       </div>
 
       {/* Stats */}
@@ -546,11 +612,20 @@ export function InvoicesClient({
           </button>
         </div>
       ) : (
+        <>
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
+                <th className="px-4 py-3 w-8">
+                  <input
+                    type="checkbox"
+                    checked={allVisibleSelected}
+                    onChange={toggleAll}
+                    className="rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+                  />
+                </th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Invoice #</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Client</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
@@ -564,12 +639,24 @@ export function InvoicesClient({
               {filtered.map((inv) => {
                 const status = getStatus(inv);
                 const currency = inv.data.currency ?? 'USD';
+                const isChecked = selected.has(inv.id);
                 return (
                   <tr
                     key={inv.id}
                     onClick={() => router.push(`/dashboard/finance/invoices/${inv.id}`)}
-                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 cursor-pointer"
+                    className={`border-b border-gray-50 last:border-0 hover:bg-gray-50/50 cursor-pointer ${isChecked ? 'bg-blue-50/30' : ''}`}
                   >
+                    <td
+                      className="px-4 py-3 w-8"
+                      onClick={(e) => { e.stopPropagation(); toggleOne(inv.id); }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => toggleOne(inv.id)}
+                        className="rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+                      />
+                    </td>
                     <td className="px-4 py-3 font-mono text-xs text-gray-600">
                       {getInvoiceNumber(inv)}
                     </td>
@@ -616,6 +703,17 @@ export function InvoicesClient({
           </table>
           </div>
         </div>
+
+        <BulkActionBar
+          selectedCount={selected.size}
+          onClear={() => setSelected(new Set())}
+          actions={[
+            { label: bulkLoading ? 'Processing…' : 'Send All', onClick: () => void handleBulkAction('send') },
+            { label: 'Void All', onClick: () => void handleBulkAction('void'), variant: 'danger' },
+            { label: 'Delete All', onClick: () => void handleBulkAction('delete'), variant: 'danger' },
+          ]}
+        />
+        </>
       )}
     </div>
   );

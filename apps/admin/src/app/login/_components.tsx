@@ -21,6 +21,7 @@ export function LoginClient() {
   const [step, setStep] = useState<Step>('credentials');
   const [tempToken, setTempToken] = useState('');
   const [mfaCode, setMfaCode] = useState('');
+  const [useBackupCode, setUseBackupCode] = useState(false);
 
   // UI state
   const [loading, setLoading] = useState(false);
@@ -45,17 +46,19 @@ export function LoginClient() {
       const data = (await res.json()) as {
         token?: string;
         mfaRequired?: boolean;
+        requires2fa?: boolean;
         tempToken?: string;
         message?: string;
+        error?: string;
         user?: { id: string; tenantId: string; permissions?: string[]; role?: string };
       };
 
       if (!res.ok) {
-        setError(data.message ?? 'Invalid email or password.');
+        setError(data.error ?? data.message ?? 'Invalid email or password.');
         return;
       }
 
-      if (data.mfaRequired && data.tempToken) {
+      if ((data.mfaRequired ?? data.requires2fa) && data.tempToken) {
         setTempToken(data.tempToken);
         setStep('mfa');
         return;
@@ -81,19 +84,21 @@ export function LoginClient() {
     setError('');
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/auth/mfa/login`, {
+      // Try the 2fa/challenge endpoint; fall back to mfa/login for compatibility
+      const res = await fetch(`${API_BASE}/auth/2fa/challenge`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tempToken, code: mfaCode }),
+        body: JSON.stringify({ sessionToken: tempToken, token: mfaCode }),
       });
       const data = (await res.json()) as {
         token?: string;
+        error?: string;
         message?: string;
         user?: { id: string; tenantId: string; permissions?: string[]; role?: string };
       };
 
       if (!res.ok) {
-        setError(data.message ?? 'Invalid verification code.');
+        setError(data.error ?? data.message ?? 'Invalid verification code.');
         return;
       }
 
@@ -213,29 +218,53 @@ export function LoginClient() {
               <Smartphone size={22} className="text-indigo-600" />
             </div>
             <p className="text-sm text-gray-600 text-center">
-              Enter the 6-digit code from your authenticator app.
+              {useBackupCode
+                ? 'Enter one of your backup codes.'
+                : 'Enter the 6-digit code from your authenticator app.'}
             </p>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Verification code
+                {useBackupCode ? 'Backup code' : 'Verification code'}
               </label>
-              <input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]{6}"
-                maxLength={6}
-                required
-                autoFocus
-                value={mfaCode}
-                onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ''))}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-900 text-center tracking-[0.4em] font-mono placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-                placeholder="000000"
-              />
+              {useBackupCode ? (
+                <input
+                  type="text"
+                  required
+                  autoFocus
+                  value={mfaCode}
+                  onChange={(e) => setMfaCode(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-900 text-center font-mono placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                  placeholder="ABCDEFGH"
+                />
+              ) : (
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]{6}"
+                  maxLength={6}
+                  required
+                  autoFocus
+                  value={mfaCode}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    setMfaCode(val);
+                    // Auto-submit on 6 digits
+                    if (val.length === 6) {
+                      setTimeout(() => {
+                        const form = e.target.form;
+                        if (form) form.requestSubmit();
+                      }, 50);
+                    }
+                  }}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-900 text-center tracking-[0.4em] font-mono placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                  placeholder="000000"
+                />
+              )}
             </div>
 
             <button
               type="submit"
-              disabled={loading || mfaCode.length !== 6}
+              disabled={loading || (!useBackupCode && mfaCode.length !== 6) || (useBackupCode && mfaCode.length === 0)}
               className="w-full bg-indigo-600 text-white text-sm font-medium py-2.5 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
             >
               {loading ? (
@@ -250,7 +279,15 @@ export function LoginClient() {
 
             <button
               type="button"
-              onClick={() => { setStep('credentials'); setError(''); setMfaCode(''); }}
+              onClick={() => { setUseBackupCode((v) => !v); setMfaCode(''); setError(''); }}
+              className="w-full text-xs text-indigo-600 hover:text-indigo-700 py-1"
+            >
+              {useBackupCode ? 'Use authenticator app instead' : 'Use backup code'}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => { setStep('credentials'); setError(''); setMfaCode(''); setUseBackupCode(false); }}
               className="w-full text-sm text-gray-500 hover:text-gray-700 py-1"
             >
               Back to sign in

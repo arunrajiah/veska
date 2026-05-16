@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { Package, Tag, Percent, ArrowRight } from 'lucide-react';
+import { apiFetch } from '@/lib/api.js';
 
-// Current plan mock = 'growth'
-// Limits sourced from packages/billing/src/plans.ts (growth plan)
+// Growth plan limits (static — sourced from packages/billing/src/plans.ts)
 const PLAN_LIMITS = {
   priceLists: 10,
   productVariants: 500,
@@ -10,28 +10,28 @@ const PLAN_LIMITS = {
 } as const;
 
 const ADMIN_URL = process.env.NEXT_PUBLIC_VESKA_ADMIN_URL ?? '';
+const TENANT_ID = 'demo-tenant';
 
-// Mock usage data
-const USAGE = {
-  productVariants: { used: 127, products: 42 },
-  priceLists: {
-    used: 4,
-    lists: [
-      { name: 'Retail', discount: null as string | null },
-      { name: 'Wholesale', discount: '-15%' },
-      { name: 'VIP', discount: '-25%' },
-      { name: 'Seasonal', discount: null as string | null },
-    ],
-  },
-  discountCodes: {
-    used: 8,
-    top: [
-      { code: 'SUMMER20', type: '% off', value: '20%' },
-      { code: 'WELCOME10', type: '% off', value: '10%' },
-      { code: 'FLAT50', type: 'fixed', value: '$50' },
-    ],
-  },
-};
+interface ProductVariant {
+  id: string;
+  data?: { productId?: string };
+  productId?: string;
+}
+
+interface PriceList {
+  id: string;
+  data?: { name?: string; discountPct?: number | null };
+  name?: string;
+  discountPct?: number | null;
+}
+
+interface DiscountCode {
+  id: string;
+  data?: { code?: string; type?: string; value?: number | string };
+  code?: string;
+  type?: string;
+  value?: number | string;
+}
 
 function LimitDisplay({
   used,
@@ -70,7 +70,46 @@ function LimitDisplay({
   );
 }
 
-export default function CatalogPage() {
+export default async function CatalogPage() {
+  let variants: ProductVariant[] = [];
+  let priceLists: PriceList[] = [];
+  let discounts: DiscountCode[] = [];
+
+  try {
+    const res = await apiFetch<{ data: ProductVariant[] } | ProductVariant[]>(
+      '/api/v1/catalog/products?limit=500',
+      TENANT_ID,
+    );
+    variants = Array.isArray(res) ? res : (res as { data: ProductVariant[] }).data ?? [];
+  } catch {
+    variants = [];
+  }
+
+  try {
+    const res = await apiFetch<{ data: PriceList[] } | PriceList[]>(
+      '/api/v1/catalog/price-lists?limit=50',
+      TENANT_ID,
+    );
+    priceLists = Array.isArray(res) ? res : (res as { data: PriceList[] }).data ?? [];
+  } catch {
+    priceLists = [];
+  }
+
+  try {
+    const res = await apiFetch<{ data: DiscountCode[] } | DiscountCode[]>(
+      '/api/v1/catalog/discounts?limit=50',
+      TENANT_ID,
+    );
+    discounts = Array.isArray(res) ? res : (res as { data: DiscountCode[] }).data ?? [];
+  } catch {
+    discounts = [];
+  }
+
+  // Compute unique product count from the variants list
+  const uniqueProductIds = new Set(
+    variants.map((v) => v.data?.productId ?? v.productId ?? v.id),
+  );
+
   return (
     <div className="px-8 py-8 max-w-5xl">
       {/* Page Header */}
@@ -100,13 +139,16 @@ export default function CatalogPage() {
             </div>
           </div>
 
-          <p className="text-sm text-gray-600 mb-3">
-            {USAGE.productVariants.used} variants across{' '}
-            {USAGE.productVariants.products} products
-          </p>
+          {variants.length === 0 ? (
+            <p className="text-sm text-gray-400 mb-3">No variants yet.</p>
+          ) : (
+            <p className="text-sm text-gray-600 mb-3">
+              {variants.length} variants across {uniqueProductIds.size} products
+            </p>
+          )}
 
           <LimitDisplay
-            used={USAGE.productVariants.used}
+            used={variants.length}
             limit={PLAN_LIMITS.productVariants}
           />
 
@@ -139,26 +181,34 @@ export default function CatalogPage() {
           </div>
 
           <p className="text-sm text-gray-600 mb-3">
-            {USAGE.priceLists.used} active price lists
+            {priceLists.length} active price lists
           </p>
 
-          <div className="space-y-1.5 mb-3">
-            {USAGE.priceLists.lists.map((list) => (
-              <div key={list.name} className="flex items-center justify-between">
-                <span className="text-sm text-gray-700">{list.name}</span>
-                {list.discount ? (
-                  <span className="text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
-                    {list.discount}
-                  </span>
-                ) : (
-                  <span className="text-xs text-gray-400">Base</span>
-                )}
-              </div>
-            ))}
-          </div>
+          {priceLists.length > 0 ? (
+            <div className="space-y-1.5 mb-3">
+              {priceLists.slice(0, 5).map((list) => {
+                const name = list.data?.name ?? list.name ?? list.id;
+                const discount = list.data?.discountPct ?? list.discountPct ?? null;
+                return (
+                  <div key={list.id} className="flex items-center justify-between">
+                    <span className="text-sm text-gray-700">{name}</span>
+                    {discount ? (
+                      <span className="text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                        -{discount}%
+                      </span>
+                    ) : (
+                      <span className="text-xs text-gray-400">Base</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-400 mb-3">No price lists yet.</p>
+          )}
 
           <LimitDisplay
-            used={USAGE.priceLists.used}
+            used={priceLists.length}
             limit={PLAN_LIMITS.priceLists}
           />
 
@@ -194,10 +244,10 @@ export default function CatalogPage() {
         <div className="grid grid-cols-2 gap-5">
           <div>
             <p className="text-sm text-gray-600 mb-3">
-              {USAGE.discountCodes.used} active discount codes
+              {discounts.length} active discount codes
             </p>
             <LimitDisplay
-              used={USAGE.discountCodes.used}
+              used={discounts.length}
               limit={PLAN_LIMITS.discountCodes}
             />
           </div>
@@ -206,21 +256,30 @@ export default function CatalogPage() {
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
               Top codes
             </p>
-            <div className="space-y-2">
-              {USAGE.discountCodes.top.map((dc) => (
-                <div key={dc.code} className="flex items-center justify-between">
-                  <code className="text-sm font-mono font-medium text-gray-900 bg-gray-50 px-2 py-0.5 rounded border border-gray-200">
-                    {dc.code}
-                  </code>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs text-gray-500">{dc.type}</span>
-                    <span className="text-xs font-semibold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full">
-                      {dc.value}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {discounts.length === 0 ? (
+              <p className="text-sm text-gray-400">No discount codes yet.</p>
+            ) : (
+              <div className="space-y-2">
+                {discounts.slice(0, 3).map((dc) => {
+                  const code = dc.data?.code ?? dc.code ?? dc.id;
+                  const type = dc.data?.type ?? dc.type ?? '% off';
+                  const value = dc.data?.value ?? dc.value ?? '';
+                  return (
+                    <div key={dc.id} className="flex items-center justify-between">
+                      <code className="text-sm font-mono font-medium text-gray-900 bg-gray-50 px-2 py-0.5 rounded border border-gray-200">
+                        {code}
+                      </code>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs text-gray-500">{type}</span>
+                        <span className="text-xs font-semibold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full">
+                          {String(value)}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
 

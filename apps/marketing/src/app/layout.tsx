@@ -2,12 +2,13 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Veska — The operating system for small businesses',
+  title: 'Veska — AI-native ERP',
   description:
-    'Describe your company in plain language. Veska sets up CRM, support, finance, and more in minutes. Your team works through Slack, WhatsApp, and Email — no logins required.',
+    'Veska connects your finance, HR, CRM, projects and inventory — with an AI assistant that understands your business.',
   openGraph: {
-    title: 'Veska',
-    description: 'AI-native operations for small businesses',
+    title: 'Veska — AI-native ERP',
+    description:
+      'The AI-native ERP that works the way you think. Finance, HR, CRM, inventory and more in one platform.',
     type: 'website',
   },
 };

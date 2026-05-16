@@ -57,11 +57,14 @@ type MfaStep = 'idle' | 'setup' | 'verify' | 'done';
 function TwoFactorSection({ showToast }: { showToast: (m: string, t?: 'success' | 'error') => void }) {
   const [mfaEnabled, setMfaEnabled] = useState(false);
   const [step, setStep] = useState<MfaStep>('idle');
-  const [otpauthUrl, setOtpauthUrl] = useState('');
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState('');
+  const [secret, setSecret] = useState('');
   const [verifyCode, setVerifyCode] = useState('');
   const [backupCodes, setBackupCodes] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [showDisableModal, setShowDisableModal] = useState(false);
+  const [disableCode, setDisableCode] = useState('');
+  const [useBackupCode, setUseBackupCode] = useState(false);
 
   // Mock initial status fetch
   useEffect(() => {
@@ -74,13 +77,14 @@ function TwoFactorSection({ showToast }: { showToast: (m: string, t?: 'success' 
   async function handleSetup() {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/auth/mfa/setup`, {
+      const res = await fetch(`${API_BASE}/auth/2fa/setup`, {
         method: 'POST',
         headers: authHeaders(),
       });
-      const d = (await res.json()) as { otpauthUrl?: string; message?: string };
+      const d = (await res.json()) as { otpAuthUrl?: string; qrCodeDataUrl?: string; secret?: string; message?: string };
       if (!res.ok) { showToast(d.message ?? 'Setup failed', 'error'); return; }
-      setOtpauthUrl(d.otpauthUrl ?? 'otpauth://totp/veska?secret=MOCK');
+      setQrCodeDataUrl(d.qrCodeDataUrl ?? '');
+      setSecret(d.secret ?? '');
       setStep('setup');
     } catch {
       showToast('Network error', 'error');
@@ -93,14 +97,14 @@ function TwoFactorSection({ showToast }: { showToast: (m: string, t?: 'success' 
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/auth/mfa/verify`, {
+      const res = await fetch(`${API_BASE}/auth/2fa/verify`, {
         method: 'POST',
         headers: authHeaders(),
-        body: JSON.stringify({ code: verifyCode }),
+        body: JSON.stringify({ token: verifyCode }),
       });
-      const d = (await res.json()) as { backupCodes?: string[]; message?: string };
-      if (!res.ok) { showToast(d.message ?? 'Invalid code', 'error'); return; }
-      setBackupCodes(d.backupCodes ?? ['ABCD-1234', 'EFGH-5678', 'IJKL-9012', 'MNOP-3456', 'QRST-7890', 'UVWX-2345']);
+      const d = (await res.json()) as { ok?: boolean; backupCodes?: string[]; message?: string; error?: string };
+      if (!res.ok) { showToast(d.error ?? d.message ?? 'Invalid code', 'error'); return; }
+      setBackupCodes(d.backupCodes ?? []);
       setMfaEnabled(true);
       setStep('done');
       showToast('2FA enabled successfully');
@@ -111,17 +115,21 @@ function TwoFactorSection({ showToast }: { showToast: (m: string, t?: 'success' 
     }
   }
 
-  async function handleDisable() {
+  async function handleDisable(e: React.FormEvent) {
+    e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/auth/mfa/disable`, {
+      const res = await fetch(`${API_BASE}/auth/2fa/disable`, {
         method: 'POST',
         headers: authHeaders(),
+        body: JSON.stringify({ token: disableCode }),
       });
-      if (!res.ok) { showToast('Failed to disable 2FA', 'error'); return; }
+      const d = (await res.json()) as { ok?: boolean; error?: string; message?: string };
+      if (!res.ok) { showToast(d.error ?? d.message ?? 'Failed to disable 2FA', 'error'); return; }
       setMfaEnabled(false);
       setStep('idle');
       setShowDisableModal(false);
+      setDisableCode('');
       showToast('2FA disabled');
     } catch {
       showToast('Network error', 'error');
@@ -178,14 +186,25 @@ function TwoFactorSection({ showToast }: { showToast: (m: string, t?: 'success' 
             Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.):
           </p>
           <div className="flex flex-col items-center gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
-            <img
-              src={`https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(otpauthUrl)}&size=200x200`}
-              alt="QR Code"
-              className="w-48 h-48 rounded-lg"
-            />
-            <p className="text-xs text-gray-500 break-all max-w-xs text-center font-mono bg-white border border-gray-200 rounded px-2 py-1">
-              {otpauthUrl}
-            </p>
+            {qrCodeDataUrl ? (
+              <img
+                src={qrCodeDataUrl}
+                alt="QR Code"
+                className="w-48 h-48 rounded-lg"
+              />
+            ) : (
+              <div className="w-48 h-48 flex items-center justify-center bg-gray-100 rounded-lg text-xs text-gray-400">
+                Loading QR code…
+              </div>
+            )}
+            {secret && (
+              <div className="w-full max-w-xs">
+                <p className="text-xs text-gray-500 mb-1 text-center">Or enter this key manually:</p>
+                <p className="text-xs text-gray-700 break-all text-center font-mono bg-white border border-gray-200 rounded px-2 py-1 select-all">
+                  {secret}
+                </p>
+              </div>
+            )}
           </div>
           <button
             onClick={() => setStep('verify')}
@@ -283,25 +302,51 @@ function TwoFactorSection({ showToast }: { showToast: (m: string, t?: 'success' 
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full mx-4">
             <h3 className="text-base font-semibold text-gray-900 mb-2">Disable two-factor authentication?</h3>
-            <p className="text-sm text-gray-500 mb-5">
-              Your account will be less secure without 2FA. This action can be undone by re-enabling 2FA.
+            <p className="text-sm text-gray-500 mb-4">
+              Enter your current authentication code to confirm.
             </p>
-            <div className="flex gap-3">
+            <form onSubmit={(e) => void handleDisable(e)} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  {useBackupCode ? 'Backup code' : 'Verification code'}
+                </label>
+                <input
+                  type="text"
+                  inputMode={useBackupCode ? 'text' : 'numeric'}
+                  maxLength={useBackupCode ? 8 : 6}
+                  required
+                  autoFocus
+                  value={disableCode}
+                  onChange={(e) => setDisableCode(useBackupCode ? e.target.value : e.target.value.replace(/\D/g, ''))}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm font-mono tracking-widest text-center focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  placeholder={useBackupCode ? 'ABCDEFGH' : '000000'}
+                />
+              </div>
               <button
-                onClick={() => void handleDisable()}
-                disabled={loading}
-                className="flex-1 text-sm bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                type="button"
+                onClick={() => { setUseBackupCode((v) => !v); setDisableCode(''); }}
+                className="text-xs text-indigo-600 hover:text-indigo-700"
               >
-                {loading && <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
-                Yes, disable
+                {useBackupCode ? 'Use authenticator code instead' : 'Use backup code instead'}
               </button>
-              <button
-                onClick={() => setShowDisableModal(false)}
-                className="flex-1 text-sm border border-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
+              <div className="flex gap-3">
+                <button
+                  type="submit"
+                  disabled={loading || disableCode.length < (useBackupCode ? 1 : 6)}
+                  className="flex-1 text-sm bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                >
+                  {loading && <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
+                  Yes, disable
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setShowDisableModal(false); setDisableCode(''); setUseBackupCode(false); }}
+                  className="flex-1 text-sm border border-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, X, Check, XCircle } from 'lucide-react';
+import { BulkActionBar } from '@/components/bulk-action-bar.js';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = 'demo-tenant';
@@ -190,6 +191,9 @@ export function LeaveClient({ records: initial }: { records: LeaveRecord[] }) {
   const [, startTransition] = useTransition();
   const [filter, setFilter] = useState<FilterTab>('all');
   const [showAdd, setShowAdd] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkLoading, setBulkLoading] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   const pending = initial.filter((r) => (r.data.status ?? 'pending') === 'pending');
   const approved = initial.filter((r) => r.data.status === 'approved');
@@ -208,6 +212,65 @@ export function LeaveClient({ records: initial }: { records: LeaveRecord[] }) {
     return (r.data.status ?? 'pending') === filter;
   });
 
+  const allVisibleSelected = filtered.length > 0 && filtered.every((r) => selected.has(r.id));
+
+  const toggleAll = () => {
+    if (allVisibleSelected) {
+      setSelected((prev) => {
+        const next = new Set(prev);
+        filtered.forEach((r) => next.delete(r.id));
+        return next;
+      });
+    } else {
+      setSelected((prev) => {
+        const next = new Set(prev);
+        filtered.forEach((r) => next.add(r.id));
+        return next;
+      });
+    }
+  };
+
+  const toggleOne = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleBulkAction = async (action: 'approve' | 'reject') => {
+    if (selected.size === 0) return;
+    setBulkLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/hr/leave/bulk`, {
+        method: 'POST',
+        headers: fmtHeaders(),
+        body: JSON.stringify({ ids: Array.from(selected), action }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const result = await res.json() as { processed: number; failed: { id: string; error: string }[] };
+      const failCount = result.failed.length;
+      setToast({
+        message: failCount > 0
+          ? `${result.processed} processed, ${failCount} failed`
+          : `${result.processed} request${result.processed !== 1 ? 's' : ''} ${action}d`,
+        type: failCount > 0 ? 'error' : 'success',
+      });
+      setSelected(new Set());
+      startTransition(() => router.refresh());
+    } catch (err) {
+      setToast({ message: err instanceof Error ? err.message : 'Bulk action failed', type: 'error' });
+    } finally {
+      setBulkLoading(false);
+    }
+  };
+
+  // Auto-clear toast
+  if (toast) {
+    setTimeout(() => setToast(null), 3500);
+  }
+
   const TABS: { key: FilterTab; label: string }[] = [
     { key: 'all', label: 'All' },
     { key: 'pending', label: 'Pending' },
@@ -217,6 +280,16 @@ export function LeaveClient({ records: initial }: { records: LeaveRecord[] }) {
 
   return (
     <div className="px-8 py-8 max-w-6xl">
+      {toast && (
+        <div
+          className={`fixed bottom-6 right-6 z-[100] px-4 py-3 rounded-xl shadow-lg text-sm font-medium ${
+            toast.type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
+          }`}
+        >
+          {toast.message}
+        </div>
+      )}
+
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         {[
@@ -262,6 +335,14 @@ export function LeaveClient({ records: initial }: { records: LeaveRecord[] }) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
+                <th className="px-4 py-3 w-8">
+                  <input
+                    type="checkbox"
+                    checked={allVisibleSelected}
+                    onChange={toggleAll}
+                    className="rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+                  />
+                </th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Employee</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Type</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Start Date</th>
@@ -280,8 +361,20 @@ export function LeaveClient({ records: initial }: { records: LeaveRecord[] }) {
                 const endDate = getField(d, 'endDate', 'end_date');
                 const days = record.data.days ?? '—';
                 const status = getField(d, 'status') || 'pending';
+                const isChecked = selected.has(record.id);
                 return (
-                  <tr key={record.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                  <tr key={record.id} className={`border-b border-gray-50 last:border-0 hover:bg-gray-50/50 ${isChecked ? 'bg-blue-50/30' : ''}`}>
+                    <td
+                      className="px-4 py-3 w-8"
+                      onClick={(e) => { e.stopPropagation(); toggleOne(record.id); }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => toggleOne(record.id)}
+                        className="rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+                      />
+                    </td>
                     <td className="px-4 py-3 font-medium text-gray-900">{empName}</td>
                     <td className="px-4 py-3"><LeaveTypeBadge type={type} /></td>
                     <td className="px-4 py-3 text-gray-400 text-xs">{startDate ? startDate.slice(0, 10) : '—'}</td>
@@ -305,6 +398,15 @@ export function LeaveClient({ records: initial }: { records: LeaveRecord[] }) {
           onSaved={() => startTransition(() => router.refresh())}
         />
       )}
+
+      <BulkActionBar
+        selectedCount={selected.size}
+        onClear={() => setSelected(new Set())}
+        actions={[
+          { label: bulkLoading ? 'Processing…' : 'Approve All', onClick: () => void handleBulkAction('approve') },
+          { label: 'Reject All', onClick: () => void handleBulkAction('reject'), variant: 'danger' },
+        ]}
+      />
     </div>
   );
 }

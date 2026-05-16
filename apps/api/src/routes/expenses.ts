@@ -158,6 +158,69 @@ expensesRouter.post(
   },
 );
 
+// ── Bulk Operations ──────────────────────────────────────────
+
+expensesRouter.post(
+  '/bulk',
+  zValidator(
+    'json',
+    z.object({
+      ids: z.array(z.string()).min(1),
+      action: z.enum(['approve', 'reject', 'delete']),
+    }),
+  ),
+  async (c) => {
+    const { db, tenantId } = c.get('tenantCtx');
+    const { ids, action } = c.req.valid('json');
+
+    let processed = 0;
+    const failed: { id: string; error: string }[] = [];
+
+    for (const id of ids) {
+      try {
+        const expense = await db.query.entityRecords.findFirst({
+          where: and(
+            eq(schema.entityRecords.tenantId, tenantId),
+            eq(schema.entityRecords.entityType, 'Expense'),
+            eq(schema.entityRecords.id, id),
+            isNull(schema.entityRecords.deletedAt),
+          ),
+        });
+
+        if (!expense) {
+          failed.push({ id, error: 'Expense not found' });
+          continue;
+        }
+
+        const existing = expense.data as Record<string, unknown>;
+
+        if (action === 'approve') {
+          await db
+            .update(schema.entityRecords)
+            .set({ data: { ...existing, status: 'approved' }, updatedAt: new Date() })
+            .where(eq(schema.entityRecords.id, id));
+        } else if (action === 'reject') {
+          await db
+            .update(schema.entityRecords)
+            .set({ data: { ...existing, status: 'rejected' }, updatedAt: new Date() })
+            .where(eq(schema.entityRecords.id, id));
+        } else if (action === 'delete') {
+          await db
+            .update(schema.entityRecords)
+            .set({ deletedAt: new Date(), updatedAt: new Date() })
+            .where(eq(schema.entityRecords.id, id));
+        }
+
+        processed++;
+      } catch (err) {
+        failed.push({ id, error: err instanceof Error ? err.message : 'Unknown error' });
+      }
+    }
+
+    return c.json({ processed, failed });
+  },
+);
+
 // ── Submit ───────────────────────────────────────────────────
 
 expensesRouter.patch(

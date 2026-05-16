@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { sql } from 'drizzle-orm';
 import { randomBytes, createHash, createHmac, timingSafeEqual } from 'node:crypto';
+import QRCode from 'qrcode';
 import { sharedDb } from '../shared.js';
 import { sendPasswordResetEmail } from '../lib/password-reset-mailer.js';
 
@@ -213,7 +214,7 @@ authRouter.post('/login', async (c) => {
         )
       `);
 
-      return c.json({ mfaRequired: true, tempToken });
+      return c.json({ mfaRequired: true, requires2fa: true, tempToken });
     }
 
     // Create full session
@@ -507,8 +508,9 @@ authRouter.post('/mfa/setup', async (c) => {
     `);
 
     const otpauthUrl = `otpauth://totp/Veska:${encodeURIComponent(String(email))}?secret=${secret}&issuer=Veska`;
+    const qrCodeDataUrl = await QRCode.toDataURL(otpauthUrl);
 
-    return c.json({ secret, otpauthUrl });
+    return c.json({ secret, otpauthUrl, qrCodeDataUrl });
   } catch (err) {
     console.error('[auth/mfa/setup]', err);
     return c.json({ error: 'Internal server error' }, 500);
@@ -589,6 +591,264 @@ authRouter.post('/mfa/disable', async (c) => {
     return c.json({ success: true });
   } catch (err) {
     console.error('[auth/mfa/disable]', err);
+    return c.json({ error: 'Internal server error' }, 500);
+  }
+});
+
+// ── GET /auth/mfa/status ──────────────────────────────────────────────────────
+
+authRouter.get('/mfa/status', async (c) => {
+  try {
+    const token = getTokenFromHeader(c);
+    if (!token) return c.json({ error: 'Unauthorized' }, 401);
+
+    const session = await resolveSession(token);
+    if (!session) return c.json({ error: 'Unauthorized' }, 401);
+
+    const tenantId = (c.req.header('x-tenant-id') ?? session['tenantId']) as string;
+    const userId = session['userId'] as string;
+
+    const mfaResult = await sharedDb.execute(sql`
+      SELECT verified FROM "mfaSecrets"
+      WHERE "tenantId" = ${tenantId} AND "userId" = ${userId}
+    `);
+
+    const enabled = mfaResult.rows.length > 0 && (mfaResult.rows[0] as { verified: boolean }).verified;
+    return c.json({ enabled });
+  } catch (err) {
+    console.error('[auth/mfa/status]', err);
+    return c.json({ error: 'Internal server error' }, 500);
+  }
+});
+
+// ── POST /auth/2fa/setup (alias for /auth/mfa/setup) ─────────────────────────
+
+authRouter.post('/2fa/setup', async (c) => {
+  try {
+    const token = getTokenFromHeader(c);
+    if (!token) return c.json({ error: 'Unauthorized' }, 401);
+
+    const session = await resolveSession(token);
+    if (!session) return c.json({ error: 'Unauthorized' }, 401);
+
+    const tenantId = (c.req.header('x-tenant-id') ?? session['tenantId']) as string;
+    const userId = session['userId'] as string;
+
+    const userResult = await sharedDb.execute(sql`
+      SELECT email FROM users WHERE id = ${userId} AND "tenantId" = ${tenantId}
+    `);
+    const email = (userResult.rows[0] as Record<string, unknown> | undefined)?.['email'] ?? userId;
+
+    const secretBytes = randomBytes(20);
+    const secret = base32Encode(secretBytes);
+
+    await sharedDb.execute(sql`
+      INSERT INTO "mfaSecrets" ("tenantId", "userId", secret, verified, "backupCodes")
+      VALUES (${tenantId}, ${userId}, ${secret}, false, '[]')
+      ON CONFLICT ("tenantId", "userId") DO UPDATE
+        SET secret = EXCLUDED.secret,
+            verified = false,
+            "backupCodes" = '[]'
+    `);
+
+    const otpAuthUrl = `otpauth://totp/Veska:${encodeURIComponent(String(email))}?secret=${secret}&issuer=Veska`;
+    const qrCodeDataUrl = await QRCode.toDataURL(otpAuthUrl);
+
+    return c.json({ secret, otpAuthUrl, qrCodeDataUrl });
+  } catch (err) {
+    console.error('[auth/2fa/setup]', err);
+    return c.json({ error: 'Internal server error' }, 500);
+  }
+});
+
+// ── POST /auth/2fa/verify (alias for /auth/mfa/verify) ───────────────────────
+
+authRouter.post('/2fa/verify', async (c) => {
+  try {
+    const token = getTokenFromHeader(c);
+    if (!token) return c.json({ error: 'Unauthorized' }, 401);
+
+    const session = await resolveSession(token);
+    if (!session) return c.json({ error: 'Unauthorized' }, 401);
+
+    const tenantId = (c.req.header('x-tenant-id') ?? session['tenantId']) as string;
+    const userId = session['userId'] as string;
+    const body = await c.req.json<{ token: string }>();
+
+    if (!body.token) return c.json({ error: 'token is required' }, 400);
+
+    const mfaResult = await sharedDb.execute(sql`
+      SELECT id, secret, verified FROM "mfaSecrets"
+      WHERE "tenantId" = ${tenantId} AND "userId" = ${userId}
+    `);
+
+    if (!mfaResult.rows.length) {
+      return c.json({ error: 'MFA not set up for this user' }, 404);
+    }
+
+    const mfa = mfaResult.rows[0] as { id: string; secret: string; verified: boolean };
+
+    if (!verifyTotp(mfa.secret, body.token)) {
+      return c.json({ error: 'Invalid TOTP code' }, 400);
+    }
+
+    const plainCodes = generateBackupCodes(8);
+    const hashedCodes = plainCodes.map((code) => sha256(code));
+
+    await sharedDb.execute(sql`
+      UPDATE "mfaSecrets"
+      SET verified = true,
+          "backupCodes" = ${JSON.stringify(hashedCodes)}::jsonb
+      WHERE "tenantId" = ${tenantId} AND "userId" = ${userId}
+    `);
+
+    return c.json({ ok: true, backupCodes: plainCodes });
+  } catch (err) {
+    console.error('[auth/2fa/verify]', err);
+    return c.json({ error: 'Internal server error' }, 500);
+  }
+});
+
+// ── POST /auth/2fa/disable ────────────────────────────────────────────────────
+
+authRouter.post('/2fa/disable', async (c) => {
+  try {
+    const token = getTokenFromHeader(c);
+    if (!token) return c.json({ error: 'Unauthorized' }, 401);
+
+    const session = await resolveSession(token);
+    if (!session) return c.json({ error: 'Unauthorized' }, 401);
+
+    const tenantId = (c.req.header('x-tenant-id') ?? session['tenantId']) as string;
+    const userId = session['userId'] as string;
+    const body = await c.req.json<{ token: string }>();
+
+    if (!body.token) return c.json({ error: 'token is required' }, 400);
+
+    const mfaResult = await sharedDb.execute(sql`
+      SELECT secret FROM "mfaSecrets"
+      WHERE "tenantId" = ${tenantId} AND "userId" = ${userId} AND verified = true
+    `);
+
+    if (!mfaResult.rows.length) {
+      return c.json({ error: 'MFA not enabled' }, 400);
+    }
+
+    const mfa = mfaResult.rows[0] as { secret: string };
+
+    if (!verifyTotp(mfa.secret, body.token)) {
+      return c.json({ error: 'Invalid TOTP code' }, 400);
+    }
+
+    await sharedDb.execute(sql`
+      DELETE FROM "mfaSecrets"
+      WHERE "tenantId" = ${tenantId} AND "userId" = ${userId}
+    `);
+
+    return c.json({ ok: true });
+  } catch (err) {
+    console.error('[auth/2fa/disable]', err);
+    return c.json({ error: 'Internal server error' }, 500);
+  }
+});
+
+// ── POST /auth/2fa/challenge ──────────────────────────────────────────────────
+// Called during login when requires2fa is true. Body: { sessionToken, token }
+
+authRouter.post('/2fa/challenge', async (c) => {
+  try {
+    const body = await c.req.json<{ sessionToken: string; token: string }>();
+    const { sessionToken, token: totpToken } = body;
+
+    if (!sessionToken || !totpToken) {
+      return c.json({ error: 'sessionToken and token are required' }, 400);
+    }
+
+    // Delegate to mfa/login logic
+    const tempResult = await sharedDb.execute(sql`
+      SELECT id, "tenantId", "userId"
+      FROM sessions
+      WHERE token = ${sessionToken}
+        AND "expiresAt" > now()
+    `);
+
+    if (!tempResult.rows.length) {
+      return c.json({ error: 'Invalid or expired session token' }, 401);
+    }
+
+    const tempSession = tempResult.rows[0] as { id: string; tenantId: string; userId: string };
+
+    const mfaResult = await sharedDb.execute(sql`
+      SELECT secret FROM "mfaSecrets"
+      WHERE "tenantId" = ${tempSession.tenantId}
+        AND "userId" = ${tempSession.userId}
+        AND verified = true
+    `);
+
+    if (!mfaResult.rows.length) {
+      return c.json({ error: 'MFA not configured' }, 400);
+    }
+
+    const mfa = mfaResult.rows[0] as { secret: string };
+    let codeValid = verifyTotp(mfa.secret, totpToken);
+
+    if (!codeValid) {
+      const backupResult = await sharedDb.execute(sql`
+        SELECT id, "backupCodes" FROM "mfaSecrets"
+        WHERE "tenantId" = ${tempSession.tenantId}
+          AND "userId" = ${tempSession.userId}
+      `);
+
+      if (backupResult.rows.length) {
+        const mfaRow = backupResult.rows[0] as { id: string; backupCodes: string[] };
+        const codeHash = sha256(totpToken);
+        const idx = mfaRow.backupCodes.findIndex((h) => h === codeHash);
+        if (idx !== -1) {
+          codeValid = true;
+          const updatedCodes = [...mfaRow.backupCodes];
+          updatedCodes.splice(idx, 1);
+          await sharedDb.execute(sql`
+            UPDATE "mfaSecrets"
+            SET "backupCodes" = ${JSON.stringify(updatedCodes)}::jsonb
+            WHERE id = ${mfaRow.id}
+          `);
+        }
+      }
+    }
+
+    if (!codeValid) {
+      return c.json({ error: 'Invalid code' }, 401);
+    }
+
+    await sharedDb.execute(sql`
+      DELETE FROM sessions WHERE token = ${sessionToken}
+    `);
+
+    const newToken = generateSessionToken();
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    await sharedDb.execute(sql`
+      INSERT INTO sessions ("tenantId", "userId", token, "expiresAt", "ipAddress", "userAgent")
+      VALUES (
+        ${tempSession.tenantId}, ${tempSession.userId}, ${newToken},
+        ${expiresAt.toISOString()},
+        ${c.req.header('x-forwarded-for') ?? null},
+        ${c.req.header('user-agent') ?? null}
+      )
+    `);
+
+    const userResult = await sharedDb.execute(sql`
+      SELECT email FROM users WHERE id = ${tempSession.userId}
+    `);
+    const email = (userResult.rows[0] as Record<string, unknown> | undefined)?.['email'] ?? '';
+
+    return c.json({
+      token: newToken,
+      expiresAt: expiresAt.toISOString(),
+      user: { id: tempSession.userId, email },
+    });
+  } catch (err) {
+    console.error('[auth/2fa/challenge]', err);
     return c.json({ error: 'Internal server error' }, 500);
   }
 });

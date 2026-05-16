@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Plus, X, CheckCircle, XCircle } from 'lucide-react';
+import { BulkActionBar } from '@/components/bulk-action-bar.js';
 import type { Expense } from './page.js';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
@@ -257,6 +258,8 @@ export function ExpensesClient({
   const [showNew, setShowNew] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkLoading, setBulkLoading] = useState(false);
 
   useEffect(() => {
     if (toast) {
@@ -272,6 +275,60 @@ export function ExpensesClient({
         if (activeTab === 'pending') return s === 'pending' || s === 'submitted';
         return s === activeTab;
       });
+
+  const allVisibleSelected = filtered.length > 0 && filtered.every((e) => selected.has(e.id));
+
+  const toggleAll = () => {
+    if (allVisibleSelected) {
+      setSelected((prev) => {
+        const next = new Set(prev);
+        filtered.forEach((e) => next.delete(e.id));
+        return next;
+      });
+    } else {
+      setSelected((prev) => {
+        const next = new Set(prev);
+        filtered.forEach((e) => next.add(e.id));
+        return next;
+      });
+    }
+  };
+
+  const toggleOne = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleBulkAction = async (action: 'approve' | 'reject' | 'delete') => {
+    if (selected.size === 0) return;
+    setBulkLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/expenses/bulk`, {
+        method: 'POST',
+        headers: authHeaders(tenantId),
+        body: JSON.stringify({ ids: Array.from(selected), action }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const result = await res.json() as { processed: number; failed: { id: string; error: string }[] };
+      const failCount = result.failed.length;
+      setToast({
+        message: failCount > 0
+          ? `${result.processed} processed, ${failCount} failed`
+          : `${result.processed} expense${result.processed !== 1 ? 's' : ''} ${action}d`,
+        type: failCount > 0 ? 'error' : 'success',
+      });
+      setSelected(new Set());
+      router.refresh();
+    } catch (err) {
+      setToast({ message: err instanceof Error ? err.message : 'Bulk action failed', type: 'error' });
+    } finally {
+      setBulkLoading(false);
+    }
+  };
 
   // Stats
   const totalSubmitted = expenses.reduce((s, e) => s + getAmount(e), 0);
@@ -418,10 +475,19 @@ export function ExpensesClient({
           </button>
         </div>
       ) : (
+        <>
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
+                <th className="px-4 py-3 w-8">
+                  <input
+                    type="checkbox"
+                    checked={allVisibleSelected}
+                    onChange={toggleAll}
+                    className="rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+                  />
+                </th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Title</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Submitted By</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Category</th>
@@ -435,12 +501,24 @@ export function ExpensesClient({
               {filtered.map((expense) => {
                 const status = getStatus(expense);
                 const isPending = status === 'pending' || status === 'submitted';
+                const isChecked = selected.has(expense.id);
                 return (
                   <tr
                     key={expense.id}
                     onClick={() => router.push(`/dashboard/expenses/${expense.id}`)}
-                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 cursor-pointer"
+                    className={`border-b border-gray-50 last:border-0 hover:bg-gray-50/50 cursor-pointer ${isChecked ? 'bg-blue-50/30' : ''}`}
                   >
+                    <td
+                      className="px-4 py-3 w-8"
+                      onClick={(e) => { e.stopPropagation(); toggleOne(expense.id); }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => toggleOne(expense.id)}
+                        className="rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+                      />
+                    </td>
                     <td className="px-4 py-3 font-medium text-gray-900">{getTitle(expense)}</td>
                     <td className="px-4 py-3 text-gray-600">{getSubmittedBy(expense)}</td>
                     <td className="px-4 py-3">
@@ -499,6 +577,16 @@ export function ExpensesClient({
             </tbody>
           </table>
         </div>
+
+        <BulkActionBar
+          selectedCount={selected.size}
+          onClear={() => setSelected(new Set())}
+          actions={[
+            { label: bulkLoading ? 'Processing…' : 'Approve All', onClick: () => void handleBulkAction('approve') },
+            { label: 'Reject All', onClick: () => void handleBulkAction('reject'), variant: 'danger' },
+          ]}
+        />
+        </>
       )}
     </div>
   );
