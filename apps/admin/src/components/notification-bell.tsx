@@ -241,17 +241,26 @@ export default function NotificationBell({ userId = 'demo-user' }: { userId?: st
         onClick={handleToggle}
         className="relative flex items-center justify-center w-8 h-8 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors"
         aria-label="Notifications"
+        aria-haspopup="true"
+        aria-expanded={open}
       >
         <Bell size={15} />
         {totalUnread > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-0.5 leading-none">
+          <span
+            aria-label={`${totalUnread} unread notifications`}
+            className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-0.5 leading-none"
+          >
             {totalUnread > 99 ? '99+' : totalUnread}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 top-10 z-50 w-80 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden">
+        <div
+          className="absolute right-0 top-10 z-50 w-80 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden"
+          role="menu"
+          aria-label="Notifications panel"
+        >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
             <span className="text-sm font-semibold text-gray-900">Notifications</span>
@@ -317,6 +326,7 @@ export default function NotificationBell({ userId = 'demo-user' }: { userId?: st
               notifications.map((n) => (
                 <button
                   key={n.id}
+                  role="menuitem"
                   onClick={() => void markRead(n)}
                   className={`w-full text-left flex items-start gap-3 px-4 py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors ${
                     !n.read ? 'bg-indigo-50/60' : ''

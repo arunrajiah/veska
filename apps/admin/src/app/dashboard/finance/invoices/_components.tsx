@@ -3,7 +3,7 @@
 import { useState, useEffect, useTransition, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Plus, Trash2, Send, X, Download } from 'lucide-react';
+import { Plus, Trash2, Send, X, Download, RefreshCw } from 'lucide-react';
 import { useRealtimeEvents } from '@/hooks/useRealtimeEvents.js';
 import { BulkActionBar } from '@/components/bulk-action-bar.js';
 import type { Invoice } from './page.js';
@@ -62,7 +62,116 @@ const STATUS_COLORS: Record<string, string> = {
   void: 'bg-gray-100 text-gray-400',
 };
 
-type FilterTab = 'all' | 'draft' | 'sent' | 'paid' | 'overdue';
+type FilterTab = 'all' | 'draft' | 'sent' | 'paid' | 'overdue' | 'recurring';
+
+// ── Recurring schedule types (for the list tab) ────────────────
+
+interface RecurringScheduleRow {
+  id: string;
+  templateInvoiceId: string;
+  frequency: string;
+  nextRunAt: string;
+  lastRunAt?: string | null;
+  enabled: boolean;
+}
+
+const FREQ_LABELS_LIST: Record<string, string> = {
+  weekly: 'Weekly',
+  monthly: 'Monthly',
+  quarterly: 'Quarterly',
+  yearly: 'Yearly',
+};
+
+// ── Recurring tab panel ────────────────────────────────────────
+
+function RecurringTab({ tenantId }: { tenantId: string }) {
+  const [schedules, setSchedules] = useState<RecurringScheduleRow[] | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    fetch(`${API_BASE}/api/v1/recurring-invoices`, {
+      headers: {
+        'X-Veska-Tenant-Id': tenantId,
+        'X-Veska-Identity-Id': process.env.NEXT_PUBLIC_ADMIN_IDENTITY_ID ?? 'admin',
+      },
+    })
+      .then((r) => r.json())
+      .then((data) => setSchedules(Array.isArray(data) ? (data as RecurringScheduleRow[]) : []))
+      .catch(() => setSchedules([]))
+      .finally(() => setLoading(false));
+  }, [tenantId]);
+
+  if (loading) {
+    return (
+      <div className="bg-white border border-gray-200 rounded-xl px-8 py-12 text-center">
+        <p className="text-sm text-gray-400">Loading recurring schedules…</p>
+      </div>
+    );
+  }
+
+  if (!schedules || schedules.length === 0) {
+    return (
+      <div className="bg-white border border-gray-200 rounded-xl px-8 py-16 text-center">
+        <RefreshCw size={32} className="mx-auto mb-3 text-gray-300" />
+        <p className="text-gray-400 text-sm">No recurring invoice schedules.</p>
+        <p className="text-gray-400 text-xs mt-1">Open an invoice and set up a recurring schedule from the invoice detail page.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-gray-100 bg-gray-50">
+              <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Invoice</th>
+              <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Frequency</th>
+              <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Next Run</th>
+              <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Last Run</th>
+              <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
+              <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {schedules.map((s) => (
+              <tr key={s.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                <td className="px-4 py-3 font-mono text-xs text-gray-600">
+                  {s.templateInvoiceId.slice(0, 8).toUpperCase()}
+                </td>
+                <td className="px-4 py-3">
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-medium">
+                    {FREQ_LABELS_LIST[s.frequency] ?? s.frequency}
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-xs text-gray-700 font-medium">
+                  {s.nextRunAt ? s.nextRunAt.slice(0, 10) : '—'}
+                </td>
+                <td className="px-4 py-3 text-xs text-gray-500">
+                  {s.lastRunAt ? s.lastRunAt.slice(0, 10) : 'Never'}
+                </td>
+                <td className="px-4 py-3">
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${s.enabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                    {s.enabled ? 'Active' : 'Paused'}
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <Link
+                    href={`/dashboard/finance/invoices/${s.templateInvoiceId}`}
+                    className="text-xs text-gray-500 hover:text-gray-900"
+                  >
+                    View Invoice →
+                  </Link>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
 
 // ---------------------------------------------------------------------------
 // Toast
@@ -520,7 +629,7 @@ export function InvoicesClient({
     }
   };
 
-  const tabs: FilterTab[] = ['all', 'draft', 'sent', 'paid', 'overdue'];
+  const tabs: FilterTab[] = ['all', 'draft', 'sent', 'paid', 'overdue', 'recurring'];
 
   return (
     <div className="px-4 sm:px-8 py-8 max-w-6xl">
@@ -600,8 +709,13 @@ export function InvoicesClient({
         ))}
       </div>
 
-      {/* Table */}
-      {filtered.length === 0 ? (
+      {/* Recurring tab */}
+      {activeTab === 'recurring' && (
+        <RecurringTab tenantId={tenantId} />
+      )}
+
+      {/* Invoice table (hidden when recurring tab is active) */}
+      {activeTab !== 'recurring' && (filtered.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-xl px-8 py-16 text-center">
           <p className="text-gray-400 text-sm">No invoices found.</p>
           <button
@@ -618,21 +732,22 @@ export function InvoicesClient({
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
-                <th className="px-4 py-3 w-8">
+                <th scope="col" className="px-4 py-3 w-8">
                   <input
                     type="checkbox"
                     checked={allVisibleSelected}
                     onChange={toggleAll}
+                    aria-label="Select all invoices"
                     className="rounded border-gray-300 text-gray-900 focus:ring-gray-900"
                   />
                 </th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Invoice #</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Client</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Amount</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 hidden sm:table-cell">Due Date</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 hidden sm:table-cell">Issued</th>
-                <th className="px-4 py-3 text-xs font-medium text-gray-500 text-right">Actions</th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">Invoice #</th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">Client</th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
+                <th scope="col" className="text-right px-4 py-3 text-xs font-medium text-gray-500">Amount</th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500 hidden sm:table-cell">Due Date</th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500 hidden sm:table-cell">Issued</th>
+                <th scope="col" className="px-4 py-3 text-xs font-medium text-gray-500 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -654,6 +769,7 @@ export function InvoicesClient({
                         type="checkbox"
                         checked={isChecked}
                         onChange={() => toggleOne(inv.id)}
+                        aria-label={`Select invoice ${getInvoiceNumber(inv)}`}
                         className="rounded border-gray-300 text-gray-900 focus:ring-gray-900"
                       />
                     </td>
@@ -714,7 +830,7 @@ export function InvoicesClient({
           ]}
         />
         </>
-      )}
+      ))}
     </div>
   );
 }

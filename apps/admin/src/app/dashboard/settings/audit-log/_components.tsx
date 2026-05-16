@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { ScrollText, ChevronRight, ChevronDown, Download, RefreshCw } from 'lucide-react';
+import { ScrollText, ChevronRight, ChevronDown, Download, RefreshCw, GitCompare } from 'lucide-react';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -25,6 +25,12 @@ const ENTITY_OPTIONS = [
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+interface FieldDiff {
+  field: string;
+  before: unknown;
+  after: unknown;
+}
+
 interface AuditEntry {
   id: string;
   actorId: string | null;
@@ -32,7 +38,9 @@ interface AuditEntry {
   action: string;
   entityType: string | null;
   entityId: string | null;
-  diff: unknown;
+  before: unknown;
+  after: unknown;
+  diff: FieldDiff[] | unknown;
   ip: string | null;
   userAgent: string | null;
   createdAt: string;
@@ -102,6 +110,81 @@ function diffFull(diff: unknown): string {
   }
 }
 
+function isFieldDiffArray(diff: unknown): diff is FieldDiff[] {
+  return Array.isArray(diff) && diff.length > 0 && typeof (diff[0] as FieldDiff).field === 'string';
+}
+
+function formatValue(val: unknown): string {
+  if (val === null || val === undefined) return '(empty)';
+  if (typeof val === 'string') {
+    // ISO date check
+    if (/^\d{4}-\d{2}-\d{2}/.test(val)) {
+      try {
+        return new Date(val).toLocaleDateString();
+      } catch {
+        // fall through
+      }
+    }
+    return truncate(val, 40);
+  }
+  if (typeof val === 'boolean') return val ? 'true' : 'false';
+  if (typeof val === 'number') return String(val);
+  try {
+    return truncate(JSON.stringify(val), 40);
+  } catch {
+    return String(val);
+  }
+}
+
+// ─── DiffViewer ───────────────────────────────────────────────────────────────
+
+function DiffViewer({ entry }: { entry: AuditEntry }) {
+  const hasDiff = isFieldDiffArray(entry.diff);
+
+  if (hasDiff) {
+    const diffs = entry.diff as FieldDiff[];
+    return (
+      <div className="overflow-x-auto">
+        <table className="w-full text-xs border-collapse">
+          <thead>
+            <tr className="bg-gray-100 dark:bg-gray-800">
+              <th className="text-left px-3 py-2 font-medium text-gray-600 dark:text-gray-400 w-1/3">Field</th>
+              <th className="text-left px-3 py-2 font-medium text-gray-600 dark:text-gray-400 w-1/3">Before</th>
+              <th className="text-left px-3 py-2 font-medium text-gray-600 dark:text-gray-400 w-1/3">After</th>
+            </tr>
+          </thead>
+          <tbody>
+            {diffs.map((d) => (
+              <tr key={d.field} className="border-t border-gray-100 dark:border-gray-700">
+                <td className="px-3 py-2 font-mono text-gray-700 dark:text-gray-300">{d.field}</td>
+                <td className="px-3 py-2">
+                  <span className="inline-block bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 px-2 py-0.5 rounded font-mono break-all">
+                    {formatValue(d.before)}
+                  </span>
+                </td>
+                <td className="px-3 py-2">
+                  <span className="inline-block bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-0.5 rounded font-mono break-all">
+                    {formatValue(d.after)}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
+  // Fallback: show raw JSON for before/after or diff
+  const fallbackData = entry.before ?? entry.after ?? entry.diff;
+  if (!fallbackData) return null;
+  return (
+    <pre className="text-xs font-mono text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-3 overflow-x-auto whitespace-pre-wrap break-all">
+      {diffFull(fallbackData)}
+    </pre>
+  );
+}
+
 // ─── Action badge ─────────────────────────────────────────────────────────────
 
 const ACTION_BADGE: Record<string, string> = {
@@ -133,6 +216,7 @@ function TableSkeleton() {
           <div className="h-5 bg-gray-200 rounded-full w-16" />
           <div className="h-3 bg-gray-200 rounded w-20" />
           <div className="h-3 bg-gray-200 rounded w-24" />
+          <div className="h-3 bg-gray-200 rounded w-20" />
           <div className="h-3 bg-gray-200 rounded flex-1" />
         </div>
       ))}
@@ -327,19 +411,20 @@ export function AuditLogClient() {
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Action</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">Entity Type</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">Entity ID</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">Changed Fields</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Details</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={6}>
+                  <td colSpan={7}>
                     <TableSkeleton />
                   </td>
                 </tr>
               ) : entries.length === 0 ? (
                 <tr>
-                  <td colSpan={6}>
+                  <td colSpan={7}>
                     <div className="flex flex-col items-center justify-center py-16 text-gray-400">
                       <ScrollText size={36} className="mb-3 opacity-40" />
                       <p className="text-sm font-medium">No audit events yet</p>
@@ -350,8 +435,10 @@ export function AuditLogClient() {
               ) : (
                 entries.map((entry) => {
                   const expanded = expandedId === entry.id;
-                  const preview  = diffPreview(entry.diff);
-                  const full     = diffFull(entry.diff);
+                  const hasDiff = isFieldDiffArray(entry.diff);
+                  const diffCount = hasDiff ? (entry.diff as FieldDiff[]).length : 0;
+                  const hasDetails = hasDiff || !!entry.before || !!entry.after || !!entry.diff;
+                  const preview = diffPreview(entry.diff);
                   return (
                     <React.Fragment key={entry.id}>
                       <tr className="border-b border-gray-50 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
@@ -386,14 +473,30 @@ export function AuditLogClient() {
                           ) : '—'}
                         </td>
 
+                        {/* Changed Fields */}
+                        <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                          {hasDiff && diffCount > 0 ? (
+                            <span className="inline-flex items-center gap-1 text-indigo-600 dark:text-indigo-400">
+                              <GitCompare size={12} />
+                              {diffCount} field{diffCount === 1 ? '' : 's'} changed
+                            </span>
+                          ) : (
+                            <span className="text-gray-300 dark:text-gray-600">—</span>
+                          )}
+                        </td>
+
                         {/* Details */}
                         <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400 max-w-xs">
-                          {full ? (
+                          {hasDetails ? (
                             <button
                               onClick={() => setExpandedId(expanded ? null : entry.id)}
                               className="flex items-center gap-1 text-left hover:text-gray-900 dark:hover:text-gray-200 transition-colors group"
                             >
-                              <span className="truncate max-w-[180px]">{preview}</span>
+                              {hasDiff ? (
+                                <span className="text-gray-500 dark:text-gray-400">View diff</span>
+                              ) : (
+                                <span className="truncate max-w-[180px]">{preview}</span>
+                              )}
                               {expanded ? (
                                 <ChevronDown size={12} className="flex-shrink-0 text-gray-400" />
                               ) : (
@@ -407,12 +510,10 @@ export function AuditLogClient() {
                       </tr>
 
                       {/* Expanded details row */}
-                      {expanded && full && (
+                      {expanded && hasDetails && (
                         <tr className="bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700">
-                          <td colSpan={6} className="px-4 py-3">
-                            <pre className="text-xs font-mono text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-3 overflow-x-auto whitespace-pre-wrap break-all">
-                              {full}
-                            </pre>
+                          <td colSpan={7} className="px-4 py-3">
+                            <DiffViewer entry={entry} />
                           </td>
                         </tr>
                       )}

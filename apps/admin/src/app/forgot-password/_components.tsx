@@ -65,19 +65,21 @@ export function ForgotPasswordClient() {
         ) : (
           <>
             {error && (
-              <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+              <div role="alert" aria-live="assertive" className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
                 {error}
               </div>
             )}
 
             <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label htmlFor="forgot-email" className="block text-sm font-medium text-gray-700 mb-1.5">
                   Email address
                 </label>
                 <input
+                  id="forgot-email"
                   type="email"
                   required
+                  aria-required="true"
                   autoComplete="email"
                   autoFocus
                   value={email}

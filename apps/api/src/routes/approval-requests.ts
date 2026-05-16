@@ -3,9 +3,12 @@ import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { sql } from 'drizzle-orm';
 import { ApprovalService } from '@veska/core';
+import { sharedDb } from '../shared.js';
 import type { TenantContext } from '../middleware/tenant-context.js';
 import { dispatchWebhookEvent } from '../middleware/webhook-events.js';
 import { sendApprovalDecisionEmail, sendApprovalRequestedEmail } from '../lib/notification-mailer.js';
+import { logAudit } from './audit.js';
+import { computeDiff, redactDiff } from '../lib/diff.js';
 
 /** Map entityType → new status after approval/rejection */
 const ENTITY_STATUS_MAP: Record<string, { approved: string; rejected: string }> = {
@@ -332,6 +335,17 @@ approvalRequestsRouter.patch(
       const mapping = ENTITY_STATUS_MAP[trigger.entityType];
       if (mapping) {
         const newStatus = body.decision === 'approved' ? mapping.approved : mapping.rejected;
+
+        // Fetch before state for diff
+        const beforeResult = (await db.execute(sql`
+          SELECT data FROM "entityRecords"
+          WHERE id = ${trigger.entityId}::uuid
+            AND "tenantId" = ${tenantId}::uuid
+          LIMIT 1
+        `)) as unknown as { rows: Array<{ data: Record<string, unknown> }> };
+        const beforeData = beforeResult.rows[0]?.data ?? {};
+        const afterData = { ...beforeData, status: newStatus };
+
         await db.execute(sql`
           UPDATE "entityRecords"
           SET data = data || ${JSON.stringify({ status: newStatus })}::jsonb,
@@ -339,6 +353,19 @@ approvalRequestsRouter.patch(
           WHERE id = ${trigger.entityId}::uuid
             AND "tenantId" = ${tenantId}::uuid
         `);
+
+        const decideDiff = redactDiff(computeDiff(beforeData, afterData));
+        void logAudit(sharedDb, {
+          tenantId,
+          actorId: identityId,
+          actorType: 'user',
+          action: 'update',
+          entityType: trigger.entityType,
+          entityId: trigger.entityId,
+          before: beforeData,
+          after: afterData,
+          diff: decideDiff,
+        });
       }
 
       // Look up requester email and send decision notification (fire-and-forget)

@@ -247,7 +247,7 @@ function AskVeskaPanelContent({ onClose }: { onClose: () => void }) {
         </div>
         <button
           onClick={onClose}
-          aria-label="Close panel"
+          aria-label="Close AI panel"
           className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
         >
           <X size={16} />
@@ -255,7 +255,7 @@ function AskVeskaPanelContent({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* Messages or empty state */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto" role="log" aria-live="polite" aria-label="Conversation">
         {!hasMessages ? (
           /* Empty state */
           <div className="flex flex-col items-center justify-center h-full px-6 py-12 text-center">
@@ -377,6 +377,8 @@ function AskVeskaPanelContent({ onClose }: { onClose: () => void }) {
             disabled={loading}
             placeholder="Ask anything… (Enter to send)"
             rows={1}
+            aria-label="Message to AI assistant"
+            aria-multiline="false"
             className="flex-1 resize-none rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 disabled:opacity-50 transition-all overflow-hidden"
           />
           <button
@@ -417,9 +419,8 @@ export function AskVeskaPanel() {
         className={`fixed top-0 right-0 z-50 w-[480px] h-full shadow-2xl transition-transform duration-300 ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Ask Veska AI panel"
+        role="complementary"
+        aria-label="AI Assistant"
       >
         <AskVeskaPanelContent onClose={close} />
       </div>

@@ -69,7 +69,9 @@ import { emailLogRouter } from './routes/email-log.js';
 import { inboundChannelsRouter } from './routes/inbound-channels.js';
 import { stripeWebhookRouter } from './routes/stripe-webhook.js';
 import { setupRouter } from './routes/setup.js';
+import { jobQueuesRouter } from './routes/job-queues.js';
 import { registerEmailWorker } from './workers/email-worker.js';
+import { startRecurringInvoiceJob } from './jobs/recurring-invoices.job.js';
 import { standardLimit, aiLimit, authLimit } from '@veska-cloud/rate-limit';
 import { tenantContext } from './middleware/tenant-context.js';
 import { requireSession } from './middleware/session.js';
@@ -230,6 +232,9 @@ api.route('/webhooks', webhooksRouter);
 api.route('/api-keys', apiKeysRouter);
 api.route('/magic-links', magicLinksRouter);
 api.route('/setup', setupRouter);
+// Job queue monitoring — admin only
+api.use('/job-queues/*', requirePermission('admin:*'));
+api.route('/job-queues', jobQueuesRouter);
 app.route('/api/v1', api);
 app.route('/api/v1/users', usersRouter);
 app.route('/api/v1/roles', rolesRouter);
@@ -279,6 +284,9 @@ registerAnomalyWorker(sharedQueueService, sharedDb, sharedLlm);
 
 // Email delivery worker (portal invites, invoice reminders)
 registerEmailWorker(sharedQueueService);
+
+// Recurring invoice scheduler (runs every hour)
+startRecurringInvoiceJob(sharedDb);
 
 // ── Graceful shutdown ─────────────────────────────────────────
 const shutdown = async () => {

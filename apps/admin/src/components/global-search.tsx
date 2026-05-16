@@ -287,6 +287,10 @@ export function GlobalSearch({ open, onClose }: GlobalSearchProps) {
             className="flex-1 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 bg-transparent outline-none"
             autoComplete="off"
             spellCheck={false}
+            aria-label="Search across all records"
+            aria-autocomplete="list"
+            aria-controls="search-results"
+            aria-activedescendant={activeIndex >= 0 ? `search-result-${activeIndex}` : undefined}
           />
           <div className="flex items-center gap-2">
             {query && (
@@ -306,7 +310,15 @@ export function GlobalSearch({ open, onClose }: GlobalSearchProps) {
         </div>
 
         {/* Results area */}
-        <div ref={listRef} className="overflow-y-auto flex-1">
+        <div
+          ref={listRef}
+          id="search-results"
+          role="listbox"
+          aria-label="Search results"
+          aria-busy={isLoading}
+          aria-live="polite"
+          className="overflow-y-auto flex-1"
+        >
           {/* Recent searches */}
           {showRecent && (
             <div className="py-2">
@@ -316,8 +328,11 @@ export function GlobalSearch({ open, onClose }: GlobalSearchProps) {
               {recent.map((q, i) => (
                 <button
                   key={q}
+                  id={`search-result-${i}`}
                   data-idx={i}
                   type="button"
+                  role="option"
+                  aria-selected={activeIndex === i}
                   onClick={() => { setQuery(q); setActiveIndex(-1); }}
                   className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
                     activeIndex === i
@@ -358,8 +373,11 @@ export function GlobalSearch({ open, onClose }: GlobalSearchProps) {
                   return (
                     <button
                       key={result.id}
+                      id={`search-result-${idx}`}
                       data-idx={idx}
                       type="button"
+                      role="option"
+                      aria-selected={activeIndex === idx}
                       onClick={() => navigate(result.href, result.title)}
                       className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
                         activeIndex === idx

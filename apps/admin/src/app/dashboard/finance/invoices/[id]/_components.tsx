@@ -3,8 +3,320 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Send, CheckCircle, Download, Printer, Sparkles } from 'lucide-react';
+import { Send, CheckCircle, Download, Printer, Sparkles, RefreshCw, X } from 'lucide-react';
 import type { InvoiceRecord } from './page.js';
+
+// ── Types ──────────────────────────────────────────────────────
+
+type Frequency = 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+
+interface RecurringSchedule {
+  id: string;
+  templateInvoiceId: string;
+  frequency: Frequency;
+  nextRunAt: string;
+  lastRunAt?: string | null;
+  dayOfMonth?: number | null;
+  enabled: boolean;
+}
+
+// ── Helpers ────────────────────────────────────────────────────
+
+function calculateNextRun(frequency: Frequency, from: Date): Date {
+  const d = new Date(from);
+  switch (frequency) {
+    case 'weekly': d.setDate(d.getDate() + 7); break;
+    case 'monthly': d.setMonth(d.getMonth() + 1); break;
+    case 'quarterly': d.setMonth(d.getMonth() + 3); break;
+    case 'yearly': d.setFullYear(d.getFullYear() + 1); break;
+  }
+  return d;
+}
+
+const FREQ_LABELS: Record<Frequency, string> = {
+  weekly: 'Weekly',
+  monthly: 'Monthly',
+  quarterly: 'Quarterly',
+  yearly: 'Yearly',
+};
+
+// ── Recurring Schedule Section ─────────────────────────────────
+
+function RecurringSection({
+  invoiceId,
+  tenantId,
+}: {
+  invoiceId: string;
+  tenantId: string;
+}) {
+  const [schedule, setSchedule] = useState<RecurringSchedule | null | undefined>(undefined); // undefined = not loaded
+  const [loading, setLoading] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+
+  // Form state
+  const [frequency, setFrequency] = useState<Frequency>('monthly');
+  const [dayOfMonth, setDayOfMonth] = useState('');
+  const [startDate, setStartDate] = useState('');
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  // Lazy-load on first render
+  const loadSchedule = async () => {
+    if (schedule !== undefined) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/finance/invoices/${invoiceId}/recurring`, {
+        headers: authHeaders(tenantId),
+      });
+      if (res.ok) {
+        const data = await res.json() as RecurringSchedule | null;
+        setSchedule(data);
+      } else {
+        setSchedule(null);
+      }
+    } catch {
+      setSchedule(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load on section mount
+  if (schedule === undefined && !loading) {
+    void loadSchedule();
+  }
+
+  const openModal = () => {
+    if (schedule) {
+      setFrequency(schedule.frequency);
+      setDayOfMonth(schedule.dayOfMonth?.toString() ?? '');
+      setStartDate('');
+    } else {
+      setFrequency('monthly');
+      setDayOfMonth('');
+      setStartDate('');
+    }
+    setModalOpen(true);
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const body: Record<string, unknown> = {
+        frequency,
+        enabled: true,
+      };
+      if (dayOfMonth) body['dayOfMonth'] = parseInt(dayOfMonth, 10);
+      if (startDate) body['startDate'] = startDate;
+
+      const res = await fetch(`${API_BASE}/api/v1/finance/invoices/${invoiceId}/recurring`, {
+        method: 'POST',
+        headers: authHeaders(tenantId),
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const updated = await res.json() as RecurringSchedule;
+      setSchedule(updated);
+      setModalOpen(false);
+      showToast('Recurring schedule saved');
+    } catch {
+      showToast('Failed to save schedule');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleToggle = async () => {
+    if (!schedule) return;
+    const newEnabled = !schedule.enabled;
+    try {
+      if (!newEnabled) {
+        // Disable via DELETE (sets enabled=false)
+        await fetch(`${API_BASE}/api/v1/finance/invoices/${invoiceId}/recurring`, {
+          method: 'DELETE',
+          headers: authHeaders(tenantId),
+        });
+        setSchedule({ ...schedule, enabled: false });
+      } else {
+        // Re-enable via POST
+        const res = await fetch(`${API_BASE}/api/v1/finance/invoices/${invoiceId}/recurring`, {
+          method: 'POST',
+          headers: authHeaders(tenantId),
+          body: JSON.stringify({
+            frequency: schedule.frequency,
+            dayOfMonth: schedule.dayOfMonth ?? undefined,
+            enabled: true,
+          }),
+        });
+        const updated = await res.json() as RecurringSchedule;
+        setSchedule(updated);
+      }
+      showToast(newEnabled ? 'Schedule enabled' : 'Schedule disabled');
+    } catch {
+      showToast('Failed to update schedule');
+    }
+  };
+
+  // Preview next run date for modal
+  const previewDate = calculateNextRun(frequency, startDate ? new Date(startDate) : new Date());
+
+  return (
+    <>
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl shadow-lg text-sm font-medium bg-gray-900 text-white">
+          {toast}
+        </div>
+      )}
+
+      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <div className="px-5 py-3 border-b border-gray-100 bg-gray-50 flex items-center gap-2">
+          <RefreshCw size={13} className="text-blue-500" />
+          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Recurring</h2>
+        </div>
+        <div className="px-5 py-4">
+          {loading && (
+            <p className="text-xs text-gray-400">Loading…</p>
+          )}
+
+          {!loading && schedule === null && (
+            <div className="space-y-3">
+              <p className="text-sm text-gray-500">This invoice does not recur.</p>
+              <button
+                onClick={openModal}
+                className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
+              >
+                <RefreshCw size={13} />
+                Set up recurring
+              </button>
+            </div>
+          )}
+
+          {!loading && schedule && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${schedule.enabled ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'}`}>
+                  {FREQ_LABELS[schedule.frequency]}
+                </span>
+                {!schedule.enabled && (
+                  <span className="text-xs text-gray-400">(paused)</span>
+                )}
+              </div>
+              <div className="text-xs text-gray-500 space-y-1">
+                <p>Next run: <span className="font-medium text-gray-700">{schedule.nextRunAt.slice(0, 10)}</span></p>
+                {schedule.lastRunAt && (
+                  <p>Last run: <span className="font-medium text-gray-700">{schedule.lastRunAt.slice(0, 10)}</span></p>
+                )}
+              </div>
+              <div className="flex items-center gap-2 pt-1">
+                <button
+                  onClick={() => void handleToggle()}
+                  className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${schedule.enabled ? 'border-gray-200 text-gray-600 hover:bg-gray-50' : 'border-blue-200 text-blue-700 bg-blue-50 hover:bg-blue-100'}`}
+                >
+                  {schedule.enabled ? 'Pause' : 'Resume'}
+                </button>
+                <button
+                  onClick={openModal}
+                  className="text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+                >
+                  Edit
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Modal */}
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <h3 className="text-base font-semibold text-gray-900">Set up recurring invoice</h3>
+              <button onClick={() => setModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                <X size={18} />
+              </button>
+            </div>
+            <div className="px-6 py-5 space-y-4">
+              {/* Frequency */}
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Frequency</label>
+                <select
+                  value={frequency}
+                  onChange={(e) => setFrequency(e.target.value as Frequency)}
+                  className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                  <option value="quarterly">Quarterly</option>
+                  <option value="yearly">Yearly</option>
+                </select>
+              </div>
+
+              {/* Day of month (monthly/quarterly/yearly) */}
+              {frequency !== 'weekly' && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Day of month <span className="text-gray-400">(optional)</span>
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={31}
+                    value={dayOfMonth}
+                    onChange={(e) => setDayOfMonth(e.target.value)}
+                    placeholder="e.g. 1 for 1st of month"
+                    className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              )}
+
+              {/* Start date */}
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Start date <span className="text-gray-400">(optional, defaults to today)</span>
+                </label>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Preview */}
+              <div className="rounded-lg bg-blue-50 px-4 py-3">
+                <p className="text-xs text-blue-700">
+                  Next invoice will be created on{' '}
+                  <span className="font-semibold">{previewDate.toISOString().slice(0, 10)}</span>
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-gray-100 bg-gray-50">
+              <button
+                onClick={() => setModalOpen(false)}
+                className="text-sm px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-100 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => void handleSave()}
+                disabled={saving}
+                className="text-sm px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:opacity-50"
+              >
+                {saving ? 'Saving…' : 'Save'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
@@ -357,6 +669,9 @@ export function InvoiceDetailClient({
               ))}
             </div>
           </div>
+
+          {/* Recurring */}
+          <RecurringSection invoiceId={record.id} tenantId={tenantId} />
 
           {/* AI Insights */}
           <AIInsights invoiceId={record.id} tenantId={tenantId} />

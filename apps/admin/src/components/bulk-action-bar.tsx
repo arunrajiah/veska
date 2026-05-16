@@ -21,8 +21,12 @@ export function BulkActionBar({ selectedCount, actions, onClear }: BulkActionBar
         visible ? 'translate-y-0' : 'translate-y-full'
       }`}
     >
-      <div className="pointer-events-auto flex items-center gap-3 bg-gray-900 text-white px-5 py-3 rounded-2xl shadow-2xl">
-        <span className="text-sm font-medium text-gray-300 mr-1">
+      <div
+        role="toolbar"
+        aria-label="Bulk actions"
+        className="pointer-events-auto flex items-center gap-3 bg-gray-900 text-white px-5 py-3 rounded-2xl shadow-2xl"
+      >
+        <span aria-live="polite" className="text-sm font-medium text-gray-300 mr-1">
           {selectedCount} {selectedCount === 1 ? 'item' : 'items'} selected
         </span>
         {actions.map((action) => (

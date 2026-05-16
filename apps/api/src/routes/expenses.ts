@@ -3,8 +3,11 @@ import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { eq, and, isNull, sql } from 'drizzle-orm';
 import { schema, ApprovalService } from '@veska/core';
+import { sharedDb } from '../shared.js';
 import type { TenantContext } from '../middleware/tenant-context.js';
 import { dispatchWebhookEvent } from '../middleware/webhook-events.js';
+import { logAudit } from './audit.js';
+import { computeDiff, redactDiff } from '../lib/diff.js';
 
 export const expensesRouter = new Hono<{ Variables: TenantContext }>();
 
@@ -249,6 +252,19 @@ expensesRouter.patch(
       .where(eq(schema.entityRecords.id, id))
       .returning();
 
+    const submitDiff = redactDiff(computeDiff(existing, updated));
+    void logAudit(sharedDb, {
+      tenantId,
+      actorId: identityId,
+      actorType: 'user',
+      action: 'update',
+      entityType: 'Expense',
+      entityId: id,
+      before: existing,
+      after: updated,
+      diff: submitDiff,
+    });
+
     // Trigger approval flow
     void new ApprovalService(db).trigger({
       tenantId,
@@ -291,7 +307,7 @@ expensesRouter.patch(
   ),
   async (c) => {
     const id = c.req.param('id');
-    const { db, tenantId } = c.get('tenantCtx');
+    const { db, tenantId, identityId } = c.get('tenantCtx');
     const body = c.req.valid('json');
 
     const expense = await db.query.entityRecords.findFirst({
@@ -320,6 +336,19 @@ expensesRouter.patch(
       .set({ data: updated, updatedAt: new Date() })
       .where(eq(schema.entityRecords.id, id))
       .returning();
+
+    const patchDiff = redactDiff(computeDiff(existing, updated));
+    void logAudit(sharedDb, {
+      tenantId,
+      actorId: identityId,
+      actorType: 'user',
+      action: 'update',
+      entityType: 'Expense',
+      entityId: id,
+      before: existing,
+      after: updated,
+      diff: patchDiff,
+    });
 
     return c.json(result);
   },

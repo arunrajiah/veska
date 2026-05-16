@@ -144,7 +144,7 @@ export function LoginClient() {
 
         {/* Error */}
         {error && (
-          <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+          <div role="alert" aria-live="assertive" className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
             {error}
           </div>
         )}
@@ -153,12 +153,14 @@ export function LoginClient() {
         {step === 'credentials' && (
           <form onSubmit={(e) => void handleSignIn(e)} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label htmlFor="login-email" className="block text-sm font-medium text-gray-700 mb-1.5">
                 Email address
               </label>
               <input
+                id="login-email"
                 type="email"
                 required
+                aria-required="true"
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -169,15 +171,17 @@ export function LoginClient() {
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-sm font-medium text-gray-700">Password</label>
+                <label htmlFor="login-password" className="block text-sm font-medium text-gray-700">Password</label>
                 <Link href={"/forgot-password" as any} className="text-xs text-indigo-600 hover:text-indigo-700">
                   Forgot password?
                 </Link>
               </div>
               <div className="relative">
                 <input
+                  id="login-password"
                   type={showPassword ? 'text' : 'password'}
                   required
+                  aria-required="true"
                   autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -187,6 +191,8 @@ export function LoginClient() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-pressed={showPassword}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}

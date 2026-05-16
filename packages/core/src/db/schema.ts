@@ -357,6 +357,25 @@ export const aiUsageLogs = pgTable('aiUsageLogs', {
 ]);
 
 // ──────────────────────────────────────────────────────────────
+// Recurring Invoice Schedules
+// ──────────────────────────────────────────────────────────────
+
+export const recurringInvoiceSchedules = pgTable('recurringInvoiceSchedules', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: uuid('tenantId').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  templateInvoiceId: uuid('templateInvoiceId').notNull(),
+  frequency: text('frequency').notNull(), // weekly | monthly | quarterly | yearly
+  nextRunAt: timestamp('nextRunAt', { withTimezone: true }).notNull(),
+  lastRunAt: timestamp('lastRunAt', { withTimezone: true }),
+  dayOfMonth: integer('dayOfMonth'),
+  enabled: boolean('enabled').notNull().default(true),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index('recurring_tenant_idx').on(t.tenantId),
+]);
+
+// ──────────────────────────────────────────────────────────────
 // Approval Triggers — links entity records to approval flows
 // ──────────────────────────────────────────────────────────────
 

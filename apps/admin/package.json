@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "next lint",
     "clean": "rm -rf .next out",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "generate-icons": "tsx scripts/generate-icons.ts"
   },
   "dependencies": {
     "@veska/core": "workspace:*",
@@ -28,7 +29,9 @@
     "@types/node": "^22.10.0",
     "@types/react": "^19.0.1",
     "@types/react-dom": "^19.0.1",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4.0.0",
+    "tsx": "^4.22.0",
     "typescript": "^5.7.2"
   }
 }

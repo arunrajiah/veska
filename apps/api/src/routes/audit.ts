@@ -16,6 +16,8 @@ export async function logAudit(
     entityId?: string;
     actorType?: string;
     actorId?: string;
+    before?: unknown;
+    after?: unknown;
     diff?: unknown;
     ip?: string;
     userAgent?: string;
@@ -24,7 +26,7 @@ export async function logAudit(
   await db.execute(sql`
     INSERT INTO "auditLog" (
       "tenantId", "actorId", "actorType", "action",
-      "entityType", "entityId", "diff", "ip", "userAgent"
+      "entityType", "entityId", "before", "after", "diff", "ip", "userAgent"
     )
     VALUES (
       ${entry.tenantId},
@@ -33,6 +35,8 @@ export async function logAudit(
       ${entry.action},
       ${entry.entityType ?? null},
       ${entry.entityId ?? null},
+      ${entry.before ? JSON.stringify(entry.before) : null}::jsonb,
+      ${entry.after ? JSON.stringify(entry.after) : null}::jsonb,
       ${entry.diff ? JSON.stringify(entry.diff) : null}::jsonb,
       ${entry.ip ?? null},
       ${entry.userAgent ?? null}

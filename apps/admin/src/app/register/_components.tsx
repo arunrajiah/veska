@@ -132,17 +132,18 @@ export function RegisterClient() {
       </p>
 
       {(error || validationError) && (
-        <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+        <div role="alert" aria-live="assertive" className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
           {error || validationError}
         </div>
       )}
 
       <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label htmlFor="register-email" className="block text-sm font-medium text-gray-700 mb-1.5">
             Email address
           </label>
           <input
+            id="register-email"
             type="email"
             readOnly
             value={invite.email}
@@ -151,12 +152,14 @@ export function RegisterClient() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label htmlFor="register-name" className="block text-sm font-medium text-gray-700 mb-1.5">
             Your name
           </label>
           <input
+            id="register-name"
             type="text"
             required
+            aria-required="true"
             autoComplete="name"
             autoFocus
             value={name}
@@ -167,13 +170,15 @@ export function RegisterClient() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label htmlFor="register-password" className="block text-sm font-medium text-gray-700 mb-1.5">
             Password
           </label>
           <div className="relative">
             <input
+              id="register-password"
               type={showPassword ? 'text' : 'password'}
               required
+              aria-required="true"
               autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -183,6 +188,8 @@ export function RegisterClient() {
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              aria-pressed={showPassword}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
             >
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -191,13 +198,15 @@ export function RegisterClient() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label htmlFor="register-confirm-password" className="block text-sm font-medium text-gray-700 mb-1.5">
             Confirm password
           </label>
           <div className="relative">
             <input
+              id="register-confirm-password"
               type={showConfirm ? 'text' : 'password'}
               required
+              aria-required="true"
               autoComplete="new-password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
@@ -207,6 +216,8 @@ export function RegisterClient() {
             <button
               type="button"
               onClick={() => setShowConfirm((v) => !v)}
+              aria-label={showConfirm ? 'Hide confirm password' : 'Show confirm password'}
+              aria-pressed={showConfirm}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
             >
               {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}

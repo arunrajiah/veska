@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
   LayoutDashboard,
@@ -57,6 +58,7 @@ import {
   Lock,
   Brain,
   Zap,
+  Cpu,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -209,6 +211,7 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/dashboard/developer/api-keys', icon: Key, label: 'API Keys', requiredPermission: 'admin:read' },
       { href: '/dashboard/developer/webhooks', icon: Webhook, label: 'Webhooks', requiredPermission: 'admin:read' },
+      { href: '/dashboard/developer/jobs', icon: Cpu, label: 'Job Queues', requiredPermission: 'admin:read' },
       { href: '/dashboard/settings/audit-log', icon: ClipboardList, label: 'Audit Log', requiredPermission: 'admin:read' },
       { href: '/dashboard/import-export', icon: ArrowUpDown, label: 'Import / Export', requiredPermission: 'admin:read' },
     ],
@@ -295,6 +298,7 @@ export function SidebarNav({ onAIClick }: SidebarNavProps) {
   const userPermissions = useUserPermissions();
   const isAdmin = userPermissions.includes('*');
   const pendingApprovalCount = usePendingApprovalCount();
+  const pathname = usePathname();
 
   const visibleSections = useMemo(() => {
     return NAV_SECTIONS.map((section) => ({
@@ -308,7 +312,7 @@ export function SidebarNav({ onAIClick }: SidebarNavProps) {
   }, [userPermissions, isAdmin]);
 
   return (
-    <nav className="flex-1 overflow-y-auto py-3 px-2">
+    <nav role="navigation" aria-label="Main navigation" className="flex-1 overflow-y-auto py-3 px-2">
       {/* AI Assistant — pinned at top, opens floating panel */}
       <div className="mb-4 space-y-1">
         <button
@@ -322,6 +326,7 @@ export function SidebarNav({ onAIClick }: SidebarNavProps) {
         </button>
         <Link
           href="/dashboard/analytics"
+          aria-current={pathname === '/dashboard/analytics' ? 'page' : undefined}
           className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors"
         >
           <BarChart2 size={15} className="flex-shrink-0" />
@@ -329,6 +334,7 @@ export function SidebarNav({ onAIClick }: SidebarNavProps) {
         </Link>
         <Link
           href="/dashboard/workflows"
+          aria-current={pathname === '/dashboard/workflows' ? 'page' : undefined}
           className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors"
         >
           <Zap size={15} className="flex-shrink-0" />
@@ -336,6 +342,7 @@ export function SidebarNav({ onAIClick }: SidebarNavProps) {
         </Link>
         <Link
           href="/dashboard/notifications"
+          aria-current={pathname === '/dashboard/notifications' ? 'page' : undefined}
           className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors"
         >
           <Bell size={15} className="flex-shrink-0" />
@@ -346,7 +353,11 @@ export function SidebarNav({ onAIClick }: SidebarNavProps) {
       {visibleSections.map((section, si) => (
         <div key={si} className="mb-3">
           {section.label && (
-            <p className="px-2 mb-1 text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+            <p
+              role="heading"
+              aria-level={2}
+              className="px-2 mb-1 text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider"
+            >
               {section.label}
             </p>
           )}
@@ -354,12 +365,16 @@ export function SidebarNav({ onAIClick }: SidebarNavProps) {
             <Link
               key={item.href}
               href={item.href as any}
+              aria-current={pathname === item.href ? 'page' : undefined}
               className="flex items-center gap-2.5 px-2.5 py-2 text-sm text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors"
             >
               <item.icon size={15} className="flex-shrink-0" />
               <span className="flex-1">{item.label}</span>
               {item.badge && pendingApprovalCount > 0 && (
-                <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-semibold flex items-center justify-center flex-shrink-0">
+                <span
+                  aria-label={`${pendingApprovalCount} pending approvals`}
+                  className="min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-semibold flex items-center justify-center flex-shrink-0"
+                >
                   {pendingApprovalCount > 99 ? '99+' : pendingApprovalCount}
                 </span>
               )}

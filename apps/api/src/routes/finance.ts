@@ -4,11 +4,14 @@ import { z } from 'zod';
 import { eq, and, isNull, sql, inArray } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import { schema } from '@veska/core';
-import { sharedQueueService } from '../shared.js';
+import { sharedQueueService, sharedDb } from '../shared.js';
 import type { TenantContext } from '../middleware/tenant-context.js';
 import { dispatchWebhookEvent } from '../middleware/webhook-events.js';
 import { checkApprovalRequired } from '../lib/approval-gate.js';
 import { sendInvoiceSentEmail } from '../lib/notification-mailer.js';
+import { logAudit } from './audit.js';
+import { computeDiff, redactDiff } from '../lib/diff.js';
+import { calculateNextRun } from '../services/recurring-invoice.service.js';
 
 export const financeRouter = new Hono<{ Variables: TenantContext }>();
 
@@ -265,26 +268,54 @@ financeRouter.patch('/invoices/:id/send', async (c) => {
   // Check if an approval chain is configured for invoices
   const approvalCheck = await checkApprovalRequired(db, tenantId, 'invoice', id, identityId, invoiceTotal);
   if (approvalCheck.required) {
+    const afterData = { ...invoiceData, status: 'pending_approval' };
     const [pendingInvoice] = await db
       .update(schema.entityRecords)
       .set({
-        data: { ...invoiceData, status: 'pending_approval' },
+        data: afterData,
         updatedAt: new Date(),
       })
       .where(eq(schema.entityRecords.id, id))
       .returning();
 
+    const diff = redactDiff(computeDiff(invoiceData, afterData));
+    void logAudit(sharedDb, {
+      tenantId,
+      actorId: identityId,
+      actorType: 'user',
+      action: 'update',
+      entityType: 'Invoice',
+      entityId: id,
+      before: invoiceData,
+      after: afterData,
+      diff,
+    });
+
     return c.json({ status: 'pending_approval', approvalTriggerId: approvalCheck.triggerId, invoice: pendingInvoice });
   }
 
+  const sentData = { ...invoiceData, status: 'sent', sent_at: new Date().toISOString() };
   const [updated] = await db
     .update(schema.entityRecords)
     .set({
-      data: { ...invoiceData, status: 'sent', sent_at: new Date().toISOString() },
+      data: sentData,
       updatedAt: new Date(),
     })
     .where(eq(schema.entityRecords.id, id))
     .returning();
+
+  const sendDiff = redactDiff(computeDiff(invoiceData, sentData));
+  void logAudit(sharedDb, {
+    tenantId,
+    actorId: identityId,
+    actorType: 'user',
+    action: 'update',
+    entityType: 'Invoice',
+    entityId: id,
+    before: invoiceData,
+    after: sentData,
+    diff: sendDiff,
+  });
 
   const customerId = invoiceData['customer_id'] as string | undefined;
 
@@ -412,21 +443,33 @@ financeRouter.patch(
       },
     ]);
 
+    const paidData = {
+      ...invoiceData,
+      status: 'paid',
+      paid_at: new Date().toISOString(),
+      payment_date,
+      payment_method: method,
+      amount_paid: amount,
+    };
+
     const [updated] = await db
       .update(schema.entityRecords)
-      .set({
-        data: {
-          ...invoiceData,
-          status: 'paid',
-          paid_at: new Date().toISOString(),
-          payment_date,
-          payment_method: method,
-          amount_paid: amount,
-        },
-        updatedAt: new Date(),
-      })
+      .set({ data: paidData, updatedAt: new Date() })
       .where(eq(schema.entityRecords.id, id))
       .returning();
+
+    const paidDiff = redactDiff(computeDiff(invoiceData, paidData));
+    void logAudit(sharedDb, {
+      tenantId,
+      actorId: identityId,
+      actorType: 'user',
+      action: 'update',
+      entityType: 'Invoice',
+      entityId: id,
+      before: invoiceData,
+      after: paidData,
+      diff: paidDiff,
+    });
 
     dispatchWebhookEvent({
       tenantId,
@@ -561,3 +604,115 @@ financeRouter.post(
     return c.json({ journal_id: journalId, entries: created }, 201);
   },
 );
+
+// ── Recurring invoice schedules ───────────────────────────────
+
+const recurringScheduleBodySchema = z.object({
+  frequency: z.enum(['weekly', 'monthly', 'quarterly', 'yearly']),
+  dayOfMonth: z.number().int().min(1).max(31).optional(),
+  startDate: z.string().optional(), // ISO date string
+  enabled: z.boolean().default(true),
+});
+
+/** GET /invoices/:id/recurring — get the recurring schedule for an invoice */
+financeRouter.get('/invoices/:id/recurring', async (c) => {
+  const id = c.req.param('id');
+  const { db, tenantId } = c.get('tenantCtx');
+
+  const schedule = await db.query.recurringInvoiceSchedules.findFirst({
+    where: and(
+      eq(schema.recurringInvoiceSchedules.tenantId, tenantId),
+      eq(schema.recurringInvoiceSchedules.templateInvoiceId, id),
+    ),
+  });
+
+  if (!schedule) return c.json(null);
+  return c.json(schedule);
+});
+
+/** POST /invoices/:id/recurring — create or update recurring schedule */
+financeRouter.post(
+  '/invoices/:id/recurring',
+  zValidator('json', recurringScheduleBodySchema),
+  async (c) => {
+    const id = c.req.param('id');
+    const { db, tenantId } = c.get('tenantCtx');
+    const body = c.req.valid('json');
+
+    // Verify the invoice exists and belongs to this tenant
+    const invoice = await db.query.entityRecords.findFirst({
+      where: and(
+        eq(schema.entityRecords.tenantId, tenantId),
+        eq(schema.entityRecords.entityType, 'Invoice'),
+        eq(schema.entityRecords.id, id),
+        isNull(schema.entityRecords.deletedAt),
+      ),
+    });
+
+    if (!invoice) return c.json({ error: 'Invoice not found' }, 404);
+
+    const startDate = body.startDate ? new Date(body.startDate) : new Date();
+    const nextRunAt = calculateNextRun(body.frequency, startDate);
+
+    // Upsert: check for existing schedule
+    const existing = await db.query.recurringInvoiceSchedules.findFirst({
+      where: and(
+        eq(schema.recurringInvoiceSchedules.tenantId, tenantId),
+        eq(schema.recurringInvoiceSchedules.templateInvoiceId, id),
+      ),
+    });
+
+    let schedule;
+    if (existing) {
+      const [updated] = await db
+        .update(schema.recurringInvoiceSchedules)
+        .set({
+          frequency: body.frequency,
+          dayOfMonth: body.dayOfMonth ?? null,
+          nextRunAt,
+          enabled: body.enabled,
+          updatedAt: new Date(),
+        })
+        .where(eq(schema.recurringInvoiceSchedules.id, existing.id))
+        .returning();
+      schedule = updated;
+    } else {
+      const [created] = await db
+        .insert(schema.recurringInvoiceSchedules)
+        .values({
+          tenantId,
+          templateInvoiceId: id,
+          frequency: body.frequency,
+          dayOfMonth: body.dayOfMonth ?? null,
+          nextRunAt,
+          enabled: body.enabled,
+        })
+        .returning();
+      schedule = created;
+    }
+
+    return c.json(schedule, existing ? 200 : 201);
+  },
+);
+
+/** DELETE /invoices/:id/recurring — disable or delete recurring schedule */
+financeRouter.delete('/invoices/:id/recurring', async (c) => {
+  const id = c.req.param('id');
+  const { db, tenantId } = c.get('tenantCtx');
+
+  const existing = await db.query.recurringInvoiceSchedules.findFirst({
+    where: and(
+      eq(schema.recurringInvoiceSchedules.tenantId, tenantId),
+      eq(schema.recurringInvoiceSchedules.templateInvoiceId, id),
+    ),
+  });
+
+  if (!existing) return c.json({ error: 'No recurring schedule found' }, 404);
+
+  await db
+    .update(schema.recurringInvoiceSchedules)
+    .set({ enabled: false, updatedAt: new Date() })
+    .where(eq(schema.recurringInvoiceSchedules.id, existing.id));
+
+  return c.json({ disabled: true });
+});

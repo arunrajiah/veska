@@ -3,9 +3,12 @@ import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { eq, and, isNull, sql } from 'drizzle-orm';
 import { schema, ApprovalService } from '@veska/core';
+import { sharedDb } from '../shared.js';
 import type { TenantContext } from '../middleware/tenant-context.js';
 import { dispatchWebhookEvent } from '../middleware/webhook-events.js';
 import { sendLeaveDecisionEmail } from '../lib/notification-mailer.js';
+import { logAudit } from './audit.js';
+import { computeDiff, redactDiff } from '../lib/diff.js';
 
 export const hrRouter = new Hono<{ Variables: TenantContext }>();
 
@@ -307,7 +310,7 @@ hrRouter.patch(
   ),
   async (c) => {
     const id = c.req.param('id');
-    const { db, tenantId } = c.get('tenantCtx');
+    const { db, tenantId, identityId } = c.get('tenantCtx');
     const { status } = c.req.valid('json');
 
     const leave = await db.query.entityRecords.findFirst({
@@ -321,14 +324,30 @@ hrRouter.patch(
 
     if (!leave) return c.json({ error: 'Leave request not found' }, 404);
 
+    const beforeData = leave.data as Record<string, unknown>;
+    const afterData = { ...beforeData, status };
+
     const [updated] = await db
       .update(schema.entityRecords)
       .set({
-        data: { ...(leave.data as Record<string, unknown>), status },
+        data: afterData,
         updatedAt: new Date(),
       })
       .where(eq(schema.entityRecords.id, id))
       .returning();
+
+    const diff = redactDiff(computeDiff(beforeData, afterData));
+    void logAudit(sharedDb, {
+      tenantId,
+      actorId: identityId,
+      actorType: 'user',
+      action: 'update',
+      entityType: 'LeaveRequest',
+      entityId: id,
+      before: beforeData,
+      after: afterData,
+      diff,
+    });
 
     // Send leave decision email to employee (fire-and-forget)
     if (status === 'approved' || status === 'rejected') {
