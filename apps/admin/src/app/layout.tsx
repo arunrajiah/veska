@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider.js';
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages } from 'next-intl/server';
 
 export const metadata: Metadata = {
   title: 'Veska',
@@ -10,11 +12,15 @@ export const metadata: Metadata = {
   icons: { icon: '/favicon.ico', apple: '/apple-touch-icon.png' },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const messages = await getMessages();
+
   return (
     <html lang="en">
       <body className="min-h-screen bg-gray-50 dark:bg-gray-950 font-sans antialiased">
-        <ThemeProvider>{children}</ThemeProvider>
+        <NextIntlClientProvider messages={messages}>
+          <ThemeProvider>{children}</ThemeProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

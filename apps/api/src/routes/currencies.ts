@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { sql } from 'drizzle-orm';
 import type { TenantContext } from '../middleware/tenant-context.js';
 import { handleRouteError } from '../lib/api-error.js';
+import { getExchangeRates, convertAmount, getCacheTimestamp } from '../services/exchange-rates.service.js';
 
 export const currenciesRouter = new Hono<{ Variables: TenantContext }>();
 
@@ -11,16 +12,18 @@ const CURRENCIES = [
   { code: 'USD', name: 'US Dollar', symbol: '$' },
   { code: 'EUR', name: 'Euro', symbol: '€' },
   { code: 'GBP', name: 'British Pound', symbol: '£' },
+  { code: 'JPY', name: 'Japanese Yen', symbol: '¥' },
   { code: 'CAD', name: 'Canadian Dollar', symbol: 'CA$' },
   { code: 'AUD', name: 'Australian Dollar', symbol: 'A$' },
-  { code: 'JPY', name: 'Japanese Yen', symbol: '¥' },
+  { code: 'CHF', name: 'Swiss Franc', symbol: 'CHF' },
+  { code: 'CNY', name: 'Chinese Yuan', symbol: '¥' },
+  { code: 'INR', name: 'Indian Rupee', symbol: '₹' },
+  { code: 'MXN', name: 'Mexican Peso', symbol: 'MX$' },
+  { code: 'BRL', name: 'Brazilian Real', symbol: 'R$' },
   { code: 'SGD', name: 'Singapore Dollar', symbol: 'S$' },
   { code: 'AED', name: 'UAE Dirham', symbol: 'د.إ' },
-  { code: 'INR', name: 'Indian Rupee', symbol: '₹' },
-  { code: 'CHF', name: 'Swiss Franc', symbol: 'Fr' },
+  { code: 'ZAR', name: 'South African Rand', symbol: 'R' },
   { code: 'HKD', name: 'Hong Kong Dollar', symbol: 'HK$' },
-  { code: 'MXN', name: 'Mexican Peso', symbol: '$' },
-  { code: 'BRL', name: 'Brazilian Real', symbol: 'R$' },
   { code: 'NOK', name: 'Norwegian Krone', symbol: 'kr' },
   { code: 'SEK', name: 'Swedish Krona', symbol: 'kr' },
 ];
@@ -29,6 +32,12 @@ const DEFAULT_SETTINGS = {
   baseCurrency: 'USD',
   supportedCurrencies: ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'SGD', 'AED'],
 };
+
+// ── GET / — list supported currencies ────────────────────────
+
+currenciesRouter.get('/', (c) => {
+  return c.json({ currencies: CURRENCIES });
+});
 
 // ── GET /settings ─────────────────────────────────────────────
 
@@ -86,18 +95,32 @@ currenciesRouter.patch('/settings', zValidator('json', settingsSchema), async (c
 });
 
 // ── GET /rates ────────────────────────────────────────────────
+// ?base=USD — return live rates from exchange rate service
+// ?live=false — return tenant-stored manual rates from DB
 
 currenciesRouter.get('/rates', async (c) => {
   try {
-    const { db, tenantId } = c.get('tenantCtx');
-    const baseCurrency = c.req.query('baseCurrency');
+    const base = c.req.query('base') ?? c.req.query('baseCurrency') ?? 'USD';
+    const live = c.req.query('live') !== 'false';
 
+    if (live) {
+      const rates = await getExchangeRates(base);
+      return c.json({
+        base,
+        rates,
+        updatedAt: getCacheTimestamp() > 0 ? new Date(getCacheTimestamp()).toISOString() : new Date().toISOString(),
+        source: 'live',
+      });
+    }
+
+    // Fall back to tenant-stored rates from DB
+    const { db, tenantId } = c.get('tenantCtx');
     let result;
-    if (baseCurrency) {
+    if (base) {
       result = await db.execute(sql`
         SELECT * FROM "exchangeRates"
         WHERE "tenantId" = ${tenantId}
-          AND "baseCurrency" = ${baseCurrency}
+          AND "baseCurrency" = ${base}
         ORDER BY "effectiveDate" DESC, "targetCurrency" ASC
       `);
     } else {
@@ -108,7 +131,7 @@ currenciesRouter.get('/rates', async (c) => {
       `);
     }
 
-    return c.json({ rates: result.rows ?? [] });
+    return c.json({ base, rates: result.rows ?? [], source: 'manual' });
   } catch (err) {
     return handleRouteError(c, err, 'GET /currencies/rates');
   }
@@ -177,6 +200,40 @@ currenciesRouter.delete('/rates/:id', async (c) => {
   }
 });
 
+// ── GET /convert — convert via query params ───────────────────
+// ?from=USD&to=EUR&amount=100
+
+currenciesRouter.get('/convert', async (c) => {
+  try {
+    const fromCurrency = c.req.query('from') ?? 'USD';
+    const toCurrency = c.req.query('to') ?? 'USD';
+    const amount = parseFloat(c.req.query('amount') ?? '0');
+
+    if (isNaN(amount)) {
+      return c.json({ error: 'Invalid amount' }, 400);
+    }
+
+    const rates = await getExchangeRates('USD');
+    const converted = convertAmount(amount, fromCurrency, toCurrency, rates);
+
+    // Compute the effective rate
+    const fromRate = rates[fromCurrency] ?? 1;
+    const toRate = rates[toCurrency] ?? 1;
+    const rate = toRate / fromRate;
+
+    return c.json({
+      amount,
+      fromCurrency,
+      toCurrency,
+      converted: Math.round(converted * 10000) / 10000,
+      rate,
+      updatedAt: getCacheTimestamp() > 0 ? new Date(getCacheTimestamp()).toISOString() : new Date().toISOString(),
+    });
+  } catch (err) {
+    return handleRouteError(c, err, 'GET /currencies/convert');
+  }
+});
+
 // ── POST /convert ─────────────────────────────────────────────
 
 const convertSchema = z.object({
@@ -227,7 +284,13 @@ currenciesRouter.post('/convert', zValidator('json', convertSchema), async (c) =
       return c.json({ converted: amount / rate, rate: 1 / rate, fromCurrency, toCurrency });
     }
 
-    return c.json({ converted: null, error: 'No exchange rate found' });
+    // Fall back to live exchange rates
+    const liveRates = await getExchangeRates('USD');
+    const converted = convertAmount(amount, fromCurrency, toCurrency, liveRates);
+    const fromRate = liveRates[fromCurrency] ?? 1;
+    const toRate = liveRates[toCurrency] ?? 1;
+    const rate = toRate / fromRate;
+    return c.json({ converted, rate, fromCurrency, toCurrency, source: 'live' });
   } catch (err) {
     return handleRouteError(c, err, 'POST /currencies/convert');
   }

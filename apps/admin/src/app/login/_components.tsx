@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Eye, EyeOff, Smartphone } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
@@ -11,6 +12,7 @@ type Step = 'credentials' | 'mfa';
 
 export function LoginClient() {
   const router = useRouter();
+  const t = useTranslations('auth');
 
   // Credentials step
   const [email, setEmail] = useState('');
@@ -138,7 +140,7 @@ export function LoginClient() {
           </div>
           <h1 className="text-xl font-semibold text-gray-900">Veska</h1>
           <p className="text-sm text-gray-500 mt-1">
-            {step === 'credentials' ? 'Sign in to your workspace' : 'Two-factor authentication'}
+            {step === 'credentials' ? t('login') : 'Two-factor authentication'}
           </p>
         </div>
 
@@ -154,7 +156,7 @@ export function LoginClient() {
           <form onSubmit={(e) => void handleSignIn(e)} className="space-y-4">
             <div>
               <label htmlFor="login-email" className="block text-sm font-medium text-gray-700 mb-1.5">
-                Email address
+                {t('email')}
               </label>
               <input
                 id="login-email"
@@ -171,9 +173,9 @@ export function LoginClient() {
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label htmlFor="login-password" className="block text-sm font-medium text-gray-700">Password</label>
+                <label htmlFor="login-password" className="block text-sm font-medium text-gray-700">{t('password')}</label>
                 <Link href={"/forgot-password" as any} className="text-xs text-indigo-600 hover:text-indigo-700">
-                  Forgot password?
+                  {t('forgotPassword')}
                 </Link>
               </div>
               <div className="relative">
@@ -211,7 +213,7 @@ export function LoginClient() {
                   Signing in…
                 </>
               ) : (
-                'Sign in'
+                t('signIn')
               )}
             </button>
           </form>

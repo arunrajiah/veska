@@ -15,7 +15,7 @@ export default async function ReportsPage() {
   let reports: Report[] = [];
 
   try {
-    const res = await fetch(`${API_BASE}/reports`, {
+    const res = await fetch(`${API_BASE}/reports/saved`, {
       cache: 'no-store',
       headers: { 'x-tenant-id': 'demo-tenant' },
     });

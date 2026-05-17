@@ -2,6 +2,8 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { LanguageSwitcher } from '@/components/language-switcher.js';
 import {
   Building,
   Palette,
@@ -1191,6 +1193,7 @@ export function SettingsClient({ initialSettings }: { initialSettings: TenantSet
   const [activeTab, setActiveTab] = useState<TabId>('company');
   const [settings, setSettings] = useState<TenantSettings>(initialSettings);
   const { toasts, show: showToast } = useToast();
+  const t = useTranslations('settings');
 
   const handleSave = useCallback(
     async (updates: Partial<TenantSettings>) => {
@@ -1212,7 +1215,13 @@ export function SettingsClient({ initialSettings }: { initialSettings: TenantSet
 
   return (
     <div className="px-8 py-8">
-      <h1 className="text-2xl font-semibold text-gray-900 mb-6">Settings</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-semibold text-gray-900">{t('title')}</h1>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-500">{t('language')}:</span>
+          <LanguageSwitcher />
+        </div>
+      </div>
 
       <SubSectionNav />
 

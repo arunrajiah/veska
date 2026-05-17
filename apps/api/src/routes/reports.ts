@@ -48,7 +48,174 @@ function buildAggregation(metric: MetricConfig): string {
   return `${agg}((data->>'${field}')::numeric) AS "${label}"`;
 }
 
+// ── Builder ReportDefinition types ───────────────────────────
+
+interface BuilderFilter {
+  field: string;
+  operator: 'eq' | 'neq' | 'gt' | 'lt' | 'gte' | 'lte' | 'contains' | 'in';
+  value: string | number | string[];
+}
+
+interface ReportDefinition {
+  entityType: string;
+  fields: string[];
+  filters: BuilderFilter[];
+  groupBy?: string;
+  aggregation?: 'count' | 'sum' | 'avg' | 'min' | 'max';
+  aggregationField?: string;
+  orderBy?: string;
+  orderDir?: 'asc' | 'desc';
+  limit?: number;
+}
+
 export const reportsRouter = new Hono<{ Variables: TenantContext }>();
+
+// ── POST /reports/run ─────────────────────────────────────────
+// Execute a dynamic report definition without saving it first.
+
+reportsRouter.post('/run', async (c) => {
+  const { db, tenantId } = c.get('tenantCtx');
+  const t0 = Date.now();
+
+  let def: ReportDefinition;
+  try {
+    def = await c.req.json<ReportDefinition>();
+  } catch {
+    return c.json({ error: 'Invalid JSON body' }, 400);
+  }
+
+  if (!def.entityType) {
+    return c.json({ error: 'entityType is required' }, 400);
+  }
+
+  try {
+    // Base WHERE conditions
+    const conditions: ReturnType<typeof sql>[] = [
+      sql`"tenantId" = ${tenantId}`,
+      sql`"entityType" = ${def.entityType}`,
+      sql`"deletedAt" IS NULL`,
+    ];
+
+    // Apply filters
+    for (const filter of def.filters ?? []) {
+      const field = safePgField(filter.field);
+      const val = filter.value;
+      switch (filter.operator) {
+        case 'eq':
+          conditions.push(sql.raw(`data->>'${field}' = `).append(sql`${String(val)}`));
+          break;
+        case 'neq':
+          conditions.push(sql.raw(`data->>'${field}' != `).append(sql`${String(val)}`));
+          break;
+        case 'gt':
+          conditions.push(sql.raw(`(data->>'${field}')::numeric > `).append(sql`${Number(val)}`));
+          break;
+        case 'lt':
+          conditions.push(sql.raw(`(data->>'${field}')::numeric < `).append(sql`${Number(val)}`));
+          break;
+        case 'gte':
+          conditions.push(sql.raw(`(data->>'${field}')::numeric >= `).append(sql`${Number(val)}`));
+          break;
+        case 'lte':
+          conditions.push(sql.raw(`(data->>'${field}')::numeric <= `).append(sql`${Number(val)}`));
+          break;
+        case 'contains':
+          conditions.push(
+            sql.raw(`data->>'${field}' ILIKE `).append(sql`${'%' + String(val) + '%'}`),
+          );
+          break;
+        case 'in': {
+          const vals = Array.isArray(val) ? val : [String(val)];
+          // Build IN list as a series of ORs since Drizzle sql tagged templates don't support arrays natively here
+          const orParts = vals.map((v) =>
+            sql.raw(`data->>'${field}' = `).append(sql`${String(v)}`),
+          );
+          const orClause = orParts.reduce((acc, part, idx) =>
+            idx === 0 ? sql`(${part})` : sql`${acc} OR (${part})`,
+          );
+          conditions.push(sql`(${orClause})`);
+          break;
+        }
+      }
+    }
+
+    const whereClause = conditions.reduce((acc, cond, idx) =>
+      idx === 0 ? cond : sql`${acc} AND ${cond}`,
+    );
+
+    const limit = def.limit ?? 100;
+    const groupByField = def.groupBy ? safePgField(def.groupBy) : null;
+    const orderByField = def.orderBy ? safePgField(def.orderBy) : null;
+    const orderDir = def.orderDir === 'desc' ? 'DESC' : 'ASC';
+
+    let queryResult: Record<string, unknown>[];
+
+    if (groupByField) {
+      // Grouped query with aggregation
+      const agg = def.aggregation ?? 'count';
+      let aggExpr: string;
+      if (agg === 'count') {
+        aggExpr = 'COUNT(*) AS agg_value';
+      } else {
+        const aggField = def.aggregationField ? safePgField(def.aggregationField) : (def.fields[0] ? safePgField(def.fields[0]) : 'value');
+        aggExpr = `${agg.toUpperCase()}((data->>'${aggField}')::numeric) AS agg_value`;
+      }
+      const orderExpr = orderByField
+        ? `ORDER BY data->>'${orderByField}' ${orderDir}`
+        : `ORDER BY agg_value ${orderDir}`;
+
+      const res = await db.execute(
+        sql
+          .raw(`SELECT data->>'${groupByField}' AS group_key, ${aggExpr} FROM "entityRecords" WHERE `)
+          .append(whereClause)
+          .append(sql.raw(` GROUP BY data->>'${groupByField}' ${orderExpr} LIMIT ${limit}`)),
+      );
+      queryResult = res.rows as Record<string, unknown>[];
+    } else if (def.fields && def.fields.length > 0) {
+      // Select specific fields from JSONB
+      const selectParts = def.fields
+        .map((f) => `data->>'${safePgField(f)}' AS "${safePgField(f)}"`)
+        .join(', ');
+      const orderExpr = orderByField
+        ? `ORDER BY data->>'${orderByField}' ${orderDir}`
+        : '';
+
+      const res = await db.execute(
+        sql
+          .raw(`SELECT id, ${selectParts} FROM "entityRecords" WHERE `)
+          .append(whereClause)
+          .append(sql.raw(` ${orderExpr} LIMIT ${limit}`)),
+      );
+      queryResult = res.rows as Record<string, unknown>[];
+    } else {
+      // Select all data
+      const orderExpr = orderByField
+        ? `ORDER BY data->>'${orderByField}' ${orderDir}`
+        : `ORDER BY "createdAt" DESC`;
+
+      const res = await db.execute(
+        sql
+          .raw(`SELECT id, data, "createdAt" FROM "entityRecords" WHERE `)
+          .append(whereClause)
+          .append(sql.raw(` ${orderExpr} LIMIT ${limit}`)),
+      );
+      queryResult = res.rows as Record<string, unknown>[];
+    }
+
+    const columns = queryResult.length > 0 ? Object.keys(queryResult[0]!) : [];
+    const rows = queryResult.map((r) => columns.map((col) => r[col] ?? null));
+
+    return c.json({
+      columns,
+      rows,
+      total: rows.length,
+      executionMs: Date.now() - t0,
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return c.json({ error: message }, 500);
+  }
+});
 
 // ── Finance summary ───────────────────────────────────────────
 

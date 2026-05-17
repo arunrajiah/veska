@@ -6,7 +6,9 @@ import Link from 'next/link';
 import { Plus, Trash2, Send, X, Download, RefreshCw } from 'lucide-react';
 import { useRealtimeEvents } from '@/hooks/useRealtimeEvents.js';
 import { BulkActionBar } from '@/components/bulk-action-bar.js';
+import { formatCurrency, SUPPORTED_CURRENCIES } from '@/lib/currency.js';
 import type { Invoice } from './page.js';
+import { useTranslations } from 'next-intl';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = 'demo-tenant';
@@ -21,8 +23,8 @@ function authHeaders(): HeadersInit {
 
 function fmt(value: unknown, currency = 'USD'): string {
   const num = typeof value === 'number' ? value : parseFloat(String(value ?? '0'));
-  if (isNaN(num)) return '$0.00';
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(num);
+  if (isNaN(num)) return formatCurrency(0, currency);
+  return formatCurrency(num, currency);
 }
 
 function getStatus(inv: Invoice): string {
@@ -209,6 +211,8 @@ function NewInvoiceSlideover({ onClose, onCreated, tenantId }: NewInvoiceSlideov
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [convertedTotal, setConvertedTotal] = useState<number | null>(null);
+  const [conversionLoading, setConversionLoading] = useState(false);
   const [form, setForm] = useState({
     clientName: '',
     clientEmail: '',
@@ -242,6 +246,30 @@ function NewInvoiceSlideover({ onClose, onCreated, tenantId }: NewInvoiceSlideov
   const taxPct = parseFloat(form.taxPct) || 0;
   const taxAmount = (subtotal * taxPct) / 100;
   const total = subtotal + taxAmount;
+
+  // Fetch conversion hint when currency != USD and total > 0
+  useEffect(() => {
+    if (form.currency === 'USD' || total <= 0) {
+      setConvertedTotal(null);
+      return;
+    }
+    const controller = new AbortController();
+    setConversionLoading(true);
+    fetch(
+      `${API_BASE}/api/v1/currencies/convert?from=${form.currency}&to=USD&amount=${total}`,
+      {
+        headers: { 'X-Veska-Tenant-Id': tenantId, 'X-Veska-Identity-Id': process.env.NEXT_PUBLIC_ADMIN_IDENTITY_ID ?? 'admin' },
+        signal: controller.signal,
+      },
+    )
+      .then((r) => r.json())
+      .then((data: { converted?: number }) => {
+        if (typeof data.converted === 'number') setConvertedTotal(data.converted);
+      })
+      .catch(() => { /* ignore */ })
+      .finally(() => setConversionLoading(false));
+    return () => controller.abort();
+  }, [form.currency, total, tenantId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -353,8 +381,8 @@ function NewInvoiceSlideover({ onClose, onCreated, tenantId }: NewInvoiceSlideov
                   onChange={set}
                   className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 bg-white"
                 >
-                  {['USD', 'EUR', 'GBP', 'INR', 'CAD', 'AUD'].map((c) => (
-                    <option key={c} value={c}>{c}</option>
+                  {SUPPORTED_CURRENCIES.map((c) => (
+                    <option key={c.code} value={c.code}>{c.code} — {c.name}</option>
                   ))}
                 </select>
               </div>
@@ -441,6 +469,15 @@ function NewInvoiceSlideover({ onClose, onCreated, tenantId }: NewInvoiceSlideov
                 <span>Total</span>
                 <span>{fmt(total, form.currency)}</span>
               </div>
+              {form.currency !== 'USD' && total > 0 && (
+                <div className="text-xs text-gray-400 text-right mt-1">
+                  {conversionLoading
+                    ? 'Converting…'
+                    : convertedTotal !== null
+                    ? `≈ ${formatCurrency(convertedTotal, 'USD')} USD at current rates`
+                    : null}
+                </div>
+              )}
             </div>
           </div>
 
@@ -499,6 +536,8 @@ export function InvoicesClient({
   openNew: boolean;
 }) {
   const router = useRouter();
+  const t = useTranslations('invoices');
+  const tCommon = useTranslations('common');
   const [invoices, setInvoices] = useState(initialInvoices);
   const [activeTab, setActiveTab] = useState<FilterTab>('all');
   const [showNew, setShowNew] = useState(openNew);
@@ -654,7 +693,7 @@ export function InvoicesClient({
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-semibold text-gray-900">Invoices</h1>
+          <h1 className="text-2xl font-semibold text-gray-900">{t('title')}</h1>
           {isUpdating && (
             <span className="text-xs text-gray-400 animate-pulse">Updating…</span>
           )}
@@ -665,14 +704,14 @@ export function InvoicesClient({
             className="flex items-center gap-1.5 border border-gray-200 text-gray-700 text-sm px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
           >
             <Download size={15} />
-            Export CSV
+            {tCommon('export')}
           </button>
           <button
             onClick={() => setShowNew(true)}
             className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
           >
             <Plus size={15} />
-            New Invoice
+            {t('newInvoice')}
           </button>
         </div>
       </div>
@@ -741,13 +780,13 @@ export function InvoicesClient({
                     className="rounded border-gray-300 text-gray-900 focus:ring-gray-900"
                   />
                 </th>
-                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">Invoice #</th>
-                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">Client</th>
-                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
-                <th scope="col" className="text-right px-4 py-3 text-xs font-medium text-gray-500">Amount</th>
-                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500 hidden sm:table-cell">Due Date</th>
-                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500 hidden sm:table-cell">Issued</th>
-                <th scope="col" className="px-4 py-3 text-xs font-medium text-gray-500 text-right">Actions</th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">{t('invoiceNumber')}</th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">{t('customer')}</th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">{tCommon('status')}</th>
+                <th scope="col" className="text-right px-4 py-3 text-xs font-medium text-gray-500">{tCommon('amount')}</th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500 hidden sm:table-cell">{t('dueDate')}</th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500 hidden sm:table-cell">{t('issuedDate')}</th>
+                <th scope="col" className="px-4 py-3 text-xs font-medium text-gray-500 text-right">{tCommon('actions')}</th>
               </tr>
             </thead>
             <tbody>

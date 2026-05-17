@@ -3,6 +3,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import {
   LayoutDashboard,
   Inbox,
@@ -299,6 +300,7 @@ export function SidebarNav({ onAIClick }: SidebarNavProps) {
   const isAdmin = userPermissions.includes('*');
   const pendingApprovalCount = usePendingApprovalCount();
   const pathname = usePathname();
+  const t = useTranslations('nav');
 
   const visibleSections = useMemo(() => {
     return NAV_SECTIONS.map((section) => ({
@@ -358,7 +360,15 @@ export function SidebarNav({ onAIClick }: SidebarNavProps) {
               aria-level={2}
               className="px-2 mb-1 text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider"
             >
-              {section.label}
+              {section.label === 'Finance' ? t('finance')
+                : section.label === 'HR' ? t('hr')
+                : section.label === 'Payroll' ? t('payroll')
+                : section.label === 'CRM' ? t('crm')
+                : section.label === 'Support' ? t('support')
+                : section.label === 'Inventory' ? t('inventory')
+                : section.label === 'Projects' ? t('projects')
+                : section.label === 'Developer' ? t('developer')
+                : section.label}
             </p>
           )}
           {section.items.map((item) => (

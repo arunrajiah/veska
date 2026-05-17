@@ -10,6 +10,7 @@ import { GlobalSearchBar } from './search/_components.js';
 import { GlobalSearch, GlobalSearchTrigger } from '@/components/global-search.js';
 import NotificationBell from '@/components/notification-bell.js';
 import { useTheme, type Theme } from '@/components/theme-provider.js';
+import { LanguageSwitcher } from '@/components/language-switcher.js';
 
 const THEME_CYCLE: Theme[] = ['light', 'dark', 'system'];
 
@@ -84,6 +85,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
             <span className="font-semibold text-gray-900 dark:text-white tracking-tight">Veska</span>
             <div className="flex items-center gap-2">
+              <LanguageSwitcher />
               <ThemeToggle />
               <NotificationBell />
               <button

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
   BarChart2,
   Plus,
@@ -10,6 +11,7 @@ import {
   Play,
   ChevronLeft,
   X,
+  Wand2,
 } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
@@ -562,12 +564,20 @@ export function ReportsClient({ reports: initialReports }: ReportsClientProps) {
             Create and run custom reports across your entity data.
           </p>
         </div>
-        <button
-          onClick={() => { setEditing(null); setView('builder'); }}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-700 transition-colors"
-        >
-          <Plus size={15} /> New report
-        </button>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/dashboard/reports/builder"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition-colors"
+          >
+            <Wand2 size={15} /> Build Custom Report
+          </Link>
+          <button
+            onClick={() => { setEditing(null); setView('builder'); }}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-700 transition-colors"
+          >
+            <Plus size={15} /> New report
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -582,12 +592,20 @@ export function ReportsClient({ reports: initialReports }: ReportsClientProps) {
           <BarChart2 size={40} className="text-gray-300 mb-4" />
           <p className="text-sm font-medium text-gray-500">No reports yet</p>
           <p className="text-xs text-gray-400 mt-1">Create your first report to get started.</p>
-          <button
-            onClick={() => { setEditing(null); setView('builder'); }}
-            className="mt-4 flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-700 transition-colors"
-          >
-            <Plus size={15} /> New report
-          </button>
+          <div className="mt-4 flex items-center gap-2">
+            <Link
+              href="/dashboard/reports/builder"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition-colors"
+            >
+              <Wand2 size={15} /> Build Custom Report
+            </Link>
+            <button
+              onClick={() => { setEditing(null); setView('builder'); }}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-700 transition-colors"
+            >
+              <Plus size={15} /> New report
+            </button>
+          </div>
         </div>
       ) : (
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
