@@ -34,3 +34,13 @@
 }
 
 @import './print.css';
+
+/*
+  WCAG AA Compliance Notes:
+  - Gray text on white background: use text-gray-700 (not gray-400) for body text
+  - Indigo button text: white on indigo-600 passes AA (contrast ratio ~4.5:1)
+  - Badge text: ensure text-xs badges use font-medium for readability
+  - text-gray-400 on white fails AA (contrast ~3.1:1) — only use for placeholder/hint text
+  - text-gray-600 on white passes AA (contrast ~5.7:1) — use for secondary body text
+  - text-gray-700 on white passes AA (contrast ~8.6:1) — use for primary body text
+*/

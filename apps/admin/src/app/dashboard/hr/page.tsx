@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { apiFetch } from '@/lib/api.js';
+import { getTranslations } from 'next-intl/server';
 
 interface EmployeeRecord {
   id: string;
@@ -54,6 +55,7 @@ function LeaveBadge({ status }: { status?: string | undefined }) {
 }
 
 export default async function HRDashboard() {
+  const t = await getTranslations('hr');
   let employees: EmployeeRecord[] = [];
   let leaveRecords: LeaveRecord[] = [];
   let departments: DepartmentRecord[] = [];
@@ -82,17 +84,17 @@ export default async function HRDashboard() {
   return (
     <div className="px-4 sm:px-8 py-8 max-w-6xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900">HR Overview</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">{t('title')}</h1>
         <p className="text-sm text-gray-500 mt-0.5">Human resources at a glance</p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
-          { label: 'Total Employees', value: totalEmployees, href: '/dashboard/hr/employees' as Route },
-          { label: 'Pending Leave', value: pendingLeave, href: '/dashboard/hr/leave' as Route },
-          { label: 'Departments', value: departments.length, href: '/dashboard/hr/departments' as Route },
-          { label: 'Active Employees', value: activeEmployees, href: '/dashboard/hr/employees' as Route },
+          { label: t('employees'), value: totalEmployees, href: '/dashboard/hr/employees' as Route },
+          { label: t('leaveRequests'), value: pendingLeave, href: '/dashboard/hr/leave' as Route },
+          { label: t('department'), value: departments.length, href: '/dashboard/hr/departments' as Route },
+          { label: t('employees'), value: activeEmployees, href: '/dashboard/hr/employees' as Route },
         ].map((s) => (
           <Link key={s.label} href={s.href} className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow">
             <p className="text-xs text-gray-500 mb-1">{s.label}</p>
@@ -105,7 +107,7 @@ export default async function HRDashboard() {
         {/* Recent Employees */}
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
           <div className="px-5 py-3 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Recent Employees</h2>
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{t('employees')}</h2>
             <Link href="/dashboard/hr/employees" className="text-xs text-indigo-600 hover:text-indigo-800">View all →</Link>
           </div>
           {recentEmployees.length === 0 ? (
@@ -137,7 +139,7 @@ export default async function HRDashboard() {
         {/* Pending Leave Requests */}
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
           <div className="px-5 py-3 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Pending Leave</h2>
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{t('leaveRequests')}</h2>
             <Link href="/dashboard/hr/leave" className="text-xs text-indigo-600 hover:text-indigo-800">View all →</Link>
           </div>
           {pendingLeaveRecords.length === 0 ? (

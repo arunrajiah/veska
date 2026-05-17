@@ -351,10 +351,12 @@ export function AuditLogClient() {
       <div className="flex flex-wrap items-end gap-3 mb-4">
         {/* Action filter */}
         <div>
-          <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Action</label>
+          <label htmlFor="audit-action-filter" className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Action</label>
           <select
+            id="audit-action-filter"
             value={action}
             onChange={(e) => setAction(e.target.value)}
+            aria-label="Filter by action"
             className="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             {ACTION_OPTIONS.map((a) => (
@@ -365,10 +367,12 @@ export function AuditLogClient() {
 
         {/* Entity type filter */}
         <div>
-          <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Entity Type</label>
+          <label htmlFor="audit-entity-filter" className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Entity Type</label>
           <select
+            id="audit-entity-filter"
             value={entityType}
             onChange={(e) => setEntityType(e.target.value)}
+            aria-label="Filter by entity type"
             className="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             {ENTITY_OPTIONS.map((et) => (
@@ -379,22 +383,26 @@ export function AuditLogClient() {
 
         {/* Date from */}
         <div>
-          <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">From</label>
+          <label htmlFor="audit-from-date" className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">From</label>
           <input
+            id="audit-from-date"
             type="date"
             value={from}
             onChange={(e) => setFrom(e.target.value)}
+            aria-label="From date"
             className="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
 
         {/* Date to */}
         <div>
-          <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">To</label>
+          <label htmlFor="audit-to-date" className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">To</label>
           <input
+            id="audit-to-date"
             type="date"
             value={to}
             onChange={(e) => setTo(e.target.value)}
+            aria-label="To date"
             className="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
@@ -406,16 +414,16 @@ export function AuditLogClient() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">Timestamp</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">User</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Action</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">Entity Type</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">Entity ID</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">Changed Fields</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Details</th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">Timestamp</th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">User</th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Action</th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">Entity Type</th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">Entity ID</th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">Changed Fields</th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Details</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody aria-live="polite" aria-label="Audit log entries">
               {loading ? (
                 <tr>
                   <td colSpan={7}>
@@ -490,6 +498,8 @@ export function AuditLogClient() {
                           {hasDetails ? (
                             <button
                               onClick={() => setExpandedId(expanded ? null : entry.id)}
+                              aria-expanded={expanded}
+                              aria-label={expanded ? 'Hide details' : 'Show details'}
                               className="flex items-center gap-1 text-left hover:text-gray-900 dark:hover:text-gray-200 transition-colors group"
                             >
                               {hasDiff ? (
@@ -535,6 +545,8 @@ export function AuditLogClient() {
               <button
                 onClick={handlePrev}
                 disabled={!hasPrev}
+                aria-disabled={!hasPrev}
+                aria-label="Previous page"
                 className="text-xs border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1.5 rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Previous
@@ -542,6 +554,8 @@ export function AuditLogClient() {
               <button
                 onClick={handleNext}
                 disabled={!hasNext}
+                aria-disabled={!hasNext}
+                aria-label="Next page"
                 className="text-xs border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1.5 rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Next

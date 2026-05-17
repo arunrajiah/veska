@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, X, Check, XCircle } from 'lucide-react';
 import { BulkActionBar } from '@/components/bulk-action-bar.js';
+import { useTranslations } from 'next-intl';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = 'demo-tenant';
@@ -41,9 +42,10 @@ function getField(d: Record<string, unknown>, ...keys: string[]): string {
 }
 
 function StatusBadge({ status }: { status?: string }) {
-  if (status === 'approved') return <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-green-50 text-green-700">Approved</span>;
-  if (status === 'rejected') return <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-red-50 text-red-700">Rejected</span>;
-  return <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-yellow-50 text-yellow-700">Pending</span>;
+  const t = useTranslations('hr');
+  if (status === 'approved') return <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-green-50 text-green-700">{t('leaveStatus.approved')}</span>;
+  if (status === 'rejected') return <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-red-50 text-red-700">{t('leaveStatus.rejected')}</span>;
+  return <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-yellow-50 text-yellow-700">{t('leaveStatus.pending')}</span>;
 }
 
 function LeaveTypeBadge({ type }: { type?: string }) {
@@ -194,6 +196,7 @@ export function LeaveClient({ records: initial }: { records: LeaveRecord[] }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkLoading, setBulkLoading] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const t = useTranslations('hr');
 
   const pending = initial.filter((r) => (r.data.status ?? 'pending') === 'pending');
   const approved = initial.filter((r) => r.data.status === 'approved');
@@ -293,8 +296,8 @@ export function LeaveClient({ records: initial }: { records: LeaveRecord[] }) {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         {[
-          { label: 'Pending Requests', value: pending.length },
-          { label: 'Approved This Month', value: thisMonth },
+          { label: t('leaveStatus.pending'), value: pending.length },
+          { label: t('leaveStatus.approved'), value: thisMonth },
           { label: 'Total Days Taken', value: totalDays },
         ].map((s) => (
           <div key={s.label} className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
@@ -306,10 +309,10 @@ export function LeaveClient({ records: initial }: { records: LeaveRecord[] }) {
 
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-semibold text-gray-900">Leave Requests</h1>
+        <h1 className="text-xl font-semibold text-gray-900">{t('leaveRequests')}</h1>
         <button onClick={() => setShowAdd(true)}
           className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
-          <Plus size={15} /> Request Leave
+          <Plus size={15} /> {t('newLeaveRequest')}
         </button>
       </div>
 
@@ -403,8 +406,8 @@ export function LeaveClient({ records: initial }: { records: LeaveRecord[] }) {
         selectedCount={selected.size}
         onClear={() => setSelected(new Set())}
         actions={[
-          { label: bulkLoading ? 'Processing…' : 'Approve All', onClick: () => void handleBulkAction('approve') },
-          { label: 'Reject All', onClick: () => void handleBulkAction('reject'), variant: 'danger' },
+          { label: bulkLoading ? 'Processing…' : t('approveAll'), onClick: () => void handleBulkAction('approve') },
+          { label: t('rejectAll'), onClick: () => void handleBulkAction('reject'), variant: 'danger' },
         ]}
       />
     </div>

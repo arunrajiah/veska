@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Plus, X, Upload } from 'lucide-react';
 import Link from 'next/link';
 import { ImportModal } from '@/components/import-modal.js';
+import { useTranslations } from 'next-intl';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = 'demo-tenant';
@@ -100,7 +101,7 @@ function AddEmployeeSlideOver({ onClose, onSaved }: { onClose: () => void; onSav
       <div className="relative bg-white w-full max-w-lg h-full overflow-y-auto shadow-xl flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-base font-semibold text-gray-900">Add Employee</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+          <button onClick={onClose} aria-label="Close Add Employee panel" className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
         </div>
         <form onSubmit={(e) => void handleSubmit(e)} className="flex-1 px-6 py-5 space-y-4">
           <div className="grid grid-cols-2 gap-3">
@@ -137,9 +138,9 @@ function AddEmployeeSlideOver({ onClose, onSaved }: { onClose: () => void; onSav
             <label className="block text-xs font-medium text-gray-700 mb-1">Salary (USD)</label>
             <input name="salary" type="number" min="0" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
           </div>
-          {error && <p className="text-xs text-red-500">{error}</p>}
+          {error && <p role="alert" className="text-xs text-red-500">{error}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="submit" disabled={saving} className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
+            <button type="submit" disabled={saving} aria-disabled={saving} className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
               {saving ? 'Saving…' : 'Add Employee'}
             </button>
             <button type="button" onClick={onClose} className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors">
@@ -183,6 +184,7 @@ export function EmployeesClient({ employees: initial }: { employees: EmployeeRec
   const [showAdd, setShowAdd] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const employees = initial;
+  const t = useTranslations('hr');
 
   const total = employees.length;
   const active = employees.filter((e) => e.data.status === 'active').length;
@@ -200,7 +202,7 @@ export function EmployeesClient({ employees: initial }: { employees: EmployeeRec
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4 mb-6">
         {[
-          { label: 'Total Employees', value: total },
+          { label: t('employees'), value: total },
           { label: 'Active', value: active },
           { label: 'On Leave', value: onLeave },
           { label: 'New This Month', value: thisMonth },
@@ -214,15 +216,18 @@ export function EmployeesClient({ employees: initial }: { employees: EmployeeRec
 
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-semibold text-gray-900">Employees</h1>
+        <h1 className="text-xl font-semibold text-gray-900">{t('employees')}</h1>
         <div className="flex items-center gap-2">
-          <button onClick={() => setShowImport(true)}
-            className="flex items-center gap-1.5 border border-gray-200 text-gray-700 text-sm px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+          <button
+            onClick={() => setShowImport(true)}
+            aria-label="Import employees from CSV"
+            className="flex items-center gap-1.5 border border-gray-200 text-gray-700 text-sm px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+          >
             <Upload size={15} /> Import CSV
           </button>
           <button onClick={() => setShowAdd(true)}
             className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
-            <Plus size={15} /> Add Employee
+            <Plus size={15} /> {t('newEmployee')}
           </button>
         </div>
       </div>
@@ -248,13 +253,13 @@ export function EmployeesClient({ employees: initial }: { employees: EmployeeRec
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Name</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Position</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Department</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Email</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Start Date</th>
-                <th className="px-4 py-3" />
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">Name</th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">Position</th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">Department</th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">Email</th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">Start Date</th>
+                <th scope="col" className="px-4 py-3"><span className="sr-only">Actions</span></th>
               </tr>
             </thead>
             <tbody>
@@ -268,7 +273,17 @@ export function EmployeesClient({ employees: initial }: { employees: EmployeeRec
                 const email = getField(d, 'email') || '—';
                 const startDate = getField(d, 'startDate', 'hire_date');
                 return (
-                  <tr key={emp.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                  <tr
+                    key={emp.id}
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        router.push(`/dashboard/hr/employees/${emp.id}`);
+                      }
+                    }}
+                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-inset"
+                  >
                     <td className="px-4 py-3 font-medium text-gray-900">
                       <Link href={`/dashboard/hr/employees/${emp.id}`} className="hover:underline">{name}</Link>
                     </td>
@@ -276,12 +291,15 @@ export function EmployeesClient({ employees: initial }: { employees: EmployeeRec
                     <td className="px-4 py-3 text-gray-500">{dept}</td>
                     <td className="px-4 py-3 text-gray-500 text-xs">{email}</td>
                     <td className="px-4 py-3"><StatusBadge status={d.status} /></td>
-                    <td className="px-4 py-3 text-gray-400 text-xs">{startDate ? startDate.slice(0, 10) : '—'}</td>
+                    <td className="px-4 py-3 text-gray-600 text-xs">{startDate ? startDate.slice(0, 10) : '—'}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
                         <EnrichRowButton employeeId={emp.id} />
-                        <Link href={`/dashboard/hr/employees/${emp.id}`}
-                          className="text-xs text-gray-500 hover:text-gray-900 px-2 py-1 rounded hover:bg-gray-100">View →</Link>
+                        <Link
+                          href={`/dashboard/hr/employees/${emp.id}`}
+                          aria-label={`View employee ${name}`}
+                          className="text-xs text-gray-500 hover:text-gray-900 px-2 py-1 rounded hover:bg-gray-100"
+                        >View →</Link>
                       </div>
                     </td>
                   </tr>

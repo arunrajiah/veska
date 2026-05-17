@@ -140,14 +140,18 @@ export function InboxActions({ requests: initialRequests }: InboxActionsProps) {
                       setRejectComment('');
                     }}
                     disabled={loadingId === req.id}
+                    aria-disabled={loadingId === req.id}
+                    aria-label={`Reject ${req.entityTitle}`}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border border-red-200 text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
                   >
                     <XCircle size={14} />
                     Reject
                   </button>
                   <button
-                    onClick={() => handleApprove(req.id)}
+                    onClick={() => { void handleApprove(req.id); }}
                     disabled={loadingId === req.id}
+                    aria-disabled={loadingId === req.id}
+                    aria-label={`Approve ${req.entityTitle}`}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-green-600 text-white hover:bg-green-700 transition-colors disabled:opacity-50"
                   >
                     {loadingId === req.id ? (

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { apiFetch } from '@/lib/api.js';
 import { Users, UserCheck, TrendingUp, DollarSign } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 
 const TENANT_ID = 'demo-tenant';
 
@@ -44,6 +45,7 @@ interface EntityRecord {
 }
 
 export default async function CRMDashboardPage() {
+  const t = await getTranslations('crm');
   const [leads, contacts, deals] = await Promise.all([
     apiFetch<{ data: EntityRecord[] } | EntityRecord[]>('/api/v1/crm/leads?limit=50', TENANT_ID)
       .then((r) => (Array.isArray(r) ? r : (r as { data: EntityRecord[] }).data ?? []))
@@ -69,7 +71,7 @@ export default async function CRMDashboardPage() {
   return (
     <div className="px-4 sm:px-6 py-8 max-w-6xl">
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-gray-900">CRM</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">{t('title')}</h1>
         <p className="text-sm text-gray-500 mt-0.5">Overview of your pipeline and customer relationships</p>
       </div>
 
@@ -77,7 +79,7 @@ export default async function CRMDashboardPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <Link href="/dashboard/crm/leads" className="bg-white border border-gray-200 rounded-xl shadow-sm px-6 py-5 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-medium uppercase tracking-widest text-gray-400">Total Leads</p>
+            <p className="text-xs font-medium uppercase tracking-widest text-gray-400">{t('leads')}</p>
             <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
               <TrendingUp size={15} className="text-blue-600" />
             </div>
@@ -86,7 +88,7 @@ export default async function CRMDashboardPage() {
         </Link>
         <Link href="/dashboard/crm/contacts" className="bg-white border border-gray-200 rounded-xl shadow-sm px-6 py-5 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-medium uppercase tracking-widest text-gray-400">Contacts</p>
+            <p className="text-xs font-medium uppercase tracking-widest text-gray-400">{t('contacts')}</p>
             <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
               <Users size={15} className="text-indigo-600" />
             </div>
@@ -95,7 +97,7 @@ export default async function CRMDashboardPage() {
         </Link>
         <Link href="/dashboard/crm/deals" className="bg-white border border-gray-200 rounded-xl shadow-sm px-6 py-5 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-medium uppercase tracking-widest text-gray-400">Open Deals</p>
+            <p className="text-xs font-medium uppercase tracking-widest text-gray-400">{t('deals')}</p>
             <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center">
               <UserCheck size={15} className="text-green-600" />
             </div>
@@ -104,7 +106,7 @@ export default async function CRMDashboardPage() {
         </Link>
         <Link href="/dashboard/crm/deals" className="bg-white border border-gray-200 rounded-xl shadow-sm px-6 py-5 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-medium uppercase tracking-widest text-gray-400">Pipeline Value</p>
+            <p className="text-xs font-medium uppercase tracking-widest text-gray-400">{t('pipeline')}</p>
             <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center">
               <DollarSign size={15} className="text-purple-600" />
             </div>

@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 interface PortalInvoice {
   id: string;
@@ -41,9 +42,10 @@ const STATUS_BADGE: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-600',
 };
 
-function PayNowButton({ token, invoiceId }: { token: string; invoiceId: string }) {
+function PayNowButton({ token, invoiceId, invoiceNumber, amount }: { token: string; invoiceId: string; invoiceNumber?: string; amount?: string }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const t = useTranslations('portal');
 
   const handlePay = useCallback(async () => {
     setLoading(true);
@@ -74,11 +76,13 @@ function PayNowButton({ token, invoiceId }: { token: string; invoiceId: string }
       <button
         onClick={() => { void handlePay(); }}
         disabled={loading}
+        aria-disabled={loading}
+        aria-label={`Pay invoice ${invoiceNumber ?? invoiceId}${amount ? ` for ${amount}` : ''}`}
         className="text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 px-3 py-1.5 rounded-lg transition-colors"
       >
-        {loading ? 'Redirecting…' : 'Pay Now'}
+        {loading ? 'Redirecting…' : t('payNow')}
       </button>
-      {error && <span className="text-xs text-red-600">{error}</span>}
+      {error && <span role="alert" aria-live="assertive" className="text-xs text-red-600">{error}</span>}
     </div>
   );
 }
@@ -93,27 +97,28 @@ export function PortalInvoiceList({
   payment?: string;
 }) {
   const router = useRouter();
+  const t = useTranslations('portal');
 
   return (
     <div>
       {/* Payment banners */}
       {payment === 'success' && (
-        <div className="mb-4 flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800">
+        <div role="alert" aria-live="assertive" className="mb-4 flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800">
           <span className="text-green-500">&#10003;</span>
-          Payment successful! Thank you.
+          {t('paymentSuccess')}
         </div>
       )}
       {payment === 'cancelled' && (
-        <div className="mb-4 flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
+        <div role="alert" aria-live="assertive" className="mb-4 flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
           <span>&#9888;</span>
-          Payment was cancelled.
+          {t('paymentCancelled')}
         </div>
       )}
 
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Your Invoices</h1>
+          <h1 className="text-xl font-semibold text-gray-900">{t('invoices')}</h1>
           <p className="text-sm text-gray-500 mt-0.5">
             {invoices.length} invoice{invoices.length !== 1 ? 's' : ''}
           </p>
@@ -128,21 +133,21 @@ export function PortalInvoiceList({
 
       {invoices.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-xl px-8 py-16 text-center">
-          <p className="text-gray-400 text-sm">No invoices found.</p>
+          <p className="text-gray-400 text-sm">{t('noInvoices')}</p>
         </div>
       ) : (
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead className="border-b border-gray-100 bg-gray-50">
               <tr>
-                <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">
+                <th scope="col" className="text-left px-5 py-3 text-xs font-medium text-gray-500">
                   Invoice #
                 </th>
-                <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Date</th>
-                <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Amount</th>
-                <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Status</th>
-                <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Due Date</th>
-                <th className="px-5 py-3" />
+                <th scope="col" className="text-left px-5 py-3 text-xs font-medium text-gray-500">Date</th>
+                <th scope="col" className="text-left px-5 py-3 text-xs font-medium text-gray-500">Amount</th>
+                <th scope="col" className="text-left px-5 py-3 text-xs font-medium text-gray-500">Status</th>
+                <th scope="col" className="text-left px-5 py-3 text-xs font-medium text-gray-500">Due Date</th>
+                <th scope="col" className="px-5 py-3"><span className="sr-only">Actions</span></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -160,6 +165,7 @@ export function PortalInvoiceList({
                     </td>
                     <td className="px-5 py-3">
                       <span
+                        aria-label={`Status: ${status}`}
                         className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_BADGE[status] ?? 'bg-gray-100 text-gray-600'}`}
                       >
                         {status}
@@ -168,7 +174,12 @@ export function PortalInvoiceList({
                     <td className="px-5 py-3 text-gray-500">{formatDate(inv.dueDate)}</td>
                     <td className="px-5 py-3 text-right">
                       {canPay ? (
-                        <PayNowButton token={token} invoiceId={inv.id} />
+                        <PayNowButton
+                          token={token}
+                          invoiceId={inv.id}
+                          invoiceNumber={invoiceNum}
+                          amount={formatAmount(inv.total, inv.currency ?? 'USD')}
+                        />
                       ) : null}
                     </td>
                   </tr>

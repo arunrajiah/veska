@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import {
   getOnboardingData,
   saveOnboardingData,
@@ -137,10 +138,11 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 // ─── Step Indicator ──────────────────────────────────────────────────────────
 
-function StepIndicator({ current }: { current: number }) {
+function StepIndicator({ current, labels }: { current: number; labels?: string[] }) {
+  const displayLabels = labels ?? STEP_LABELS;
   return (
     <div className="flex items-center justify-center gap-0 mb-8">
-      {STEP_LABELS.map((label, idx) => {
+      {displayLabels.map((label, idx) => {
         const stepNum = idx + 1;
         const isCompleted = stepNum < current;
         const isCurrent = stepNum === current;
@@ -168,7 +170,7 @@ function StepIndicator({ current }: { current: number }) {
                 {label}
               </span>
             </div>
-            {idx < STEP_LABELS.length - 1 && (
+            {idx < displayLabels.length - 1 && (
               <div
                 className={[
                   'h-0.5 w-12 mx-1 mb-5 transition-colors',
@@ -301,7 +303,7 @@ function Step1({ onNext }: { onNext: () => void }) {
   );
 }
 
-// ─── Step 2: Enable Modules ──────────────────────────────────────────────────
+// ─── Step 2: Enable Modules ─────────────────────────────────────────────────
 
 function Step2({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
   const data = getOnboardingData();
@@ -833,6 +835,7 @@ function Step5({ onBack }: { onBack: () => void }) {
 
 export function OnboardingWizard({ step }: { step: number }) {
   const router = useRouter();
+  const t = useTranslations('onboarding');
 
   function goTo(targetStep: number) {
     setOnboardingStep(targetStep);
@@ -859,7 +862,7 @@ export function OnboardingWizard({ step }: { step: number }) {
           <p className="text-xs text-gray-400 mt-0.5">Setup wizard</p>
         </div>
 
-        <StepIndicator current={step} />
+        <StepIndicator current={step} labels={[t('step1'), t('step2'), t('step3'), t('step4'), t('step5')]} />
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 sm:p-8">
           {step === 1 && <Step1 onNext={next} />}

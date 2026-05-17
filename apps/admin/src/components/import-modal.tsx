@@ -163,7 +163,7 @@ export function ImportModal({ entityType, onComplete, onClose }: ImportModalProp
             <Upload size={18} className="text-indigo-600" />
             <h2 className="text-sm font-semibold text-gray-900">Import {config.label}</h2>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+          <button onClick={onClose} aria-label="Close import modal" className="text-gray-400 hover:text-gray-600 transition-colors">
             <X size={16} />
           </button>
         </div>
@@ -247,7 +247,7 @@ export function ImportModal({ entityType, onComplete, onClose }: ImportModalProp
 
           {/* Result */}
           {state === 'done' && result && (
-            <div className="bg-green-50 border border-green-100 rounded-xl px-4 py-3">
+            <div role="alert" className="bg-green-50 border border-green-100 rounded-xl px-4 py-3">
               <p className="text-sm font-medium text-green-800">
                 {result.imported} {config.label.toLowerCase()} imported
                 {result.skipped > 0 && `, ${result.skipped} skipped`}
@@ -263,7 +263,7 @@ export function ImportModal({ entityType, onComplete, onClose }: ImportModalProp
           )}
 
           {state === 'error' && result && (
-            <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3">
+            <div role="alert" className="bg-red-50 border border-red-100 rounded-xl px-4 py-3">
               <p className="text-sm font-medium text-red-800">Import failed</p>
               {result.errors.slice(0, 3).map((e, i) => (
                 <p key={i} className="text-xs text-red-600 mt-0.5">{e}</p>

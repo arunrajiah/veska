@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { CheckSquare, ExternalLink } from 'lucide-react';
 import { InboxActions } from './_actions';
+import { getTranslations } from 'next-intl/server';
 
 interface ApprovalRequest {
   id: string;
@@ -78,6 +79,7 @@ interface PageProps {
 export default async function ApprovalsPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const activeTab = params.tab === 'all' ? 'all' : 'inbox';
+  const t = await getTranslations('approvals');
 
   const [pending, all] = await Promise.all([fetchPending(), fetchAll()]);
 
@@ -87,7 +89,7 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-1">
           <CheckSquare size={24} className="text-indigo-600" />
-          <h1 className="text-2xl font-bold text-gray-900">Approvals</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
         </div>
         <p className="text-sm text-gray-500 ml-9">
           Review and act on pending approval requests.
@@ -106,7 +108,10 @@ export default async function ApprovalsPage({ searchParams }: PageProps) {
         >
           Inbox
           {pending.length > 0 && (
-            <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700">
+            <span
+              aria-label={`${pending.length} pending approvals`}
+              className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700"
+            >
               {pending.length}
             </span>
           )}
@@ -148,13 +153,13 @@ function AllRequestsTable({ requests }: { requests: ApprovalRequest[] }) {
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-gray-100 bg-gray-50">
-            <th className="text-left px-4 py-3 font-medium text-gray-500">Entity Title</th>
-            <th className="text-left px-4 py-3 font-medium text-gray-500">Type</th>
-            <th className="text-left px-4 py-3 font-medium text-gray-500">Status</th>
-            <th className="text-left px-4 py-3 font-medium text-gray-500">Step</th>
-            <th className="text-left px-4 py-3 font-medium text-gray-500">Requested</th>
-            <th className="text-left px-4 py-3 font-medium text-gray-500">Updated</th>
-            <th className="text-left px-4 py-3 font-medium text-gray-500">Actions</th>
+            <th scope="col" className="text-left px-4 py-3 font-medium text-gray-500">Entity Title</th>
+            <th scope="col" className="text-left px-4 py-3 font-medium text-gray-500">Type</th>
+            <th scope="col" className="text-left px-4 py-3 font-medium text-gray-500">Status</th>
+            <th scope="col" className="text-left px-4 py-3 font-medium text-gray-500">Step</th>
+            <th scope="col" className="text-left px-4 py-3 font-medium text-gray-500">Requested</th>
+            <th scope="col" className="text-left px-4 py-3 font-medium text-gray-500">Updated</th>
+            <th scope="col" className="text-left px-4 py-3 font-medium text-gray-500">Actions</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-50">

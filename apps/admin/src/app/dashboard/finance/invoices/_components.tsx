@@ -181,6 +181,8 @@ function RecurringTab({ tenantId }: { tenantId: string }) {
 function Toast({ message, type }: { message: string; type: 'success' | 'error' }) {
   return (
     <div
+      role="alert"
+      aria-live="assertive"
       className={`fixed bottom-6 right-6 z-[100] px-4 py-3 rounded-xl shadow-lg text-sm font-medium transition-all ${
         type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
       }`}
@@ -316,7 +318,7 @@ function NewInvoiceSlideover({ onClose, onCreated, tenantId }: NewInvoiceSlideov
       <div className="relative ml-auto w-full max-w-lg bg-white h-full overflow-y-auto shadow-2xl flex flex-col">
         <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
           <h2 className="text-sm font-semibold text-gray-900">New Invoice</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-700">
+          <button onClick={onClose} aria-label="Close new invoice panel" className="text-gray-400 hover:text-gray-700">
             <X size={18} />
           </button>
         </div>
@@ -797,8 +799,15 @@ export function InvoicesClient({
                 return (
                   <tr
                     key={inv.id}
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        router.push(`/dashboard/finance/invoices/${inv.id}`);
+                      }
+                    }}
                     onClick={() => router.push(`/dashboard/finance/invoices/${inv.id}`)}
-                    className={`border-b border-gray-50 last:border-0 hover:bg-gray-50/50 cursor-pointer ${isChecked ? 'bg-blue-50/30' : ''}`}
+                    className={`border-b border-gray-50 last:border-0 hover:bg-gray-50/50 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-inset ${isChecked ? 'bg-blue-50/30' : ''}`}
                   >
                     <td
                       className="px-4 py-3 w-8"
@@ -818,6 +827,7 @@ export function InvoicesClient({
                     <td className="px-4 py-3 font-medium text-gray-900">{getClientName(inv)}</td>
                     <td className="px-4 py-3">
                       <span
+                        aria-label={`Status: ${status}`}
                         className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-600'}`}
                       >
                         {status}

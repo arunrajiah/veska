@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Plus, X, AlertTriangle } from 'lucide-react';
 import { useRealtimeEvents } from '@/hooks/useRealtimeEvents.js';
 import type { Ticket } from './page.js';
+import { useTranslations } from 'next-intl';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = 'demo-tenant';
@@ -127,9 +128,9 @@ function NewTicketSlideOver({ open, onClose }: { open: boolean; onClose: () => v
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
             </div>
           </div>
-          {error && <p className="text-xs text-red-500">{error}</p>}
+          {error && <p role="alert" className="text-xs text-red-500">{error}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="submit" disabled={saving}
+            <button type="submit" disabled={saving} aria-disabled={saving}
               className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
               {saving ? 'Creating…' : 'Create Ticket'}
             </button>
@@ -153,6 +154,7 @@ export function TicketsClient({ tickets: initialTickets }: { tickets: Ticket[] }
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [isUpdating, setIsUpdating] = useState(false);
+  const t = useTranslations('support');
 
   // Realtime: refresh ticket list when ticket events arrive via SSE
   const handleRealtimeUpdate = useCallback(() => {
@@ -188,7 +190,7 @@ export function TicketsClient({ tickets: initialTickets }: { tickets: Ticket[] }
       <div className="flex items-center justify-between mb-6">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold text-gray-900">Support Tickets</h1>
+            <h1 className="text-2xl font-semibold text-gray-900">{t('title')} {t('tickets')}</h1>
             {isUpdating && (
               <span className="text-xs text-gray-400 animate-pulse">Updating…</span>
             )}
@@ -200,17 +202,17 @@ export function TicketsClient({ tickets: initialTickets }: { tickets: Ticket[] }
           className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
         >
           <Plus size={15} />
-          New Ticket
+          {t('newTicket')}
         </button>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         {[
-          { label: 'Total', value: total, color: 'text-gray-900' },
-          { label: 'Open', value: openCount, color: 'text-blue-600' },
-          { label: 'In Progress', value: inProgressCount, color: 'text-yellow-600' },
-          { label: 'Resolved Today', value: resolvedToday, color: 'text-green-600' },
+          { label: t('tickets'), value: total, color: 'text-gray-900' },
+          { label: t('status.open'), value: openCount, color: 'text-blue-600' },
+          { label: t('status.in_progress'), value: inProgressCount, color: 'text-yellow-600' },
+          { label: t('status.resolved'), value: resolvedToday, color: 'text-green-600' },
         ].map((s) => (
           <div key={s.label} className="bg-white border border-gray-200 rounded-xl px-5 py-4 shadow-sm">
             <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
@@ -239,6 +241,7 @@ export function TicketsClient({ tickets: initialTickets }: { tickets: Ticket[] }
         <select
           value={priorityFilter}
           onChange={(e) => setPriorityFilter(e.target.value)}
+          aria-label="Filter by priority"
           className="ml-auto border border-gray-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-gray-900"
         >
           <option value="all">All Priorities</option>
@@ -259,14 +262,14 @@ export function TicketsClient({ tickets: initialTickets }: { tickets: Ticket[] }
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">#</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Subject</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Contact</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Assigned To</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Priority</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Created</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">SLA</th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">#</th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">Subject</th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">Contact</th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">{t('assignee')}</th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">{t('priority')}</th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">Created</th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">SLA</th>
               </tr>
             </thead>
             <tbody>
@@ -276,7 +279,14 @@ export function TicketsClient({ tickets: initialTickets }: { tickets: Ticket[] }
                 return (
                   <tr
                     key={ticket.id}
-                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 cursor-pointer"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        router.push(`/dashboard/support/tickets/${ticket.id}`);
+                      }
+                    }}
+                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-inset"
                     onClick={() => router.push(`/dashboard/support/tickets/${ticket.id}`)}
                   >
                     <td className="px-4 py-3">
@@ -295,7 +305,10 @@ export function TicketsClient({ tickets: initialTickets }: { tickets: Ticket[] }
                     </td>
                     <td className="px-4 py-3 text-xs text-gray-500">{d.assignedTo ?? '—'}</td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${PRIORITY_COLORS[d.priority ?? 'medium'] ?? 'bg-gray-100 text-gray-600'}`}>
+                      <span
+                        aria-label={`Priority: ${d.priority ?? 'medium'}`}
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${PRIORITY_COLORS[d.priority ?? 'medium'] ?? 'bg-gray-100 text-gray-600'}`}
+                      >
                         {d.priority ?? 'medium'}
                       </span>
                     </td>

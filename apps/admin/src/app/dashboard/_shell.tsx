@@ -138,7 +138,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <span className="font-semibold text-gray-900 dark:text-white tracking-tight flex-1">Veska</span>
             <GlobalSearchTrigger onClick={() => setSearchOpen(true)} />
           </header>
-          <main className="flex-1 min-w-0">{children}</main>
+          <main id="main-content" className="flex-1 min-w-0">{children}</main>
         </div>
 
         {/* Ask Veska floating panel — accessible from every dashboard page */}

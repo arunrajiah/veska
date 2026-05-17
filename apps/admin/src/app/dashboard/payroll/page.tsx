@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import {
   DollarSign,
   Users,
@@ -48,6 +49,7 @@ function fmtDate(s?: string) {
 export default function PayrollPage() {
   const [runs, setRuns] = useState<PayrollRun[]>([]);
   const [loading, setLoading] = useState(true);
+  const t = useTranslations('payroll');
 
   useEffect(() => {
     async function load() {
@@ -83,7 +85,7 @@ export default function PayrollPage() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Payroll</h1>
+          <h1 className="text-2xl font-semibold text-gray-900">{t('title')}</h1>
           <p className="text-sm text-gray-500 mt-0.5">Manage pay runs, payslips, and payroll settings</p>
         </div>
         <Link
@@ -91,18 +93,18 @@ export default function PayrollPage() {
           className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
         >
           <Play size={14} />
-          Run Payroll
+          {t('runPayroll')}
         </Link>
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div role="region" aria-label="Payroll summary" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-xl border border-gray-200 p-5 flex items-start gap-4">
           <div className="p-2 bg-indigo-50 rounded-lg">
             <Users size={20} className="text-indigo-600" />
           </div>
           <div>
-            <p className="text-sm text-gray-500">Total Headcount</p>
+            <p className="text-sm text-gray-500">{t('totalHeadcount')}</p>
             <p className="text-2xl font-semibold text-gray-900 mt-0.5">{totalHeadcount || '—'}</p>
           </div>
         </div>
@@ -111,7 +113,7 @@ export default function PayrollPage() {
             <Calendar size={20} className="text-green-600" />
           </div>
           <div>
-            <p className="text-sm text-gray-500">Last Payroll Run</p>
+            <p className="text-sm text-gray-500">{t('lastRun')}</p>
             <p className="text-lg font-semibold text-gray-900 mt-0.5">
               {lastRun ? fmtDate(lastRun.data.processedAt ?? lastRun.data.period) : '—'}
             </p>
@@ -122,7 +124,7 @@ export default function PayrollPage() {
             <TrendingUp size={20} className="text-blue-600" />
           </div>
           <div>
-            <p className="text-sm text-gray-500">Next Payroll Date</p>
+            <p className="text-sm text-gray-500">{t('nextRun')}</p>
             <p className="text-lg font-semibold text-gray-900 mt-0.5">
               {nextPayroll.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
             </p>
@@ -133,7 +135,7 @@ export default function PayrollPage() {
             <DollarSign size={20} className="text-amber-600" />
           </div>
           <div>
-            <p className="text-sm text-gray-500">Total Payroll Cost This Month</p>
+            <p className="text-sm text-gray-500">{t('totalCost')}</p>
             <p className="text-2xl font-semibold text-gray-900 mt-0.5">
               {totalCostThisMonth > 0 ? fmt(totalCostThisMonth) : '—'}
             </p>
@@ -144,7 +146,7 @@ export default function PayrollPage() {
       {/* Recent payroll runs */}
       <div className="bg-white rounded-xl border border-gray-200">
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-          <h2 className="text-sm font-semibold text-gray-900">Recent Payroll Runs</h2>
+          <h2 className="text-sm font-semibold text-gray-900">{t('payrollRuns')}</h2>
           <Link href="/dashboard/payroll/runs" className="text-xs text-indigo-600 hover:text-indigo-700 font-medium">
             View all
           </Link>
@@ -169,11 +171,11 @@ export default function PayrollPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-xs text-gray-500 border-b border-gray-100 bg-gray-50">
-                  <th className="text-left px-5 py-3 font-medium">Period</th>
-                  <th className="text-left px-5 py-3 font-medium">Status</th>
-                  <th className="text-left px-5 py-3 font-medium">Employee Count</th>
-                  <th className="text-right px-5 py-3 font-medium">Total Amount</th>
-                  <th className="text-right px-5 py-3 font-medium">Actions</th>
+                  <th scope="col" className="text-left px-5 py-3 font-medium">Period</th>
+                  <th scope="col" className="text-left px-5 py-3 font-medium">Status</th>
+                  <th scope="col" className="text-left px-5 py-3 font-medium">Employee Count</th>
+                  <th scope="col" className="text-right px-5 py-3 font-medium">Total Amount</th>
+                  <th scope="col" className="text-right px-5 py-3 font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -214,8 +216,8 @@ export default function PayrollPage() {
       {/* Quick links */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
-          { href: '/dashboard/payroll/runs', icon: Play, label: 'Payroll Runs', desc: 'Manage and process pay runs' },
-          { href: '/dashboard/payroll/payslips', icon: FileText, label: 'Payslips', desc: 'View and download payslips' },
+          { href: '/dashboard/payroll/runs', icon: Play, label: t('payrollRuns'), desc: 'Manage and process pay runs' },
+          { href: '/dashboard/payroll/payslips', icon: FileText, label: t('payslips'), desc: 'View and download payslips' },
           { href: '/dashboard/settings', icon: Settings, label: 'Settings', desc: 'Configure payroll settings' },
         ].map((link) => (
           <Link
