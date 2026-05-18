@@ -61,17 +61,17 @@ export default async function HRDashboard() {
   let departments: DepartmentRecord[] = [];
 
   try {
-    const res = await apiFetch<{ data: EmployeeRecord[] } | EmployeeRecord[]>('/api/v1/hr/employees?limit=50', 'demo-tenant');
+    const res = await apiFetch<{ data: EmployeeRecord[] } | EmployeeRecord[]>('/api/v1/hr/employees?limit=50', process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant');
     employees = Array.isArray(res) ? res : (res as { data: EmployeeRecord[] }).data ?? [];
   } catch { employees = []; }
 
   try {
-    const res = await apiFetch<{ data: LeaveRecord[] } | LeaveRecord[]>('/api/v1/hr/leave?limit=50', 'demo-tenant');
+    const res = await apiFetch<{ data: LeaveRecord[] } | LeaveRecord[]>('/api/v1/hr/leave?limit=50', process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant');
     leaveRecords = Array.isArray(res) ? res : (res as { data: LeaveRecord[] }).data ?? [];
   } catch { leaveRecords = []; }
 
   try {
-    const res = await apiFetch<{ data: DepartmentRecord[] } | DepartmentRecord[]>('/api/v1/hr/departments?limit=50', 'demo-tenant');
+    const res = await apiFetch<{ data: DepartmentRecord[] } | DepartmentRecord[]>('/api/v1/hr/departments?limit=50', process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant');
     departments = Array.isArray(res) ? res : (res as { data: DepartmentRecord[] }).data ?? [];
   } catch { departments = []; }
 

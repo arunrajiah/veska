@@ -22,7 +22,7 @@ const TENANT_ID = 'demo';
 async function fetchChannels(): Promise<Channel[]> {
   try {
     const res = await fetch(
-      `http://localhost:3001/api/v1/notification-channels/channels?tenantId=${TENANT_ID}`,
+      `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/notification-channels/channels?tenantId=${TENANT_ID}`,
       { cache: 'no-store' }
     );
     if (!res.ok) return [];
@@ -36,7 +36,7 @@ async function fetchChannels(): Promise<Channel[]> {
 async function fetchRoutes(): Promise<Route[]> {
   try {
     const res = await fetch(
-      `http://localhost:3001/api/v1/notification-channels/routes?tenantId=${TENANT_ID}`,
+      `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/notification-channels/routes?tenantId=${TENANT_ID}`,
       { cache: 'no-store' }
     );
     if (!res.ok) return [];

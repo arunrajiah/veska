@@ -54,17 +54,17 @@ export default async function InventoryDashboard() {
   let movements: MovementRecord[] = [];
 
   try {
-    const res = await apiFetch<{ data: ProductRecord[] } | ProductRecord[]>('/api/v1/inventory/products?limit=50', 'demo-tenant');
+    const res = await apiFetch<{ data: ProductRecord[] } | ProductRecord[]>('/api/v1/inventory/products?limit=50', process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant');
     products = Array.isArray(res) ? res : (res as { data: ProductRecord[] }).data ?? [];
   } catch { products = []; }
 
   try {
-    const res = await apiFetch<{ data: WarehouseRecord[] } | WarehouseRecord[]>('/api/v1/inventory/warehouses?limit=20', 'demo-tenant');
+    const res = await apiFetch<{ data: WarehouseRecord[] } | WarehouseRecord[]>('/api/v1/inventory/warehouses?limit=20', process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant');
     warehouses = Array.isArray(res) ? res : (res as { data: WarehouseRecord[] }).data ?? [];
   } catch { warehouses = []; }
 
   try {
-    const res = await apiFetch<{ data: MovementRecord[] } | MovementRecord[]>('/api/v1/inventory/movements?limit=50', 'demo-tenant');
+    const res = await apiFetch<{ data: MovementRecord[] } | MovementRecord[]>('/api/v1/inventory/movements?limit=50', process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant');
     movements = Array.isArray(res) ? res : (res as { data: MovementRecord[] }).data ?? [];
   } catch { movements = []; }
 

@@ -3,7 +3,7 @@ import { GRNClient } from './_components.js';
 import type { GRN } from './_components.js';
 
 export default async function GRNListPage() {
-  const tenantId = 'demo-tenant';
+  const tenantId = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
   let grns: GRN[] = [];
   try {

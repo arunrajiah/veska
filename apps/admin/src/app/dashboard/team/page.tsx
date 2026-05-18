@@ -12,7 +12,7 @@ interface User {
 
 async function getUsers(): Promise<User[]> {
   try {
-    const res = await fetch('http://localhost:3001/api/v1/users?tenantId=demo', {
+    const res = await fetch((process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/users?tenantId=demo', {
       cache: 'no-store',
     });
     if (!res.ok) return [];

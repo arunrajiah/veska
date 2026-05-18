@@ -10,7 +10,7 @@ const PLAN_LIMITS = {
 } as const;
 
 const ADMIN_URL = process.env.NEXT_PUBLIC_VESKA_ADMIN_URL ?? '';
-const TENANT_ID = 'demo-tenant';
+const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 interface ProductVariant {
   id: string;

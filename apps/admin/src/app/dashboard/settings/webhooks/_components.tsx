@@ -16,18 +16,19 @@ import {
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
+function getCookieToken(): string {
+  if (typeof document === 'undefined') return '';
+  const match = document.cookie.split('; ').find((row) => row.startsWith('veska_session='));
+  return match ? decodeURIComponent(match.split('=')[1] ?? '') : '';
+}
+
 function apiHeaders(): HeadersInit {
-  const tenantId =
-    typeof window !== 'undefined' ? (localStorage.getItem('veska_tenant_id') ?? 'demo-tenant') : 'demo-tenant';
-  const identityId =
-    typeof window !== 'undefined' ? (localStorage.getItem('veska_identity_id') ?? 'admin') : 'admin';
-  const token =
-    typeof window !== 'undefined' ? (localStorage.getItem('veska_token') ?? '') : '';
+  const tenantId = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
+  const token = getCookieToken();
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     'X-Veska-Tenant-Id': tenantId,
-    'X-Veska-Identity-Id': identityId,
   };
   if (token) headers['Authorization'] = `Bearer ${token}`;
   return headers;
@@ -249,8 +250,6 @@ export function WebhookSettingsClient({
     // Optimistically re-fetch to update local state
     void (async () => {
       try {
-        const tenantId =
-          typeof window !== 'undefined' ? (localStorage.getItem('veska_tenant_id') ?? 'demo-tenant') : 'demo-tenant';
         const res = await fetch(`${API_BASE}/api/v1/webhooks/endpoints`, {
           headers: apiHeaders(),
         });

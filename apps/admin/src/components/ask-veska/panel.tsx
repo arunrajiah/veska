@@ -80,11 +80,14 @@ const SUGGESTED_PROMPTS = [
 ];
 
 function getAuthHeaders(): Record<string, string> {
-  const token =
-    typeof window !== 'undefined' ? (localStorage.getItem('veska_token') ?? '') : '';
+  const cookieMatch =
+    typeof document !== 'undefined'
+      ? document.cookie.split('; ').find((row) => row.startsWith('veska_session='))
+      : undefined;
+  const token = cookieMatch ? decodeURIComponent(cookieMatch.split('=')[1] ?? '') : '';
   return {
     'Content-Type': 'application/json',
-    'X-Veska-Tenant-Id': 'demo-tenant',
+    'X-Veska-Tenant-Id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 }

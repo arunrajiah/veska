@@ -33,7 +33,7 @@ export interface Contract {
 
 export default async function VendorDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const tenantId = 'demo-tenant';
+  const tenantId = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
   let vendor: VendorDetail | null = null;
   let contracts: Contract[] = [];

@@ -34,7 +34,7 @@ export default async function TemplateDetailPage({
   try {
     const res = await fetch(`${API_BASE}/document-templates/${id}`, {
       cache: 'no-store',
-      headers: { 'x-tenant-id': 'demo-tenant' },
+      headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
     });
     if (res.ok) {
       template = await res.json() as DocumentTemplate;
@@ -46,7 +46,7 @@ export default async function TemplateDetailPage({
   try {
     const res = await fetch(`${API_BASE}/document-templates/${id}/documents`, {
       cache: 'no-store',
-      headers: { 'x-tenant-id': 'demo-tenant' },
+      headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
     });
     if (res.ok) {
       const json = await res.json() as RenderedDocument[] | { results?: RenderedDocument[]; data?: RenderedDocument[] };

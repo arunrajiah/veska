@@ -7,7 +7,7 @@ export default async function WarehousesPage() {
   try {
     const res = await apiFetch<{ data: WarehouseRecord[] } | WarehouseRecord[]>(
       '/api/v1/inventory/warehouses?limit=20',
-      'demo-tenant',
+      process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
     );
     warehouses = Array.isArray(res) ? res : (res as { data: WarehouseRecord[] }).data ?? [];
   } catch {

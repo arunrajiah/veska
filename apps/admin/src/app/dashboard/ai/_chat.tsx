@@ -91,7 +91,7 @@ export default function AIChatShell({ initialConversations }: AIChatShellProps) 
 
   async function createConversation(firstMessage?: string): Promise<Conversation | null> {
     try {
-      const res = await fetch('http://localhost:3001/api/v1/ai/conversations', {
+      const res = await fetch((process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/ai/conversations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -114,7 +114,7 @@ export default function AIChatShell({ initialConversations }: AIChatShellProps) 
   async function loadMessages(convId: string) {
     try {
       const res = await fetch(
-        `http://localhost:3001/api/v1/ai/conversations/${convId}/messages`
+        `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/ai/conversations/${convId}/messages`
       );
       if (!res.ok) return;
       const data = await res.json();
@@ -156,7 +156,7 @@ export default function AIChatShell({ initialConversations }: AIChatShellProps) 
 
     try {
       const res = await fetch(
-        `http://localhost:3001/api/v1/ai/conversations/${targetConvId}/chat`,
+        `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/ai/conversations/${targetConvId}/chat`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

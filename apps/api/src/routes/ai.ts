@@ -13,7 +13,7 @@ export const aiRouter = new Hono<{ Variables: TenantContext }>();
 
 // ── POST /insights — AI-generated KPI insights ────────────────
 
-aiRouter.post('/insights', aiLimit(), async (c) => {
+aiRouter.post('/insights', aiLimit, async (c) => {
   const { db, tenantId } = c.get('tenantCtx');
   const body = await c.req.json<{ focus?: 'finance' | 'hr' | 'sales' | 'ops' }>().catch(() => ({ focus: undefined }));
   const focus = body.focus;

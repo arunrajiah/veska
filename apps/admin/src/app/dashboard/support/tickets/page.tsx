@@ -20,7 +20,7 @@ export interface Ticket {
 }
 
 export default async function TicketsPage() {
-  const tenantId = 'demo-tenant';
+  const tenantId = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
   let tickets: Ticket[] = [];
   try {

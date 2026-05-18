@@ -6,7 +6,7 @@ async function fetchSettings(): Promise<TenantSettings> {
   try {
     const res = await fetch(`${API_BASE}/tenant-settings`, {
       headers: {
-        'x-tenant-id': 'demo-tenant',
+        'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
         'Content-Type': 'application/json',
       },
       cache: 'no-store',

@@ -52,7 +52,7 @@ export default function WebhookForm() {
       };
       if (description.trim()) body.description = description.trim();
 
-      const res = await fetch('http://localhost:3001/api/v1/webhooks/endpoints', {
+      const res = await fetch((process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/webhooks/endpoints', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),

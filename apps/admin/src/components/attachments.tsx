@@ -45,7 +45,7 @@ export function AttachmentsPanel({ entityType, entityId, tenantId = 'demo' }: At
     setError(null);
     try {
       const res = await fetch(
-        `http://localhost:3001/api/v1/attachments?entityType=${encodeURIComponent(entityType)}&entityId=${encodeURIComponent(entityId)}&tenantId=${encodeURIComponent(tenantId)}`
+        `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/attachments?entityType=${encodeURIComponent(entityType)}&entityId=${encodeURIComponent(entityId)}&tenantId=${encodeURIComponent(tenantId)}`
       );
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
@@ -72,7 +72,7 @@ export function AttachmentsPanel({ entityType, entityId, tenantId = 'demo' }: At
       form.append('entityId', entityId);
       form.append('file', file);
 
-      const res = await fetch('http://localhost:3001/api/v1/attachments/upload', {
+      const res = await fetch((process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/attachments/upload', {
         method: 'POST',
         body: form,
       });
@@ -89,7 +89,7 @@ export function AttachmentsPanel({ entityType, entityId, tenantId = 'demo' }: At
     // Optimistic removal
     setAttachments((prev) => prev.filter((a) => a.id !== id));
     try {
-      const res = await fetch(`http://localhost:3001/api/v1/attachments/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/attachments/${id}`, {
         method: 'DELETE',
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);

@@ -61,7 +61,7 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
   let movements: MovementRecord[] = [];
 
   try {
-    record = await apiFetch<ProductRecord>(`/api/v1/inventory/products/${id}`, 'demo-tenant');
+    record = await apiFetch<ProductRecord>(`/api/v1/inventory/products/${id}`, process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant');
   } catch {
     record = null;
   }
@@ -70,7 +70,7 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
     try {
       const res = await apiFetch<{ data: MovementRecord[] } | MovementRecord[]>(
         `/api/v1/inventory/movements?productId=${id}&limit=10`,
-        'demo-tenant',
+        process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
       );
       movements = Array.isArray(res) ? res : (res as { data: MovementRecord[] }).data ?? [];
     } catch {

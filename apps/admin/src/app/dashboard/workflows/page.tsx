@@ -9,7 +9,7 @@ export default async function WorkflowsPage() {
     const res = await fetch(`${API_BASE}/workflows?limit=50`, {
       headers: {
         'Content-Type': 'application/json',
-        'x-tenant-id': 'demo-tenant',
+        'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
       },
       cache: 'no-store',
     });

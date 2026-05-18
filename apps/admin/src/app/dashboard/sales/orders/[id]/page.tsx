@@ -47,7 +47,7 @@ export default async function SalesOrderDetailPage({ params }: { params: { id: s
   let record: OrderRecord | null = null;
 
   try {
-    record = await apiFetch<OrderRecord>(`/api/v1/sales/orders/${id}`, 'demo-tenant');
+    record = await apiFetch<OrderRecord>(`/api/v1/sales/orders/${id}`, process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant');
   } catch {
     record = null;
   }

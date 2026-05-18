@@ -9,7 +9,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 function tenantHeaders(): HeadersInit {
   return {
     'Content-Type': 'application/json',
-    'x-tenant-id': 'demo-tenant',
+    'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
   };
 }
 

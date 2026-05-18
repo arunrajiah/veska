@@ -127,7 +127,7 @@ export function AIChatClient() {
     async function loadConversations() {
       try {
         const res = await fetch(`${API_BASE}/api/v1/ai/conversations`, {
-          headers: { 'x-tenant-id': 'demo-tenant' },
+          headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
         });
         if (!res.ok) return;
         const data = await res.json();
@@ -147,7 +147,7 @@ export function AIChatClient() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-tenant-id': 'demo-tenant',
+          'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
         },
         body: JSON.stringify({
           title: firstMessage
@@ -175,7 +175,7 @@ export function AIChatClient() {
   const loadMessages = useCallback(async (convId: string) => {
     try {
       const res = await fetch(`${API_BASE}/api/v1/ai/conversations/${convId}/messages`, {
-        headers: { 'x-tenant-id': 'demo-tenant' },
+        headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
       });
       if (!res.ok) return;
       const data = await res.json();
@@ -230,7 +230,7 @@ export function AIChatClient() {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'x-tenant-id': 'demo-tenant',
+              'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
             },
             body: JSON.stringify({ message: trimmed }),
           },

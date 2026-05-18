@@ -20,7 +20,7 @@ export interface Asset {
 }
 
 export default async function AssetsPage() {
-  const tenantId = 'demo-tenant';
+  const tenantId = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
   let assets: Asset[] = [];
   try {

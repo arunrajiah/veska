@@ -7,7 +7,7 @@ interface LeadRecord {
   createdAt: string;
 }
 
-const TENANT_ID = 'demo-tenant';
+const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 export default async function LeadsPage() {
   let leads: LeadRecord[] = [];

@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
@@ -6,7 +7,12 @@ export async function POST(
   req: NextRequest,
   { params }: { params: { id: string } },
 ) {
-  const tenantId = process.env.VESKA_TENANT_ID ?? '';
+  const cookieStore = await cookies();
+  const sessionToken = cookieStore.get('veska_session')?.value;
+  if (!sessionToken) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const { id } = params;
   const body = await req.json() as Record<string, unknown>;
 
@@ -14,8 +20,7 @@ export async function POST(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-Veska-Tenant-Id': tenantId,
-      'X-Veska-Identity-Id': process.env.NEXT_PUBLIC_ADMIN_IDENTITY_ID ?? 'admin',
+      Authorization: `Bearer ${sessionToken}`,
     },
     body: JSON.stringify(body),
   });

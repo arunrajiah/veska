@@ -91,7 +91,7 @@ const AGGREGATIONS: Aggregation[] = ['count', 'sum', 'avg', 'min', 'max'];
 const CHART_COLORS = ['#6366f1', '#22d3ee', '#f59e0b', '#10b981', '#f43f5e', '#a78bfa'];
 
 function tenantHeaders(): HeadersInit {
-  return { 'Content-Type': 'application/json', 'x-tenant-id': 'demo-tenant' };
+  return { 'Content-Type': 'application/json', 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' };
 }
 
 // ─────────────────────────────────────────────────────────────

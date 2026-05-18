@@ -67,11 +67,13 @@ export function LoginClient() {
       }
 
       if (data.token) {
-        localStorage.setItem('veska_token', data.token);
-        document.cookie = `veska_session=${data.token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
-        if (data.user) {
-          localStorage.setItem('veska_user', JSON.stringify(data.user));
-        }
+        // Token is stored only in the server-set HttpOnly cookie via /api/auth/set-cookie.
+        // Do NOT store in localStorage — XSS-accessible storage is insecure.
+        await fetch('/api/auth/set-cookie', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: data.token }),
+        });
         router.push('/dashboard');
       }
     } catch {
@@ -105,11 +107,13 @@ export function LoginClient() {
       }
 
       if (data.token) {
-        localStorage.setItem('veska_token', data.token);
-        document.cookie = `veska_session=${data.token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
-        if (data.user) {
-          localStorage.setItem('veska_user', JSON.stringify(data.user));
-        }
+        // Token is stored only in the server-set HttpOnly cookie via /api/auth/set-cookie.
+        // Do NOT store in localStorage — XSS-accessible storage is insecure.
+        await fetch('/api/auth/set-cookie', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: data.token }),
+        });
         router.push('/dashboard');
       }
     } catch {

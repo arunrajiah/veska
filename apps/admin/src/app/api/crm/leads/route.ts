@@ -1,22 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 
 const API_BASE = process.env.API_URL ?? 'http://localhost:3001';
-const TENANT_ID = process.env.VESKA_TENANT_ID ?? '';
-const IDENTITY_ID = process.env.VESKA_ADMIN_IDENTITY_ID ?? '';
-
-function apiHeaders() {
-  return {
-    'Content-Type': 'application/json',
-    'X-Veska-Tenant-Id': TENANT_ID,
-    'X-Veska-Identity-Id': IDENTITY_ID,
-  };
-}
 
 export async function POST(req: NextRequest) {
+  const cookieStore = await cookies();
+  const sessionToken = cookieStore.get('veska_session')?.value;
+  if (!sessionToken) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const body = await req.json();
   const res = await fetch(`${API_BASE}/api/v1/crm/leads`, {
     method: 'POST',
-    headers: apiHeaders(),
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${sessionToken}`,
+    },
     body: JSON.stringify(body),
   });
   const data = await res.json();

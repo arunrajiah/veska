@@ -6,6 +6,25 @@ import type { TenantContext } from '../middleware/tenant-context.js';
 
 export const webhooksRouter = new Hono<{ Variables: TenantContext }>();
 
+// ── URL safety validation (SSRF protection) ────────────────────
+
+function isSafeWebhookUrl(rawUrl: string): boolean {
+  let parsed: URL;
+  try { parsed = new URL(rawUrl); } catch { return false; }
+  if (parsed.protocol !== 'https:') return false;
+  const host = parsed.hostname.toLowerCase();
+  // Block loopback, private ranges, link-local, cloud metadata
+  if (host === 'localhost') return false;
+  if (/^127\./.test(host)) return false;
+  if (/^10\./.test(host)) return false;
+  if (/^192\.168\./.test(host)) return false;
+  if (/^172\.(1[6-9]|2\d|3[01])\./.test(host)) return false;
+  if (host === '169.254.169.254') return false; // AWS IMDS
+  if (host.endsWith('.internal')) return false;
+  if (host === '0.0.0.0') return false;
+  return true;
+}
+
 // ── Endpoints ──────────────────────────────────────────────────
 
 // GET /endpoints — list endpoints for tenant (no secret)
@@ -29,6 +48,13 @@ webhooksRouter.post('/endpoints', async (c) => {
   const body = await c.req.json<{ url: string; description?: string; events?: string[] }>();
 
   if (!body.url) return c.json({ error: 'url is required' }, 400);
+
+  if (!isSafeWebhookUrl(body.url)) {
+    return c.json({ error: 'Invalid webhook URL. Must be a public HTTPS endpoint.' }, 400);
+  }
+  if (process.env['NODE_ENV'] === 'production' && !body.url.startsWith('https://')) {
+    return c.json({ error: 'Webhook URLs must use HTTPS in production.' }, 400);
+  }
 
   const secret = randomBytes(24).toString('hex');
   const events: string[] = body.events ?? [];
@@ -65,6 +91,15 @@ webhooksRouter.patch('/endpoints/:id', async (c) => {
   const id = c.req.param('id');
   const { tenantId } = c.get('tenantCtx');
   const body = await c.req.json<{ url?: string; description?: string; events?: string[]; enabled?: boolean }>();
+
+  if (body.url !== undefined) {
+    if (!isSafeWebhookUrl(body.url)) {
+      return c.json({ error: 'Invalid webhook URL. Must be a public HTTPS endpoint.' }, 400);
+    }
+    if (process.env['NODE_ENV'] === 'production' && !body.url.startsWith('https://')) {
+      return c.json({ error: 'Webhook URLs must use HTTPS in production.' }, 400);
+    }
+  }
 
   const result = await sharedDb.execute(sql`
     UPDATE "webhookEndpoints"
@@ -145,6 +180,11 @@ webhooksRouter.post('/test/:endpointId', async (c) => {
   if (!epResult.rows.length) return c.json({ error: 'Endpoint not found' }, 404);
   const endpoint = epResult.rows[0] as Record<string, unknown>;
 
+  const endpointUrl = endpoint['url'] as string;
+  if (!isSafeWebhookUrl(endpointUrl)) {
+    return c.json({ error: 'Invalid webhook URL. Must be a public HTTPS endpoint.' }, 400);
+  }
+
   const payload = {
     event: 'test',
     tenantId,
@@ -168,7 +208,7 @@ webhooksRouter.post('/test/:endpointId', async (c) => {
   const deliveryId = (deliveryResult.rows[0] as Record<string, unknown>)['id'] as string;
 
   try {
-    const response = await fetch(endpoint['url'] as string, {
+    const response = await fetch(endpointUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

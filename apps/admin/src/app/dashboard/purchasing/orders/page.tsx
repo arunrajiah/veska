@@ -3,7 +3,7 @@ import { OrdersClient } from './_components.js';
 import type { PurchaseOrder } from './_components.js';
 
 export default async function PurchaseOrdersPage() {
-  const tenantId = 'demo-tenant';
+  const tenantId = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
   let orders: PurchaseOrder[] = [];
   try {

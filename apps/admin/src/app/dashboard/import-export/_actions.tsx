@@ -30,7 +30,7 @@ export function ExportButton({ type, label }: ExportButtonProps) {
     setError(null);
     try {
       const res = await fetch(
-        `http://localhost:3001/api/v1/import-export/export/${type}?tenantId=demo`
+        `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/import-export/export/${type}?tenantId=demo`
       );
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const blob = await res.blob();
@@ -95,7 +95,7 @@ export function ImportButton({ type, label }: ImportButtonProps) {
       form.append('tenantId', 'demo');
 
       const res = await fetch(
-        `http://localhost:3001/api/v1/import-export/import/${type}`,
+        `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/import-export/import/${type}`,
         { method: 'POST', body: form }
       );
       if (!res.ok) throw new Error(`HTTP ${res.status}`);

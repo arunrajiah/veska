@@ -22,7 +22,7 @@ interface ApprovalChain {
 async function fetchChains(): Promise<ApprovalChain[]> {
   try {
     const res = await fetch(
-      'http://localhost:3001/api/v1/approval-chains?tenantId=demo',
+      (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/approval-chains?tenantId=demo',
       { cache: 'no-store' },
     );
     if (!res.ok) return [];

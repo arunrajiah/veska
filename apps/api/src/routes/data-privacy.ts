@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { sql } from 'drizzle-orm';
 import { sharedDb } from '../shared.js';
+import { requirePermission } from '../middleware/rbac.js';
 import type { TenantContext } from '../middleware/tenant-context.js';
 
 export const dataPrivacyRouter = new Hono<{ Variables: TenantContext }>();
@@ -25,7 +26,7 @@ async function safeQuery(
 // ── Data Export ────────────────────────────────────────────────
 
 // POST /privacy/export-request
-dataPrivacyRouter.post('/export-request', async (c) => {
+dataPrivacyRouter.post('/export-request', requirePermission('settings.manage'), async (c) => {
   const { tenantId } = c.get('tenantCtx');
   const body = await c.req.json<{ requestedBy: string; notes?: string }>();
 
@@ -45,7 +46,6 @@ dataPrivacyRouter.post('/export-request', async (c) => {
   const EXPORT_TABLES = [
     'users',
     'roles',
-    'sessions',
     'apiKeys',
     'webhookEndpoints',
     'notificationChannels',

@@ -7,7 +7,7 @@ export default async function PayrollRunsPage({
 }: {
   searchParams: Promise<{ new?: string }>;
 }) {
-  const tenantId = 'demo-tenant';
+  const tenantId = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
   let runs: PayrollRun[] = [];
   try {

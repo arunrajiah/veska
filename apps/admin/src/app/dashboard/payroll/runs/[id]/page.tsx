@@ -59,7 +59,7 @@ function StatusBadge({ status }: { status?: string }) {
 }
 
 export default async function PayrollRunDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const tenantId = 'demo-tenant';
+  const tenantId = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
   const { id } = await params;
 
   let run: PayrollRun | null = null;

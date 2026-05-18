@@ -131,5 +131,11 @@
     "system": "System",
     "save": "Save changes",
     "saved": "Changes saved"
+  },
+  "errors": {
+    "notFound": "Page not found",
+    "goHome": "Go to Dashboard",
+    "serverError": "Something went wrong",
+    "tryAgain": "Try again"
   }
 }

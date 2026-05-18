@@ -23,7 +23,7 @@ export interface ServiceDeskDetail {
 
 export default async function ServiceDeskDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const tenantId = 'demo-tenant';
+  const tenantId = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
   let item: ServiceDeskDetail | null = null;
   try {

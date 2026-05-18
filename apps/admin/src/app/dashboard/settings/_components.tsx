@@ -31,7 +31,7 @@ import {
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 function tenantHeaders(extra?: HeadersInit): HeadersInit {
-  return { 'x-tenant-id': 'demo-tenant', 'Content-Type': 'application/json', ...extra };
+  return { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant', 'Content-Type': 'application/json', ...extra };
 }
 
 // ─── Types ───────────────────────────────────────────────────────────────────

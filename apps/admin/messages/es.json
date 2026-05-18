@@ -7,7 +7,7 @@
     "hr": "RRHH y Personas",
     "employees": "Empleados",
     "leave": "Solicitudes de permiso",
-    "payroll": "Nómina",
+    "payroll": "N\u00f3mina",
     "crm": "CRM",
     "contacts": "Contactos",
     "deals": "Oportunidades",
@@ -16,8 +16,8 @@
     "tickets": "Tickets",
     "knowledgeBase": "Base de conocimiento",
     "inventory": "Inventario",
-    "settings": "Configuración",
-    "auditLog": "Registro de auditoría",
+    "settings": "Configuraci\u00f3n",
+    "auditLog": "Registro de auditor\u00eda",
     "webhooks": "Webhooks",
     "developer": "Desarrollador",
     "jobQueues": "Colas de trabajos"
@@ -40,11 +40,11 @@
     "date": "Fecha",
     "amount": "Importe",
     "name": "Nombre",
-    "email": "Correo electrónico",
-    "phone": "Teléfono",
-    "yes": "Sí",
+    "email": "Correo electr\u00f3nico",
+    "phone": "Tel\u00e9fono",
+    "yes": "S\u00ed",
     "no": "No",
-    "back": "Atrás",
+    "back": "Atr\u00e1s",
     "next": "Siguiente",
     "previous": "Anterior",
     "close": "Cerrar",
@@ -54,20 +54,20 @@
     "required": "Obligatorio"
   },
   "auth": {
-    "login": "Iniciar sesión en Veska",
-    "email": "Dirección de correo electrónico",
-    "password": "Contraseña",
-    "forgotPassword": "¿Olvidó su contraseña?",
-    "signIn": "Iniciar sesión",
-    "signingIn": "Iniciando sesión...",
-    "forgotPasswordTitle": "Restablecer contraseña",
+    "login": "Iniciar sesi\u00f3n en Veska",
+    "email": "Direcci\u00f3n de correo electr\u00f3nico",
+    "password": "Contrase\u00f1a",
+    "forgotPassword": "\u00bfOlvid\u00f3 su contrase\u00f1a?",
+    "signIn": "Iniciar sesi\u00f3n",
+    "signingIn": "Iniciando sesi\u00f3n...",
+    "forgotPasswordTitle": "Restablecer contrase\u00f1a",
     "forgotPasswordDesc": "Introduzca su correo y le enviaremos un enlace de restablecimiento",
     "sendResetLink": "Enviar enlace de restablecimiento",
-    "checkEmail": "Revise su correo electrónico",
-    "resetPassword": "Establecer nueva contraseña",
-    "newPassword": "Nueva contraseña",
-    "confirmPassword": "Confirmar contraseña",
-    "updatePassword": "Actualizar contraseña"
+    "checkEmail": "Revise su correo electr\u00f3nico",
+    "resetPassword": "Establecer nueva contrase\u00f1a",
+    "newPassword": "Nueva contrase\u00f1a",
+    "confirmPassword": "Confirmar contrase\u00f1a",
+    "updatePassword": "Actualizar contrase\u00f1a"
   },
   "dashboard": {
     "title": "Panel de control",
@@ -80,11 +80,11 @@
   "invoices": {
     "title": "Facturas",
     "newInvoice": "Nueva factura",
-    "runPayroll": "Ejecutar nómina",
-    "invoiceNumber": "Factura N°",
+    "runPayroll": "Ejecutar n\u00f3mina",
+    "invoiceNumber": "Factura N\u00b0",
     "customer": "Cliente",
     "dueDate": "Fecha de vencimiento",
-    "issuedDate": "Fecha de emisión",
+    "issuedDate": "Fecha de emisi\u00f3n",
     "sendInvoice": "Enviar factura",
     "markPaid": "Marcar como pagado",
     "voidInvoice": "Anular factura",
@@ -94,13 +94,13 @@
       "paid": "Pagada",
       "overdue": "Vencida",
       "void": "Anulada",
-      "pending_approval": "Pendiente de aprobación"
+      "pending_approval": "Pendiente de aprobaci\u00f3n"
     }
   },
   "expenses": {
     "title": "Gastos",
     "newExpense": "Nuevo gasto",
-    "category": "Categoría",
+    "category": "Categor\u00eda",
     "submittedBy": "Enviado por",
     "approveAll": "Aprobar todos",
     "rejectAll": "Rechazar todos",
@@ -120,7 +120,7 @@
     "salary": "Salario"
   },
   "settings": {
-    "title": "Configuración",
+    "title": "Configuraci\u00f3n",
     "general": "General",
     "security": "Seguridad",
     "notifications": "Notificaciones",
@@ -131,5 +131,11 @@
     "system": "Sistema",
     "save": "Guardar cambios",
     "saved": "Cambios guardados"
+  },
+  "errors": {
+    "notFound": "P\u00e1gina no encontrada",
+    "goHome": "Ir al panel",
+    "serverError": "Algo sali\u00f3 mal",
+    "tryAgain": "Intentar de nuevo"
   }
 }

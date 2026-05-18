@@ -9,7 +9,7 @@ interface LeadRecord {
   updatedAt: string;
 }
 
-const TENANT_ID = 'demo-tenant';
+const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 export default async function LeadDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

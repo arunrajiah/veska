@@ -35,7 +35,7 @@ export function WorkspaceForm({ initial }: { initial?: Partial<WorkspaceFormValu
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'x-tenant-id': 'demo-tenant',
+          'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
         },
         body: JSON.stringify({
           companyName: form.companyName || undefined,

@@ -40,7 +40,7 @@ function fmtMoney(n?: number) {
 }
 
 export default async function PurchasingDashboardPage() {
-  const tenantId = 'demo-tenant';
+  const tenantId = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
   let orders: PurchaseOrder[] = [];
   let grns: GRN[] = [];

@@ -16,7 +16,7 @@ import {
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 function tenantHeaders(): HeadersInit {
-  return { 'Content-Type': 'application/json', 'x-tenant-id': 'demo-tenant' };
+  return { 'Content-Type': 'application/json', 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' };
 }
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -485,7 +485,7 @@ function BookRoomTab({ rooms }: { rooms: Room[] }) {
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/rooms/bookings?date=${d}`, {
-        headers: { 'x-tenant-id': 'demo-tenant' },
+        headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
       });
       if (res.ok) {
         const data = await res.json() as Booking[] | { bookings?: Booking[] };
@@ -599,8 +599,8 @@ export function RoomsClient() {
     void (async () => {
       try {
         const [roomsRes, summaryRes] = await Promise.all([
-          fetch(`${API_BASE}/rooms`, { headers: { 'x-tenant-id': 'demo-tenant' } }),
-          fetch(`${API_BASE}/rooms/summary`, { headers: { 'x-tenant-id': 'demo-tenant' } }),
+          fetch(`${API_BASE}/rooms`, { headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' } }),
+          fetch(`${API_BASE}/rooms/summary`, { headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' } }),
         ]);
         if (roomsRes.ok) {
           const d = await roomsRes.json() as Room[] | { rooms?: Room[] };

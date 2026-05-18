@@ -221,7 +221,7 @@ workflowsRouter.get('/templates', async (c) => {
 });
 
 // POST /ai-suggest — generate a workflow config from a natural-language description
-workflowsRouter.post('/ai-suggest', aiLimit(), async (c) => {
+workflowsRouter.post('/ai-suggest', aiLimit, async (c) => {
   let body: { description: string; context?: string };
   try {
     body = await c.req.json<{ description: string; context?: string }>();

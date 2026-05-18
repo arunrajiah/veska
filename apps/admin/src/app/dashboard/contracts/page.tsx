@@ -19,7 +19,7 @@ export interface Contract {
 }
 
 export default async function ContractsPage() {
-  const tenantId = 'demo-tenant';
+  const tenantId = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
   let contracts: Contract[] = [];
 

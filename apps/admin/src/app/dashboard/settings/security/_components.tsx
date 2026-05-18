@@ -16,7 +16,8 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 function getToken(): string {
   if (typeof window === 'undefined') return '';
-  return localStorage.getItem('veska_token') ?? '';
+  const match = document.cookie.split('; ').find((row) => row.startsWith('veska_session='));
+  return match ? decodeURIComponent(match.split('=')[1] ?? '') : '';
 }
 
 function authHeaders() {

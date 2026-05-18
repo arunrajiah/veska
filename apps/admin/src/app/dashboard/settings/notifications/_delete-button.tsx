@@ -22,7 +22,7 @@ export default function DeleteChannelButton({ channelId, tenantId }: DeleteChann
 
     setLoading(true);
     try {
-      await fetch(`http://localhost:3001/api/v1/notification-channels/channels/${channelId}`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/notification-channels/channels/${channelId}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tenantId }),

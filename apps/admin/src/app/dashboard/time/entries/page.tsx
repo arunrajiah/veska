@@ -18,7 +18,7 @@ interface TimeEntry {
 }
 
 export default async function TimeEntriesPage() {
-  const tenantId = 'demo-tenant';
+  const tenantId = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
   let entries: TimeEntry[] = [];
   try {

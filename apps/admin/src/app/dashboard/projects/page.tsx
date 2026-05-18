@@ -95,7 +95,7 @@ export default function ProjectsPage() {
     async function load() {
       try {
         const res = await fetch('/api/v1/projects?limit=50', {
-          headers: { 'x-tenant-id': 'demo-tenant' },
+          headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
         });
         if (res.ok) {
           const json = await res.json() as { data?: Project[] } | Project[];

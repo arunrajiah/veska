@@ -55,13 +55,12 @@ interface ApiResponse {
 
 function getAuthHeaders(): Record<string, string> {
   if (typeof window === 'undefined') return {};
-  const token = localStorage.getItem('veska_token') ?? '';
-  const tenantId = localStorage.getItem('veska_tenant_id') ?? '';
-  const identityId = localStorage.getItem('veska_identity_id') ?? '';
+  const match = document.cookie.split('; ').find((row) => row.startsWith('veska_session='));
+  const token = match ? decodeURIComponent(match.split('=')[1] ?? '') : '';
+  const tenantId = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
   return {
-    Authorization: `Bearer ${token}`,
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     'X-Veska-Tenant-Id': tenantId,
-    'X-Veska-Identity-Id': identityId,
   };
 }
 

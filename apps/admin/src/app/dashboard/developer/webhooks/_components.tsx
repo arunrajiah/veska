@@ -6,7 +6,7 @@ import { Plus, X, Webhook, Edit, Trash2, CheckCircle2, XCircle } from 'lucide-re
 import type { Webhook as WebhookType } from './page.js';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
-const TENANT_ID = 'demo-tenant';
+const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 function apiHeaders() {
   return {

@@ -78,7 +78,7 @@ export default function AddChannelForm() {
     setSubmitting(true);
 
     try {
-      const res = await fetch('http://localhost:3001/api/v1/notification-channels/channels', {
+      const res = await fetch((process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/notification-channels/channels', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

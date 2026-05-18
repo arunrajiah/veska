@@ -45,7 +45,7 @@ export default async function StockPage() {
   try {
     const res = await apiFetch<{ data: StockLevel[] } | StockLevel[]>(
       '/api/v1/inventory/stock?limit=50',
-      'demo-tenant',
+      process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
     );
     levels = Array.isArray(res) ? res : (res as { data: StockLevel[] }).data ?? [];
   } catch {

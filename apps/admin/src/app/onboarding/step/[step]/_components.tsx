@@ -544,7 +544,7 @@ function Step4({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
   const fetchProvider = useCallback(async () => {
     try {
       const res = await fetch(`${API_BASE}/api/v1/ai/provider-info`, {
-        headers: { 'x-tenant-id': 'demo-tenant' },
+        headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
       });
       if (res.ok) {
         const json = await res.json() as ProviderInfo;
@@ -742,7 +742,7 @@ function Step5({ onBack }: { onBack: () => void }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-tenant-id': 'demo-tenant',
+          'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
         },
         body: JSON.stringify({
           company: data.company,

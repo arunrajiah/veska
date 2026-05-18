@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { User, Lock, Shield, LogOut, X, CheckCircle, AlertCircle, Smartphone } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
-const TENANT_ID = 'demo-tenant';
+const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 type Session = {
   id: string;
@@ -23,7 +23,8 @@ type UserProfile = {
 
 function getToken(): string {
   if (typeof window === 'undefined') return '';
-  return localStorage.getItem('veska_token') ?? '';
+  const match = document.cookie.split('; ').find((row) => row.startsWith('veska_session='));
+  return match ? decodeURIComponent(match.split('=')[1] ?? '') : '';
 }
 
 function authHeaders(): HeadersInit {
@@ -415,8 +416,10 @@ function SignOutSection({ onToast }: { onToast: (msg: string, kind: ToastKind) =
     } catch {
       // proceed regardless
     } finally {
-      localStorage.removeItem('veska_token');
-      document.cookie = 'veska_session=; path=/; max-age=0';
+      // Clear the session cookie; the HttpOnly server-set cookie is cleared
+      // server-side via /api/auth/logout if present. We also clear the
+      // client-readable one as a belt-and-suspenders measure.
+      document.cookie = 'veska_session=; path=/; max-age=0; SameSite=Strict';
       router.push('/login');
     }
   }

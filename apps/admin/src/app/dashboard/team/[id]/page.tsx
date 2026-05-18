@@ -19,7 +19,7 @@ interface User {
 
 async function getUser(id: string): Promise<User | null> {
   try {
-    const res = await fetch(`http://localhost:3001/api/v1/users/${id}`, { cache: 'no-store' });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/users/${id}`, { cache: 'no-store' });
     if (!res.ok) return null;
     const data = await res.json();
     return data.user ?? data;
@@ -30,7 +30,7 @@ async function getUser(id: string): Promise<User | null> {
 
 async function getRoles(): Promise<Role[]> {
   try {
-    const res = await fetch('http://localhost:3001/api/v1/roles?tenantId=demo', {
+    const res = await fetch((process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/roles?tenantId=demo', {
       cache: 'no-store',
     });
     if (!res.ok) return [];

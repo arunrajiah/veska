@@ -17,7 +17,7 @@ export interface Webhook {
 }
 
 export default async function WebhooksPage() {
-  const tenantId = 'demo-tenant';
+  const tenantId = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
   let webhooks: Webhook[] = [];
   try {

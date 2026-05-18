@@ -16,7 +16,7 @@ export default async function ReportBuilderPage() {
   try {
     const res = await fetch(`${API_BASE}/reports/saved`, {
       cache: 'no-store',
-      headers: { 'x-tenant-id': 'demo-tenant' },
+      headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
     });
     if (res.ok) {
       const json = (await res.json()) as SavedReport[] | { results?: SavedReport[] };

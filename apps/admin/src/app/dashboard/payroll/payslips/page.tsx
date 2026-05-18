@@ -18,7 +18,7 @@ interface PayrollItem {
 }
 
 export default async function PayslipsPage() {
-  const tenantId = 'demo-tenant';
+  const tenantId = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
   let payslips: PayrollItem[] = [];
   try {

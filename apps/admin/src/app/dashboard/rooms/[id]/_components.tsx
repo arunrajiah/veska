@@ -16,7 +16,7 @@ import {
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 function tenantHeaders(): HeadersInit {
-  return { 'Content-Type': 'application/json', 'x-tenant-id': 'demo-tenant' };
+  return { 'Content-Type': 'application/json', 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' };
 }
 
 interface Room {
@@ -164,7 +164,7 @@ export function RoomDetailClient({ roomId, initialRoom, initialBookings, initial
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/rooms/${roomId}/bookings?date=${d}`, {
-        headers: { 'x-tenant-id': 'demo-tenant' },
+        headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
       });
       if (res.ok) {
         const data = await res.json() as Booking[] | { bookings?: Booking[] };

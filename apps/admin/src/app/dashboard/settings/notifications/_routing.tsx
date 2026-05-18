@@ -59,7 +59,7 @@ export default function RoutingTable({ routes: initialRoutes, channels, tenantId
     setLoading(optimisticId);
 
     try {
-      const res = await fetch('http://localhost:3001/api/v1/notification-channels/routes', {
+      const res = await fetch((process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/notification-channels/routes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tenantId, event: eventKey, channelId }),
@@ -80,7 +80,7 @@ export default function RoutingTable({ routes: initialRoutes, channels, tenantId
     setRoutes((prev) => prev.filter((r) => r.id !== routeId));
 
     try {
-      const res = await fetch(`http://localhost:3001/api/v1/notification-channels/routes/${routeId}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/notification-channels/routes/${routeId}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tenantId }),

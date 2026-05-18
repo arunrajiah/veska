@@ -267,12 +267,10 @@ function usePendingApprovalCount(): number {
 
     async function fetchCount() {
       try {
-        const tenantId = typeof window !== 'undefined' ? localStorage.getItem('veska_tenant_id') ?? '' : '';
-        const identityId = typeof window !== 'undefined' ? localStorage.getItem('veska_identity_id') ?? '' : '';
+        const tenantId = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
         const res = await fetch('/api/v1/approval-requests/pending-count', {
           headers: {
             'X-Veska-Tenant-Id': tenantId,
-            'X-Veska-Identity-Id': identityId,
           },
         });
         if (!res.ok || cancelled) return;

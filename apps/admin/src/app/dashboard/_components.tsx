@@ -10,7 +10,7 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
     ...init,
     headers: {
       'Content-Type': 'application/json',
-      'x-tenant-id': 'demo-tenant',
+      'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
       ...(init?.headers ?? {}),
     },
   });

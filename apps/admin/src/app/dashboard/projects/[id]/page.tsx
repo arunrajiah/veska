@@ -37,7 +37,7 @@ const PRIORITY_STYLES: Record<string, string> = {
 };
 
 export default async function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const tenantId = 'demo-tenant';
+  const tenantId = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
   const { id } = await params;
 
   let project: Project | null = null;

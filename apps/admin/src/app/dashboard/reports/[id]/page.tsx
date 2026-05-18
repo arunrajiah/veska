@@ -43,7 +43,7 @@ export default async function ReportDetailPage({ params }: PageProps) {
   try {
     const res = await fetch(`${API_BASE}/reports/${id}`, {
       cache: 'no-store',
-      headers: { 'x-tenant-id': 'demo-tenant' },
+      headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
     });
     if (res.ok) {
       report = (await res.json()) as Report;
@@ -55,7 +55,7 @@ export default async function ReportDetailPage({ params }: PageProps) {
   try {
     const res = await fetch(`${API_BASE}/reports/${id}/schedules`, {
       cache: 'no-store',
-      headers: { 'x-tenant-id': 'demo-tenant' },
+      headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
     });
     if (res.ok) {
       const json = await res.json() as Schedule[] | { results?: Schedule[] };

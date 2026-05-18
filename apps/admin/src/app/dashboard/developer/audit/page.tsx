@@ -16,7 +16,7 @@ export interface AuditLog {
 }
 
 export default async function AuditPage() {
-  const tenantId = 'demo-tenant';
+  const tenantId = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
   let logs: AuditLog[] = [];
   try {

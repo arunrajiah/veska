@@ -3,7 +3,7 @@ import { apiFetch } from '@/lib/api.js';
 import { Users, UserCheck, TrendingUp, DollarSign } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 
-const TENANT_ID = 'demo-tenant';
+const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 function formatCurrency(value: unknown): string {
   if (value == null || value === '') return '$0';

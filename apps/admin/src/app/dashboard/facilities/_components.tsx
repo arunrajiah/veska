@@ -14,7 +14,7 @@ import {
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 function tenantHeaders(): HeadersInit {
-  return { 'Content-Type': 'application/json', 'x-tenant-id': 'demo-tenant' };
+  return { 'Content-Type': 'application/json', 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' };
 }
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -93,7 +93,7 @@ function NewRequestForm({ onClose, onSaved }: NewRequestFormProps) {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    void fetch(`${API_BASE}/rooms`, { headers: { 'x-tenant-id': 'demo-tenant' } })
+    void fetch(`${API_BASE}/rooms`, { headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' } })
       .then((r) => r.ok ? r.json() : [])
       .then((d) => {
         const list = Array.isArray(d) ? d : (d.rooms ?? []);
@@ -510,8 +510,8 @@ export function FacilitiesClient() {
     setLoading(true);
     try {
       const [reqRes, sumRes] = await Promise.all([
-        fetch(`${API_BASE}/facility-requests`, { headers: { 'x-tenant-id': 'demo-tenant' } }),
-        fetch(`${API_BASE}/facility-requests/summary`, { headers: { 'x-tenant-id': 'demo-tenant' } }),
+        fetch(`${API_BASE}/facility-requests`, { headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' } }),
+        fetch(`${API_BASE}/facility-requests/summary`, { headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' } }),
       ]);
       if (reqRes.ok) {
         const d = await reqRes.json() as FacilityRequest[] | { requests?: FacilityRequest[] };

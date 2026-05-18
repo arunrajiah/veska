@@ -153,8 +153,11 @@ export function GlobalSearch({ open, onClose }: GlobalSearchProps) {
     }
     setIsLoading(true);
     try {
-      const token =
-        typeof window !== 'undefined' ? localStorage.getItem('veska_token') : null;
+      const cookieMatch =
+        typeof document !== 'undefined'
+          ? document.cookie.split('; ').find((row) => row.startsWith('veska_session='))
+          : undefined;
+      const token = cookieMatch ? decodeURIComponent(cookieMatch.split('=')[1] ?? '') : null;
       const authHeaders: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
       const res = await fetch(
         `${API_BASE}/search?q=${encodeURIComponent(q.trim())}&limit=20`,

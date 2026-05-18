@@ -54,7 +54,7 @@ export default function EmailLogPage() {
     setError(null);
     try {
       const res = await fetch(`${API_BASE}/tenant-settings/email-log?limit=50`, {
-        headers: { 'x-tenant-id': 'demo-tenant' },
+        headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
       });
       if (!res.ok) {
         if (res.status === 404) {

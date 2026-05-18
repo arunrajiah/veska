@@ -17,7 +17,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const CURRENT_USER = 'demo-user';
 
 function tenantHeaders(): HeadersInit {
-  return { 'Content-Type': 'application/json', 'x-tenant-id': 'demo-tenant' };
+  return { 'Content-Type': 'application/json', 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' };
 }
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -445,7 +445,7 @@ function EventsList() {
       if (toDate) params.set('to', toDate);
       if (typeFilter !== 'all') params.set('type', typeFilter);
       const res = await fetch(`${API_BASE}/events?${params.toString()}`, {
-        headers: { 'x-tenant-id': 'demo-tenant' },
+        headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
       });
       if (res.ok) {
         const d = await res.json() as CalendarEvent[] | { events?: CalendarEvent[] };
@@ -599,7 +599,7 @@ function CalendarGrid() {
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/events/calendar?year=${y}&month=${m + 1}`, {
-        headers: { 'x-tenant-id': 'demo-tenant' },
+        headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
       });
       if (res.ok) {
         const d = await res.json() as CalendarResponse;

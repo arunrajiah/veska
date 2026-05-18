@@ -13,15 +13,19 @@ import {
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
+function getCookieToken(): string {
+  if (typeof document === 'undefined') return '';
+  const match = document.cookie.split('; ').find((row) => row.startsWith('veska_session='));
+  return match ? decodeURIComponent(match.split('=')[1] ?? '') : '';
+}
+
 function apiHeaders(): HeadersInit {
-  const token =
-    typeof window !== 'undefined' ? (localStorage.getItem('veska_token') ?? '') : '';
-  const tenantId =
-    typeof window !== 'undefined' ? (localStorage.getItem('veska_tenant_id') ?? 'demo-tenant') : 'demo-tenant';
+  const token = getCookieToken();
+  const tenantId = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
   return {
     'Content-Type': 'application/json',
     'X-Veska-Tenant-Id': tenantId,
-    Authorization: `Bearer ${token}`,
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 }
 

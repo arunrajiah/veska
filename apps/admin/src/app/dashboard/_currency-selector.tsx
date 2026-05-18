@@ -23,7 +23,7 @@ export function useDashboardCurrency() {
   // Fetch rates timestamp
   useEffect(() => {
     fetch(`${API_BASE}/api/v1/currencies/rates?base=USD`, {
-      headers: { 'X-Veska-Tenant-Id': 'demo-tenant', 'X-Veska-Identity-Id': 'admin' },
+      headers: { 'X-Veska-Tenant-Id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant', 'X-Veska-Identity-Id': 'admin' },
     })
       .then((r) => r.json())
       .then((data: { updatedAt?: string }) => {

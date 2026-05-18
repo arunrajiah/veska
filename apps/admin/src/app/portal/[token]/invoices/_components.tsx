@@ -15,10 +15,7 @@ interface PortalInvoice {
   status?: string;
 }
 
-const API_BASE =
-  typeof window !== 'undefined'
-    ? (process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3001')
-    : 'http://localhost:3001';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 function formatAmount(amount?: number, currency = 'USD'): string {
   if (amount == null) return '—';

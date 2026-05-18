@@ -1,6 +1,17 @@
 import { Hono } from 'hono';
 import { sql } from 'drizzle-orm';
 import { randomBytes, createHash, createHmac, timingSafeEqual } from 'node:crypto';
+import bcrypt from 'bcrypt';
+import Redis from 'ioredis';
+
+// Lazy Redis client for TOTP brute-force protection
+let _redis: Redis | null = null;
+function getRedis(): Redis {
+  if (!_redis) {
+    _redis = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379', { lazyConnect: true });
+  }
+  return _redis;
+}
 import QRCode from 'qrcode';
 import { sharedDb } from '../shared.js';
 import { sendPasswordResetEmail } from '../lib/password-reset-mailer.js';
@@ -172,20 +183,9 @@ authRouter.post('/login', async (c) => {
       return c.json({ error: 'Account is not active' }, 403);
     }
 
-    // Compare password using SHA-256 + timingSafeEqual
-    const inputHash = sha256(password);
+    // Compare password using bcrypt
     const storedHash = user.passwordHash ?? '';
-    const inputBuf = Buffer.from(inputHash, 'hex');
-    const storedBuf = Buffer.from(storedHash.padEnd(inputHash.length, '0'), 'hex');
-
-    let passwordMatch = false;
-    try {
-      if (inputBuf.length === storedBuf.length) {
-        passwordMatch = timingSafeEqual(inputBuf, storedBuf);
-      }
-    } catch {
-      passwordMatch = false;
-    }
+    const passwordMatch = storedHash ? await bcrypt.compare(password, storedHash) : false;
 
     if (!passwordMatch) {
       return c.json({ error: 'Invalid credentials' }, 401);
@@ -359,45 +359,19 @@ authRouter.delete('/sessions/:sessionId', async (c) => {
 // ── GET /auth/sso/:provider/callback ─────────────────────────────────────────
 
 authRouter.get('/sso/:provider/callback', async (c) => {
-  try {
-    const provider = c.req.param('provider');
-    const code = c.req.query('code');
-    const state = c.req.query('state');
-
-    console.log(`[auth/sso/${provider}/callback] code=${code} state=${state}`);
-
-    // Mock: in production, exchange code for user info via OAuth2 / OIDC
-    const tenantId = state ?? 'demo';
-    const mockUserId = 'sso-user-' + randomBytes(4).toString('hex');
-    const mockEmail = 'sso@example.com';
-
-    const token = generateSessionToken();
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-
-    await sharedDb.execute(sql`
-      INSERT INTO sessions ("tenantId", "userId", token, "expiresAt", "ipAddress", "userAgent")
-      VALUES (
-        ${tenantId}, ${mockUserId}, ${token},
-        ${expiresAt.toISOString()},
-        ${c.req.header('x-forwarded-for') ?? null},
-        ${c.req.header('user-agent') ?? null}
-      )
-    `);
-
-    return c.json({
-      token,
-      user: { id: mockUserId, email: mockEmail },
-    });
-  } catch (err) {
-    console.error('[auth/sso/callback]', err);
-    return c.json({ error: 'Internal server error' }, 500);
-  }
+  // SSO callback not yet implemented — requires real OIDC token exchange
+  return c.json({ error: 'SSO callback not implemented. Configure a real OIDC provider.' }, 501);
 });
 
 // ── GET /auth/sso/config ──────────────────────────────────────────────────────
 
 authRouter.get('/sso/config', async (c) => {
   try {
+    const ssoToken = getTokenFromHeader(c);
+    if (!ssoToken) return c.json({ error: 'Unauthorized' }, 401);
+    const ssoSession = await resolveSession(ssoToken);
+    if (!ssoSession) return c.json({ error: 'Unauthorized' }, 401);
+
     const tenantId = c.req.header('x-tenant-id');
     if (!tenantId) return c.json({ error: 'x-tenant-id header is required' }, 400);
 
@@ -430,6 +404,11 @@ authRouter.get('/sso/config', async (c) => {
 
 authRouter.post('/sso/config', async (c) => {
   try {
+    const ssoToken = getTokenFromHeader(c);
+    if (!ssoToken) return c.json({ error: 'Unauthorized' }, 401);
+    const ssoSession = await resolveSession(ssoToken);
+    if (!ssoSession) return c.json({ error: 'Unauthorized' }, 401);
+
     const tenantId = c.req.header('x-tenant-id');
     if (!tenantId) return c.json({ error: 'x-tenant-id header is required' }, 400);
 
@@ -764,6 +743,14 @@ authRouter.post('/2fa/challenge', async (c) => {
       return c.json({ error: 'sessionToken and token are required' }, 400);
     }
 
+    // Per-tempToken TOTP brute-force lockout
+    const redis = getRedis();
+    const attemptKey = `totp:attempts:${sessionToken}`;
+    const attempts = parseInt((await redis.get(attemptKey)) ?? '0', 10);
+    if (attempts >= 5) {
+      return c.json({ error: 'Too many failed attempts. Please log in again.' }, 429);
+    }
+
     // Delegate to mfa/login logic
     const tempResult = await sharedDb.execute(sql`
       SELECT id, "tenantId", "userId"
@@ -817,8 +804,11 @@ authRouter.post('/2fa/challenge', async (c) => {
     }
 
     if (!codeValid) {
+      await redis.multi().incr(attemptKey).expire(attemptKey, 300).exec();
       return c.json({ error: 'Invalid code' }, 401);
     }
+
+    await redis.del(attemptKey);
 
     await sharedDb.execute(sql`
       DELETE FROM sessions WHERE token = ${sessionToken}
@@ -864,9 +854,14 @@ authRouter.post('/forgot-password', async (c) => {
       return c.json({ error: 'email is required' }, 400);
     }
 
+    const tenantId = c.req.header('x-tenant-id') ?? c.req.header('X-Veska-Tenant-Id') ?? '';
+
     // Look up user to get their name (for the email greeting), but don't reveal if not found
     const userResult = await sharedDb.execute(sql`
-      SELECT id, name FROM users WHERE email = ${email} LIMIT 1
+      SELECT id, name FROM users
+      WHERE email = ${email}
+        AND "tenantId" = ${tenantId}
+      LIMIT 1
     `);
 
     if (userResult.rows.length) {
@@ -875,8 +870,8 @@ authRouter.post('/forgot-password', async (c) => {
       const expiresAt = new Date(Date.now() + 3600000); // 1 hour
 
       await sharedDb.execute(sql`
-        INSERT INTO "passwordResetTokens" (token, email, "expiresAt", used)
-        VALUES (${token}, ${email}, ${expiresAt.toISOString()}, false)
+        INSERT INTO "passwordResetTokens" (token, email, "tenantId", "expiresAt", used)
+        VALUES (${token}, ${email}, ${tenantId}, ${expiresAt.toISOString()}, false)
       `);
 
       // Fire-and-forget
@@ -911,7 +906,7 @@ authRouter.post('/reset-password', async (c) => {
 
     // Look up the token record
     const tokenResult = await sharedDb.execute(sql`
-      SELECT id, email, "expiresAt", used
+      SELECT id, email, "tenantId", "expiresAt", used
       FROM "passwordResetTokens"
       WHERE token = ${token}
       LIMIT 1
@@ -924,6 +919,7 @@ authRouter.post('/reset-password', async (c) => {
     const record = tokenResult.rows[0] as {
       id: string;
       email: string;
+      tenantId: string;
       expiresAt: string;
       used: boolean;
     };
@@ -932,13 +928,14 @@ authRouter.post('/reset-password', async (c) => {
       return c.json({ error: 'invalid_token' }, 400);
     }
 
-    const passwordHash = createHash('sha256').update(password).digest('hex');
+    const passwordHash = await bcrypt.hash(password, 12);
 
     // Update user password
     await sharedDb.execute(sql`
       UPDATE users
       SET "passwordHash" = ${passwordHash}
       WHERE email = ${record.email}
+        AND "tenantId" = ${record.tenantId}
     `);
 
     // Mark token as used
@@ -1032,7 +1029,7 @@ authRouter.post('/accept-invite', async (c) => {
       return c.json({ error: 'invalid_token' }, 400);
     }
 
-    const passwordHash = createHash('sha256').update(password).digest('hex');
+    const passwordHash = await bcrypt.hash(password, 12);
 
     // Create the user
     await sharedDb.execute(sql`
@@ -1067,6 +1064,14 @@ authRouter.post('/mfa/login', async (c) => {
 
     if (!tempToken || !code) {
       return c.json({ error: 'tempToken and code are required' }, 400);
+    }
+
+    // Per-tempToken TOTP brute-force lockout
+    const redis = getRedis();
+    const attemptKey = `totp:attempts:${tempToken}`;
+    const attempts = parseInt((await redis.get(attemptKey)) ?? '0', 10);
+    if (attempts >= 5) {
+      return c.json({ error: 'Too many failed attempts. Please log in again.' }, 429);
     }
 
     // Validate temp token session (must exist and not be expired)
@@ -1127,8 +1132,11 @@ authRouter.post('/mfa/login', async (c) => {
     }
 
     if (!codeValid) {
+      await redis.multi().incr(attemptKey).expire(attemptKey, 300).exec();
       return c.json({ error: 'Invalid code' }, 401);
     }
+
+    await redis.del(attemptKey);
 
     // Delete temp session, create full session
     await sharedDb.execute(sql`

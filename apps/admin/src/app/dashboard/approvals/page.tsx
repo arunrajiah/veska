@@ -17,7 +17,7 @@ interface ApprovalRequest {
 async function fetchPending(): Promise<ApprovalRequest[]> {
   try {
     const res = await fetch(
-      'http://localhost:3001/api/v1/approval-requests?tenantId=demo&status=pending',
+      (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/approval-requests?tenantId=demo&status=pending',
       { cache: 'no-store' },
     );
     if (!res.ok) return [];
@@ -30,7 +30,7 @@ async function fetchPending(): Promise<ApprovalRequest[]> {
 
 async function fetchAll(): Promise<ApprovalRequest[]> {
   try {
-    const res = await fetch('http://localhost:3001/api/v1/approval-requests?tenantId=demo', {
+    const res = await fetch((process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/approval-requests?tenantId=demo', {
       cache: 'no-store',
     });
     if (!res.ok) return [];

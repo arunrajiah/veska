@@ -3,7 +3,7 @@ import { TimeTrackingPageClient } from './_components.js';
 import type { TimeEntry } from './_components.js';
 
 export default async function TimeTrackingPage() {
-  const tenantId = 'demo-tenant';
+  const tenantId = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
   let entries: TimeEntry[] = [];
   try {

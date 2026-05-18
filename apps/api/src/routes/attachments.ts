@@ -84,6 +84,11 @@ attachmentsRouter.post('/upload', async (c) => {
       return c.json({ error: 'file field is required' }, 400);
     }
 
+    const MAX_UPLOAD_BYTES = 50 * 1024 * 1024; // 50 MB
+    if (file.size > MAX_UPLOAD_BYTES) {
+      return c.json({ error: 'File too large. Maximum upload size is 50 MB.' }, 413);
+    }
+
     const uuid = randomUUID();
     const originalName = file.name;
     const storageKey = `${tenantId}/${entityType}/${entityId}/${uuid}-${originalName}`;

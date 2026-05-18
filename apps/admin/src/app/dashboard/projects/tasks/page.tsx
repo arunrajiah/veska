@@ -23,7 +23,7 @@ interface Project {
 }
 
 export default async function TasksPage() {
-  const tenantId = 'demo-tenant';
+  const tenantId = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
   let tasks: Task[] = [];
   let projects: Project[] = [];

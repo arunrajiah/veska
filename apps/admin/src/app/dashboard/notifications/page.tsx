@@ -14,7 +14,7 @@ export interface Notification {
 }
 
 export default async function NotificationsPage() {
-  const tenantId = 'demo-tenant';
+  const tenantId = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
   let notifications: Notification[] = [];
   try {

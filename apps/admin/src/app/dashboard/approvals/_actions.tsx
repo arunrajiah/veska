@@ -68,7 +68,7 @@ export function InboxActions({ requests: initialRequests }: InboxActionsProps) {
   async function handleApprove(id: string) {
     setLoadingId(id);
     try {
-      await fetch(`http://localhost:3001/api/v1/approval-requests/${id}/approve`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/approval-requests/${id}/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ approverName: 'Admin' }),
@@ -82,7 +82,7 @@ export function InboxActions({ requests: initialRequests }: InboxActionsProps) {
   async function handleRejectSubmit(id: string) {
     setLoadingId(id);
     try {
-      await fetch(`http://localhost:3001/api/v1/approval-requests/${id}/reject`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/approval-requests/${id}/reject`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ approverName: 'Admin', comment: rejectComment }),
@@ -225,7 +225,7 @@ export function DetailActions({ requestId, status }: DetailActionsProps) {
   async function handleApprove() {
     setLoadingAction('approve');
     try {
-      await fetch(`http://localhost:3001/api/v1/approval-requests/${requestId}/approve`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/approval-requests/${requestId}/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ approverName: 'Admin' }),
@@ -239,7 +239,7 @@ export function DetailActions({ requestId, status }: DetailActionsProps) {
   async function handleReject() {
     setLoadingAction('reject');
     try {
-      await fetch(`http://localhost:3001/api/v1/approval-requests/${requestId}/reject`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/approval-requests/${requestId}/reject`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ approverName: 'Admin', comment }),

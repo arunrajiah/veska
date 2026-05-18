@@ -13,7 +13,7 @@ interface Role {
 
 async function getRoles(): Promise<Role[]> {
   try {
-    const res = await fetch('http://localhost:3001/api/v1/roles?tenantId=demo', {
+    const res = await fetch((process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/roles?tenantId=demo', {
       cache: 'no-store',
     });
     if (!res.ok) return [];
@@ -27,7 +27,7 @@ async function getRoles(): Promise<Role[]> {
 async function seedSystemRoles() {
   'use server';
   try {
-    await fetch('http://localhost:3001/api/v1/roles/seed', {
+    await fetch((process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/roles/seed', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tenantId: 'demo' }),

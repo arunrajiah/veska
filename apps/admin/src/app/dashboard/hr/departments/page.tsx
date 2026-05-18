@@ -7,7 +7,7 @@ export default async function DepartmentsPage() {
   try {
     const res = await apiFetch<{ data: DepartmentRecord[] } | DepartmentRecord[]>(
       '/api/v1/hr/departments?limit=50',
-      'demo-tenant',
+      process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
     );
     departments = Array.isArray(res) ? res : (res as { data: DepartmentRecord[] }).data ?? [];
   } catch {

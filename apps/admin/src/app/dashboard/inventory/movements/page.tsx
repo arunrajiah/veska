@@ -7,7 +7,7 @@ export default async function MovementsPage() {
   try {
     const res = await apiFetch<{ data: MovementRecord[] } | MovementRecord[]>(
       '/api/v1/inventory/movements?limit=50',
-      'demo-tenant',
+      process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
     );
     movements = Array.isArray(res) ? res : (res as { data: MovementRecord[] }).data ?? [];
   } catch {

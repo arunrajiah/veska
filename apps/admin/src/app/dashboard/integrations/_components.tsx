@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
-const TENANT = 'demo-tenant';
+const TENANT = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 function apiHeaders(extra?: Record<string, string>) {
   return {

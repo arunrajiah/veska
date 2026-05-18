@@ -34,7 +34,7 @@ export default function RatesTable({
     startTransition(async () => {
       try {
         const res = await fetch(
-          `http://localhost:3001/api/v1/currencies/rates?tenantId=${tenantId}`,
+          `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/currencies/rates?tenantId=${tenantId}`,
           { cache: 'no-store' },
         );
         if (!res.ok) return;
@@ -50,7 +50,7 @@ export default function RatesTable({
     setDeletingId(id);
     startTransition(async () => {
       try {
-        await fetch(`http://localhost:3001/api/v1/currencies/rates/${id}?tenantId=${tenantId}`, {
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/currencies/rates/${id}?tenantId=${tenantId}`, {
           method: 'DELETE',
         });
         setRates((prev) => prev.filter((r) => r.id !== id));

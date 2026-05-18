@@ -5,7 +5,7 @@ import type { PurchasingVendor, PurchaseOrder } from './_components.js';
 
 export default async function PurchasingVendorDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const tenantId = 'demo-tenant';
+  const tenantId = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
   let vendor: PurchasingVendor | null = null;
   let orders: PurchaseOrder[] = [];

@@ -16,7 +16,7 @@ interface GRN {
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const tenantId = 'demo-tenant';
+  const tenantId = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
   let order: PurchaseOrder | null = null;
   let grns: GRN[] = [];

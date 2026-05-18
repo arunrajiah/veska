@@ -35,7 +35,7 @@ export default function CurrencySettings({
   function handleSave() {
     startTransition(async () => {
       try {
-        const res = await fetch('http://localhost:3001/api/v1/currencies/settings', {
+        const res = await fetch((process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/currencies/settings', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ tenantId, baseCurrency, supportedCurrencies: supported }),

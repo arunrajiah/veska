@@ -565,7 +565,7 @@ const DANGEROUS_KEYWORDS = /\b(INSERT|UPDATE|DELETE|DROP|TRUNCATE|ALTER|CREATE|R
 
 // ── POST /reports/ai-generate ─────────────────────────────────
 
-reportsRouter.post('/ai-generate', aiLimit(), async (c) => {
+reportsRouter.post('/ai-generate', aiLimit, async (c) => {
   const { db, tenantId } = c.get('tenantCtx');
 
   let body: { prompt?: string; maxRows?: number };

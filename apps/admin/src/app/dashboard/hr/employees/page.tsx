@@ -7,7 +7,7 @@ export default async function EmployeesPage() {
   try {
     const res = await apiFetch<{ data: EmployeeRecord[] } | EmployeeRecord[]>(
       '/api/v1/hr/employees?limit=50',
-      'demo-tenant',
+      process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
     );
     employees = Array.isArray(res) ? res : (res as { data: EmployeeRecord[] }).data ?? [];
   } catch {

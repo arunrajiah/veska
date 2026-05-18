@@ -12,7 +12,7 @@ interface CompanyRecord {
 interface ContactRecord { id: string; data: Record<string, unknown> }
 interface DealRecord { id: string; data: Record<string, unknown> }
 
-const TENANT_ID = 'demo-tenant';
+const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 export default async function CompanyDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

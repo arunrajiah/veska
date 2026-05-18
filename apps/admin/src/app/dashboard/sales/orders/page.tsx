@@ -7,7 +7,7 @@ export default async function SalesOrdersPage() {
   try {
     const res = await apiFetch<{ data: OrderRecord[] } | OrderRecord[]>(
       '/api/v1/sales/orders?limit=50',
-      'demo-tenant',
+      process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
     );
     orders = Array.isArray(res) ? res : (res as { data: OrderRecord[] }).data ?? [];
   } catch {

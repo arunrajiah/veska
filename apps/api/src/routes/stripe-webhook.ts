@@ -36,7 +36,7 @@ stripeWebhookRouter.post('/', async (c) => {
           SELECT id FROM "stripeWebhookEvents"
           WHERE "stripeEventId" = ${event.id}
         `);
-        if ((existing as unknown[]).length > 0) {
+        if (existing.rows.length > 0) {
           return c.json({ received: true });
         }
 

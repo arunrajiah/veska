@@ -73,7 +73,7 @@ interface RunResult {
 function tenantHeaders(): HeadersInit {
   return {
     'Content-Type': 'application/json',
-    'x-tenant-id': 'demo-tenant',
+    'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
   };
 }
 

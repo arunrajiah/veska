@@ -80,7 +80,7 @@ function LineItemsTab({
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/api/v1/budgets/${budgetId}/line-items`, {
-        headers: { 'x-tenant-id': 'demo-tenant' },
+        headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
       });
       if (res.ok) {
         const data = await res.json() as LineItem[] | { data: LineItem[] };
@@ -107,7 +107,7 @@ function LineItemsTab({
       };
       const res = await fetch(`${API_BASE}/api/v1/budgets/${budgetId}/line-items`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-tenant-id': 'demo-tenant' },
+        headers: { 'Content-Type': 'application/json', 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
         body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error(await res.text());
@@ -128,7 +128,7 @@ function LineItemsTab({
     try {
       const res = await fetch(`${API_BASE}/api/v1/budgets/${budgetId}/line-items/${id}`, {
         method: 'DELETE',
-        headers: { 'x-tenant-id': 'demo-tenant' },
+        headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
       });
       if (res.ok) setItems((prev) => prev.filter((i) => i.id !== id));
     } finally {
@@ -146,7 +146,7 @@ function LineItemsTab({
     try {
       const res = await fetch(`${API_BASE}/api/v1/budgets/${budgetId}/line-items/${editingId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'x-tenant-id': 'demo-tenant' },
+        headers: { 'Content-Type': 'application/json', 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
         body: JSON.stringify(editForm),
       });
       if (res.ok) {
@@ -367,7 +367,7 @@ function ActualsTab({ budgetId, currency }: { budgetId: string; currency: string
 
   useEffect(() => {
     fetch(`${API_BASE}/api/v1/budgets/${budgetId}/actuals`, {
-      headers: { 'x-tenant-id': 'demo-tenant' },
+      headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
     })
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((data: ActualLine[] | { data: ActualLine[] }) => {
@@ -379,7 +379,7 @@ function ActualsTab({ budgetId, currency }: { budgetId: string; currency: string
 
   useEffect(() => {
     fetch(`${API_BASE}/api/v1/budgets/${budgetId}/cashflow`, {
-      headers: { 'x-tenant-id': 'demo-tenant' },
+      headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
     })
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((data: CashFlowMonth[] | { data: CashFlowMonth[] }) => {

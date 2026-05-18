@@ -1,23 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 
 const API_BASE = process.env.API_URL ?? 'http://localhost:3001';
-const TENANT_ID = process.env.VESKA_TENANT_ID ?? '';
-const IDENTITY_ID = process.env.VESKA_ADMIN_IDENTITY_ID ?? '';
 
 export async function POST(req: NextRequest) {
+  const cookieStore = await cookies();
+  const sessionToken = cookieStore.get('veska_session')?.value;
+  if (!sessionToken) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const { message, history } = (await req.json()) as {
     message: string;
     history: Array<{ role: string; content: string }>;
   };
 
+  const authHeaders = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${sessionToken}`,
+  };
+
   // Forward to the core API config propose endpoint which uses the ConfigAgent
   const res = await fetch(`${API_BASE}/api/v1/config/propose`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Veska-Tenant-Id': TENANT_ID,
-      'X-Veska-Identity-Id': IDENTITY_ID,
-    },
+    headers: authHeaders,
     body: JSON.stringify({ request: message, conversationHistory: history }),
   });
 
@@ -39,22 +45,16 @@ export async function POST(req: NextRequest) {
 
   // Check if user said yes to apply
   const lowerMsg = message.toLowerCase().trim();
-  let done = false;
   if ((lowerMsg === 'yes' || lowerMsg === 'looks good' || lowerMsg === 'apply') && data.diffId) {
     await fetch(`${API_BASE}/api/v1/config/apply/${data.diffId}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Veska-Tenant-Id': TENANT_ID,
-        'X-Veska-Identity-Id': IDENTITY_ID,
-      },
+      headers: authHeaders,
     });
-    done = true;
     return NextResponse.json({
       reply: "Your workspace is ready. Taking you to the dashboard...",
       done: true,
     });
   }
 
-  return NextResponse.json({ reply, done });
+  return NextResponse.json({ reply, done: false });
 }

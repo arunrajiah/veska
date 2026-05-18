@@ -72,7 +72,7 @@ export default async function EmployeeDetailPage({ params }: { params: { id: str
   let leaveRecords: LeaveRecord[] = [];
 
   try {
-    record = await apiFetch<EmployeeRecord>(`/api/v1/hr/employees/${id}`, 'demo-tenant');
+    record = await apiFetch<EmployeeRecord>(`/api/v1/hr/employees/${id}`, process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant');
   } catch {
     record = null;
   }
@@ -81,7 +81,7 @@ export default async function EmployeeDetailPage({ params }: { params: { id: str
     try {
       const res = await apiFetch<{ data: LeaveRecord[] } | LeaveRecord[]>(
         `/api/v1/hr/leave?employeeId=${id}&limit=50`,
-        'demo-tenant',
+        process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
       );
       leaveRecords = Array.isArray(res) ? res : (res as { data: LeaveRecord[] }).data ?? [];
     } catch {

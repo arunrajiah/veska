@@ -3,7 +3,7 @@ import CurrencySettings from './_currency-settings.js';
 import RatesTable from './_rates-table.js';
 
 const TENANT_ID = 'demo';
-const API_BASE = 'http://localhost:3001/api/v1/currencies';
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/currencies';
 
 interface CurrencyOption {
   code: string;

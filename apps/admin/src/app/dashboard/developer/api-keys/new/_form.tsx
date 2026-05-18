@@ -48,7 +48,7 @@ export default function ApiKeyForm() {
     try {
       const body: Record<string, unknown> = { tenantId: 'demo', name: name.trim(), scopes };
       if (expiresAt) body.expiresAt = new Date(expiresAt).toISOString();
-      const res = await fetch('http://localhost:3001/api/v1/api-keys', {
+      const res = await fetch((process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/api-keys', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),

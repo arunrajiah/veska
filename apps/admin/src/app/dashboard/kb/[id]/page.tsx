@@ -5,7 +5,7 @@ import type { Article } from '../page.js';
 
 export default async function KBArticlePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const tenantId = 'demo-tenant';
+  const tenantId = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
   let article: Article | null = null;
   try {

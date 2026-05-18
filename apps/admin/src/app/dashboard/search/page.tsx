@@ -32,7 +32,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
       const res = await fetch(url.toString(), {
         cache: 'no-store',
-        headers: { 'x-tenant-id': 'demo-tenant' },
+        headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
       });
       if (res.ok) {
         const json = (await res.json()) as SearchResponse | SearchResult[];

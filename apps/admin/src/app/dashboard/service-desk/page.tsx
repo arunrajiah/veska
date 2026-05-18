@@ -18,7 +18,7 @@ export interface ServiceDeskItem {
 }
 
 export default async function ServiceDeskPage() {
-  const tenantId = 'demo-tenant';
+  const tenantId = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
   let items: ServiceDeskItem[] = [];
   try {
