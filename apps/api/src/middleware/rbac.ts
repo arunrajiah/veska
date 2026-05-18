@@ -17,7 +17,7 @@ export function requirePermission(permission: string) {
 
     try {
       const rows = await sharedDb.execute(sql`
-        SELECT r."permissions"
+        SELECT r."capabilities"
         FROM "userRoles" ur
         JOIN "roles" r ON r."id" = ur."roleId"
         JOIN "users" u ON u."id" = ur."userId"
@@ -26,8 +26,9 @@ export function requirePermission(permission: string) {
           AND u."status" = 'active'
       `);
 
-      const allPerms: string[] = (rows.rows ?? []).flatMap(
-        (r: any) => (r.permissions as string[]) ?? [],
+      const rowsArray: any[] = Array.isArray(rows) ? rows : (rows as any).rows ?? [];
+      const allPerms: string[] = rowsArray.flatMap(
+        (r: any) => (r.capabilities as string[]) ?? [],
       );
       const hasPermission = allPerms.includes('*') || allPerms.includes(permission);
 
@@ -48,7 +49,8 @@ export function requirePermission(permission: string) {
             AND u."status" = 'active'
             AND r."name" = 'Admin'
         `);
-        if (!adminCheck.rows.length) {
+        const adminRows = Array.isArray(adminCheck) ? adminCheck : (adminCheck as any).rows ?? [];
+        if (!adminRows.length) {
           return c.json({ error: 'Insufficient permissions' }, 403);
         }
       } catch {

@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { logger } from 'hono/logger';
@@ -99,6 +100,32 @@ const app = new Hono();
 app.use('*', logger());
 app.use('*', secureHeaders());
 
+// CORS — allow same-origin and localhost dev origins
+app.use('*', async (c, next) => {
+  const origin = c.req.header('Origin') ?? '';
+  const allowed =
+    origin === '' ||
+    origin.startsWith('http://localhost:') ||
+    origin.startsWith('https://localhost:') ||
+    (process.env['CORS_ORIGIN'] ? origin === process.env['CORS_ORIGIN'] : false);
+  if (c.req.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        'Access-Control-Allow-Origin': allowed ? origin : '',
+        'Access-Control-Allow-Methods': 'GET,POST,PUT,PATCH,DELETE,OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Veska-Tenant-Id,X-Veska-Identity-Id,x-tenant-id',
+        'Access-Control-Max-Age': '86400',
+      },
+    });
+  }
+  await next();
+  if (allowed && origin) {
+    c.res.headers.set('Access-Control-Allow-Origin', origin);
+    c.res.headers.set('Access-Control-Allow-Credentials', 'true');
+  }
+});
+
 // Local file storage — serve uploaded files when not using cloud storage
 if (!process.env['AWS_S3_BUCKET']) {
   const uploadRoot = process.env['UPLOAD_DIR'] ?? './uploads';
@@ -106,7 +133,7 @@ if (!process.env['AWS_S3_BUCKET']) {
 }
 
 // Auth routes — no tenant middleware; apply strict rate limiting
-app.use('/auth/*', authLimit());
+app.use('/auth/*', authLimit);
 app.route('/auth', authRouter);
 
 // Public routes
@@ -131,6 +158,12 @@ app.route('/webhooks/stripe', stripeWebhookRouter);
 
 // Inbound channel webhooks — enqueue for async processing
 app.post('/webhooks/email', async (c) => {
+  const webhookSecret = process.env['EMAIL_WEBHOOK_SECRET'];
+  const providedSecret = c.req.header('X-Webhook-Secret') ?? c.req.query('secret');
+  if (webhookSecret && providedSecret !== webhookSecret) {
+    return c.json({ error: 'Unauthorized' }, 401);
+  }
+
   const payload = await c.req.json<Record<string, unknown>>();
   await sharedQueueService.enqueue('inbound_message', {
     tenantId: String(payload['tenantId'] ?? c.req.header('X-Veska-Tenant-Id') ?? ''),
@@ -142,6 +175,18 @@ app.post('/webhooks/email', async (c) => {
 
 // Twilio sends form-encoded data for WhatsApp; respond with 200 immediately
 app.post('/webhooks/whatsapp', async (c) => {
+  const webhookSecret = process.env['WHATSAPP_WEBHOOK_SECRET'];
+  const signature = c.req.header('X-Hub-Signature-256') ?? '';
+  if (webhookSecret && signature) {
+    const rawBody = await c.req.text();
+    const expected = 'sha256=' + createHmac('sha256', webhookSecret).update(rawBody).digest('hex');
+    const sigBuf = Buffer.from(signature);
+    const expBuf = Buffer.from(expected);
+    if (sigBuf.length !== expBuf.length || !timingSafeEqual(sigBuf, expBuf)) {
+      return c.json({ error: 'Invalid signature' }, 403);
+    }
+  }
+
   const body = await c.req.parseBody();
   const tenantId = c.req.header('X-Veska-Tenant-Id') ?? '';
   await sharedQueueService.enqueue('inbound_message', {
@@ -155,6 +200,12 @@ app.post('/webhooks/whatsapp', async (c) => {
 
 // Telegram Bot API sends POST to this endpoint
 app.post('/webhooks/telegram', async (c) => {
+  const secretToken = c.req.header('X-Telegram-Bot-Api-Secret-Token');
+  const expectedSecret = process.env['TELEGRAM_WEBHOOK_SECRET'];
+  if (expectedSecret && secretToken !== expectedSecret) {
+    return c.json({ error: 'Unauthorized' }, 401);
+  }
+
   const update = await c.req.json<Record<string, unknown>>();
   const tenantId = c.req.header('X-Veska-Tenant-Id') ?? '';
   await sharedQueueService.enqueue('inbound_message', {
@@ -172,8 +223,8 @@ api.use('*', requireSession());
 api.use('*', tenantContext);
 api.use('*', rateLimit(sharedRedis, { windowMs: 60_000, max: 120 }));
 // Sliding-window rate limiters (package: @veska-cloud/rate-limit)
-api.use('*', standardLimit());
-api.use('/ai/*', aiLimit());
+api.use('*', standardLimit);
+api.use('/ai/*', aiLimit);
 // Per-route in-memory limits (belt-and-suspenders on top of Redis limits)
 api.use('/conversations/*', inMemoryRateLimit({
   windowMs: 60_000,
@@ -226,7 +277,7 @@ api.route('/analytics', analyticsRouter);
 api.route('/sales', salesRouter);
 api.route('/notifications', notificationsRouter);
 api.route('/reports', reportsRouter);
-api.use('/search/*', standardLimit());
+api.use('/search/*', standardLimit);
 api.route('/search', searchRouter);
 api.route('/document-templates', documentTemplatesRouter);
 api.route('/assets', assetsRouter);
@@ -242,20 +293,20 @@ api.route('/setup', setupRouter);
 // Job queue monitoring — admin only
 api.use('/job-queues/*', requirePermission('admin:*'));
 api.route('/job-queues', jobQueuesRouter);
+api.route('/users', usersRouter);
+api.route('/roles', rolesRouter);
+api.route('/notification-channels', notificationChannelsRouter);
+api.route('/attachments', attachmentsRouter);
+api.route('/import-export', importExportRouter);
+api.route('/approval-chains', approvalChainsRouter);
+api.route('/approval-requests', approvalRequestsRouter);
+api.route('/dashboard', dashboardRouter);
+api.route('/currencies', currenciesRouter);
+api.route('/custom-fields', customFieldsRouter);
+api.route('/recurring-invoices', recurringInvoicesRouter);
+api.route('/invoices/email', invoiceEmailRouter);
+api.route('/sse', sseRouter);
 app.route('/api/v1', api);
-app.route('/api/v1/users', usersRouter);
-app.route('/api/v1/roles', rolesRouter);
-app.route('/api/v1/notification-channels', notificationChannelsRouter);
-app.route('/api/v1/attachments', attachmentsRouter);
-app.route('/api/v1/import-export', importExportRouter);
-app.route('/api/v1/approval-chains', approvalChainsRouter);
-app.route('/api/v1/approval-requests', approvalRequestsRouter);
-app.route('/api/v1/dashboard', dashboardRouter);
-app.route('/api/v1/currencies', currenciesRouter);
-app.route('/api/v1/custom-fields', customFieldsRouter);
-app.route('/api/v1/recurring-invoices', recurringInvoicesRouter);
-app.route('/api/v1/invoices/email', invoiceEmailRouter);
-app.route('/api/v1/events', sseRouter);
 
 // ── Slack setup ───────────────────────────────────────────────
 const slackManager = new SlackAppManager({

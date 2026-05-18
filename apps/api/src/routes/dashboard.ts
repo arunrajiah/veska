@@ -41,7 +41,7 @@ function toActivity(record: Record<string, unknown>): ActivityItem {
     (d['number'] as string) ||
     (d['subject'] as string) ||
     (record['id'] as string).slice(0, 8);
-  const entityType = record['entityType'] as string;
+  const entityType = (record['entity_type'] ?? record['entityType']) as string;
   const status = (d['status'] as string | undefined) ?? (record['status'] as string | undefined);
   const verb = getVerb(entityType, status);
   return {
@@ -50,16 +50,30 @@ function toActivity(record: Record<string, unknown>): ActivityItem {
     label,
     verb,
     status,
-    timestamp: record['updatedAt'],
+    timestamp: record['updated_at'] ?? record['updatedAt'],
   };
 }
 
 // ── GET /stats ────────────────────────────────────────────────
 
+// drizzle-orm/postgres-js returns rows as a plain array from db.execute(),
+// not as { rows: [...] }. This helper normalises the result.
+function firstRow(result: unknown): Record<string, string> | undefined {
+  if (Array.isArray(result)) return result[0] as Record<string, string> | undefined;
+  const r = result as { rows?: unknown[] };
+  return (r.rows?.[0]) as Record<string, string> | undefined;
+}
+
+function allRows(result: unknown): Record<string, unknown>[] {
+  if (Array.isArray(result)) return result as Record<string, unknown>[];
+  const r = result as { rows?: unknown[] };
+  return (r.rows ?? []) as Record<string, unknown>[];
+}
+
 dashboardRouter.get('/stats', async (c) => {
   const tenantId = c.req.query('tenantId') ?? 'demo';
 
-  // Helper to safely run a query and return 0 on error
+  // Helper to safely run a query and return undefined on error
   async function safeQuery<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
     try {
       return await fn();
@@ -87,51 +101,51 @@ dashboardRouter.get('/stats', async (c) => {
       const res = await db.execute(sql`
         SELECT
           COALESCE(SUM(CASE WHEN data->>'status' IN ('sent','overdue') THEN (data->>'amount')::numeric ELSE 0 END), 0) AS outstanding,
-          COALESCE(SUM(CASE WHEN data->>'status' = 'paid' AND "updatedAt" >= date_trunc('month', now()) THEN (data->>'amount')::numeric ELSE 0 END), 0) AS paid_this_month,
+          COALESCE(SUM(CASE WHEN data->>'status' = 'paid' AND updated_at >= date_trunc('month', now()) THEN (data->>'amount')::numeric ELSE 0 END), 0) AS paid_this_month,
           COALESCE(SUM(CASE WHEN data->>'status' IN ('submitted','approved') THEN (data->>'amount')::numeric ELSE 0 END), 0) AS expenses_pending,
           COUNT(CASE WHEN data->>'status' = 'overdue' THEN 1 END) AS overdue_count
-        FROM "entityRecords"
-        WHERE "tenantId" = ${tenantId}
-          AND "entityType" IN ('invoice', 'expense')
+        FROM entity_records
+        WHERE tenant_id = ${tenantId}
+          AND entity_type IN ('Invoice', 'Expense')
       `);
-      return res.rows[0] as Record<string, string> | undefined;
+      return firstRow(res);
     }, undefined),
 
     // HR: active employees
     safeQuery(async () => {
       const res = await db.execute(sql`
         SELECT COUNT(*) AS count
-        FROM "entityRecords"
-        WHERE "tenantId" = ${tenantId}
-          AND "entityType" = 'employee'
+        FROM entity_records
+        WHERE tenant_id = ${tenantId}
+          AND entity_type = 'Employee'
           AND data->>'status' = 'active'
       `);
-      return res.rows[0] as Record<string, string> | undefined;
+      return firstRow(res);
     }, undefined),
 
     // HR: pending leave requests
     safeQuery(async () => {
       const res = await db.execute(sql`
         SELECT COUNT(*) AS count
-        FROM "entityRecords"
-        WHERE "tenantId" = ${tenantId}
-          AND "entityType" = 'leave_request'
+        FROM entity_records
+        WHERE tenant_id = ${tenantId}
+          AND entity_type = 'LeaveRequest'
           AND data->>'status' = 'pending'
       `);
-      return res.rows[0] as Record<string, string> | undefined;
+      return firstRow(res);
     }, undefined),
 
     // HR: payroll runs this month
     safeQuery(async () => {
       const res = await db.execute(sql`
         SELECT COUNT(*) AS count
-        FROM "entityRecords"
-        WHERE "tenantId" = ${tenantId}
-          AND "entityType" = 'payroll_run'
-          AND "createdAt" >= date_trunc('month', now())
-          AND "createdAt" <= now()
+        FROM entity_records
+        WHERE tenant_id = ${tenantId}
+          AND entity_type = 'PayrollRun'
+          AND created_at >= date_trunc('month', now())
+          AND created_at <= now()
       `);
-      return res.rows[0] as Record<string, string> | undefined;
+      return firstRow(res);
     }, undefined),
 
     // Inventory stats
@@ -141,25 +155,25 @@ dashboardRouter.get('/stats', async (c) => {
           COUNT(*) AS total_products,
           COUNT(CASE WHEN (data->>'stock_level')::numeric < (data->>'reorder_level')::numeric THEN 1 END) AS low_stock,
           COALESCE(SUM((data->>'stock_level')::numeric * (data->>'cost_price')::numeric), 0) AS total_value
-        FROM "entityRecords"
-        WHERE "tenantId" = ${tenantId}
-          AND "entityType" = 'inventory_item'
+        FROM entity_records
+        WHERE tenant_id = ${tenantId}
+          AND entity_type = 'InventoryItem'
           AND (data->>'stock_level') IS NOT NULL
           AND (data->>'reorder_level') IS NOT NULL
       `);
-      return res.rows[0] as Record<string, string> | undefined;
+      return firstRow(res);
     }, undefined),
 
     // Sales orders
     safeQuery(async () => {
       const res = await db.execute(sql`
         SELECT COUNT(*) AS count
-        FROM "entityRecords"
-        WHERE "tenantId" = ${tenantId}
-          AND "entityType" = 'sales_order'
+        FROM entity_records
+        WHERE tenant_id = ${tenantId}
+          AND entity_type = 'SalesOrder'
           AND data->>'status' NOT IN ('delivered', 'cancelled')
       `);
-      return res.rows[0] as Record<string, string> | undefined;
+      return firstRow(res);
     }, undefined),
 
     // Deals
@@ -168,48 +182,48 @@ dashboardRouter.get('/stats', async (c) => {
         SELECT
           COUNT(*) AS count,
           COALESCE(SUM((data->>'value')::numeric), 0) AS total_value
-        FROM "entityRecords"
-        WHERE "tenantId" = ${tenantId}
-          AND "entityType" = 'deal'
+        FROM entity_records
+        WHERE tenant_id = ${tenantId}
+          AND entity_type = 'Deal'
           AND data->>'status' NOT IN ('won', 'lost')
       `);
-      return res.rows[0] as Record<string, string> | undefined;
+      return firstRow(res);
     }, undefined),
 
     // Projects
     safeQuery(async () => {
       const res = await db.execute(sql`
         SELECT COUNT(*) AS count
-        FROM "entityRecords"
-        WHERE "tenantId" = ${tenantId}
-          AND "entityType" = 'project'
+        FROM entity_records
+        WHERE tenant_id = ${tenantId}
+          AND entity_type = 'Project'
           AND data->>'status' IN ('active', 'in_progress')
       `);
-      return res.rows[0] as Record<string, string> | undefined;
+      return firstRow(res);
     }, undefined),
 
     // Tasks in progress
     safeQuery(async () => {
       const res = await db.execute(sql`
         SELECT COUNT(*) AS count
-        FROM "entityRecords"
-        WHERE "tenantId" = ${tenantId}
-          AND "entityType" = 'task'
+        FROM entity_records
+        WHERE tenant_id = ${tenantId}
+          AND entity_type = 'Task'
           AND data->>'status' = 'in_progress'
       `);
-      return res.rows[0] as Record<string, string> | undefined;
+      return firstRow(res);
     }, undefined),
 
     // Purchase orders
     safeQuery(async () => {
       const res = await db.execute(sql`
         SELECT COUNT(*) AS count
-        FROM "entityRecords"
-        WHERE "tenantId" = ${tenantId}
-          AND "entityType" = 'purchase_order'
+        FROM entity_records
+        WHERE tenant_id = ${tenantId}
+          AND entity_type = 'PurchaseOrder'
           AND data->>'status' NOT IN ('received', 'cancelled')
       `);
-      return res.rows[0] as Record<string, string> | undefined;
+      return firstRow(res);
     }, undefined),
 
     // Pending approvals
@@ -220,20 +234,20 @@ dashboardRouter.get('/stats', async (c) => {
         WHERE "tenantId" = ${tenantId}
           AND "status" = 'pending'
       `);
-      return res.rows[0] as Record<string, string> | undefined;
+      return firstRow(res);
     }, undefined),
 
     // Time entries this week
     safeQuery(async () => {
       const res = await db.execute(sql`
         SELECT COALESCE(SUM((data->>'hours')::numeric), 0) AS total_hours
-        FROM "entityRecords"
-        WHERE "tenantId" = ${tenantId}
-          AND "entityType" = 'time_entry'
-          AND "createdAt" >= date_trunc('week', now())
-          AND "createdAt" <= now()
+        FROM entity_records
+        WHERE tenant_id = ${tenantId}
+          AND entity_type = 'TimeEntry'
+          AND created_at >= date_trunc('week', now())
+          AND created_at <= now()
       `);
-      return res.rows[0] as Record<string, string> | undefined;
+      return firstRow(res);
     }, undefined),
   ]);
 
@@ -286,22 +300,22 @@ dashboardRouter.get('/activity', async (c) => {
     const result = await db.execute(sql`
       SELECT
         id,
-        "entityType",
+        entity_type,
         data->>'status' AS status,
         data->>'title' AS title,
         data->>'name' AS name,
         data->>'number' AS number,
         data->>'subject' AS subject,
         data,
-        "createdAt",
-        "updatedAt"
-      FROM "entityRecords"
-      WHERE "tenantId" = ${tenantId}
-      ORDER BY "updatedAt" DESC
+        created_at,
+        updated_at
+      FROM entity_records
+      WHERE tenant_id = ${tenantId}
+      ORDER BY updated_at DESC
       LIMIT ${limit}
     `);
 
-    const activities: ActivityItem[] = (result.rows as Record<string, unknown>[]).map((row) => {
+    const activities: ActivityItem[] = allRows(result).map((row) => {
       // Merge top-level fields into a data-like shape for toActivity
       const enriched: Record<string, unknown> = {
         ...row,
@@ -340,34 +354,34 @@ dashboardRouter.get('/quick-stats', async (c) => {
     safeQuery(async () => {
       const res = await db.execute(sql`
         SELECT COALESCE(SUM((data->>'amount')::numeric), 0) AS outstanding
-        FROM "entityRecords"
-        WHERE "tenantId" = ${tenantId}
-          AND "entityType" = 'invoice'
+        FROM entity_records
+        WHERE tenant_id = ${tenantId}
+          AND entity_type = 'invoice'
           AND data->>'status' IN ('sent', 'overdue')
       `);
-      return res.rows[0] as Record<string, string> | undefined;
+      return firstRow(res);
     }, undefined),
 
     safeQuery(async () => {
       const res = await db.execute(sql`
         SELECT COUNT(*) AS count
-        FROM "entityRecords"
-        WHERE "tenantId" = ${tenantId}
-          AND "entityType" = 'employee'
+        FROM entity_records
+        WHERE tenant_id = ${tenantId}
+          AND entity_type = 'Employee'
           AND data->>'status' = 'active'
       `);
-      return res.rows[0] as Record<string, string> | undefined;
+      return firstRow(res);
     }, undefined),
 
     safeQuery(async () => {
       const res = await db.execute(sql`
         SELECT COUNT(*) AS count
-        FROM "entityRecords"
-        WHERE "tenantId" = ${tenantId}
-          AND "entityType" = 'sales_order'
+        FROM entity_records
+        WHERE tenant_id = ${tenantId}
+          AND entity_type = 'SalesOrder'
           AND data->>'status' NOT IN ('delivered', 'cancelled')
       `);
-      return res.rows[0] as Record<string, string> | undefined;
+      return firstRow(res);
     }, undefined),
 
     safeQuery(async () => {
@@ -377,7 +391,7 @@ dashboardRouter.get('/quick-stats', async (c) => {
         WHERE "tenantId" = ${tenantId}
           AND "status" = 'pending'
       `);
-      return res.rows[0] as Record<string, string> | undefined;
+      return firstRow(res);
     }, undefined),
   ]);
 

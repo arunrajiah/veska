@@ -46,11 +46,14 @@ export function requireSession(): MiddlewareHandler<{ Variables: SessionContext 
           AND "expiresAt" > now()
       `);
 
-      if (!result.rows.length) {
+      // drizzle-orm/postgres-js returns rows directly as an array
+      const rows: unknown[] = Array.isArray(result) ? result : (result as { rows?: unknown[] }).rows ?? [];
+
+      if (!rows.length) {
         return c.json({ error: 'Unauthorized' }, 401);
       }
 
-      const session = result.rows[0] as SessionRow;
+      const session = rows[0] as SessionRow;
       c.set('session', session);
       c.set('userId', session.userId);
 

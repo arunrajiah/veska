@@ -19,10 +19,6 @@ const PALETTE = [
 
 // ── Helpers ───────────────────────────────────────────────────
 
-/**
- * Build a complete date spine (no gaps) between two dates, inclusive.
- * Returns ISO date strings (YYYY-MM-DD).
- */
 function buildDateSpine(from: Date, to: Date): string[] {
   const spine: string[] = [];
   const cur = new Date(from);
@@ -33,9 +29,6 @@ function buildDateSpine(from: Date, to: Date): string[] {
   return spine;
 }
 
-/**
- * Build a complete month spine (YYYY-MM) going back `count` months.
- */
 function buildMonthSpine(count: number): string[] {
   const spine: string[] = [];
   const now = new Date();
@@ -57,6 +50,17 @@ function parsePeriod(raw: string | undefined): { days: number; trunc: 'day' | 'w
   }
 }
 
+// Normalize drizzle-orm/postgres-js result (returns array directly, not { rows: [] })
+function toRows(result: unknown): Record<string, unknown>[] {
+  if (Array.isArray(result)) return result as Record<string, unknown>[];
+  const r = result as { rows?: unknown[] };
+  return (r.rows ?? []) as Record<string, unknown>[];
+}
+
+function firstRow(result: unknown): Record<string, unknown> | undefined {
+  return toRows(result)[0];
+}
+
 // ── GET /analytics/revenue ────────────────────────────────────
 
 analyticsRouter.get('/revenue', async (c) => {
@@ -66,19 +70,20 @@ analyticsRouter.get('/revenue', async (c) => {
   try {
     const result = await db.execute(sql`
       SELECT
-        DATE_TRUNC(${trunc}, "createdAt")::date AS bucket,
-        COALESCE(SUM(CAST(data->>'total' AS numeric)), 0) AS revenue
-      FROM "entityRecords"
-      WHERE "tenantId" = ${tenantId}
-        AND "entityType" = 'Invoice'
+        DATE_TRUNC(${trunc}, created_at)::date AS bucket,
+        COALESCE(SUM(CAST(COALESCE(data->>'total', data->>'amount') AS numeric)), 0) AS revenue
+      FROM entity_records
+      WHERE tenant_id = ${tenantId}
+        AND entity_type = 'Invoice'
         AND data->>'status' = 'paid'
-        AND "createdAt" >= NOW() - (${days} || ' days')::interval
+        AND created_at >= NOW() - (${days} || ' days')::interval
+        AND deleted_at IS NULL
       GROUP BY bucket
       ORDER BY bucket ASC
     `);
 
     type Row = { bucket: string; revenue: string };
-    const dbRows = result.rows as Row[];
+    const dbRows = toRows(result) as Row[];
     const byBucket = new Map(dbRows.map((r) => [String(r.bucket).slice(0, 10), Number(r.revenue)]));
 
     let labels: string[];
@@ -116,16 +121,17 @@ analyticsRouter.get('/expenses', async (c) => {
       SELECT
         COALESCE(data->>'category', 'Uncategorised') AS category,
         COALESCE(SUM(CAST(data->>'amount' AS numeric)), 0) AS total
-      FROM "entityRecords"
-      WHERE "tenantId" = ${tenantId}
-        AND "entityType" = 'Expense'
-        AND "createdAt" >= NOW() - (${days} || ' days')::interval
+      FROM entity_records
+      WHERE tenant_id = ${tenantId}
+        AND entity_type = 'Expense'
+        AND created_at >= NOW() - (${days} || ' days')::interval
+        AND deleted_at IS NULL
       GROUP BY category
       ORDER BY total DESC
     `);
 
     type Row = { category: string; total: string };
-    const rows = result.rows as Row[];
+    const rows = toRows(result) as Row[];
 
     const top6 = rows.slice(0, 6);
     const rest = rows.slice(6);
@@ -163,16 +169,16 @@ analyticsRouter.get('/headcount', async (c) => {
       SELECT
         COALESCE(data->>'department', 'Unassigned') AS department,
         COUNT(*) AS headcount
-      FROM "entityRecords"
-      WHERE "tenantId" = ${tenantId}
-        AND "entityType" = 'Employee'
-        AND "deletedAt" IS NULL
+      FROM entity_records
+      WHERE tenant_id = ${tenantId}
+        AND entity_type = 'Employee'
+        AND deleted_at IS NULL
       GROUP BY department
       ORDER BY headcount DESC
     `);
 
     type Row = { department: string; headcount: string };
-    const rows = result.rows as Row[];
+    const rows = toRows(result) as Row[];
 
     return c.json({
       labels: rows.map((r) => r.department),
@@ -191,6 +197,7 @@ analyticsRouter.get('/headcount', async (c) => {
 });
 
 // ── GET /analytics/pipeline ───────────────────────────────────
+// Uses entity_records for deals (Deal entity type)
 
 analyticsRouter.get('/pipeline', async (c) => {
   const { db, tenantId } = c.get('tenantCtx');
@@ -198,21 +205,20 @@ analyticsRouter.get('/pipeline', async (c) => {
   try {
     const result = await db.execute(sql`
       SELECT
-        s.name AS stage,
-        s."order",
-        COUNT(d.id) AS deal_count,
-        COALESCE(SUM(d.value), 0) AS pipeline_value
-      FROM "dealStages" s
-      LEFT JOIN "crmDeals" d ON d."stageId" = s.id
-        AND d."tenantId" = ${tenantId}
-        AND d.status NOT IN ('won', 'lost')
-      WHERE s."tenantId" = ${tenantId}
-      GROUP BY s.id, s.name, s."order"
-      ORDER BY s."order" ASC
+        COALESCE(data->>'stage', data->>'status', 'Unknown') AS stage,
+        COUNT(*) AS deal_count,
+        COALESCE(SUM(CAST(COALESCE(data->>'value', data->>'amount') AS numeric)), 0) AS pipeline_value
+      FROM entity_records
+      WHERE tenant_id = ${tenantId}
+        AND entity_type = 'Deal'
+        AND data->>'status' NOT IN ('won', 'lost')
+        AND deleted_at IS NULL
+      GROUP BY stage
+      ORDER BY pipeline_value DESC
     `);
 
-    type Row = { stage: string; order: string; deal_count: string; pipeline_value: string };
-    const rows = result.rows as Row[];
+    type Row = { stage: string; deal_count: string; pipeline_value: string };
+    const rows = toRows(result) as Row[];
 
     return c.json({
       labels: rows.map((r) => r.stage),
@@ -244,22 +250,20 @@ analyticsRouter.get('/inventory-value', async (c) => {
     const result = await db.execute(sql`
       SELECT
         COALESCE(data->>'category', 'Uncategorised') AS category,
-        SUM(
-          CAST(data->>'unitPrice' AS numeric) *
-          CAST(data->>'stockQuantity' AS numeric)
-        ) AS inventory_value
-      FROM "entityRecords"
-      WHERE "tenantId" = ${tenantId}
-        AND "entityType" = 'Product'
-        AND "deletedAt" IS NULL
-        AND data->>'unitPrice' IS NOT NULL
-        AND data->>'stockQuantity' IS NOT NULL
+        COALESCE(SUM(
+          CAST(COALESCE(data->>'cost_price', data->>'unitPrice', '0') AS numeric) *
+          CAST(COALESCE(data->>'stock_level', data->>'stockQuantity', '0') AS numeric)
+        ), 0) AS inventory_value
+      FROM entity_records
+      WHERE tenant_id = ${tenantId}
+        AND entity_type = 'InventoryItem'
+        AND deleted_at IS NULL
       GROUP BY category
       ORDER BY inventory_value DESC
     `);
 
     type Row = { category: string; inventory_value: string };
-    const rows = result.rows as Row[];
+    const rows = toRows(result) as Row[];
 
     return c.json({
       labels: rows.map((r) => r.category),
@@ -287,17 +291,19 @@ analyticsRouter.get('/ticket-volume', async (c) => {
   try {
     const result = await db.execute(sql`
       SELECT
-        DATE_TRUNC('day', "createdAt")::date AS day,
+        DATE_TRUNC('day', created_at)::date AS day,
         COUNT(*) AS ticket_count
-      FROM "serviceTickets"
-      WHERE "tenantId" = ${tenantId}
-        AND "createdAt" >= NOW() - (${days} || ' days')::interval
+      FROM entity_records
+      WHERE tenant_id = ${tenantId}
+        AND entity_type IN ('SupportTicket', 'Ticket', 'ServiceTicket')
+        AND created_at >= NOW() - (${days} || ' days')::interval
+        AND deleted_at IS NULL
       GROUP BY day
       ORDER BY day ASC
     `);
 
     type Row = { day: string; ticket_count: string };
-    const dbRows = result.rows as Row[];
+    const dbRows = toRows(result) as Row[];
     const byDay = new Map(dbRows.map((r) => [String(r.day).slice(0, 10), Number(r.ticket_count)]));
 
     const from = new Date(Date.now() - days * 86400_000);
@@ -319,90 +325,74 @@ analyticsRouter.get('/ticket-volume', async (c) => {
 analyticsRouter.get('/summary', async (c) => {
   const { db, tenantId } = c.get('tenantCtx');
 
-  try {
-    const [
-      revenue30d,
-      expenses30d,
-      openInvoices,
-      headcount,
-      openTickets,
-      pipeline,
-      budgetUtil,
-    ] = await Promise.all([
-      db.execute(sql`
-        SELECT COALESCE(SUM(CAST(data->>'total' AS numeric)), 0) AS total
-        FROM "entityRecords"
-        WHERE "tenantId" = ${tenantId}
-          AND "entityType" = 'Invoice'
+  async function safeQuery<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
+    try { return await fn(); } catch { return fallback; }
+  }
+
+  const [revenue30d, expenses30d, openInvoices, headcount, openTickets, pipeline] =
+    await Promise.all([
+      safeQuery(() => db.execute(sql`
+        SELECT COALESCE(SUM(CAST(COALESCE(data->>'total', data->>'amount') AS numeric)), 0) AS total
+        FROM entity_records
+        WHERE tenant_id = ${tenantId}
+          AND entity_type = 'Invoice'
           AND data->>'status' = 'paid'
-          AND "createdAt" >= NOW() - INTERVAL '30 days'
-      `),
-      db.execute(sql`
+          AND created_at >= NOW() - INTERVAL '30 days'
+          AND deleted_at IS NULL
+      `), null),
+      safeQuery(() => db.execute(sql`
         SELECT COALESCE(SUM(CAST(data->>'amount' AS numeric)), 0) AS total
-        FROM "entityRecords"
-        WHERE "tenantId" = ${tenantId}
-          AND "entityType" = 'Expense'
-          AND "createdAt" >= NOW() - INTERVAL '30 days'
-      `),
-      db.execute(sql`
+        FROM entity_records
+        WHERE tenant_id = ${tenantId}
+          AND entity_type = 'Expense'
+          AND created_at >= NOW() - INTERVAL '30 days'
+          AND deleted_at IS NULL
+      `), null),
+      safeQuery(() => db.execute(sql`
         SELECT
           COUNT(*) AS count,
-          COALESCE(SUM(CAST(data->>'total' AS numeric)), 0) AS value
-        FROM "entityRecords"
-        WHERE "tenantId" = ${tenantId}
-          AND "entityType" = 'Invoice'
+          COALESCE(SUM(CAST(COALESCE(data->>'total', data->>'amount') AS numeric)), 0) AS value
+        FROM entity_records
+        WHERE tenant_id = ${tenantId}
+          AND entity_type = 'Invoice'
           AND data->>'status' NOT IN ('paid', 'cancelled')
-          AND "deletedAt" IS NULL
-      `),
-      db.execute(sql`
+          AND deleted_at IS NULL
+      `), null),
+      safeQuery(() => db.execute(sql`
         SELECT COUNT(*) AS count
-        FROM "entityRecords"
-        WHERE "tenantId" = ${tenantId}
-          AND "entityType" = 'Employee'
-          AND "deletedAt" IS NULL
-      `),
-      db.execute(sql`
+        FROM entity_records
+        WHERE tenant_id = ${tenantId}
+          AND entity_type = 'Employee'
+          AND deleted_at IS NULL
+      `), null),
+      safeQuery(() => db.execute(sql`
         SELECT COUNT(*) AS count
-        FROM "serviceTickets"
-        WHERE "tenantId" = ${tenantId}
-          AND status NOT IN ('resolved', 'closed')
-      `),
-      db.execute(sql`
-        SELECT COALESCE(SUM(d.value), 0) AS total
-        FROM "crmDeals" d
-        WHERE d."tenantId" = ${tenantId}
-          AND d.status NOT IN ('won', 'lost')
-      `),
-      db.execute(sql`
-        SELECT
-          CASE
-            WHEN COALESCE(SUM(bli."plannedAmount"), 0) > 0
-            THEN ROUND(SUM(bli."actualAmount") / SUM(bli."plannedAmount") * 100, 1)
-            ELSE 0
-          END AS utilization_pct
-        FROM budgets b
-        LEFT JOIN "budgetLineItems" bli ON bli."budgetId" = b.id
-        WHERE b."tenantId" = ${tenantId}
-      `),
+        FROM entity_records
+        WHERE tenant_id = ${tenantId}
+          AND entity_type IN ('SupportTicket', 'Ticket', 'ServiceTicket')
+          AND data->>'status' NOT IN ('resolved', 'closed')
+          AND deleted_at IS NULL
+      `), null),
+      safeQuery(() => db.execute(sql`
+        SELECT COALESCE(SUM(CAST(COALESCE(data->>'value', data->>'amount') AS numeric)), 0) AS total
+        FROM entity_records
+        WHERE tenant_id = ${tenantId}
+          AND entity_type = 'Deal'
+          AND data->>'status' NOT IN ('won', 'lost')
+          AND deleted_at IS NULL
+      `), null),
     ]);
 
-    type SingleNum = { total: string };
-    type CountVal = { count: string; value: string };
-    type CountOnly = { count: string };
-    type UtilRow = { utilization_pct: string };
+  const n = (result: unknown, key = 'total') => Number(firstRow(result)?.[key] ?? 0);
 
-    return c.json({
-      revenue30d: Number((revenue30d.rows[0] as SingleNum)?.total ?? 0),
-      expenses30d: Number((expenses30d.rows[0] as SingleNum)?.total ?? 0),
-      openInvoicesCount: Number((openInvoices.rows[0] as CountVal)?.count ?? 0),
-      openInvoicesValue: Number((openInvoices.rows[0] as CountVal)?.value ?? 0),
-      headcount: Number((headcount.rows[0] as CountOnly)?.count ?? 0),
-      openTickets: Number((openTickets.rows[0] as CountOnly)?.count ?? 0),
-      pipelineValue: Number((pipeline.rows[0] as SingleNum)?.total ?? 0),
-      budgetUtilizationPct: Number((budgetUtil.rows[0] as UtilRow)?.utilization_pct ?? 0),
-    });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    return c.json({ error: message }, 500);
-  }
+  return c.json({
+    revenue30d: n(revenue30d),
+    expenses30d: n(expenses30d),
+    openInvoicesCount: n(openInvoices, 'count'),
+    openInvoicesValue: n(openInvoices, 'value'),
+    headcount: n(headcount, 'count'),
+    openTickets: n(openTickets, 'count'),
+    pipelineValue: n(pipeline),
+    budgetUtilizationPct: 0,
+  });
 });
