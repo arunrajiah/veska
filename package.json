@@ -23,7 +23,8 @@
     "db:migrate": "turbo run db:migrate --filter=@veska/core",
     "db:push": "turbo run db:push --filter=@veska/core",
     "seed": "pnpm --filter @veska/core seed",
-    "seed:clear": "pnpm --filter @veska/core seed:clear"
+    "seed:clear": "pnpm --filter @veska/core seed:clear",
+    "check:boundary": "bash scripts/check-oss-cloud-boundary.sh"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

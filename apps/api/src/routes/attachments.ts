@@ -1,14 +1,41 @@
 import { Hono } from 'hono';
 import { sql } from 'drizzle-orm';
-import { createStorage } from '@veska-cloud/storage';
 import { randomUUID } from 'node:crypto';
 import type { TenantContext } from '../middleware/tenant-context.js';
 import { handleRouteError } from '../lib/api-error.js';
+import { LocalStorage } from '../lib/local-storage.js';
+
+// Minimal storage interface used by this router
+interface StorageProvider {
+  upload(key: string, data: Buffer, mimeType: string): Promise<string>;
+  download(key: string): Promise<Buffer>;
+  delete(key: string): Promise<void>;
+}
 
 export const attachmentsRouter = new Hono<{ Variables: TenantContext }>();
 
-// Singleton storage instance
-const storage = createStorage();
+// Lazy singleton — try cloud storage (S3/R2) first, fall back to local disk.
+let _storage: StorageProvider | undefined;
+
+async function getStorage(): Promise<StorageProvider> {
+  if (_storage) return _storage;
+
+  if (process.env['STORAGE_PROVIDER'] !== 'local' && process.env['AWS_S3_BUCKET']) {
+    try {
+      const cloud = await import('@veska-cloud/storage');
+      _storage = cloud.createStorage() as StorageProvider;
+      return _storage;
+    } catch {
+      // cloud package not available — fall through to local disk
+    }
+  }
+
+  _storage = new LocalStorage(
+    process.env['UPLOAD_DIR'] ?? './uploads',
+    process.env['UPLOAD_BASE_URL'] ?? `http://localhost:${process.env['PORT'] ?? '3001'}/uploads`,
+  );
+  return _storage;
+}
 
 // ── List attachments ─────────────────────────────────────────
 
@@ -61,6 +88,7 @@ attachmentsRouter.post('/upload', async (c) => {
     const originalName = file.name;
     const storageKey = `${tenantId}/${entityType}/${entityId}/${uuid}-${originalName}`;
     const buffer = Buffer.from(await file.arrayBuffer());
+    const storage = await getStorage();
     const url = await storage.upload(storageKey, buffer, file.type);
 
     const result = await db.execute(sql`
@@ -99,6 +127,7 @@ attachmentsRouter.delete('/:id', async (c) => {
       return c.json({ error: 'Attachment not found' }, 404);
     }
 
+    const storage = await getStorage();
     await storage.delete(attachment['storageKey'] as string);
 
     await db.execute(sql`
@@ -127,6 +156,7 @@ attachmentsRouter.get('/:id/download', async (c) => {
       return c.json({ error: 'Attachment not found' }, 404);
     }
 
+    const storage = await getStorage();
     const buffer = await storage.download(attachment['storageKey'] as string);
 
     return new Response(buffer, {

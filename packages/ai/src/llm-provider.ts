@@ -1,3 +1,10 @@
+// Cloud LLM provider interface for @veska-cloud/ai.
+//
+// Note: this interface uses chat()/chatWithTools() which is distinct from the OSS
+// core LLMProvider (complete()/stream()). The cloud package keeps its own interface
+// because it directly surfaces Anthropic tool format and supports multi-provider
+// adapters (Ollama, OpenAI-compat) that are specific to the admin app context.
+
 import Anthropic from '@anthropic-ai/sdk';
 
 export interface LLMMessage {
@@ -18,8 +25,8 @@ export class AnthropicProvider implements LLMProvider {
   private client: Anthropic;
   private model: string;
 
-  constructor(apiKey?: string, model = 'claude-sonnet-4-5') {
-    this.client = new Anthropic({ apiKey: apiKey ?? process.env.ANTHROPIC_API_KEY });
+  constructor(apiKey?: string, model = 'claude-sonnet-4-6') {
+    this.client = new Anthropic({ apiKey: apiKey ?? process.env['ANTHROPIC_API_KEY'] });
     this.model = model;
   }
 
@@ -31,7 +38,7 @@ export class AnthropicProvider implements LLMProvider {
       messages,
     });
     const block = response.content[0];
-    return block.type === 'text' ? block.text : '';
+    return block && block.type === 'text' ? block.text : '';
   }
 
   async chatWithTools(

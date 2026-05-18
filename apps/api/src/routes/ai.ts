@@ -1,11 +1,13 @@
 import { Hono } from 'hono';
 import { sql } from 'drizzle-orm';
-import { AnthropicProvider, ActionAgent } from '@veska-cloud/ai';
-import type { LLMMessage } from '@veska-cloud/ai';
-import { aiLimit } from '@veska-cloud/rate-limit';
+import type { CompletionMessage } from '@veska/core';
+import { AIUsageService, maskPII, unmaskPII } from '@veska/core';
+import { aiLimit } from '../lib/rate-limiters.js';
 import type { TenantContext } from '../middleware/tenant-context.js';
 import { sharedLlm, sharedQueueService } from '../shared.js';
-import { AIUsageService, maskPII, unmaskPII } from '@veska/core';
+
+// LLMMessage is an alias for CompletionMessage (role + content)
+type LLMMessage = CompletionMessage;
 
 export const aiRouter = new Hono<{ Variables: TenantContext }>();
 
@@ -322,20 +324,29 @@ aiRouter.post('/conversations/:id/chat', async (c) => {
     return { role: msg.role, content: masked };
   });
 
-  // Run the ActionAgent with the masked message and masked history
-  const llm = new AnthropicProvider();
-  const apiBaseUrl = process.env['API_BASE_URL'] ?? 'http://localhost:3001/api/v1';
-  const agent = new ActionAgent(llm, { tenantId, apiBaseUrl });
+  // Run the LLM with the masked message and masked history
+  const agentSystem =
+    'You are the Veska Action Agent. You help users accomplish tasks by reading and writing business data. ' +
+    'Respond concisely — this is a chat interface. Never assume; ask for confirmation before irreversible actions.';
+
+  const agentMessages: LLMMessage[] = [
+    ...maskedHistory,
+    { role: 'user', content: maskedUserMessage },
+  ];
 
   let answer: string;
   let toolsUsed: string[];
 
   const chatStart = Date.now();
   try {
-    const result = await agent.run(maskedUserMessage, maskedHistory);
+    const result = await sharedLlm.complete({
+      system: agentSystem,
+      messages: agentMessages,
+      maxTokens: 2048,
+    });
     // Unmask PII in the AI response so the UI sees real values
-    answer = unmaskPII(result.answer, piiMappings);
-    toolsUsed = result.toolsUsed;
+    answer = unmaskPII(result.content, piiMappings);
+    toolsUsed = result.toolCalls.map((tc) => tc.name);
   } catch (err) {
     return c.json({ error: `Agent error: ${String(err)}` }, 500);
   }

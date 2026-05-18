@@ -1,4 +1,4 @@
-import type { LLMProvider } from './provider.js';
+import type { LLMProvider, Tool } from './provider.js';
 import type { Database } from '../db/index.js';
 import { schema } from '../db/index.js';
 import type { IncomingMessage, OutgoingMessage } from '../primitives/channel.js';
@@ -11,6 +11,22 @@ import type { MagicLinkService } from '../services/magic-link.service.js';
 // ──────────────────────────────────────────────────────────────
 // Action agent — processes one inbound message end-to-end
 // ──────────────────────────────────────────────────────────────
+
+// AgentContext / AgentResponse — shared types used by the cloud extension
+export interface AgentContext {
+  db: Database;
+  llm: LLMProvider;
+  auditService: AuditService;
+  magicLinkService: MagicLinkService;
+  defaultModel?: string;
+}
+
+export interface AgentResponse {
+  response: OutgoingMessage;
+  actionsPerformed: string[];
+  requiresApproval: boolean;
+  reasoningTrace: string;
+}
 
 const ACTION_AGENT_SYSTEM = `You are the Veska Action Agent. You help users accomplish tasks by reading and writing business data.
 
@@ -28,26 +44,45 @@ You cannot:
 Respond in the same language the user used. Be concise — this is a chat interface, not a document.
 When an action needs confirmation, ask clearly. Never assume.`;
 
-export interface ActionAgentResult {
-  response: OutgoingMessage;
-  actionsPerformed: string[];
-  requiresApproval: boolean;
-  reasoningTrace: string;
-}
+/** @deprecated Use AgentResponse instead */
+export type ActionAgentResult = AgentResponse;
 
 export class ActionAgent {
+  protected db: Database;
+  protected llm: LLMProvider;
+  protected auditService: AuditService;
+  protected magicLinkService: MagicLinkService;
+  protected defaultModel: string;
+
+  /** Extra tools registered by subclasses (e.g. cloud-only tools). */
+  private extraTools: Tool[] = [];
+
   constructor(
-    private db: Database,
-    private llm: LLMProvider,
-    private auditService: AuditService,
-    private magicLinkService: MagicLinkService,
-    private defaultModel = 'claude-sonnet-4-6',
-  ) {}
+    db: Database,
+    llm: LLMProvider,
+    auditService: AuditService,
+    magicLinkService: MagicLinkService,
+    defaultModel = 'claude-sonnet-4-6',
+  ) {
+    this.db = db;
+    this.llm = llm;
+    this.auditService = auditService;
+    this.magicLinkService = magicLinkService;
+    this.defaultModel = defaultModel;
+  }
+
+  /**
+   * Register additional tools from a subclass or plugin.
+   * These are merged with the permission-filtered tools at call time.
+   */
+  registerTools(tools: Tool[]): void {
+    this.extraTools = [...this.extraTools, ...tools];
+  }
 
   async process(
     message: IncomingMessage,
     identity: Identity,
-  ): Promise<ActionAgentResult> {
+  ): Promise<AgentResponse> {
     // Load tenant context: entity definitions + identity's roles
     const [entityDefs, roles] = await Promise.all([
       this.db.query.entityDefinitions.findMany({
@@ -189,10 +224,11 @@ export class ActionAgent {
       },
     });
 
-    return tools;
+    // Merge in any tools registered by subclasses or plugins
+    return [...tools, ...this.extraTools];
   }
 
-  private async executeTool(
+  protected async executeTool(
     toolName: string,
     input: Record<string, unknown>,
     message: IncomingMessage,

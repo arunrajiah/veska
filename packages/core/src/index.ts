@@ -15,7 +15,8 @@ export { OllamaProvider, type OllamaProviderConfig } from './ai/ollama-provider.
 export { OpenAICompatProvider, type OpenAICompatProviderConfig } from './ai/openai-compat-provider.js';
 export { createLLMProvider, type ProviderName } from './ai/provider-factory.js';
 export { ConfigAgent, type ConfigDiff, type ConfigChange, type ApplyResult } from './ai/config-agent.js';
-export { ActionAgent, type ActionAgentResult } from './ai/action-agent.js';
+export { ActionAgent, type ActionAgentResult, type AgentContext, type AgentResponse } from './ai/action-agent.js';
+export { BASE_ERP_TOOLS, WRITE_TOOLS, ERP_TOOLS } from './ai/erp-tools.js';
 
 // Channels
 export { SlackChannelAdapter } from './channels/slack/adapter.js';

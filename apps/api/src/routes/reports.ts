@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { eq, and, isNull, sql } from 'drizzle-orm';
 import { schema } from '@veska/core';
-import { aiLimit } from '@veska-cloud/rate-limit';
+import { aiLimit } from '../lib/rate-limiters.js';
 import type { TenantContext } from '../middleware/tenant-context.js';
 import { sharedLlm } from '../shared.js';
 

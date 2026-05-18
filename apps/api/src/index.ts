@@ -72,7 +72,8 @@ import { setupRouter } from './routes/setup.js';
 import { jobQueuesRouter } from './routes/job-queues.js';
 import { registerEmailWorker } from './workers/email-worker.js';
 import { startRecurringInvoiceJob } from './jobs/recurring-invoices.job.js';
-import { standardLimit, aiLimit, authLimit } from '@veska-cloud/rate-limit';
+import { serveStatic } from '@hono/node-server/serve-static';
+import { standardLimit, aiLimit, authLimit } from './lib/rate-limiters.js';
 import { tenantContext } from './middleware/tenant-context.js';
 import { requireSession } from './middleware/session.js';
 import { requirePermission } from './middleware/rbac.js';
@@ -97,6 +98,12 @@ import { WorkflowEngine } from '@veska/core';
 const app = new Hono();
 app.use('*', logger());
 app.use('*', secureHeaders());
+
+// Local file storage — serve uploaded files when not using cloud storage
+if (!process.env['AWS_S3_BUCKET']) {
+  const uploadRoot = process.env['UPLOAD_DIR'] ?? './uploads';
+  app.use('/uploads/*', serveStatic({ root: uploadRoot }));
+}
 
 // Auth routes — no tenant middleware; apply strict rate limiting
 app.use('/auth/*', authLimit());

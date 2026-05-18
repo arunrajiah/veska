@@ -11,7 +11,7 @@ import {
   sharedMagicLinkService,
 } from '../shared.js';
 import type { TenantContext } from '../middleware/tenant-context.js';
-import { aiLimit } from '@veska-cloud/rate-limit';
+import { aiLimit } from '../lib/rate-limiters.js';
 
 // Construct the engine once at module level
 const workflowEngine = new WorkflowEngine(
