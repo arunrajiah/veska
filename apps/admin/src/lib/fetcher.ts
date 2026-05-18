@@ -1,8 +1,20 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
-const TENANT_ID = 'demo-tenant';
+const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
+
+function getCookieValue(name: string): string | null {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie
+    .split('; ')
+    .find((row) => row.startsWith(`${name}=`));
+  return match ? decodeURIComponent(match.split('=')[1] ?? '') : null;
+}
 
 function clientHeaders(): HeadersInit {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('veska_token') : null;
+  // The session token lives in the veska_session cookie (set HttpOnly by the
+  // server).  In practice the browser attaches it automatically; we only read
+  // it here for the Authorization header on same-origin fetch calls.  We
+  // intentionally do NOT use localStorage — that would be XSS-accessible.
+  const token = getCookieValue('veska_session');
   return {
     'Content-Type': 'application/json',
     'X-Veska-Tenant-Id': TENANT_ID,

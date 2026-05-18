@@ -8,7 +8,7 @@ import { ImportModal } from '@/components/import-modal.js';
 import { useTranslations } from 'next-intl';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
-const TENANT_ID = 'demo-tenant';
+const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 const IDENTITY_ID = process.env.NEXT_PUBLIC_ADMIN_IDENTITY_ID ?? 'admin';
 
 function fmtHeaders() {
@@ -267,11 +267,11 @@ export function EmployeesClient({ employees: initial }: { employees: EmployeeRec
                 const d = emp.data;
                 const firstName = getField(d, 'firstName', 'first_name');
                 const lastName = getField(d, 'lastName', 'last_name');
-                const name = [firstName, lastName].filter(Boolean).join(' ') || '—';
-                const position = getField(d, 'position', 'title') || '—';
+                const name = [firstName, lastName].filter(Boolean).join(' ') || getField(d, 'name') || '—';
+                const position = getField(d, 'position', 'title', 'role') || '—';
                 const dept = getField(d, 'department') || '—';
                 const email = getField(d, 'email') || '—';
-                const startDate = getField(d, 'startDate', 'hire_date');
+                const startDate = getField(d, 'startDate', 'start_date', 'hire_date');
                 return (
                   <tr
                     key={emp.id}

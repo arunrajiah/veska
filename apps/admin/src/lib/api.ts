@@ -8,21 +8,34 @@ export async function apiFetch<T>(
   init?: RequestInit,
 ): Promise<T> {
   let token: string | null = null;
+  let identityId: string | null = null;
 
-  // Server-side (RSC): read session token from the cookie store
+  // Server-side (RSC): read session + identity from the cookie store
   if (typeof window === 'undefined') {
     try {
       const cookieStore = await cookies();
-      token = cookieStore.get('veska_session')?.value ?? null;
+      token      = cookieStore.get('veska_session')?.value  ?? null;
+      identityId = cookieStore.get('veska_identity')?.value
+                ?? cookieStore.get('veska_user')?.value
+                ?? 'system';
     } catch {
       token = null;
+      identityId = 'system';
     }
   } else {
-    // Client-side: read from localStorage
-    token = localStorage.getItem('veska_token');
+    // Client-side: read from cookie
+    const getCookie = (name: string) => {
+      const match = document.cookie.split('; ').find((row) => row.startsWith(`${name}=`));
+      return match ? decodeURIComponent(match.split('=')[1] ?? '') : null;
+    };
+    token      = getCookie('veska_session');
+    identityId = getCookie('veska_identity') ?? getCookie('veska_user') ?? 'system';
   }
 
-  const authHeaders: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
+  const authHeaders: HeadersInit = {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    'X-Veska-Identity-Id': identityId ?? 'system',
+  };
 
   const res = await fetch(`${API_BASE}${path}`, {
     ...init,

@@ -1,3 +1,4 @@
+import { cookies } from 'next/headers';
 import { apiFetch } from '@/lib/api.js';
 import { InvoicesClient } from './_components.js';
 
@@ -11,15 +12,18 @@ export interface Invoice {
     clientName?: string;
     customer?: string;
     customer_name?: string;
+    customerName?: string;
     clientEmail?: string;
     status?: string;
     subtotal?: number;
     tax?: number;
     total?: number;
+    amount?: number;
     dueDate?: string;
     due_date?: string;
     issuedAt?: string;
     issue_date?: string;
+    issueDate?: string;
     lineItems?: Array<{ description: string; quantity: number; unitPrice: number; total: number }>;
     line_items?: Array<{ description: string; quantity: number; unit_price: number; amount: number }>;
     notes?: string;
@@ -46,7 +50,8 @@ export default async function InvoicesPage({
 }: {
   searchParams: { new?: string };
 }) {
-  const tenantId = process.env.VESKA_TENANT_ID ?? 'demo-tenant';
+  const cookieStore = await cookies();
+  const tenantId = cookieStore.get('veska_tenant')?.value ?? process.env.VESKA_TENANT_ID ?? 'demo-tenant';
   const invoices = await fetchInvoices(tenantId);
   const openNew = searchParams.new === 'true';
 

@@ -17,8 +17,22 @@ import { LineChart, BarChart, DonutChart, KPICard } from './_charts.js';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
+function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.split('; ').find((row) => row.startsWith(`${name}=`));
+  return match ? decodeURIComponent(match.split('=')[1] ?? '') : null;
+}
+
 function tenantHeaders(extra?: HeadersInit): HeadersInit {
-  return { 'x-tenant-id': 'demo-tenant', ...extra };
+  const tenantId = getCookie('veska_tenant') ?? process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
+  const identityId = getCookie('veska_identity') ?? getCookie('veska_user') ?? 'system';
+  const session = getCookie('veska_session');
+  return {
+    'X-Veska-Tenant-Id': tenantId,
+    'X-Veska-Identity-Id': identityId,
+    ...(session ? { Authorization: `Bearer ${session}` } : {}),
+    ...extra,
+  };
 }
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -113,7 +127,7 @@ function useChartData<T>(url: string, deps: unknown[]) {
 
 function RevenueChart({ period }: { period: Period }) {
   const { data, loading, error } = useChartData<ChartData>(
-    `${API_BASE}/analytics/revenue?period=${period}`,
+    `${API_BASE}/api/v1/analytics/revenue?period=${period}`,
     [period],
   );
 
@@ -131,7 +145,7 @@ function RevenueChart({ period }: { period: Period }) {
 
 function ExpensesDonut({ period }: { period: Period }) {
   const { data, loading, error } = useChartData<DonutSlice[] | { categories?: DonutSlice[] }>(
-    `${API_BASE}/analytics/expenses?period=${period}`,
+    `${API_BASE}/api/v1/analytics/expenses?period=${period}`,
     [period],
   );
 
@@ -150,7 +164,7 @@ function ExpensesDonut({ period }: { period: Period }) {
 
 function PipelineBar() {
   const { data, loading, error } = useChartData<ChartData | { stages?: { label: string; value: number }[] }>(
-    `${API_BASE}/analytics/pipeline`,
+    `${API_BASE}/api/v1/analytics/pipeline`,
     [],
   );
 
@@ -176,7 +190,7 @@ function PipelineBar() {
 
 function HeadcountBar() {
   const { data, loading, error } = useChartData<ChartData | { departments?: { label: string; value: number }[] }>(
-    `${API_BASE}/analytics/headcount`,
+    `${API_BASE}/api/v1/analytics/headcount`,
     [],
   );
 

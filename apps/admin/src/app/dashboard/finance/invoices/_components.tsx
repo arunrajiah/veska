@@ -11,7 +11,7 @@ import type { Invoice } from './page.js';
 import { useTranslations } from 'next-intl';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
-const TENANT_ID = 'demo-tenant';
+const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 function authHeaders(): HeadersInit {
   return {
@@ -32,12 +32,12 @@ function getStatus(inv: Invoice): string {
 }
 
 function getTotal(inv: Invoice): number {
-  const t = inv.data.total ?? 0;
+  const t = inv.data.total ?? inv.data.subtotal ?? inv.data.amount ?? 0;
   return typeof t === 'number' ? t : parseFloat(String(t)) || 0;
 }
 
 function getClientName(inv: Invoice): string {
-  return inv.data.clientName ?? inv.data.customer ?? inv.data.customer_name ?? '—';
+  return inv.data.clientName ?? inv.data.customer ?? inv.data.customer_name ?? inv.data.customerName ?? '—';
 }
 
 function getInvoiceNumber(inv: Invoice): string {
@@ -50,7 +50,7 @@ function getDueDate(inv: Invoice): string {
 }
 
 function getIssuedAt(inv: Invoice): string {
-  const d = inv.data.issuedAt ?? inv.data.issue_date ?? inv.createdAt ?? '';
+  const d = inv.data.issuedAt ?? inv.data.issue_date ?? inv.data.issueDate ?? inv.createdAt ?? '';
   return d ? d.slice(0, 10) : '—';
 }
 
@@ -834,7 +834,7 @@ export function InvoicesClient({
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right font-semibold text-gray-900">
-                      {fmt(inv.data.total, currency)}
+                      {fmt(getTotal(inv), currency)}
                     </td>
                     <td className="px-4 py-3 text-xs text-gray-500 hidden sm:table-cell">{getDueDate(inv)}</td>
                     <td className="px-4 py-3 text-xs text-gray-500 hidden sm:table-cell">{getIssuedAt(inv)}</td>
