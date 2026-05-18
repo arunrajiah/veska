@@ -19,11 +19,14 @@ out/
 # Coverage
 coverage/
 
-# IDE
+# IDE / editor tooling
 .vscode/settings.json
 .idea/
 *.swp
 *.swo
+
+# Claude Code editor config — local dev tooling, not for public repos
+.claude/
 
 # OS
 .DS_Store
