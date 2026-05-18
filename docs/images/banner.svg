@@ -1,43 +1,326 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640">
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640">
   <defs>
-    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#0f0c29"/>
-      <stop offset="50%" style="stop-color:#302b63"/>
-      <stop offset="100%" style="stop-color:#24243e"/>
+    <!-- Background gradient: deep navy → rich indigo → near-black -->
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#0a0f1e"/>
+      <stop offset="45%"  stop-color="#0f1729"/>
+      <stop offset="100%" stop-color="#070b14"/>
     </linearGradient>
-    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" style="stop-color:rgba(99,102,241,0.15)"/>
-      <stop offset="100%" style="stop-color:rgba(99,102,241,0)"/>
+
+    <!-- Accent glow radial  -->
+    <radialGradient id="glow1" cx="30%" cy="40%" r="55%">
+      <stop offset="0%"   stop-color="#6366f1" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#6366f1" stop-opacity="0"/>
     </radialGradient>
+    <radialGradient id="glow2" cx="80%" cy="65%" r="45%">
+      <stop offset="0%"   stop-color="#8b5cf6" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Grid line fade -->
+    <linearGradient id="gridFade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Logo accent gradient -->
+    <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#a78bfa"/>
+    </linearGradient>
+
+    <!-- Pill background -->
+    <linearGradient id="pillGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#1e2340"/>
+      <stop offset="100%" stop-color="#1a1f38"/>
+    </linearGradient>
+
+    <!-- Stat card gradient -->
+    <linearGradient id="cardGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#161b2e"/>
+      <stop offset="100%" stop-color="#0e1322"/>
+    </linearGradient>
+
+    <!-- Shimmer line gradient for card accent -->
+    <linearGradient id="shimmer" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#6366f1" stop-opacity="0"/>
+      <stop offset="50%"  stop-color="#6366f1" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#a78bfa" stop-opacity="0"/>
+    </linearGradient>
   </defs>
 
-  <!-- Background -->
-  <rect width="1280" height="640" fill="url(#bg-gradient)"/>
+  <!-- ── Background ─────────────────────────────────────────────────────── -->
+  <rect width="1280" height="640" fill="url(#bg)"/>
+  <rect width="1280" height="640" fill="url(#glow1)"/>
+  <rect width="1280" height="640" fill="url(#glow2)"/>
 
-  <!-- Radial glow -->
-  <ellipse cx="640" cy="320" rx="500" ry="500" fill="url(#glow)"/>
+  <!-- ── Subtle grid lines ──────────────────────────────────────────────── -->
+  <line x1="0" y1="0" x2="0" y2="640" stroke="url(#gridFade)" stroke-width="1"/>
+  <line x1="100" y1="0" x2="100" y2="640" stroke="url(#gridFade)" stroke-width="1"/>
+  <line x1="200" y1="0" x2="200" y2="640" stroke="url(#gridFade)" stroke-width="1"/>
+  <line x1="300" y1="0" x2="300" y2="640" stroke="url(#gridFade)" stroke-width="1"/>
+  <line x1="400" y1="0" x2="400" y2="640" stroke="url(#gridFade)" stroke-width="1"/>
+  <line x1="500" y1="0" x2="500" y2="640" stroke="url(#gridFade)" stroke-width="1"/>
+  <line x1="600" y1="0" x2="600" y2="640" stroke="url(#gridFade)" stroke-width="1"/>
+  <line x1="700" y1="0" x2="700" y2="640" stroke="url(#gridFade)" stroke-width="1"/>
+  <line x1="800" y1="0" x2="800" y2="640" stroke="url(#gridFade)" stroke-width="1"/>
+  <line x1="900" y1="0" x2="900" y2="640" stroke="url(#gridFade)" stroke-width="1"/>
+  <line x1="1000" y1="0" x2="1000" y2="640" stroke="url(#gridFade)" stroke-width="1"/>
+  <line x1="1100" y1="0" x2="1100" y2="640" stroke="url(#gridFade)" stroke-width="1"/>
+  <line x1="1200" y1="0" x2="1200" y2="640" stroke="url(#gridFade)" stroke-width="1"/>
+  <line x1="1300" y1="0" x2="1300" y2="640" stroke="url(#gridFade)" stroke-width="1"/>
+  <line x1="0" y1="0" x2="1280" y2="0" stroke="url(#gridFade)" stroke-width="1"/>
+  <line x1="0" y1="100" x2="1280" y2="100" stroke="url(#gridFade)" stroke-width="1"/>
+  <line x1="0" y1="200" x2="1280" y2="200" stroke="url(#gridFade)" stroke-width="1"/>
+  <line x1="0" y1="300" x2="1280" y2="300" stroke="url(#gridFade)" stroke-width="1"/>
+  <line x1="0" y1="400" x2="1280" y2="400" stroke="url(#gridFade)" stroke-width="1"/>
+  <line x1="0" y1="500" x2="1280" y2="500" stroke="url(#gridFade)" stroke-width="1"/>
+  <line x1="0" y1="600" x2="1280" y2="600" stroke="url(#gridFade)" stroke-width="1"/>
+  <line x1="0" y1="700" x2="1280" y2="700" stroke="url(#gridFade)" stroke-width="1"/>
 
-  <!-- Main title -->
-  <text x="640" y="220" font-family="system-ui, -apple-system, sans-serif" font-size="96" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">Veska</text>
+  <!-- ── Decorative circles (depth) ────────────────────────────────────── -->
+  <circle cx="1150" cy="100" r="280" fill="none" stroke="#6366f1" stroke-width="1" stroke-opacity="0.08"/>
+  <circle cx="1150" cy="100" r="200" fill="none" stroke="#6366f1" stroke-width="1" stroke-opacity="0.06"/>
+  <circle cx="1150" cy="100" r="120" fill="none" stroke="#6366f1" stroke-width="1" stroke-opacity="0.04"/>
+  <circle cx="120"  cy="540" r="180" fill="none" stroke="#8b5cf6" stroke-width="1" stroke-opacity="0.06"/>
+  <circle cx="120"  cy="540" r="100" fill="none" stroke="#8b5cf6" stroke-width="1" stroke-opacity="0.04"/>
 
-  <!-- Subtitle -->
-  <text x="640" y="298" font-family="system-ui, -apple-system, sans-serif" font-size="28" fill="#a5b4fc" text-anchor="middle" dominant-baseline="middle">AI-native ERP — open source</text>
+  <!-- ── LEFT SIDE: branding + tagline ─────────────────────────────────── -->
+
+  <!-- Apache badge -->
+  <rect x="72" y="58" width="130" height="26" rx="13" fill="#1e2340" stroke="#6366f1" stroke-width="1" stroke-opacity="0.5"/>
+  <text x="137" y="75" font-family="'SF Pro Display', 'Inter', 'Helvetica Neue', Arial, sans-serif"
+        font-size="11" fill="#818cf8" text-anchor="middle" font-weight="500" letter-spacing="0.5">Apache 2.0 · Open Source</text>
+
+  <!-- Logo mark (stylised V) -->
+  <g transform="translate(72, 110)">
+    <!-- Hexagonal backdrop -->
+    <polygon points="28,0 56,16 56,48 28,64 0,48 0,16" fill="#1e2340" stroke="url(#logoGrad)" stroke-width="2"/>
+    <!-- V shape -->
+    <polyline points="16,20 28,44 40,20" fill="none" stroke="url(#logoGrad)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Dot above V -->
+    <circle cx="28" cy="14" r="3.5" fill="#818cf8"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="148" y="160" font-family="'SF Pro Display', 'Inter', 'Helvetica Neue', Arial, sans-serif"
+        font-size="56" font-weight="700" fill="white" letter-spacing="-1">Veska</text>
+
+  <!-- Tagline -->
+  <text x="72" y="210" font-family="'SF Pro Display', 'Inter', 'Helvetica Neue', Arial, sans-serif"
+        font-size="20" fill="#94a3b8" letter-spacing="0.2">The open-source AI-native ERP</text>
+
+  <!-- Sub-tagline -->
+  <text x="72" y="244" font-family="'SF Pro Display', 'Inter', 'Helvetica Neue', Arial, sans-serif"
+        font-size="15" fill="#64748b" letter-spacing="0.1">Invoicing · CRM · HR · Analytics · AI Actions</text>
 
   <!-- Divider line -->
-  <line x1="320" y1="330" x2="960" y2="330" stroke="rgba(165,180,252,0.3)" stroke-width="1"/>
+  <line x1="72" y1="275" x2="560" y2="275" stroke="#1e2340" stroke-width="1.5"/>
 
-  <!-- Badge 1: AI-First -->
-  <rect x="286" y="355" width="180" height="52" rx="26" fill="rgba(99,102,241,0.4)" stroke="rgba(99,102,241,0.7)" stroke-width="1.5"/>
-  <text x="376" y="381" font-family="system-ui, -apple-system, sans-serif" font-size="22" fill="white" text-anchor="middle" dominant-baseline="middle">🤖 AI-First</text>
+  <!-- Feature pills -->
+  
+  <rect x="72" y="296" width="128" height="34" rx="17" fill="url(#pillGrad)" stroke="#6366f1" stroke-width="1" stroke-opacity="0.6"/>
+  <text x="136" y="318" font-family="'SF Pro Display', 'Inter', Arial, sans-serif"
+        font-size="12.5" fill="#6366f1" text-anchor="middle" font-weight="600">⚡  AI-Powered</text>
 
-  <!-- Badge 2: Plugin SDK -->
-  <rect x="550" y="355" width="180" height="52" rx="26" fill="rgba(139,92,246,0.4)" stroke="rgba(139,92,246,0.7)" stroke-width="1.5"/>
-  <text x="640" y="381" font-family="system-ui, -apple-system, sans-serif" font-size="22" fill="white" text-anchor="middle" dominant-baseline="middle">🔌 Plugin SDK</text>
+  <rect x="210" y="296" width="128" height="34" rx="17" fill="url(#pillGrad)" stroke="#8b5cf6" stroke-width="1" stroke-opacity="0.6"/>
+  <text x="274" y="318" font-family="'SF Pro Display', 'Inter', Arial, sans-serif"
+        font-size="12.5" fill="#8b5cf6" text-anchor="middle" font-weight="600">🔒  Multi-tenant</text>
 
-  <!-- Badge 3: Docker Ready -->
-  <rect x="814" y="355" width="180" height="52" rx="26" fill="rgba(6,182,212,0.4)" stroke="rgba(6,182,212,0.7)" stroke-width="1.5"/>
-  <text x="904" y="381" font-family="system-ui, -apple-system, sans-serif" font-size="22" fill="white" text-anchor="middle" dominant-baseline="middle">🐋 Docker Ready</text>
+  <rect x="362" y="296" width="128" height="34" rx="17" fill="url(#pillGrad)" stroke="#0ea5e9" stroke-width="1" stroke-opacity="0.6"/>
+  <text x="426" y="318" font-family="'SF Pro Display', 'Inter', Arial, sans-serif"
+        font-size="12.5" fill="#0ea5e9" text-anchor="middle" font-weight="600">🌐  Self-hostable</text>
 
-  <!-- Bottom text -->
-  <text x="640" y="590" font-family="system-ui, -apple-system, sans-serif" font-size="16" fill="rgba(255,255,255,0.4)" text-anchor="middle" dominant-baseline="middle">Apache 2.0 · Self-host in minutes</text>
+  <!-- Stats row -->
+  <text x="72"  y="378" font-family="'SF Pro Display', 'Inter', Arial, sans-serif" font-size="26" font-weight="700" fill="white">32+</text>
+  <text x="72"  y="398" font-family="'SF Pro Display', 'Inter', Arial, sans-serif" font-size="12" fill="#64748b">DB Migrations</text>
+
+  <text x="190" y="378" font-family="'SF Pro Display', 'Inter', Arial, sans-serif" font-size="26" font-weight="700" fill="white">15+</text>
+  <text x="190" y="398" font-family="'SF Pro Display', 'Inter', Arial, sans-serif" font-size="12" fill="#64748b">AI ERP Tools</text>
+
+  <text x="308" y="378" font-family="'SF Pro Display', 'Inter', Arial, sans-serif" font-size="26" font-weight="700" fill="white">4</text>
+  <text x="308" y="398" font-family="'SF Pro Display', 'Inter', Arial, sans-serif" font-size="12" fill="#64748b">Locales</text>
+
+  <text x="380" y="378" font-family="'SF Pro Display', 'Inter', Arial, sans-serif" font-size="26" font-weight="700" fill="white">RBAC</text>
+  <text x="380" y="398" font-family="'SF Pro Display', 'Inter', Arial, sans-serif" font-size="12" fill="#64748b">Role-based Access</text>
+
+  <!-- CTA button -->
+  <rect x="72" y="430" width="180" height="46" rx="23" fill="#6366f1"/>
+  <text x="162" y="458" font-family="'SF Pro Display', 'Inter', Arial, sans-serif"
+        font-size="15" fill="white" text-anchor="middle" font-weight="600">Get Started →</text>
+
+  <rect x="270" y="430" width="145" height="46" rx="23" fill="none" stroke="#6366f1" stroke-width="1.5"/>
+  <text x="342" y="458" font-family="'SF Pro Display', 'Inter', Arial, sans-serif"
+        font-size="15" fill="#818cf8" text-anchor="middle" font-weight="500">View Docs</text>
+
+  <!-- ── RIGHT SIDE: mock UI cards ─────────────────────────────────────── -->
+
+  <!-- Card shadow -->
+  <rect x="672" y="52" width="540" height="536" rx="20" fill="#060b16" fill-opacity="0.7"/>
+
+  <!-- Main card: Invoice overview -->
+  <rect x="664" y="44" width="540" height="536" rx="16" fill="url(#cardGrad)" stroke="#1e2340" stroke-width="1.5"/>
+
+  <!-- Card top accent line -->
+  <rect x="664" y="44" width="540" height="2" rx="1" fill="url(#shimmer)"/>
+
+  <!-- Card header -->
+  <rect x="664" y="44" width="540" height="56" rx="16" fill="#131829"/>
+  <rect x="664" y="76" width="540" height="24" fill="#131829"/>
+
+  <!-- Nav dots -->
+  <circle cx="694" cy="72" r="6" fill="#ef4444" fill-opacity="0.7"/>
+  <circle cx="714" cy="72" r="6" fill="#f59e0b" fill-opacity="0.7"/>
+  <circle cx="734" cy="72" r="6" fill="#22c55e" fill-opacity="0.7"/>
+
+  <!-- URL bar -->
+  <rect x="760" y="60" width="300" height="24" rx="12" fill="#0e1322"/>
+  <text x="910" y="76" font-family="monospace" font-size="11" fill="#475569" text-anchor="middle">localhost:3000/dashboard/invoices</text>
+
+  <!-- Sidebar -->
+  <rect x="664" y="100" width="172" height="480" fill="#0f1420"/>
+
+  <!-- Sidebar logo -->
+  <polygon points="700,116 712,122 712,134 700,140 688,134 688,122" fill="#1e2340" stroke="#6366f1" stroke-width="1.5"/>
+  <polyline points="694,126 700,136 706,126" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="722" y="134" font-family="'Inter', Arial, sans-serif" font-size="14" font-weight="700" fill="white">Veska</text>
+
+  <!-- Sidebar items -->
+  
+  
+  <text x="688" y="174" font-family="Arial" font-size="13" fill="#475569">⊞</text>
+  <text x="708" y="174" font-family="'Inter', Arial, sans-serif" font-size="13" fill="#64748b" font-weight="400">Dashboard</text>
+
+  <rect x="664" y="190" width="172" height="30" fill="#1e2340"/><rect x="664" y="190" width="3" height="30" fill="#6366f1"/>
+  <text x="688" y="208" font-family="Arial" font-size="13" fill="#818cf8">◈</text>
+  <text x="708" y="208" font-family="'Inter', Arial, sans-serif" font-size="13" fill="#e2e8f0" font-weight="600">Invoices</text>
+
+  
+  <text x="688" y="242" font-family="Arial" font-size="13" fill="#475569">⊙</text>
+  <text x="708" y="242" font-family="'Inter', Arial, sans-serif" font-size="13" fill="#64748b" font-weight="400">CRM</text>
+
+  
+  <text x="688" y="276" font-family="Arial" font-size="13" fill="#475569">⚙</text>
+  <text x="708" y="276" font-family="'Inter', Arial, sans-serif" font-size="13" fill="#64748b" font-weight="400">Workflows</text>
+
+  
+  <text x="688" y="310" font-family="Arial" font-size="13" fill="#475569">✦</text>
+  <text x="708" y="310" font-family="'Inter', Arial, sans-serif" font-size="13" fill="#64748b" font-weight="400">AI Actions</text>
+
+  
+  <text x="688" y="344" font-family="Arial" font-size="13" fill="#475569">▦</text>
+  <text x="708" y="344" font-family="'Inter', Arial, sans-serif" font-size="13" fill="#64748b" font-weight="400">Reports</text>
+
+  
+  <text x="688" y="378" font-family="Arial" font-size="13" fill="#475569">☰</text>
+  <text x="708" y="378" font-family="'Inter', Arial, sans-serif" font-size="13" fill="#64748b" font-weight="400">HR</text>
+
+  
+  <text x="688" y="412" font-family="Arial" font-size="13" fill="#475569">◉</text>
+  <text x="708" y="412" font-family="'Inter', Arial, sans-serif" font-size="13" fill="#64748b" font-weight="400">Settings</text>
+
+  <!-- Main content area -->
+  <rect x="836" y="100" width="368" height="480" fill="#0c1120"/>
+
+  <!-- Page title row -->
+  <text x="856" y="130" font-family="'Inter', Arial, sans-serif" font-size="16" font-weight="700" fill="white">Invoices</text>
+  <rect x="1120" y="112" width="68" height="28" rx="14" fill="#6366f1"/>
+  <text x="1154" y="130" font-family="'Inter', Arial, sans-serif" font-size="12" fill="white" text-anchor="middle" font-weight="600">+ New</text>
+
+  <!-- Stats cards row -->
+  
+  <rect x="856" y="148" width="112" height="68" rx="10" fill="#131829" stroke="#1e2340" stroke-width="1"/>
+  <text x="868" y="168" font-family="'Inter', Arial, sans-serif" font-size="11" fill="#64748b">Total</text>
+  <text x="868" y="190" font-family="'Inter', Arial, sans-serif" font-size="17" font-weight="700" fill="white">$124.5K</text>
+  <text x="868" y="206" font-family="'Inter', Arial, sans-serif" font-size="10" fill="#22c55e">↑ 18% vs last mo</text>
+
+  <rect x="984" y="148" width="112" height="68" rx="10" fill="#131829" stroke="#1e2340" stroke-width="1"/>
+  <text x="996" y="168" font-family="'Inter', Arial, sans-serif" font-size="11" fill="#64748b">Pending</text>
+  <text x="996" y="190" font-family="'Inter', Arial, sans-serif" font-size="17" font-weight="700" fill="white">14</text>
+  <text x="996" y="206" font-family="'Inter', Arial, sans-serif" font-size="10" fill="#f59e0b">$22.3K outstanding</text>
+
+  <rect x="1112" y="148" width="112" height="68" rx="10" fill="#131829" stroke="#1e2340" stroke-width="1"/>
+  <text x="1124" y="168" font-family="'Inter', Arial, sans-serif" font-size="11" fill="#64748b">Overdue</text>
+  <text x="1124" y="190" font-family="'Inter', Arial, sans-serif" font-size="17" font-weight="700" fill="white">3</text>
+  <text x="1124" y="206" font-family="'Inter', Arial, sans-serif" font-size="10" fill="#ef4444">Needs attention</text>
+
+  <!-- Table header -->
+  <rect x="836" y="232" width="368" height="30" fill="#131829"/>
+  <text x="856" y="251" font-family="'Inter', Arial, sans-serif" font-size="11" fill="#64748b" font-weight="600">CLIENT</text>
+  <text x="1020" y="251" font-family="'Inter', Arial, sans-serif" font-size="11" fill="#64748b" font-weight="600">AMOUNT</text>
+  <text x="1110" y="251" font-family="'Inter', Arial, sans-serif" font-size="11" fill="#64748b" font-weight="600">STATUS</text>
+  <text x="1170" y="251" font-family="'Inter', Arial, sans-serif" font-size="11" fill="#64748b" font-weight="600">DATE</text>
+
+  <!-- Table rows -->
+  
+  <rect x="836" y="262" width="368" height="36" fill="#0c1120"/>
+  <circle cx="856" cy="280" r="10" fill="#1e2340"/>
+  <text x="856" y="285" font-family="'Inter', Arial, sans-serif" font-size="9" fill="#818cf8" text-anchor="middle">A</text>
+  <text x="872" y="285" font-family="'Inter', Arial, sans-serif" font-size="12" fill="#e2e8f0">Acme Corp</text>
+  <text x="1020" y="285" font-family="'Inter', Arial, sans-serif" font-size="12" fill="white" font-weight="600">$8,400</text>
+  <rect x="1108" y="269" width="52" height="20" rx="10" fill="#052e16"/>
+  <text x="1134" y="283" font-family="'Inter', Arial, sans-serif" font-size="10" fill="#22c55e" text-anchor="middle" font-weight="600">Paid</text>
+  <text x="1170" y="285" font-family="'Inter', Arial, sans-serif" font-size="11" fill="#64748b">May 12</text>
+
+  <rect x="836" y="298" width="368" height="36" fill="#0e1424"/>
+  <circle cx="856" cy="316" r="10" fill="#1e2340"/>
+  <text x="856" y="321" font-family="'Inter', Arial, sans-serif" font-size="9" fill="#818cf8" text-anchor="middle">G</text>
+  <text x="872" y="321" font-family="'Inter', Arial, sans-serif" font-size="12" fill="#e2e8f0">Globex Ltd</text>
+  <text x="1020" y="321" font-family="'Inter', Arial, sans-serif" font-size="12" fill="white" font-weight="600">$3,200</text>
+  <rect x="1108" y="305" width="52" height="20" rx="10" fill="#451a03"/>
+  <text x="1134" y="319" font-family="'Inter', Arial, sans-serif" font-size="10" fill="#f59e0b" text-anchor="middle" font-weight="600">Pending</text>
+  <text x="1170" y="321" font-family="'Inter', Arial, sans-serif" font-size="11" fill="#64748b">May 15</text>
+
+  <rect x="836" y="334" width="368" height="36" fill="#0c1120"/>
+  <circle cx="856" cy="352" r="10" fill="#1e2340"/>
+  <text x="856" y="357" font-family="'Inter', Arial, sans-serif" font-size="9" fill="#818cf8" text-anchor="middle">I</text>
+  <text x="872" y="357" font-family="'Inter', Arial, sans-serif" font-size="12" fill="#e2e8f0">Initech Inc</text>
+  <text x="1020" y="357" font-family="'Inter', Arial, sans-serif" font-size="12" fill="white" font-weight="600">$12,000</text>
+  <rect x="1108" y="341" width="52" height="20" rx="10" fill="#450a0a"/>
+  <text x="1134" y="355" font-family="'Inter', Arial, sans-serif" font-size="10" fill="#ef4444" text-anchor="middle" font-weight="600">Overdue</text>
+  <text x="1170" y="357" font-family="'Inter', Arial, sans-serif" font-size="11" fill="#64748b">Apr 30</text>
+
+  <rect x="836" y="370" width="368" height="36" fill="#0e1424"/>
+  <circle cx="856" cy="388" r="10" fill="#1e2340"/>
+  <text x="856" y="393" font-family="'Inter', Arial, sans-serif" font-size="9" fill="#818cf8" text-anchor="middle">U</text>
+  <text x="872" y="393" font-family="'Inter', Arial, sans-serif" font-size="12" fill="#e2e8f0">Umbrella Co</text>
+  <text x="1020" y="393" font-family="'Inter', Arial, sans-serif" font-size="12" fill="white" font-weight="600">$5,750</text>
+  <rect x="1108" y="377" width="52" height="20" rx="10" fill="#052e16"/>
+  <text x="1134" y="391" font-family="'Inter', Arial, sans-serif" font-size="10" fill="#22c55e" text-anchor="middle" font-weight="600">Paid</text>
+  <text x="1170" y="393" font-family="'Inter', Arial, sans-serif" font-size="11" fill="#64748b">May 10</text>
+
+  <rect x="836" y="406" width="368" height="36" fill="#0c1120"/>
+  <circle cx="856" cy="424" r="10" fill="#1e2340"/>
+  <text x="856" y="429" font-family="'Inter', Arial, sans-serif" font-size="9" fill="#818cf8" text-anchor="middle">S</text>
+  <text x="872" y="429" font-family="'Inter', Arial, sans-serif" font-size="12" fill="#e2e8f0">Stark Industries</text>
+  <text x="1020" y="429" font-family="'Inter', Arial, sans-serif" font-size="12" fill="white" font-weight="600">$21,500</text>
+  <rect x="1108" y="413" width="52" height="20" rx="10" fill="#1e293b"/>
+  <text x="1134" y="427" font-family="'Inter', Arial, sans-serif" font-size="10" fill="#94a3b8" text-anchor="middle" font-weight="600">Draft</text>
+  <text x="1170" y="429" font-family="'Inter', Arial, sans-serif" font-size="11" fill="#64748b">May 18</text>
+
+  <!-- Pagination row -->
+  <rect x="836" y="445" width="368" height="36" fill="#131829"/>
+  <text x="856"  y="468" font-family="'Inter', Arial, sans-serif" font-size="11" fill="#475569">Showing 5 of 48</text>
+  <rect x="1120" y="452" width="28" height="22" rx="6" fill="#1e2340"/>
+  <text x="1134" y="467" font-family="'Inter', Arial, sans-serif" font-size="12" fill="#818cf8" text-anchor="middle">‹</text>
+  <rect x="1154" y="452" width="28" height="22" rx="6" fill="#6366f1"/>
+  <text x="1168" y="467" font-family="'Inter', Arial, sans-serif" font-size="12" fill="white" text-anchor="middle">›</text>
+
+  <!-- AI assistant bubble (bottom right) -->
+  <rect x="1100" y="492" width="88" height="70" rx="12" fill="#161b2e" stroke="#6366f1" stroke-width="1.5"/>
+  <circle cx="1120" cy="510" r="10" fill="#6366f1"/>
+  <text x="1120" y="515" font-family="Arial" font-size="11" fill="white" text-anchor="middle">✦</text>
+  <text x="1144" y="510" font-family="'Inter', Arial, sans-serif" font-size="10" fill="#818cf8" font-weight="600">Ask Veska</text>
+  <text x="1108" y="526" font-family="'Inter', Arial, sans-serif" font-size="9" fill="#64748b">AI-powered ERP</text>
+  <text x="1108" y="540" font-family="'Inter', Arial, sans-serif" font-size="9" fill="#64748b">assistant</text>
+  <rect x="1108" y="548" width="72" height="6" rx="3" fill="#1e2340"/>
+  <rect x="1108" y="548" width="44" height="6" rx="3" fill="#6366f1" fill-opacity="0.8"/>
+
+  <!-- ── Bottom bar ─────────────────────────────────────────────────────── -->
+  <rect x="0" y="600" width="1280" height="40" fill="#070b14"/>
+  <line x1="0" y1="600" x2="1280" y2="600" stroke="#1e2340" stroke-width="1"/>
+  <text x="72" y="624" font-family="'Inter', Arial, sans-serif" font-size="12" fill="#334155">
+    github.com/veska-erp/veska  ·  Apache 2.0  ·  Built with Next.js 15 · Hono · PostgreSQL · Drizzle · AI
+  </text>
+  <text x="1208" y="624" font-family="'Inter', Arial, sans-serif" font-size="12" fill="#334155" text-anchor="end">⭐  Star us on GitHub</text>
 </svg>
