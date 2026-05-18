@@ -34,7 +34,7 @@ export async function enqueueNotification(
     });
   } catch {
     // Redis not available — fire synchronously as fallback
-    const { dispatch } = await import('./dispatcher');
+    const { dispatch } = await import('./dispatcher.js');
     await dispatch(payload, channels);
   }
 }

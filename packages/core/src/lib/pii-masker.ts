@@ -17,13 +17,13 @@ const PATTERNS: PatternDef[] = [
   // Email addresses (before phone so we don't mis-match)
   {
     type: 'EMAIL',
-    regex: /\b[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}\b/g,
+    regex: /\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b/g,
   },
   // Phone numbers — international and domestic formats
   {
     type: 'PHONE',
     regex:
-      /(?<!\d)(\+?1[\s\-.]?)?\(?[2-9]\d{2}\)?[\s\-.]?\d{3}[\s\-.]?\d{4}(?!\d)/g,
+      /(?<!\d)(\+?1[\s-.]?)?\(?[2-9]\d{2}\)?[\s-.]?\d{3}[\s-.]?\d{4}(?!\d)/g,
   },
   // UK NIN: AB123456C
   {
@@ -43,7 +43,7 @@ const PATTERNS: PatternDef[] = [
   // Credit card: 16 digits with optional spaces/dashes
   {
     type: 'CC',
-    regex: /\b(?:\d{4}[\s\-]){3}\d{4}\b/g,
+    regex: /\b(?:\d{4}[\s-]){3}\d{4}\b/g,
   },
   // Bank account: 8–10 consecutive digits not preceded/followed by digit
   {
