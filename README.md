@@ -4,6 +4,10 @@
 
 Describe your company in plain language. Veska sets up CRM, support desk, and finance in minutes. Your team works through Slack, WhatsApp, and Email — no accounts, no logins, no training required.
 
+<p align="center">
+  <img src="docs/images/banner.svg" alt="Veska — AI-native ERP" width="100%" />
+</p>
+
 [![CI](https://github.com/arunrajiah/veska/actions/workflows/ci.yml/badge.svg)](https://github.com/arunrajiah/veska/actions/workflows/ci.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
@@ -16,6 +20,27 @@ Describe your company in plain language. Veska sets up CRM, support desk, and fi
 Veska is an open-source, AI-first ERP for small businesses. A founder describes their company and Veska configures the complete back office — CRM, support, finance — in under 20 minutes.
 
 Once configured, almost nobody logs in. Employees, customers, and vendors interact with Veska through **Slack, WhatsApp, Email, and Telegram**. The AI does the work; humans just talk.
+
+## Screenshots
+
+<table>
+  <tr>
+    <td><img src="docs/images/screenshot-dashboard.svg" alt="Dashboard" /></td>
+    <td><img src="docs/images/screenshot-ai.svg" alt="AI Actions" /></td>
+  </tr>
+  <tr>
+    <td align="center"><em>Dashboard — KPIs, recent activity, AI assistant</em></td>
+    <td align="center"><em>AI Actions — plain-language ERP commands</em></td>
+  </tr>
+  <tr>
+    <td><img src="docs/images/screenshot-invoices.svg" alt="Invoices" /></td>
+    <td><img src="docs/images/screenshot-dashboard.svg" alt="Reports" /></td>
+  </tr>
+  <tr>
+    <td align="center"><em>Invoices — full lifecycle with approval gate</em></td>
+    <td align="center"><em>Reports — visual builder with AI narrative</em></td>
+  </tr>
+</table>
 
 ## Self-hosted vs. Veska Cloud
 

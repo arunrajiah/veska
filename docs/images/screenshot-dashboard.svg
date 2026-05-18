@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" width="100%">
+  <defs>
+    <clipPath id="main-clip">
+      <rect x="0" y="0" width="1200" height="720"/>
+    </clipPath>
+  </defs>
+
+  <!-- Main background -->
+  <rect width="1200" height="720" fill="#0f172a"/>
+
+  <!-- Top navbar -->
+  <rect x="0" y="0" width="1200" height="48" fill="#1e293b"/>
+  <line x1="0" y1="48" x2="1200" y2="48" stroke="#334155" stroke-width="1"/>
+  <!-- Veska logo -->
+  <text x="24" y="24" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="bold" fill="#6366f1" dominant-baseline="middle">Veska</text>
+  <!-- Right side: org name + avatar -->
+  <text x="1090" y="24" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#94a3b8" dominant-baseline="middle" text-anchor="end">Acme Corp</text>
+  <circle cx="1160" cy="24" r="16" fill="#4f46e5"/>
+  <text x="1160" y="24" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">A</text>
+
+  <!-- Left sidebar -->
+  <rect x="0" y="48" width="200" height="672" fill="#1e293b"/>
+  <line x1="200" y1="48" x2="200" y2="720" stroke="#334155" stroke-width="1"/>
+
+  <!-- Sidebar menu items -->
+  <!-- Dashboard (active) -->
+  <rect x="12" y="68" width="176" height="36" rx="8" fill="#4f46e5"/>
+  <text x="20" y="86" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="white" dominant-baseline="middle">📊  Dashboard</text>
+  <!-- Invoices -->
+  <text x="20" y="130" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#94a3b8" dominant-baseline="middle">🧾  Invoices</text>
+  <!-- Expenses -->
+  <text x="20" y="170" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#94a3b8" dominant-baseline="middle">💳  Expenses</text>
+  <!-- CRM -->
+  <text x="20" y="210" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#94a3b8" dominant-baseline="middle">👥  CRM</text>
+  <!-- Employees -->
+  <text x="20" y="250" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#94a3b8" dominant-baseline="middle">🏢  Employees</text>
+  <!-- AI Actions -->
+  <text x="20" y="290" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#94a3b8" dominant-baseline="middle">🤖  AI Actions</text>
+  <!-- Settings -->
+  <text x="20" y="330" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#94a3b8" dominant-baseline="middle">⚙️  Settings</text>
+
+  <!-- Main content area -->
+  <!-- Page header -->
+  <text x="224" y="84" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="bold" fill="white" dominant-baseline="middle">Dashboard</text>
+  <text x="224" y="110" font-family="system-ui, -apple-system, sans-serif" font-size="16" fill="#94a3b8" dominant-baseline="middle">Good morning, Alex</text>
+
+  <!-- Stat card 1: Revenue -->
+  <rect x="220" y="136" width="228" height="100" rx="12" fill="#1e293b"/>
+  <text x="240" y="162" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#94a3b8" dominant-baseline="middle">Revenue</text>
+  <text x="240" y="196" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="bold" fill="white" dominant-baseline="middle">$124,500</text>
+  <text x="240" y="224" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#22c55e" dominant-baseline="middle">+12% vs last month</text>
+
+  <!-- Stat card 2: Open Invoices -->
+  <rect x="462" y="136" width="228" height="100" rx="12" fill="#1e293b"/>
+  <text x="482" y="162" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#94a3b8" dominant-baseline="middle">Open Invoices</text>
+  <text x="482" y="196" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="bold" fill="white" dominant-baseline="middle">23</text>
+  <text x="482" y="224" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#f59e0b" dominant-baseline="middle">4 overdue</text>
+
+  <!-- Stat card 3: Expenses -->
+  <rect x="704" y="136" width="228" height="100" rx="12" fill="#1e293b"/>
+  <text x="724" y="162" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#94a3b8" dominant-baseline="middle">Expenses</text>
+  <text x="724" y="196" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="bold" fill="white" dominant-baseline="middle">$31,200</text>
+  <text x="724" y="224" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#22c55e" dominant-baseline="middle">Within budget</text>
+
+  <!-- Stat card 4: Employees -->
+  <rect x="946" y="136" width="228" height="100" rx="12" fill="#1e293b"/>
+  <text x="966" y="162" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#94a3b8" dominant-baseline="middle">Employees</text>
+  <text x="966" y="196" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="bold" fill="white" dominant-baseline="middle">48</text>
+  <text x="966" y="224" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#94a3b8" dominant-baseline="middle">3 on leave</text>
+
+  <!-- Recent Invoices card (left column) -->
+  <rect x="220" y="256" width="460" height="240" rx="12" fill="#1e293b"/>
+  <text x="240" y="282" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="bold" fill="white" dominant-baseline="middle">Recent Invoices</text>
+  <!-- Header row -->
+  <text x="240" y="312" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#64748b" dominant-baseline="middle">#</text>
+  <text x="290" y="312" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#64748b" dominant-baseline="middle">CUSTOMER</text>
+  <text x="470" y="312" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#64748b" dominant-baseline="middle">AMOUNT</text>
+  <text x="570" y="312" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#64748b" dominant-baseline="middle">STATUS</text>
+  <line x1="240" y1="322" x2="660" y2="322" stroke="#334155" stroke-width="1"/>
+  <!-- Row 1 -->
+  <text x="240" y="344" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">1042</text>
+  <text x="290" y="344" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">Acme Corp</text>
+  <text x="470" y="344" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">$5,000</text>
+  <rect x="566" y="334" width="46" height="18" rx="9" fill="rgba(100,116,139,0.3)"/>
+  <text x="589" y="343" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#94a3b8" text-anchor="middle" dominant-baseline="middle">Draft</text>
+  <!-- Row 2 -->
+  <text x="240" y="376" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">1041</text>
+  <text x="290" y="376" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">TechFlow Ltd</text>
+  <text x="470" y="376" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">$12,400</text>
+  <rect x="562" y="366" width="46" height="18" rx="9" fill="rgba(59,130,246,0.3)"/>
+  <text x="585" y="375" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#60a5fa" text-anchor="middle" dominant-baseline="middle">Sent</text>
+  <!-- Row 3 -->
+  <text x="240" y="408" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">1040</text>
+  <text x="290" y="408" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">GlobalRetail</text>
+  <text x="470" y="408" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">$8,750</text>
+  <rect x="563" y="398" width="44" height="18" rx="9" fill="rgba(34,197,94,0.3)"/>
+  <text x="585" y="407" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#22c55e" text-anchor="middle" dominant-baseline="middle">Paid</text>
+  <!-- Row 4 -->
+  <rect x="220" y="416" width="460" height="34" rx="0" fill="rgba(23,32,51,0.5)"/>
+  <text x="240" y="433" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">1039</text>
+  <text x="290" y="433" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">StartupXYZ</text>
+  <text x="470" y="433" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">$3,200</text>
+  <rect x="558" y="423" width="56" height="18" rx="9" fill="rgba(239,68,68,0.3)"/>
+  <text x="586" y="432" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#f87171" text-anchor="middle" dominant-baseline="middle">Overdue</text>
+
+  <!-- AI Assistant card (right column) -->
+  <rect x="700" y="256" width="474" height="240" rx="12" fill="#1e293b"/>
+  <text x="720" y="282" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="bold" fill="white" dominant-baseline="middle">AI Assistant</text>
+  <circle cx="1148" cy="282" r="8" fill="#22c55e"/>
+  <!-- User bubble -->
+  <rect x="850" y="298" width="294" height="34" rx="10" fill="#4f46e5"/>
+  <text x="862" y="315" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="white" dominant-baseline="middle">Show me overdue invoices</text>
+  <!-- AI response bubble -->
+  <rect x="718" y="344" width="330" height="60" rx="10" fill="#0f172a"/>
+  <text x="730" y="364" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">Found 4 overdue invoices</text>
+  <text x="730" y="382" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">totalling $18,400...</text>
+  <text x="730" y="398" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#94a3b8" dominant-baseline="middle">Oldest: INV-1037 · 33 days past due</text>
+  <!-- Input bar -->
+  <rect x="718" y="424" width="436" height="36" rx="18" fill="#0f172a" stroke="#334155" stroke-width="1"/>
+  <text x="740" y="442" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#475569" dominant-baseline="middle">Ask anything…</text>
+  <circle cx="1132" cy="442" r="14" fill="#4f46e5"/>
+  <text x="1132" y="442" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="white" text-anchor="middle" dominant-baseline="middle">↑</text>
+
+  <!-- Bottom padding area -->
+  <rect x="220" y="514" width="954" height="186" rx="0" fill="#0f172a"/>
+  <text x="640" y="610" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#334155" text-anchor="middle" dominant-baseline="middle">Veska Admin · v1.0.0</text>
+</svg>

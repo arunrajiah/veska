@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640">
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#0f0c29"/>
+      <stop offset="50%" style="stop-color:#302b63"/>
+      <stop offset="100%" style="stop-color:#24243e"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:rgba(99,102,241,0.15)"/>
+      <stop offset="100%" style="stop-color:rgba(99,102,241,0)"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1280" height="640" fill="url(#bg-gradient)"/>
+
+  <!-- Radial glow -->
+  <ellipse cx="640" cy="320" rx="500" ry="500" fill="url(#glow)"/>
+
+  <!-- Main title -->
+  <text x="640" y="220" font-family="system-ui, -apple-system, sans-serif" font-size="96" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">Veska</text>
+
+  <!-- Subtitle -->
+  <text x="640" y="298" font-family="system-ui, -apple-system, sans-serif" font-size="28" fill="#a5b4fc" text-anchor="middle" dominant-baseline="middle">AI-native ERP — open source</text>
+
+  <!-- Divider line -->
+  <line x1="320" y1="330" x2="960" y2="330" stroke="rgba(165,180,252,0.3)" stroke-width="1"/>
+
+  <!-- Badge 1: AI-First -->
+  <rect x="286" y="355" width="180" height="52" rx="26" fill="rgba(99,102,241,0.4)" stroke="rgba(99,102,241,0.7)" stroke-width="1.5"/>
+  <text x="376" y="381" font-family="system-ui, -apple-system, sans-serif" font-size="22" fill="white" text-anchor="middle" dominant-baseline="middle">🤖 AI-First</text>
+
+  <!-- Badge 2: Plugin SDK -->
+  <rect x="550" y="355" width="180" height="52" rx="26" fill="rgba(139,92,246,0.4)" stroke="rgba(139,92,246,0.7)" stroke-width="1.5"/>
+  <text x="640" y="381" font-family="system-ui, -apple-system, sans-serif" font-size="22" fill="white" text-anchor="middle" dominant-baseline="middle">🔌 Plugin SDK</text>
+
+  <!-- Badge 3: Docker Ready -->
+  <rect x="814" y="355" width="180" height="52" rx="26" fill="rgba(6,182,212,0.4)" stroke="rgba(6,182,212,0.7)" stroke-width="1.5"/>
+  <text x="904" y="381" font-family="system-ui, -apple-system, sans-serif" font-size="22" fill="white" text-anchor="middle" dominant-baseline="middle">🐋 Docker Ready</text>
+
+  <!-- Bottom text -->
+  <text x="640" y="590" font-family="system-ui, -apple-system, sans-serif" font-size="16" fill="rgba(255,255,255,0.4)" text-anchor="middle" dominant-baseline="middle">Apache 2.0 · Self-host in minutes</text>
+</svg>

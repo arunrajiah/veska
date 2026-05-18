@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" width="100%">
+  <!-- Main background -->
+  <rect width="1200" height="720" fill="#0f172a"/>
+
+  <!-- Top navbar -->
+  <rect x="0" y="0" width="1200" height="48" fill="#1e293b"/>
+  <line x1="0" y1="48" x2="1200" y2="48" stroke="#334155" stroke-width="1"/>
+  <text x="24" y="24" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="bold" fill="#6366f1" dominant-baseline="middle">Veska</text>
+  <text x="1090" y="24" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#94a3b8" dominant-baseline="middle" text-anchor="end">Acme Corp</text>
+  <circle cx="1160" cy="24" r="16" fill="#4f46e5"/>
+  <text x="1160" y="24" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">A</text>
+
+  <!-- Left sidebar -->
+  <rect x="0" y="48" width="200" height="672" fill="#1e293b"/>
+  <line x1="200" y1="48" x2="200" y2="720" stroke="#334155" stroke-width="1"/>
+  <text x="20" y="86" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#94a3b8" dominant-baseline="middle">📊  Dashboard</text>
+  <!-- Invoices (active) -->
+  <rect x="12" y="108" width="176" height="36" rx="8" fill="#4f46e5"/>
+  <text x="20" y="126" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="white" dominant-baseline="middle">🧾  Invoices</text>
+  <text x="20" y="170" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#94a3b8" dominant-baseline="middle">💳  Expenses</text>
+  <text x="20" y="210" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#94a3b8" dominant-baseline="middle">👥  CRM</text>
+  <text x="20" y="250" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#94a3b8" dominant-baseline="middle">🏢  Employees</text>
+  <text x="20" y="290" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#94a3b8" dominant-baseline="middle">🤖  AI Actions</text>
+  <text x="20" y="330" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#94a3b8" dominant-baseline="middle">⚙️  Settings</text>
+
+  <!-- Main content area -->
+  <!-- Page header -->
+  <text x="224" y="84" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="bold" fill="white" dominant-baseline="middle">Invoices</text>
+  <!-- New Invoice button -->
+  <rect x="1040" y="68" width="136" height="36" rx="8" fill="#4f46e5"/>
+  <text x="1108" y="86" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="600" fill="white" text-anchor="middle" dominant-baseline="middle">+ New Invoice</text>
+
+  <!-- Filter bar -->
+  <!-- Status pills -->
+  <rect x="220" y="116" width="42" height="28" rx="14" fill="#4f46e5"/>
+  <text x="241" y="130" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="white" text-anchor="middle" dominant-baseline="middle">All</text>
+  <rect x="272" y="116" width="52" height="28" rx="14" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="298" y="130" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle" dominant-baseline="middle">Draft</text>
+  <rect x="334" y="116" width="48" height="28" rx="14" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="358" y="130" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle" dominant-baseline="middle">Sent</text>
+  <rect x="392" y="116" width="46" height="28" rx="14" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="415" y="130" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle" dominant-baseline="middle">Paid</text>
+  <rect x="448" y="116" width="62" height="28" rx="14" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="479" y="130" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle" dominant-baseline="middle">Overdue</text>
+  <!-- Search box -->
+  <rect x="900" y="116" width="276" height="28" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="916" y="130" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#475569" dominant-baseline="middle">🔍  Search invoices…</text>
+
+  <!-- Invoices table -->
+  <rect x="220" y="160" width="956" height="476" rx="12" fill="#1e293b"/>
+
+  <!-- Table header -->
+  <rect x="220" y="160" width="956" height="40" rx="12" fill="#0f172a"/>
+  <rect x="220" y="184" width="956" height="16" fill="#0f172a"/>
+  <text x="244" y="180" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#64748b" text-transform="uppercase" dominant-baseline="middle">#</text>
+  <text x="300" y="180" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#64748b" dominant-baseline="middle">CUSTOMER</text>
+  <text x="520" y="180" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#64748b" dominant-baseline="middle">DATE</text>
+  <text x="700" y="180" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#64748b" dominant-baseline="middle">AMOUNT</text>
+  <text x="840" y="180" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#64748b" dominant-baseline="middle">STATUS</text>
+  <text x="980" y="180" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#64748b" dominant-baseline="middle">ACTIONS</text>
+
+  <!-- Row 1 (normal) -->
+  <rect x="220" y="200" width="956" height="46" fill="#1e293b"/>
+  <line x1="220" y1="246" x2="1176" y2="246" stroke="#0f172a" stroke-width="1"/>
+  <text x="244" y="223" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">INV-1042</text>
+  <text x="300" y="223" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">Acme Corp</text>
+  <text x="520" y="223" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#94a3b8" dominant-baseline="middle">May 18, 2026</text>
+  <text x="700" y="223" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">$5,000.00</text>
+  <rect x="836" y="213" width="52" height="20" rx="10" fill="rgba(100,116,139,0.3)"/>
+  <text x="862" y="223" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle" dominant-baseline="middle">Draft</text>
+  <text x="980" y="223" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#475569" dominant-baseline="middle">👁  ✏️  📤</text>
+
+  <!-- Row 2 (alternate) -->
+  <rect x="220" y="246" width="956" height="46" fill="#172033"/>
+  <line x1="220" y1="292" x2="1176" y2="292" stroke="#0f172a" stroke-width="1"/>
+  <text x="244" y="269" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">INV-1041</text>
+  <text x="300" y="269" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">TechFlow Ltd</text>
+  <text x="520" y="269" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#94a3b8" dominant-baseline="middle">May 15, 2026</text>
+  <text x="700" y="269" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">$12,400.00</text>
+  <rect x="836" y="259" width="46" height="20" rx="10" fill="rgba(59,130,246,0.3)"/>
+  <text x="859" y="269" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#60a5fa" text-anchor="middle" dominant-baseline="middle">Sent</text>
+  <text x="980" y="269" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#475569" dominant-baseline="middle">👁  ✏️  📤</text>
+
+  <!-- Row 3 (normal) -->
+  <rect x="220" y="292" width="956" height="46" fill="#1e293b"/>
+  <line x1="220" y1="338" x2="1176" y2="338" stroke="#0f172a" stroke-width="1"/>
+  <text x="244" y="315" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">INV-1040</text>
+  <text x="300" y="315" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">GlobalRetail</text>
+  <text x="520" y="315" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#94a3b8" dominant-baseline="middle">May 10, 2026</text>
+  <text x="700" y="315" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">$8,750.00</text>
+  <rect x="836" y="305" width="44" height="20" rx="10" fill="rgba(34,197,94,0.3)"/>
+  <text x="858" y="315" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#22c55e" text-anchor="middle" dominant-baseline="middle">Paid</text>
+  <text x="980" y="315" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#475569" dominant-baseline="middle">👁  ✏️  📤</text>
+
+  <!-- Row 4 (alternate) -->
+  <rect x="220" y="338" width="956" height="46" fill="#172033"/>
+  <line x1="220" y1="384" x2="1176" y2="384" stroke="#0f172a" stroke-width="1"/>
+  <text x="244" y="361" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">INV-1039</text>
+  <text x="300" y="361" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">StartupXYZ</text>
+  <text x="520" y="361" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#94a3b8" dominant-baseline="middle">Apr 28, 2026</text>
+  <text x="700" y="361" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">$3,200.00</text>
+  <rect x="830" y="351" width="58" height="20" rx="10" fill="rgba(239,68,68,0.3)"/>
+  <text x="859" y="361" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#f87171" text-anchor="middle" dominant-baseline="middle">Overdue</text>
+  <text x="980" y="361" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#475569" dominant-baseline="middle">👁  ✏️  📤</text>
+
+  <!-- Row 5 (normal) -->
+  <rect x="220" y="384" width="956" height="46" fill="#1e293b"/>
+  <line x1="220" y1="430" x2="1176" y2="430" stroke="#0f172a" stroke-width="1"/>
+  <text x="244" y="407" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">INV-1038</text>
+  <text x="300" y="407" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">Maple Corp</text>
+  <text x="520" y="407" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#94a3b8" dominant-baseline="middle">Apr 22, 2026</text>
+  <text x="700" y="407" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">$21,000.00</text>
+  <rect x="836" y="397" width="44" height="20" rx="10" fill="rgba(34,197,94,0.3)"/>
+  <text x="858" y="407" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#22c55e" text-anchor="middle" dominant-baseline="middle">Paid</text>
+  <text x="980" y="407" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#475569" dominant-baseline="middle">👁  ✏️  📤</text>
+
+  <!-- Row 6 (alternate) -->
+  <rect x="220" y="430" width="956" height="46" fill="#172033"/>
+  <rect x="220" y="460" width="956" height="16" rx="0" fill="#172033"/>
+  <rect x="220" y="464" width="956" height="12" rx="0" fill="#172033"/>
+  <line x1="220" y1="476" x2="1176" y2="476" stroke="#334155" stroke-width="1"/>
+  <text x="244" y="453" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">INV-1037</text>
+  <text x="300" y="453" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">SkyBridge</text>
+  <text x="520" y="453" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#94a3b8" dominant-baseline="middle">Apr 15, 2026</text>
+  <text x="700" y="453" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#e2e8f0" dominant-baseline="middle">$6,500.00</text>
+  <rect x="830" y="443" width="58" height="20" rx="10" fill="rgba(239,68,68,0.3)"/>
+  <text x="859" y="453" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#f87171" text-anchor="middle" dominant-baseline="middle">Overdue</text>
+  <text x="980" y="453" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#475569" dominant-baseline="middle">👁  ✏️  📤</text>
+
+  <!-- Pagination bar -->
+  <rect x="220" y="582" width="956" height="54" rx="0" fill="#0f172a"/>
+  <rect x="220" y="582" width="956" height="54" rx="0" fill="#1e293b"/>
+  <rect x="220" y="582" width="956" height="4" fill="#0f172a"/>
+  <text x="244" y="612" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#64748b" dominant-baseline="middle">Showing 1–6 of 47 invoices</text>
+  <!-- Prev / Next buttons -->
+  <rect x="960" y="596" width="70" height="28" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1"/>
+  <text x="995" y="610" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#94a3b8" text-anchor="middle" dominant-baseline="middle">← Prev</text>
+  <rect x="1044" y="596" width="70" height="28" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1"/>
+  <text x="1079" y="610" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#94a3b8" text-anchor="middle" dominant-baseline="middle">Next →</text>
+
+  <!-- Bottom status bar -->
+  <text x="698" y="662" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#334155" text-anchor="middle" dominant-baseline="middle">Veska Admin · v1.0.0</text>
+</svg>
