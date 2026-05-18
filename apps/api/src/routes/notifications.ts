@@ -114,7 +114,7 @@ notificationsRouter.post('/', zValidator('json', createNotificationSchema), asyn
       RETURNING *
     `);
 
-    const row = (result as unknown as Record<string, unknown>[])[0];
+    const row = (result as unknown as unknown as Record<string, unknown>[])[0];
 
     // Broadcast to SSE subscribers
     broadcast(tenantId, { type: 'notification', payload: { id: row?.['id'], ...body } });
@@ -140,7 +140,7 @@ notificationsRouter.post('/:id/read', async (c) => {
       RETURNING *
     `);
 
-    const row = (result as unknown[])[0];
+    const row = (result as unknown as unknown[])[0];
     if (!row) return c.json({ error: 'Notification not found' }, 404);
 
     return c.json(row);
@@ -163,7 +163,7 @@ notificationsRouter.delete('/:id', async (c) => {
       RETURNING id
     `);
 
-    const row = (result as unknown[])[0];
+    const row = (result as unknown as unknown[])[0];
     if (!row) return c.json({ error: 'Notification not found' }, 404);
 
     return c.json({ deleted: true });

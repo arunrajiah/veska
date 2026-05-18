@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { sql } from 'drizzle-orm';
+import { sharedDb } from '../shared.js';
 
 const invoiceEmailRouter = new Hono();
 
@@ -8,7 +9,7 @@ invoiceEmailRouter.get('/preview/:invoiceId', async (c) => {
   const invoiceId = c.req.param('invoiceId');
   const tenantId = c.req.query('tenantId') ?? 'demo';
 
-  const db = c.get('db') as any;
+  const db = sharedDb;
   const result = await db.execute(sql`
     SELECT * FROM "entityRecords"
     WHERE id = ${invoiceId}::uuid AND "tenantId" = ${tenantId} AND "entityType" = 'invoice'
@@ -25,7 +26,7 @@ invoiceEmailRouter.get('/preview/:invoiceId', async (c) => {
     status: d.status as string ?? 'draft',
     dueDate: d.dueDate as string,
     lineItems: (d.lineItems as any[]) ?? [],
-    createdAt: invoice.createdAt,
+    createdAt: (invoice as Record<string, unknown>)['createdAt'] as string,
   });
 
   return c.html(html);
@@ -38,7 +39,7 @@ invoiceEmailRouter.post('/send/:invoiceId', async (c) => {
 
   if (!toEmail) return c.json({ error: 'toEmail required' }, 400);
 
-  const db = c.get('db') as any;
+  const db = sharedDb;
   const result = await db.execute(sql`
     SELECT * FROM "entityRecords"
     WHERE id = ${invoiceId}::uuid AND "tenantId" = ${tenantId}

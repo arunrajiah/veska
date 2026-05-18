@@ -165,7 +165,7 @@ app.post('/webhooks/email', async (c) => {
   }
 
   const payload = await c.req.json<Record<string, unknown>>();
-  await sharedQueueService.enqueue('inbound_message', {
+  await sharedQueueService.enqueue('process.inbound_message', {
     tenantId: String(payload['tenantId'] ?? c.req.header('X-Veska-Tenant-Id') ?? ''),
     channelName: 'email',
     rawMessage: payload,
@@ -189,7 +189,7 @@ app.post('/webhooks/whatsapp', async (c) => {
 
   const body = await c.req.parseBody();
   const tenantId = c.req.header('X-Veska-Tenant-Id') ?? '';
-  await sharedQueueService.enqueue('inbound_message', {
+  await sharedQueueService.enqueue('process.inbound_message', {
     tenantId,
     channelName: 'whatsapp',
     rawMessage: body,
@@ -208,7 +208,7 @@ app.post('/webhooks/telegram', async (c) => {
 
   const update = await c.req.json<Record<string, unknown>>();
   const tenantId = c.req.header('X-Veska-Tenant-Id') ?? '';
-  await sharedQueueService.enqueue('inbound_message', {
+  await sharedQueueService.enqueue('process.inbound_message', {
     tenantId,
     channelName: 'telegram',
     rawMessage: update,

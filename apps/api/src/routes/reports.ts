@@ -265,10 +265,7 @@ reportsRouter.get('/finance', async (c) => {
     if (status === 'sent' || status === 'draft') totalOutstanding += amount;
     if (status === 'sent' && dueDate && dueDate < today) overdueCount++;
 
-    const month =
-      typeof inv.createdAt === 'string'
-        ? inv.createdAt.slice(0, 7)
-        : new Date(inv.createdAt).toISOString().slice(0, 7);
+    const month = new Date(inv.createdAt).toISOString().slice(0, 7);
 
     if (byMonthMap[month]) {
       byMonthMap[month]!.invoiced += amount;

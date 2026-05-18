@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { sql } from 'drizzle-orm';
 import { randomBytes, createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import bcrypt from 'bcrypt';
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 
 // Lazy Redis client for TOTP brute-force protection
 let _redis: Redis | null = null;

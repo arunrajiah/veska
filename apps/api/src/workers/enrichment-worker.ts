@@ -3,7 +3,7 @@ import { and, eq } from 'drizzle-orm';
 import type {
   Database,
   QueueService,
-  AnthropicProvider,
+  LLMProvider,
   AuditService,
 } from '@veska/core';
 import { schema } from '@veska/core';
@@ -31,7 +31,7 @@ import type { EnrichEntityJob } from '@veska/core';
 export function registerEnrichmentWorker(
   queueService: QueueService,
   db: Database,
-  llm: AnthropicProvider,
+  llm: LLMProvider,
   auditService: AuditService,
 ): void {
   queueService.registerWorker<'ai.enrich_entity'>(
@@ -108,7 +108,7 @@ export function registerEnrichmentWorker(
           maxTokens: 512,
         });
 
-        const responseText = result.text.trim();
+        const responseText = result.content.trim();
 
         // Strip markdown code fences if present
         const jsonText = responseText

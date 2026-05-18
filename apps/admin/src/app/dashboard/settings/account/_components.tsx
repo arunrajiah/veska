@@ -279,7 +279,7 @@ function MfaSection({ onToast }: { onToast: (msg: string, kind: ToastKind) => vo
             </p>
             {setupData.qrCodeUrl ? (
               <div className="flex justify-center mb-4">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
+
                 <img src={setupData.qrCodeUrl} alt="MFA QR Code" className="w-48 h-48" />
               </div>
             ) : null}

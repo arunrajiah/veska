@@ -53,7 +53,7 @@ taxRatesRouter.get('/default', async (c) => {
         AND status = 'active'
       LIMIT 1
     `);
-    const row = (rows as unknown[])[0];
+    const row = (rows as unknown as unknown[])[0];
     if (!row) {
       return c.json({ error: 'No default tax rate configured' }, 404);
     }
@@ -76,7 +76,7 @@ taxRatesRouter.post('/calculate', zValidator('json', CalculateSchema), async (c)
         WHERE id = ${taxRateId} AND "tenantId" = ${tenantId} AND status = 'active'
         LIMIT 1
       `);
-      rateRow = (rows as unknown[])[0] as Record<string, unknown> | undefined;
+      rateRow = (rows as unknown as unknown[])[0] as Record<string, unknown> | undefined;
       if (!rateRow) {
         return c.json({ error: 'Tax rate not found' }, 404);
       }
@@ -86,7 +86,7 @@ taxRatesRouter.post('/calculate', zValidator('json', CalculateSchema), async (c)
         WHERE "tenantId" = ${tenantId} AND "isDefault" = true AND status = 'active'
         LIMIT 1
       `);
-      rateRow = (rows as unknown[])[0] as Record<string, unknown> | undefined;
+      rateRow = (rows as unknown as unknown[])[0] as Record<string, unknown> | undefined;
     }
 
     // Get currency from tenant settings
@@ -94,7 +94,7 @@ taxRatesRouter.post('/calculate', zValidator('json', CalculateSchema), async (c)
       SELECT currency FROM "tenantSettings" WHERE "tenantId" = ${tenantId}
     `);
     const currency =
-      ((settingsRows as unknown[])[0] as Record<string, unknown> | undefined)?.['currency'] ??
+      ((settingsRows as unknown as unknown[])[0] as Record<string, unknown> | undefined)?.['currency'] ??
       'USD';
 
     if (!rateRow) {
@@ -151,7 +151,7 @@ taxRatesRouter.post('/', zValidator('json', CreateTaxRateSchema), async (c) => {
       )
       RETURNING *
     `);
-    return c.json((rows as unknown[])[0], 201);
+    return c.json((rows as unknown as unknown[])[0], 201);
   } catch (error) {
     return c.json({ error }, 500);
   }
@@ -165,7 +165,7 @@ taxRatesRouter.get('/:id', async (c) => {
     const rows = await sharedDb.execute(sql`
       SELECT * FROM "taxRates" WHERE id = ${id} AND "tenantId" = ${tenantId}
     `);
-    const row = (rows as unknown[])[0];
+    const row = (rows as unknown as unknown[])[0];
     if (!row) return c.json({ error: 'Not found' }, 404);
     return c.json(row);
   } catch (error) {
@@ -198,7 +198,7 @@ taxRatesRouter.put('/:id', zValidator('json', UpdateTaxRateSchema), async (c) =>
       WHERE id = ${id} AND "tenantId" = ${tenantId}
       RETURNING *
     `);
-    const row = (rows as unknown[])[0];
+    const row = (rows as unknown as unknown[])[0];
     if (!row) return c.json({ error: 'Not found' }, 404);
     return c.json(row);
   } catch (error) {
@@ -216,7 +216,7 @@ taxRatesRouter.delete('/:id', async (c) => {
       WHERE id = ${id} AND "tenantId" = ${tenantId}
       RETURNING *
     `);
-    const row = (rows as unknown[])[0];
+    const row = (rows as unknown as unknown[])[0];
     if (!row) return c.json({ error: 'Not found' }, 404);
     return c.json(row);
   } catch (error) {
@@ -240,7 +240,7 @@ taxRatesRouter.post('/:id/set-default', async (c) => {
       WHERE id = ${id} AND "tenantId" = ${tenantId}
       RETURNING *
     `);
-    const row = (rows as unknown[])[0];
+    const row = (rows as unknown as unknown[])[0];
     if (!row) return c.json({ error: 'Not found' }, 404);
     return c.json(row);
   } catch (error) {

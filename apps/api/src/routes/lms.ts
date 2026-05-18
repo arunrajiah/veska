@@ -80,10 +80,10 @@ lmsRouter.get('/summary', async (c) => {
 
     return c.json({
       coursesByStatus: courseStatusRows,
-      enrollments: (enrollmentRows as unknown[])[0],
+      enrollments: (enrollmentRows as unknown as unknown[])[0],
       topCourses: topCoursesRows,
-      certificationsIssuedThisYear: (certsRows as Record<string, unknown>[])[0]?.['count'] ?? 0,
-      mandatoryIncompleteCount: (mandatoryRows as Record<string, unknown>[])[0]?.['count'] ?? 0,
+      certificationsIssuedThisYear: (certsRows as unknown as Record<string, unknown>[])[0]?.['count'] ?? 0,
+      mandatoryIncompleteCount: (mandatoryRows as unknown as Record<string, unknown>[])[0]?.['count'] ?? 0,
     });
   } catch (err) {
     return handleRouteError(c, err, 'GET /lms/summary');
@@ -149,7 +149,7 @@ lmsRouter.post('/courses', zValidator('json', CourseCreateSchema), async (c) => 
       RETURNING *
     `);
 
-    return c.json((rows as unknown[])[0], 201);
+    return c.json((rows as unknown as unknown[])[0], 201);
   } catch (err) {
     return handleRouteError(c, err, 'POST /lms/courses');
   }
@@ -181,11 +181,11 @@ lmsRouter.get('/courses/:id', async (c) => {
       `),
     ]);
 
-    if ((courseRows as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
+    if ((courseRows as unknown as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
 
     return c.json({
-      ...(courseRows as Record<string, unknown>[])[0],
-      stats: (statsRows as unknown[])[0],
+      ...(courseRows as unknown as Record<string, unknown>[])[0],
+      stats: (statsRows as unknown as unknown[])[0],
     });
   } catch (err) {
     return handleRouteError(c, err, 'GET /lms/courses/:id');
@@ -202,7 +202,7 @@ lmsRouter.put('/courses/:id', zValidator('json', CourseUpdateSchema), async (c) 
     const existing = await sharedDb.execute(sql`
       SELECT id FROM "lmsCourses" WHERE id = ${id} AND "tenantId" = ${tenantId} LIMIT 1
     `);
-    if ((existing as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
+    if ((existing as unknown as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
 
     const parts: ReturnType<typeof sql>[] = [sql`"updatedAt" = now()`];
 
@@ -225,7 +225,7 @@ lmsRouter.put('/courses/:id', zValidator('json', CourseUpdateSchema), async (c) 
       RETURNING *
     `);
 
-    return c.json((rows as unknown[])[0]);
+    return c.json((rows as unknown as unknown[])[0]);
   } catch (err) {
     return handleRouteError(c, err, 'PUT /lms/courses/:id');
   }
@@ -240,7 +240,7 @@ lmsRouter.delete('/courses/:id', async (c) => {
     const enrollments = await sharedDb.execute(sql`
       SELECT id FROM "lmsEnrollments" WHERE "courseId" = ${id} AND "tenantId" = ${tenantId} LIMIT 1
     `);
-    if ((enrollments as unknown[]).length > 0) {
+    if ((enrollments as unknown as unknown[]).length > 0) {
       return c.json({ error: 'Cannot delete a course with enrollments' }, 409);
     }
 
@@ -267,8 +267,8 @@ lmsRouter.put('/courses/:id/publish', async (c) => {
       RETURNING *
     `);
 
-    if ((rows as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
-    return c.json((rows as unknown[])[0]);
+    if ((rows as unknown as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
+    return c.json((rows as unknown as unknown[])[0]);
   } catch (err) {
     return handleRouteError(c, err, 'PUT /lms/courses/:id/publish');
   }
@@ -320,7 +320,7 @@ lmsRouter.post(
       const course = await sharedDb.execute(sql`
         SELECT id FROM "lmsCourses" WHERE id = ${courseId} AND "tenantId" = ${tenantId} LIMIT 1
       `);
-      if ((course as unknown[]).length === 0) return c.json({ error: 'Course not found' }, 404);
+      if ((course as unknown as unknown[]).length === 0) return c.json({ error: 'Course not found' }, 404);
 
       // Check unique — return existing if already enrolled
       const existing = await sharedDb.execute(sql`
@@ -328,8 +328,8 @@ lmsRouter.post(
         WHERE "tenantId" = ${tenantId} AND "courseId" = ${courseId} AND "userId" = ${userId}
         LIMIT 1
       `);
-      if ((existing as unknown[]).length > 0) {
-        return c.json((existing as unknown[])[0], 200);
+      if ((existing as unknown as unknown[]).length > 0) {
+        return c.json((existing as unknown as unknown[])[0], 200);
       }
 
       const rows = await sharedDb.execute(sql`
@@ -343,7 +343,7 @@ lmsRouter.post(
         RETURNING *
       `);
 
-      return c.json((rows as unknown[])[0], 201);
+      return c.json((rows as unknown as unknown[])[0], 201);
     } catch (err) {
       return handleRouteError(c, err, 'POST /lms/enrollments');
     }
@@ -364,8 +364,8 @@ lmsRouter.get('/enrollments/:id', async (c) => {
       LIMIT 1
     `);
 
-    if ((rows as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
-    return c.json((rows as unknown[])[0]);
+    if ((rows as unknown as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
+    return c.json((rows as unknown as unknown[])[0]);
   } catch (err) {
     return handleRouteError(c, err, 'GET /lms/enrollments/:id');
   }
@@ -389,9 +389,10 @@ lmsRouter.put(
         WHERE e.id = ${id} AND e."tenantId" = ${tenantId}
         LIMIT 1
       `);
-      if ((existing as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
+      if ((existing as unknown as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
 
-      const enrollment = (existing as Record<string, unknown>[])[0];
+      const enrollment = (existing as unknown as Record<string, unknown>[])[0];
+      if (!enrollment) return c.json({ error: 'Not found' }, 404);
       const passingScore = enrollment['passingScore'] as number;
       const courseId = enrollment['courseId'] as string;
       const userId = enrollment['userId'] as string;
@@ -430,7 +431,7 @@ lmsRouter.put(
         RETURNING *
       `);
 
-      const updatedEnrollment = (rows as unknown[])[0];
+      const updatedEnrollment = (rows as unknown as unknown[])[0];
 
       // Auto-issue certificate on completion with passing score
       if (newStatus === 'completed' && score !== undefined && score >= passingScore) {
@@ -438,7 +439,7 @@ lmsRouter.put(
         const countRows = await sharedDb.execute(sql`
           SELECT COUNT(*) AS count FROM "lmsCertifications" WHERE "tenantId" = ${tenantId}
         `);
-        const certCount = Number((countRows as Record<string, unknown>[])[0]?.['count'] ?? 0) + 1;
+        const certCount = Number((countRows as unknown as Record<string, unknown>[])[0]?.['count'] ?? 0) + 1;
         const year = new Date().getFullYear();
         const certNumber = `CERT-${year}-${String(certCount).padStart(4, '0')}`;
 
@@ -506,8 +507,8 @@ lmsRouter.get('/certifications/:id', async (c) => {
       LIMIT 1
     `);
 
-    if ((rows as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
-    return c.json((rows as unknown[])[0]);
+    if ((rows as unknown as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
+    return c.json((rows as unknown as unknown[])[0]);
   } catch (err) {
     return handleRouteError(c, err, 'GET /lms/certifications/:id');
   }

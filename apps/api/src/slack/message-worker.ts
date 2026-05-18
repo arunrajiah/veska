@@ -2,7 +2,7 @@ import type { Job } from 'bullmq';
 import type {
   Database,
   QueueService,
-  AnthropicProvider,
+  LLMProvider,
   AuditService,
   MagicLinkService,
 } from '@veska/core';
@@ -28,7 +28,7 @@ import type { SlackAppManager } from './slack-app.js';
 export function registerMessageWorker(
   queueService: QueueService,
   db: Database,
-  llm: AnthropicProvider,
+  llm: LLMProvider,
   auditService: AuditService,
   magicLinkService: MagicLinkService,
   slackManager: SlackAppManager,
@@ -81,7 +81,7 @@ export function registerMessageWorker(
         if (channelConfig) {
           const slackChannelId = raw.event['channel'] as string | undefined;
           if (slackChannelId) {
-            await adapter.send(tenantId, slackChannelId, result.response, channelConfig);
+            await adapter.send(tenantId, slackChannelId, result.response, channelConfig as import('@veska/core').ChannelConfig);
           }
         }
         return;
@@ -106,20 +106,21 @@ export function registerMessageWorker(
         );
         const inbound = await adapter.parseInbound(rawMessage);
 
-        inbound.senderIdentityId = await resolveEmailIdentity(db, inbound);
+        const emailIdentity = await resolveEmailIdentity(db, inbound.tenantId, inbound.senderChannelId);
+        inbound.senderIdentityId = emailIdentity.id;
 
         const identity = await db.query.identities.findFirst({
-          where: eq(schema.identities.id, inbound.senderIdentityId),
+          where: eq(schema.identities.id, emailIdentity.id),
         });
 
         if (!identity) {
-          console.warn(`[Worker] No identity found for ${inbound.senderIdentityId}`);
+          console.warn(`[Worker] No identity found for ${emailIdentity.id}`);
           return;
         }
 
         const result = await actionAgent.process(inbound, identity as import('@veska/core').Identity);
 
-        await adapter.send(tenantId, inbound.senderChannelId, result.response, channelConfig);
+        await adapter.send(tenantId, inbound.senderChannelId, result.response, channelConfig as import('@veska/core').ChannelConfig);
         return;
       }
 
@@ -142,20 +143,21 @@ export function registerMessageWorker(
         );
         const inbound = await adapter.parseInbound(rawMessage);
 
-        inbound.senderIdentityId = await resolveWhatsAppIdentity(db, inbound);
+        const whatsappIdentity = await resolveWhatsAppIdentity(db, inbound.tenantId, inbound.senderChannelId);
+        inbound.senderIdentityId = whatsappIdentity.id;
 
         const identity = await db.query.identities.findFirst({
-          where: eq(schema.identities.id, inbound.senderIdentityId),
+          where: eq(schema.identities.id, whatsappIdentity.id),
         });
 
         if (!identity) {
-          console.warn(`[Worker] No identity found for ${inbound.senderIdentityId}`);
+          console.warn(`[Worker] No identity found for ${whatsappIdentity.id}`);
           return;
         }
 
         const result = await actionAgent.process(inbound, identity as import('@veska/core').Identity);
 
-        await adapter.send(tenantId, inbound.senderChannelId, result.response, channelConfig);
+        await adapter.send(tenantId, inbound.senderChannelId, result.response, channelConfig as import('@veska/core').ChannelConfig);
         return;
       }
 
@@ -178,20 +180,21 @@ export function registerMessageWorker(
         );
         const inbound = await adapter.parseInbound(rawMessage);
 
-        inbound.senderIdentityId = await resolveTelegramIdentity(db, inbound);
+        const telegramIdentity = await resolveTelegramIdentity(db, inbound.tenantId, inbound.senderChannelId);
+        inbound.senderIdentityId = telegramIdentity.id;
 
         const identity = await db.query.identities.findFirst({
-          where: eq(schema.identities.id, inbound.senderIdentityId),
+          where: eq(schema.identities.id, telegramIdentity.id),
         });
 
         if (!identity) {
-          console.warn(`[Worker] No identity found for ${inbound.senderIdentityId}`);
+          console.warn(`[Worker] No identity found for ${telegramIdentity.id}`);
           return;
         }
 
         const result = await actionAgent.process(inbound, identity as import('@veska/core').Identity);
 
-        await adapter.send(tenantId, inbound.senderChannelId, result.response, channelConfig);
+        await adapter.send(tenantId, inbound.senderChannelId, result.response, channelConfig as import('@veska/core').ChannelConfig);
         return;
       }
 

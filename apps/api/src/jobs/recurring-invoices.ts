@@ -7,7 +7,7 @@ export function startRecurringInvoicesWorker(apiBaseUrl: string) {
 
   // Schedule daily check
   queue.add('check-due', {}, {
-    repeat: { cron: '0 6 * * *' }, // 6 AM daily
+    repeat: { pattern: '0 6 * * *' }, // 6 AM daily
     jobId: 'daily-recurring-check',
   }).catch(() => {}); // Ignore if Redis not available
 

@@ -35,7 +35,7 @@ async function uniqueSlug(
       LIMIT 1
     `);
 
-    if ((rows as unknown[]).length === 0) return slug;
+    if ((rows as unknown as unknown[]).length === 0) return slug;
     counter++;
     slug = `${base}-${counter}`;
   }
@@ -65,13 +65,13 @@ knowledgeBaseRouter.get('/categories', async (c) => {
     `);
 
     // Build hierarchy
-    type Cat = Record<string, unknown> & { children: Cat[] };
+    type Cat = { id: string; parentId: string | null; children: Cat[]; [key: string]: unknown };
     const all = (rows as unknown as Cat[]).map((r) => ({ ...r, children: [] as Cat[] }));
-    const byId = new Map<string, Cat>(all.map((r) => [r['id'] as string, r]));
+    const byId = new Map<string, Cat>(all.map((r) => [r.id, r]));
     const roots: Cat[] = [];
 
     for (const cat of all) {
-      const parentId = cat['parentId'] as string | null;
+      const parentId = cat.parentId;
       if (parentId && byId.has(parentId)) {
         byId.get(parentId)!.children.push(cat);
       } else {
@@ -107,7 +107,7 @@ knowledgeBaseRouter.post('/categories', zValidator('json', CategoryCreateSchema)
       RETURNING *
     `);
 
-    return c.json((rows as unknown[])[0], 201);
+    return c.json((rows as unknown as unknown[])[0], 201);
   } catch (err) {
     return handleRouteError(c, err, 'POST /kb/categories');
   }
@@ -124,7 +124,7 @@ knowledgeBaseRouter.put('/categories/:id', zValidator('json', CategoryUpdateSche
     const existing = await sharedDb.execute(sql`
       SELECT id FROM "kbCategories" WHERE id = ${id} AND "tenantId" = ${tenantId} LIMIT 1
     `);
-    if ((existing as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
+    if ((existing as unknown as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
 
     const parts: ReturnType<typeof sql>[] = [];
 
@@ -139,7 +139,7 @@ knowledgeBaseRouter.put('/categories/:id', zValidator('json', CategoryUpdateSche
 
     if (parts.length === 0) {
       const rows = await sharedDb.execute(sql`SELECT * FROM "kbCategories" WHERE id = ${id}`);
-      return c.json((rows as unknown[])[0]);
+      return c.json((rows as unknown as unknown[])[0]);
     }
 
     const setClauses = parts.map((p) => p).reduce((acc, p) => sql`${acc}, ${p}`);
@@ -150,7 +150,7 @@ knowledgeBaseRouter.put('/categories/:id', zValidator('json', CategoryUpdateSche
       RETURNING *
     `);
 
-    return c.json((rows as unknown[])[0]);
+    return c.json((rows as unknown as unknown[])[0]);
   } catch (err) {
     return handleRouteError(c, err, 'PUT /kb/categories/:id');
   }
@@ -165,7 +165,7 @@ knowledgeBaseRouter.delete('/categories/:id', async (c) => {
     const articles = await sharedDb.execute(sql`
       SELECT id FROM "kbArticles" WHERE "categoryId" = ${id} AND "tenantId" = ${tenantId} LIMIT 1
     `);
-    if ((articles as unknown[]).length > 0) {
+    if ((articles as unknown as unknown[]).length > 0) {
       return c.json({ error: 'Category has articles — reassign or delete them first' }, 409);
     }
 
@@ -245,15 +245,18 @@ knowledgeBaseRouter.get('/articles/by-slug/:slug', async (c) => {
       LIMIT 1
     `);
 
-    if ((rows as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
+    if ((rows as unknown as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
+
+    const firstRow = (rows as unknown as Record<string, unknown>[])[0];
+    if (!firstRow) return c.json({ error: 'Not found' }, 404);
 
     // Fire-and-forget view count increment
     void sharedDb.execute(sql`
       UPDATE "kbArticles" SET "viewCount" = "viewCount" + 1
-      WHERE id = ${(rows as Record<string, unknown>[])[0]['id']}
+      WHERE id = ${firstRow['id']}
     `);
 
-    return c.json((rows as unknown[])[0]);
+    return c.json(firstRow);
   } catch (err) {
     return handleRouteError(c, err, 'GET /kb/articles/by-slug/:slug');
   }
@@ -287,7 +290,7 @@ knowledgeBaseRouter.get('/articles', zValidator('query', articlesQuerySchema), a
           AND (${categoryId ? sql`a."categoryId" = ${categoryId}` : sql`TRUE`})
           AND to_tsvector('english', a.title || ' ' || a.content) @@ plainto_tsquery('english', ${search})
         ORDER BY a."updatedAt" DESC
-      `) as unknown[];
+      `) as unknown as unknown[];
     } else {
       rows = await sharedDb.execute(sql`
         SELECT a.*, c.name AS "categoryName"
@@ -297,7 +300,7 @@ knowledgeBaseRouter.get('/articles', zValidator('query', articlesQuerySchema), a
           AND (${effectiveStatus !== 'all' ? sql`a.status = ${effectiveStatus}` : sql`TRUE`})
           AND (${categoryId ? sql`a."categoryId" = ${categoryId}` : sql`TRUE`})
         ORDER BY a."updatedAt" DESC
-      `) as unknown[];
+      `) as unknown as unknown[];
     }
 
     return c.json(rows);
@@ -337,7 +340,7 @@ knowledgeBaseRouter.post('/articles', zValidator('json', ArticleCreateSchema), a
       RETURNING *
     `);
 
-    return c.json((rows as unknown[])[0], 201);
+    return c.json((rows as unknown as unknown[])[0], 201);
   } catch (err) {
     return handleRouteError(c, err, 'POST /kb/articles');
   }
@@ -357,7 +360,7 @@ knowledgeBaseRouter.get('/articles/:id', async (c) => {
       LIMIT 1
     `);
 
-    if ((rows as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
+    if ((rows as unknown as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
 
     // Fire-and-forget view count increment
     void sharedDb.execute(sql`
@@ -365,7 +368,7 @@ knowledgeBaseRouter.get('/articles/:id', async (c) => {
       WHERE id = ${id}
     `);
 
-    return c.json((rows as unknown[])[0]);
+    return c.json((rows as unknown as unknown[])[0]);
   } catch (err) {
     return handleRouteError(c, err, 'GET /kb/articles/:id');
   }
@@ -381,9 +384,10 @@ knowledgeBaseRouter.put('/articles/:id', zValidator('json', ArticleUpdateSchema)
     const existing = await sharedDb.execute(sql`
       SELECT * FROM "kbArticles" WHERE id = ${id} AND "tenantId" = ${tenantId} LIMIT 1
     `);
-    if ((existing as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
+    if ((existing as unknown as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
 
-    const current = (existing as Record<string, unknown>[])[0];
+    const current = (existing as unknown as Record<string, unknown>[])[0];
+    if (!current) return c.json({ error: 'Not found' }, 404);
     const contentChanged = body.content !== undefined && body.content !== current['content'];
     const newVersion = contentChanged ? (Number(current['version']) + 1) : Number(current['version']);
 
@@ -409,7 +413,7 @@ knowledgeBaseRouter.put('/articles/:id', zValidator('json', ArticleUpdateSchema)
       RETURNING *
     `);
 
-    return c.json((rows as unknown[])[0]);
+    return c.json((rows as unknown as unknown[])[0]);
   } catch (err) {
     return handleRouteError(c, err, 'PUT /kb/articles/:id');
   }
@@ -424,9 +428,11 @@ knowledgeBaseRouter.delete('/articles/:id', async (c) => {
     const existing = await sharedDb.execute(sql`
       SELECT status FROM "kbArticles" WHERE id = ${id} AND "tenantId" = ${tenantId} LIMIT 1
     `);
-    if ((existing as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
+    if ((existing as unknown as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
 
-    const status = (existing as Record<string, unknown>[])[0]['status'] as string;
+    const existingRow = (existing as unknown as Record<string, unknown>[])[0];
+    if (!existingRow) return c.json({ error: 'Not found' }, 404);
+    const status = existingRow['status'] as string;
     if (status === 'published') {
       return c.json({ error: 'Cannot delete a published article — archive it first' }, 409);
     }
@@ -454,8 +460,8 @@ knowledgeBaseRouter.put('/articles/:id/publish', async (c) => {
       RETURNING *
     `);
 
-    if ((rows as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
-    return c.json((rows as unknown[])[0]);
+    if ((rows as unknown as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
+    return c.json((rows as unknown as unknown[])[0]);
   } catch (err) {
     return handleRouteError(c, err, 'PUT /kb/articles/:id/publish');
   }
@@ -474,8 +480,8 @@ knowledgeBaseRouter.put('/articles/:id/archive', async (c) => {
       RETURNING *
     `);
 
-    if ((rows as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
-    return c.json((rows as unknown[])[0]);
+    if ((rows as unknown as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
+    return c.json((rows as unknown as unknown[])[0]);
   } catch (err) {
     return handleRouteError(c, err, 'PUT /kb/articles/:id/archive');
   }
@@ -507,8 +513,8 @@ knowledgeBaseRouter.post(
           `,
       );
 
-      if ((rows as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
-      return c.json((rows as unknown[])[0]);
+      if ((rows as unknown as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
+      return c.json((rows as unknown as unknown[])[0]);
     } catch (err) {
       return handleRouteError(c, err, 'POST /kb/articles/:id/feedback');
     }

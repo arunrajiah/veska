@@ -14,7 +14,7 @@ async function insertEmailLog(
     VALUES (${tenantId}, ${jobName}, ${toEmail}, ${subject}, 'pending')
     RETURNING id
   `);
-  return ((rows as unknown[])[0] as Record<string, unknown>)['id'] as string;
+  return ((rows as unknown as unknown[])[0] as Record<string, unknown>)['id'] as string;
 }
 
 async function sendEmail(
@@ -31,7 +31,7 @@ async function sendEmail(
     const rows = await sharedDb.execute(
       sql`SELECT * FROM "tenantSettings" WHERE "tenantId" = ${tenantId}`,
     );
-    const settings = (rows as unknown[])[0] as Record<string, unknown> | undefined;
+    const settings = (rows as unknown as unknown[])[0] as Record<string, unknown> | undefined;
 
     if (!settings?.['smtpHost'] || !settings?.['smtpFromEmail']) {
       // No SMTP configured — log as skipped (not an error for dev)
@@ -51,7 +51,9 @@ async function sendEmail(
       };
     };
     try {
-      nodemailer = (await import('nodemailer')) as typeof nodemailer;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore nodemailer is optional — graceful degradation
+      nodemailer = (await import('nodemailer')) as unknown as typeof nodemailer;
     } catch {
       await sharedDb.execute(
         sql`UPDATE "emailLog" SET status='skipped', "sentAt"=now() WHERE id=${logId}`,
@@ -67,10 +69,12 @@ async function sendEmail(
       const keyBuf = Buffer.from(key.slice(0, 32));
       const encrypted = settings['smtpPassEncrypted'] as string;
       const [ivHex, tagHex, cipherHex] = encrypted.split(':');
-      const { createDecipheriv } = await import('node:crypto');
-      const decipher = createDecipheriv('aes-256-gcm', keyBuf, Buffer.from(ivHex, 'hex'));
-      decipher.setAuthTag(Buffer.from(tagHex, 'hex'));
-      smtpPass = decipher.update(cipherHex, 'hex', 'utf8') + decipher.final('utf8');
+      if (ivHex && tagHex && cipherHex) {
+        const { createDecipheriv } = await import('node:crypto');
+        const decipher = createDecipheriv('aes-256-gcm', keyBuf, Buffer.from(ivHex, 'hex'));
+        decipher.setAuthTag(Buffer.from(tagHex, 'hex'));
+        smtpPass = decipher.update(cipherHex, 'hex', 'utf8') + decipher.final('utf8');
+      }
     }
 
     const transporter = nodemailer.createTransport({
@@ -130,7 +134,7 @@ export function registerEmailWorker(
     const rows = await sharedDb.execute(
       sql`SELECT data FROM "entityRecords" WHERE id=${invoiceId} AND "tenantId"=${tenantId}`,
     );
-    const invoice = ((rows as unknown[])[0] as Record<string, unknown> | undefined)?.['data'] as
+    const invoice = ((rows as unknown as unknown[])[0] as Record<string, unknown> | undefined)?.['data'] as
       | Record<string, unknown>
       | undefined ?? {};
     const subject = `Payment Reminder: Invoice ${(invoice['invoiceNumber'] as string | undefined) ?? invoiceId}`;

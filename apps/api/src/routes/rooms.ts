@@ -73,9 +73,9 @@ roomsRouter.get('/summary', async (c) => {
       `),
     ]);
 
-    const totals = (totalRows as Record<string, unknown>[])[0] ?? {};
+    const totals = (totalRows as unknown as Record<string, unknown>[])[0] ?? {};
     const totalRooms = Number(totals['total'] ?? 0);
-    const bookingsLast7 = Number((utilizationRows as Record<string, unknown>[])[0]?.['bookingsLast7Days'] ?? 0);
+    const bookingsLast7 = Number((utilizationRows as unknown as Record<string, unknown>[])[0]?.['bookingsLast7Days'] ?? 0);
 
     // Theoretical max: rooms * (12 hours/day * 2 slots/hour * 7 days)
     const theoreticalMax = totalRooms * 12 * 2 * 7;
@@ -136,7 +136,7 @@ roomsRouter.post('/', zValidator('json', RoomCreateSchema), async (c) => {
       RETURNING *
     `);
 
-    return c.json((rows as unknown[])[0], 201);
+    return c.json((rows as unknown as unknown[])[0], 201);
   } catch (err) {
     return handleRouteError(c, err, 'POST /rooms');
   }
@@ -165,10 +165,10 @@ roomsRouter.get('/:id', async (c) => {
       `),
     ]);
 
-    if ((roomRows as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
+    if ((roomRows as unknown as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
 
     return c.json({
-      ...(roomRows as Record<string, unknown>[])[0],
+      ...(roomRows as unknown as Record<string, unknown>[])[0],
       todaySchedule: bookingRows,
     });
   } catch (err) {
@@ -186,7 +186,7 @@ roomsRouter.put('/:id', zValidator('json', RoomUpdateSchema), async (c) => {
     const check = await sharedDb.execute(sql`
       SELECT id FROM "rooms" WHERE id = ${id} AND "tenantId" = ${tenantId} LIMIT 1
     `);
-    if ((check as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
+    if ((check as unknown as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
 
     const parts: ReturnType<typeof sql>[] = [sql`"updatedAt" = now()`];
 
@@ -206,7 +206,7 @@ roomsRouter.put('/:id', zValidator('json', RoomUpdateSchema), async (c) => {
       RETURNING *
     `);
 
-    return c.json((rows as unknown[])[0]);
+    return c.json((rows as unknown as unknown[])[0]);
   } catch (err) {
     return handleRouteError(c, err, 'PUT /rooms/:id');
   }
@@ -225,7 +225,7 @@ roomsRouter.delete('/:id', async (c) => {
       RETURNING id
     `);
 
-    if ((rows as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
+    if ((rows as unknown as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
     return c.json({ success: true });
   } catch (err) {
     return handleRouteError(c, err, 'DELETE /rooms/:id');
@@ -259,9 +259,9 @@ roomsRouter.get('/:id/availability', async (c) => {
       `),
     ]);
 
-    if ((roomRows as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
+    if ((roomRows as unknown as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
 
-    const bookings = bookingRows as Array<{ startAt: string; endAt: string }>;
+    const bookings = bookingRows as unknown as Array<{ startAt: string; endAt: string }>;
 
     // Generate 30-min slots from 08:00 to 20:00
     const slots: Array<{ slotStart: string; slotEnd: string; available: boolean }> = [];
@@ -303,7 +303,7 @@ roomsRouter.post('/:id/bookings', zValidator('json', BookingCreateSchema), async
     const roomCheck = await sharedDb.execute(sql`
       SELECT id FROM "rooms" WHERE id = ${id} AND "tenantId" = ${tenantId} LIMIT 1
     `);
-    if ((roomCheck as unknown[]).length === 0) return c.json({ error: 'Room not found' }, 404);
+    if ((roomCheck as unknown as unknown[]).length === 0) return c.json({ error: 'Room not found' }, 404);
 
     // Conflict check
     const conflicts = await sharedDb.execute(sql`
@@ -315,7 +315,7 @@ roomsRouter.post('/:id/bookings', zValidator('json', BookingCreateSchema), async
         AND NOT ("endAt" <= ${body.startAt}::timestamptz OR "startAt" >= ${body.endAt}::timestamptz)
     `);
 
-    if ((conflicts as unknown[]).length > 0) {
+    if ((conflicts as unknown as unknown[]).length > 0) {
       return c.json({ error: 'Room is already booked', conflicts }, 409);
     }
 
@@ -337,7 +337,7 @@ roomsRouter.post('/:id/bookings', zValidator('json', BookingCreateSchema), async
       RETURNING *
     `);
 
-    return c.json((rows as unknown[])[0], 201);
+    return c.json((rows as unknown as unknown[])[0], 201);
   } catch (err) {
     return handleRouteError(c, err, 'POST /rooms/:id/bookings');
   }
@@ -353,7 +353,7 @@ roomsRouter.get('/:id/bookings', async (c) => {
     const roomCheck = await sharedDb.execute(sql`
       SELECT id FROM "rooms" WHERE id = ${id} AND "tenantId" = ${tenantId} LIMIT 1
     `);
-    if ((roomCheck as unknown[]).length === 0) return c.json({ error: 'Room not found' }, 404);
+    if ((roomCheck as unknown as unknown[]).length === 0) return c.json({ error: 'Room not found' }, 404);
 
     const rows = await sharedDb.execute(sql`
       SELECT * FROM "roomBookings"
@@ -385,7 +385,7 @@ roomsRouter.delete('/:id/bookings/:bookingId', async (c) => {
       RETURNING id
     `);
 
-    if ((rows as unknown[]).length === 0) return c.json({ error: 'Booking not found' }, 404);
+    if ((rows as unknown as unknown[]).length === 0) return c.json({ error: 'Booking not found' }, 404);
     return c.json({ success: true });
   } catch (err) {
     return handleRouteError(c, err, 'DELETE /rooms/:id/bookings/:bookingId');

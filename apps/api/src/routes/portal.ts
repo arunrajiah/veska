@@ -126,7 +126,7 @@ portalRouter.get('/:token/invoices/:invoiceId', async (c) => {
         AND (data->>'contactId' = ${pt.contactId} OR data->>'contactEmail' = ${pt.email})
     `);
 
-    const invoice = (rows as unknown[])[0];
+    const invoice = (rows as unknown as unknown[])[0];
     if (!invoice) return c.json({ error: 'Invoice not found' }, 404);
 
     return c.json(invoice);
@@ -270,7 +270,7 @@ portalRouter.post('/:token/tickets', zValidator('json', createTicketSchema), asy
       RETURNING *
     `);
 
-    const ticket = (result as unknown[])[0];
+    const ticket = (result as unknown as unknown[])[0];
     return c.json(ticket, 201);
   } catch (error) {
     return c.json({ error }, 500);
@@ -322,7 +322,7 @@ portalRouter.get('/:token/kb/:articleId', async (c) => {
         AND status = 'published'
     `);
 
-    const article = (rows as unknown[])[0];
+    const article = (rows as unknown as unknown[])[0];
     if (!article) return c.json({ error: 'Article not found' }, 404);
 
     // Increment viewCount

@@ -20,6 +20,8 @@ const nodeGlobals = {
 };
 
 const webGlobals = {
+  React: 'readonly',
+  JSX: 'readonly',
   fetch: 'readonly',
   Request: 'readonly',
   Response: 'readonly',
@@ -54,6 +56,19 @@ const webGlobals = {
   ResizeObserver: 'readonly',
   IntersectionObserver: 'readonly',
   MutationObserver: 'readonly',
+  Node: 'readonly',
+  NodeList: 'readonly',
+  EventSource: 'readonly',
+  WebSocket: 'readonly',
+  MessageEvent: 'readonly',
+  CloseEvent: 'readonly',
+  ErrorEvent: 'readonly',
+  CustomEvent: 'readonly',
+  RequestInit: 'readonly',
+  ResponseInit: 'readonly',
+  HeadersInit: 'readonly',
+  BodyInit: 'readonly',
+  RequestInfo: 'readonly',
   document: 'readonly',
   window: 'readonly',
   navigator: 'readonly',

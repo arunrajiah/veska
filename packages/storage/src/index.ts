@@ -1,5 +1,6 @@
 export * from './types';
 export { LocalStorage } from './local';
+import { LocalStorage } from './local';
 
 // Factory: returns LocalStorage by default; swap for S3 in production via STORAGE_PROVIDER env
 export function createStorage(): import('./types').StorageProvider {

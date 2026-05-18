@@ -103,7 +103,7 @@ export class TenantService {
       if (!adminRoleId) throw new Error('Admin role not created');
 
       // Bootstrap default entity definitions
-      await this.bootstrapEntityDefinitions(tx as Database, tenantId);
+      await this.bootstrapEntityDefinitions(tx as unknown as Database, tenantId);
 
       // Create the admin identity
       const [adminIdentity] = await tx

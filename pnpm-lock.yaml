@@ -153,6 +153,9 @@ importers:
       qrcode:
         specifier: ^1.5.4
         version: 1.5.4
+      resend:
+        specifier: ^3.0.0
+        version: 3.5.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       stripe:
         specifier: ^22.1.1
         version: 22.1.1(@types/node@22.19.19)

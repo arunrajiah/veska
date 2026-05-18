@@ -9,7 +9,7 @@ export const emailLogRouter = new Hono<{ Variables: TenantContext }>();
 // GET /email-log?limit=50&status=<optional>
 emailLogRouter.get('/', async (c) => {
   try {
-    const tenantId = c.get('tenantId');
+    const tenantId = c.get('tenantCtx').tenantId;
     const limitParam = c.req.query('limit');
     const status = c.req.query('status');
     const limit = Math.min(parseInt(limitParam ?? '50', 10) || 50, 500);
@@ -43,7 +43,7 @@ emailLogRouter.get('/', async (c) => {
 // DELETE /email-log/:id
 emailLogRouter.delete('/:id', async (c) => {
   try {
-    const tenantId = c.get('tenantId');
+    const tenantId = c.get('tenantCtx').tenantId;
     const id = c.req.param('id');
 
     await sharedDb.execute(sql`

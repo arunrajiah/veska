@@ -105,7 +105,7 @@ export function useRealtimeEvents(
       retryDelayRef.current = Math.min(delay * 2, 30_000);
       setTimeout(connect, delay);
     };
-  }, [enabled, filterKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [enabled, filterKey]); // eslint-disable-line -- react-hooks not configured in this project
 
   useEffect(() => {
     if (!enabled) return;

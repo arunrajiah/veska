@@ -23,6 +23,7 @@ function toCSV(rows: Record<string, unknown>[], columns: string[]): string {
 
 function parseCSV(text: string): Record<string, string>[] {
   const [headerLine, ...dataLines] = text.trim().split('\n');
+  if (!headerLine) return [];
   const headers = headerLine.split(',').map(h => h.trim().replace(/^"|"$/g, ''));
   return dataLines
     .filter(line => line.trim())

@@ -71,22 +71,22 @@ facilitiesRouter.get('/summary', async (c) => {
     type PriorityRow = { priority: string; count: string };
     type CompletionRow = { avgCompletionHours: string | null };
 
-    const byStatus = (statusRows as StatusRow[]).reduce<Record<string, number>>((acc, r) => {
+    const byStatus = (statusRows as unknown as StatusRow[]).reduce<Record<string, number>>((acc, r) => {
       acc[r.status] = Number(r.count);
       return acc;
     }, {});
 
-    const byType = (typeRows as TypeRow[]).reduce<Record<string, number>>((acc, r) => {
+    const byType = (typeRows as unknown as TypeRow[]).reduce<Record<string, number>>((acc, r) => {
       acc[r.type] = Number(r.count);
       return acc;
     }, {});
 
-    const openByPriority = (priorityRows as PriorityRow[]).reduce<Record<string, number>>((acc, r) => {
+    const openByPriority = (priorityRows as unknown as PriorityRow[]).reduce<Record<string, number>>((acc, r) => {
       acc[r.priority] = Number(r.count);
       return acc;
     }, {});
 
-    const compRow = (completionRows as CompletionRow[])[0];
+    const compRow = (completionRows as unknown as CompletionRow[])[0];
 
     return c.json({
       byStatus,
@@ -132,7 +132,7 @@ facilitiesRouter.post('/requests', zValidator('json', RequestCreateSchema), asyn
     const countRows = await sharedDb.execute(sql`
       SELECT COUNT(*) AS cnt FROM "facilityRequests" WHERE "tenantId" = ${tenantId}
     `);
-    const cnt = Number((countRows as Record<string, unknown>[])[0]?.['cnt'] ?? 0);
+    const cnt = Number((countRows as unknown as Record<string, unknown>[])[0]?.['cnt'] ?? 0);
     const number = `FAC-${String(cnt + 1).padStart(4, '0')}`;
 
     const rows = await sharedDb.execute(sql`
@@ -154,7 +154,7 @@ facilitiesRouter.post('/requests', zValidator('json', RequestCreateSchema), asyn
       RETURNING *
     `);
 
-    return c.json((rows as unknown[])[0], 201);
+    return c.json((rows as unknown as unknown[])[0], 201);
   } catch (err) {
     return handleRouteError(c, err, 'POST /facilities/requests');
   }
@@ -172,8 +172,8 @@ facilitiesRouter.get('/requests/:id', async (c) => {
       LIMIT 1
     `);
 
-    if ((rows as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
-    return c.json((rows as unknown[])[0]);
+    if ((rows as unknown as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
+    return c.json((rows as unknown as unknown[])[0]);
   } catch (err) {
     return handleRouteError(c, err, 'GET /facilities/requests/:id');
   }
@@ -189,7 +189,7 @@ facilitiesRouter.put('/requests/:id', zValidator('json', RequestUpdateSchema), a
     const check = await sharedDb.execute(sql`
       SELECT id FROM "facilityRequests" WHERE id = ${id} AND "tenantId" = ${tenantId} LIMIT 1
     `);
-    if ((check as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
+    if ((check as unknown as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
 
     const parts: ReturnType<typeof sql>[] = [sql`"updatedAt" = now()`];
 
@@ -210,7 +210,7 @@ facilitiesRouter.put('/requests/:id', zValidator('json', RequestUpdateSchema), a
       RETURNING *
     `);
 
-    return c.json((rows as unknown[])[0]);
+    return c.json((rows as unknown as unknown[])[0]);
   } catch (err) {
     return handleRouteError(c, err, 'PUT /facilities/requests/:id');
   }
@@ -226,7 +226,7 @@ facilitiesRouter.put('/requests/:id/status', zValidator('json', StatusUpdateSche
     const check = await sharedDb.execute(sql`
       SELECT id FROM "facilityRequests" WHERE id = ${id} AND "tenantId" = ${tenantId} LIMIT 1
     `);
-    if ((check as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
+    if ((check as unknown as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
 
     const rows = await sharedDb.execute(sql`
       UPDATE "facilityRequests"
@@ -242,7 +242,7 @@ facilitiesRouter.put('/requests/:id/status', zValidator('json', StatusUpdateSche
       RETURNING *
     `);
 
-    return c.json((rows as unknown[])[0]);
+    return c.json((rows as unknown as unknown[])[0]);
   } catch (err) {
     return handleRouteError(c, err, 'PUT /facilities/requests/:id/status');
   }

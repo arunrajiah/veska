@@ -59,7 +59,6 @@ export function AttachmentsPanel({ entityType, entityId, tenantId = 'demo' }: At
 
   useEffect(() => {
     fetchAttachments();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entityType, entityId, tenantId]);
 
   async function uploadFile(file: File) {

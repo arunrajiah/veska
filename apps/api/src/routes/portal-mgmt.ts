@@ -35,7 +35,7 @@ portalMgmtRouter.post('/tokens', zValidator('json', createTokenSchema), async (c
       RETURNING *
     `);
 
-    const row = (result as unknown[])[0];
+    const row = (result as unknown as unknown[])[0];
     return c.json(row, 201);
   } catch (error) {
     return c.json({ error }, 500);
@@ -76,7 +76,7 @@ portalMgmtRouter.delete('/tokens/:id', async (c) => {
       RETURNING id
     `);
 
-    const row = (result as unknown[])[0];
+    const row = (result as unknown as unknown[])[0];
     if (!row) return c.json({ error: 'Token not found' }, 404);
 
     return c.json({ deactivated: true });

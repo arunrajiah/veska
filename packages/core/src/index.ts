@@ -9,7 +9,7 @@ export * from './primitives/integration.js';
 export { createDatabase, type Database, schema } from './db/index.js';
 
 // AI
-export { type LLMProvider, type CompletionParams, type CompletionResult, type Tool } from './ai/provider.js';
+export { type LLMProvider, type CompletionMessage, type CompletionParams, type CompletionResult, type Tool } from './ai/provider.js';
 export { AnthropicProvider, type AnthropicProviderConfig } from './ai/anthropic-provider.js';
 export { OllamaProvider, type OllamaProviderConfig } from './ai/ollama-provider.js';
 export { OpenAICompatProvider, type OpenAICompatProviderConfig } from './ai/openai-compat-provider.js';

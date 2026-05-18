@@ -3,7 +3,7 @@ import type { Job } from 'bullmq';
 import type {
   Database,
   QueueService,
-  AnthropicProvider,
+  LLMProvider,
   AnomalyRecord,
   AnomalySummaryJob,
 } from '@veska/core';
@@ -60,7 +60,7 @@ interface ExpiringContractRow {
 export function registerAnomalyWorker(
   queueService: QueueService,
   db: Database,
-  llm: AnthropicProvider,
+  llm: LLMProvider,
 ): void {
   // ── 1. Repeatable scanner — every 6 hours ──────────────────
 
@@ -105,7 +105,7 @@ export function registerAnomalyWorker(
         SELECT DISTINCT id FROM tenants WHERE "deletedAt" IS NULL
       `);
 
-      const tenants = tenantsResult.rows as TenantRow[];
+      const tenants = tenantsResult.rows as unknown as TenantRow[];
 
       for (const tenant of tenants) {
         const tenantId = tenant.id;
@@ -126,7 +126,7 @@ export function registerAnomalyWorker(
             AND bli."actualAmount" > bli."plannedAmount" * 1.1
         `);
 
-        for (const row of budgetOverrunResult.rows as BudgetOverrunRow[]) {
+        for (const row of budgetOverrunResult.rows as unknown as BudgetOverrunRow[]) {
           const overPct = Math.round(
             ((Number(row.actualAmount) - Number(row.plannedAmount)) / Number(row.plannedAmount)) * 100,
           );
@@ -158,7 +158,7 @@ export function registerAnomalyWorker(
             AND priority IN ('high', 'critical')
         `);
 
-        for (const row of slaBreachResult.rows as SlaBreachRow[]) {
+        for (const row of slaBreachResult.rows as unknown as SlaBreachRow[]) {
           anomalies.push({
             type: 'sla_breach',
             description: `Service ticket "${row.subject ?? row.ticketId}" (priority: ${row.priority}) has been open since ${row.createdAt} without resolution`,
@@ -181,7 +181,7 @@ export function registerAnomalyWorker(
             AND data->>'status' NOT IN ('paid', 'cancelled')
         `);
 
-        for (const row of overdueInvoiceResult.rows as OverdueInvoiceRow[]) {
+        for (const row of overdueInvoiceResult.rows as unknown as OverdueInvoiceRow[]) {
           anomalies.push({
             type: 'overdue_invoice',
             description: `Invoice ${row.invoiceId} was due on ${row.dueDate} and remains unpaid${row.amount ? ` (amount: ${row.amount})` : ''}`,
@@ -203,7 +203,7 @@ export function registerAnomalyWorker(
             AND status = 'active'
         `);
 
-        for (const row of expiringContractResult.rows as ExpiringContractRow[]) {
+        for (const row of expiringContractResult.rows as unknown as ExpiringContractRow[]) {
           anomalies.push({
             type: 'expiring_contract',
             description: `Contract "${row.title ?? row.contractId}" expires on ${row.endDate}`,
@@ -225,10 +225,10 @@ export function registerAnomalyWorker(
 
   queueService.registerWorker(
     'ai',
-    async (job: Job<AnomalySummaryJob>) => {
+    async (job: Job) => {
       if (job.name !== 'ai.anomaly_summary') return;
 
-      const { tenantId, anomalies } = job.data;
+      const { tenantId, anomalies } = job.data as AnomalySummaryJob;
 
       const system = `You are a business intelligence assistant for an ERP system. Summarize the following anomalies for a business manager in 2-3 concise sentences. Be specific with numbers and dates. Focus on the most critical issues first.`;
 

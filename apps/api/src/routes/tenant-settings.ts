@@ -28,6 +28,7 @@ function encryptPassword(plaintext: string): string {
 function decryptPassword(encrypted: string): string {
   const key = ENCRYPTION_KEY();
   const [ivHex, tagHex, cipherHex] = encrypted.split(':');
+  if (!ivHex || !tagHex || !cipherHex) throw new Error('Invalid encrypted value');
   const decipher = crypto.createDecipheriv('aes-256-gcm', key, Buffer.from(ivHex, 'hex'));
   decipher.setAuthTag(Buffer.from(tagHex, 'hex'));
   return decipher.update(cipherHex, 'hex', 'utf8') + decipher.final('utf8');
@@ -103,7 +104,7 @@ tenantSettingsRouter.get('/', async (c) => {
     const rows = await sharedDb.execute(
       sql`SELECT * FROM "tenantSettings" WHERE "tenantId" = ${tenantId}`,
     );
-    const row = (rows as unknown[])[0] as Record<string, unknown> | undefined;
+    const row = (rows as unknown as unknown[])[0] as Record<string, unknown> | undefined;
     if (!row) {
       return c.json({ ...DEFAULT_SETTINGS, tenantId });
     }
@@ -208,7 +209,7 @@ export async function upsertSettings(
   const updated = await sharedDb.execute(
     sql`SELECT * FROM "tenantSettings" WHERE "tenantId" = ${tenantId}`,
   );
-  return (updated as unknown[])[0] as Record<string, unknown>;
+  return (updated as unknown as unknown[])[0] as Record<string, unknown>;
 }
 
 // PATCH /tenant-settings — merge-update (partial)
@@ -242,7 +243,7 @@ tenantSettingsRouter.post('/test-smtp', async (c) => {
     const rows = await sharedDb.execute(
       sql`SELECT "smtpHost", "smtpPort" FROM "tenantSettings" WHERE "tenantId" = ${tenantId}`,
     );
-    const settings = (rows as unknown[])[0] as
+    const settings = (rows as unknown as unknown[])[0] as
       | { smtpHost: string | null; smtpPort: number | null }
       | undefined;
 
@@ -307,7 +308,7 @@ tenantSettingsRouter.post('/seed-defaults', async (c) => {
     const rows = await sharedDb.execute(
       sql`SELECT * FROM "tenantSettings" WHERE "tenantId" = ${tenantId}`,
     );
-    const row = (rows as unknown[])[0] as Record<string, unknown>;
+    const row = (rows as unknown as unknown[])[0] as Record<string, unknown>;
     return c.json(sanitizeRow(row));
   } catch (error) {
     return c.json({ error }, 500);

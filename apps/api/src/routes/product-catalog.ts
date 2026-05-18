@@ -161,7 +161,7 @@ productCatalogRouter.get('/products/:id', async (c) => {
       `),
     ]);
 
-    const product = (productRows as Record<string, unknown>[])[0];
+    const product = (productRows as unknown as Record<string, unknown>[])[0];
     if (!product) return c.json({ error: 'Product not found' }, 404);
 
     return c.json({ ...product, variants: variantRows });
@@ -193,7 +193,7 @@ productCatalogRouter.post(
         RETURNING *
       `);
 
-      return c.json((rows as Record<string, unknown>[])[0], 201);
+      return c.json((rows as unknown as Record<string, unknown>[])[0], 201);
     } catch (err) {
       return handleRouteError(c, err, 'POST /catalog/products');
     }
@@ -222,7 +222,7 @@ productCatalogRouter.put(
         RETURNING *
       `);
 
-      const updated = (rows as Record<string, unknown>[])[0];
+      const updated = (rows as unknown as Record<string, unknown>[])[0];
       if (!updated) return c.json({ error: 'Product not found' }, 404);
       return c.json(updated);
     } catch (err) {
@@ -299,7 +299,7 @@ productCatalogRouter.post(
         RETURNING *
       `);
 
-      return c.json((rows as Record<string, unknown>[])[0], 201);
+      return c.json((rows as unknown as Record<string, unknown>[])[0], 201);
     } catch (err) {
       return handleRouteError(c, err, 'POST /catalog/products/:productId/variants');
     }
@@ -323,7 +323,7 @@ productCatalogRouter.put(
           WHERE id = ${id} AND "tenantId" = ${tenantId}
           LIMIT 1
         `);
-        const variant = (existing as Record<string, unknown>[])[0];
+        const variant = (existing as unknown as Record<string, unknown>[])[0];
         if (variant) {
           await sharedDb.execute(sql`
             UPDATE "productVariants"
@@ -372,7 +372,7 @@ productCatalogRouter.put(
         RETURNING *
       `);
 
-      const updated = (rows as Record<string, unknown>[])[0];
+      const updated = (rows as unknown as Record<string, unknown>[])[0];
       if (!updated) return c.json({ error: 'Variant not found' }, 404);
       return c.json(updated);
     } catch (err) {
@@ -394,7 +394,7 @@ productCatalogRouter.delete('/variants/:id', async (c) => {
       LIMIT 1
     `);
 
-    const variant = (variantRows as Record<string, unknown>[])[0];
+    const variant = (variantRows as unknown as Record<string, unknown>[])[0];
     if (!variant) return c.json({ error: 'Variant not found' }, 404);
 
     if (variant['isDefault']) {
@@ -404,7 +404,7 @@ productCatalogRouter.delete('/variants/:id', async (c) => {
           AND "productId" = ${variant['productId'] as string}
           AND id != ${id}
       `);
-      const otherCount = Number((otherRows as Record<string, unknown>[])[0]?.['count'] ?? 0);
+      const otherCount = Number((otherRows as unknown as Record<string, unknown>[])[0]?.['count'] ?? 0);
       if (otherCount > 0) {
         return c.json({ error: 'Cannot delete default variant while other variants exist. Set another variant as default first.' }, 400);
       }
@@ -486,7 +486,7 @@ productCatalogRouter.post(
         RETURNING *
       `);
 
-      return c.json((rows as Record<string, unknown>[])[0], 201);
+      return c.json((rows as unknown as Record<string, unknown>[])[0], 201);
     } catch (err) {
       return handleRouteError(c, err, 'POST /catalog/price-lists');
     }
@@ -514,7 +514,7 @@ productCatalogRouter.get('/price-lists/:id', async (c) => {
       `),
     ]);
 
-    const list = (listRows as Record<string, unknown>[])[0];
+    const list = (listRows as unknown as Record<string, unknown>[])[0];
     if (!list) return c.json({ error: 'Price list not found' }, 404);
 
     return c.json({ ...list, items: itemRows });
@@ -558,7 +558,7 @@ productCatalogRouter.put(
         RETURNING *
       `);
 
-      const updated = (rows as Record<string, unknown>[])[0];
+      const updated = (rows as unknown as Record<string, unknown>[])[0];
       if (!updated) return c.json({ error: 'Price list not found' }, 404);
       return c.json(updated);
     } catch (err) {
@@ -579,7 +579,7 @@ productCatalogRouter.delete('/price-lists/:id', async (c) => {
       LIMIT 1
     `);
 
-    const list = (listRows as Record<string, unknown>[])[0];
+    const list = (listRows as unknown as Record<string, unknown>[])[0];
     if (!list) return c.json({ error: 'Price list not found' }, 404);
 
     if (list['isDefault']) {
@@ -614,7 +614,7 @@ productCatalogRouter.post(
         WHERE id = ${priceListId} AND "tenantId" = ${tenantId}
         LIMIT 1
       `);
-      if (!(listRows as unknown[]).length) return c.json({ error: 'Price list not found' }, 404);
+      if (!(listRows as unknown as unknown[]).length) return c.json({ error: 'Price list not found' }, 404);
 
       const rows = await sharedDb.execute(sql`
         INSERT INTO "priceListItems" (
@@ -634,7 +634,7 @@ productCatalogRouter.post(
         RETURNING *
       `);
 
-      return c.json((rows as Record<string, unknown>[])[0], 201);
+      return c.json((rows as unknown as Record<string, unknown>[])[0], 201);
     } catch (err) {
       return handleRouteError(c, err, 'POST /catalog/price-lists/:id/items');
     }
@@ -666,7 +666,7 @@ productCatalogRouter.put(
         RETURNING *
       `);
 
-      const updated = (rows as Record<string, unknown>[])[0];
+      const updated = (rows as unknown as Record<string, unknown>[])[0];
       if (!updated) return c.json({ error: 'Price list item not found' }, 404);
       return c.json(updated);
     } catch (err) {
@@ -690,7 +690,7 @@ productCatalogRouter.delete('/price-lists/:id/items/:itemId', async (c) => {
       RETURNING id
     `);
 
-    if (!(result as unknown[]).length) return c.json({ error: 'Price list item not found' }, 404);
+    if (!(result as unknown as unknown[]).length) return c.json({ error: 'Price list item not found' }, 404);
     return c.json({ success: true });
   } catch (err) {
     return handleRouteError(c, err, 'DELETE /catalog/price-lists/:id/items/:itemId');
@@ -718,7 +718,7 @@ productCatalogRouter.post(
           WHERE id = ${variantId} AND "tenantId" = ${tenantId}
           LIMIT 1
         `);
-        const v = (vRows as Record<string, unknown>[])[0];
+        const v = (vRows as unknown as Record<string, unknown>[])[0];
         if (v) basePrice = Number(v['price'] ?? 0);
       } else {
         const pRows = await sharedDb.execute(sql`
@@ -730,7 +730,7 @@ productCatalogRouter.post(
             AND "deletedAt" IS NULL
           LIMIT 1
         `);
-        const p = (pRows as Record<string, unknown>[])[0];
+        const p = (pRows as unknown as Record<string, unknown>[])[0];
         if (p && p['basePrice'] !== null && p['basePrice'] !== undefined) {
           basePrice = Number(p['basePrice']);
         }
@@ -752,7 +752,7 @@ productCatalogRouter.post(
         WHERE id = ${priceListId} AND "tenantId" = ${tenantId} AND status = 'active'
         LIMIT 1
       `);
-      const list = (listRows as Record<string, unknown>[])[0];
+      const list = (listRows as unknown as Record<string, unknown>[])[0];
       if (!list) {
         return c.json({
           basePrice,
@@ -784,7 +784,7 @@ productCatalogRouter.post(
         LIMIT 1
       `);
 
-      const item = (itemRows as Record<string, unknown>[])[0];
+      const item = (itemRows as unknown as Record<string, unknown>[])[0];
 
       let effectivePrice = basePrice;
 
@@ -840,7 +840,7 @@ productCatalogRouter.post(
         LIMIT 1
       `);
 
-      const discount = (rows as Record<string, unknown>[])[0];
+      const discount = (rows as unknown as Record<string, unknown>[])[0];
 
       if (!discount) {
         return c.json({ valid: false, error: 'Discount code not found or inactive' });
@@ -986,7 +986,7 @@ productCatalogRouter.post(
         RETURNING *
       `);
 
-      return c.json((rows as Record<string, unknown>[])[0], 201);
+      return c.json((rows as unknown as Record<string, unknown>[])[0], 201);
     } catch (err) {
       return handleRouteError(c, err, 'POST /catalog/discounts');
     }
@@ -1005,7 +1005,7 @@ productCatalogRouter.get('/discounts/:id', async (c) => {
       LIMIT 1
     `);
 
-    const discount = (rows as Record<string, unknown>[])[0];
+    const discount = (rows as unknown as Record<string, unknown>[])[0];
     if (!discount) return c.json({ error: 'Discount not found' }, 404);
     return c.json(discount);
   } catch (err) {
@@ -1042,7 +1042,7 @@ productCatalogRouter.put(
         RETURNING *
       `);
 
-      const updated = (rows as Record<string, unknown>[])[0];
+      const updated = (rows as unknown as Record<string, unknown>[])[0];
       if (!updated) return c.json({ error: 'Discount not found' }, 404);
       return c.json(updated);
     } catch (err) {
@@ -1063,7 +1063,7 @@ productCatalogRouter.delete('/discounts/:id', async (c) => {
       RETURNING id
     `);
 
-    if (!(result as unknown[]).length) return c.json({ error: 'Discount not found' }, 404);
+    if (!(result as unknown as unknown[]).length) return c.json({ error: 'Discount not found' }, 404);
     return c.json({ success: true });
   } catch (err) {
     return handleRouteError(c, err, 'DELETE /catalog/discounts/:id');

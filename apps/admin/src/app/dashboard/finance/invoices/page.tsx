@@ -48,12 +48,13 @@ async function fetchInvoices(tenantId: string): Promise<Invoice[]> {
 export default async function InvoicesPage({
   searchParams,
 }: {
-  searchParams: { new?: string };
+  searchParams: Promise<{ new?: string }>;
 }) {
+  const params = await searchParams;
   const cookieStore = await cookies();
   const tenantId = cookieStore.get('veska_tenant')?.value ?? process.env.VESKA_TENANT_ID ?? 'demo-tenant';
   const invoices = await fetchInvoices(tenantId);
-  const openNew = searchParams.new === 'true';
+  const openNew = params.new === 'true';
 
   return (
     <InvoicesClient

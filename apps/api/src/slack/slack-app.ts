@@ -1,6 +1,6 @@
 import { App, type AppOptions } from '@slack/bolt';
-import type { Database } from '@veska/core';
-import { schema, SlackChannelAdapter, resolveSlackIdentity, AnthropicProvider, ActionAgent, AuditService, MagicLinkService } from '@veska/core';
+import type { Database, LLMProvider } from '@veska/core';
+import { schema, SlackChannelAdapter, resolveSlackIdentity, ActionAgent, AuditService, MagicLinkService } from '@veska/core';
 import { eq, and } from 'drizzle-orm';
 import type { QueueService } from '@veska/core';
 
@@ -10,7 +10,7 @@ export type { App };
 export interface SlackAppManagerConfig {
   db: Database;
   queueService: QueueService;
-  llm: AnthropicProvider;
+  llm: LLMProvider;
   magicLinkService: MagicLinkService;
   auditService: AuditService;
 }
@@ -61,7 +61,7 @@ export class SlackAppManager {
     this.apps.set(tenantId, app);
 
     // Register the WebClient with the adapter for outbound messages
-    this.adapter.setClient(tenantId, app.client as unknown as Parameters<typeof this.adapter.setClient>[1]);
+    this.adapter.setClient(tenantId, app.client as unknown as Parameters<SlackChannelAdapter['setClient']>[1]);
   }
 
   private registerHandlers(app: App, tenantId: string): void {
@@ -110,7 +110,7 @@ export class SlackAppManager {
     });
 
     // ── Button actions (magic link confirmations) ─────────────
-    app.action('confirm_yes', async ({ body, ack, say }) => {
+    app.action('confirm_yes', async ({ body, ack, respond }) => {
       await ack();
       const metadata = (body as { message?: { metadata?: { event_payload?: Record<string, unknown> } } })
         .message?.metadata?.event_payload;
@@ -123,9 +123,9 @@ export class SlackAppManager {
       });
     });
 
-    app.action('confirm_no', async ({ ack, say }) => {
+    app.action('confirm_no', async ({ ack, respond }) => {
       await ack();
-      await say({ text: 'Got it, cancelled.' });
+      await respond({ text: 'Got it, cancelled.' });
     });
 
     // ── Errors ────────────────────────────────────────────────

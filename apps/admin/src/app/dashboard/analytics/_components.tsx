@@ -115,7 +115,7 @@ function useChartData<T>(url: string, deps: unknown[]) {
     } finally {
       setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [url, ...deps]);
 
   useEffect(() => { void load(); }, [load]);

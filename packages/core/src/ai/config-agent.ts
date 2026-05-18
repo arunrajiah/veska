@@ -133,7 +133,7 @@ export class ConfigAgent {
     // Apply all changes in a transaction
     await this.db.transaction(async (tx) => {
       for (const change of diff.changes) {
-        await this.applyConfigChange(tx as Database, diff.tenantId, change);
+        await this.applyConfigChange(tx as unknown as Database, diff.tenantId, change);
       }
 
       // Record the new config version

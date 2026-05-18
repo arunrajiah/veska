@@ -67,7 +67,7 @@ eventsRouter.get('/calendar', async (c) => {
 
     // Group by day (YYYY-MM-DD of startAt in UTC)
     const grouped: Record<string, unknown[]> = {};
-    for (const row of rows as Record<string, unknown>[]) {
+    for (const row of rows as unknown as Record<string, unknown>[]) {
       const startAt = row['startAt'] as string;
       const day = new Date(startAt).toISOString().slice(0, 10);
       if (!grouped[day]) grouped[day] = [];
@@ -180,7 +180,7 @@ eventsRouter.post('/', zValidator('json', EventCreateSchema), async (c) => {
       RETURNING *
     `);
 
-    const event = (rows as Record<string, unknown>[])[0];
+    const event = (rows as unknown as Record<string, unknown>[])[0];
     if (!event) return c.json({ error: 'Failed to create event' }, 500);
 
     // Auto-create room booking if roomId provided
@@ -227,10 +227,10 @@ eventsRouter.get('/:id', async (c) => {
       `),
     ]);
 
-    if ((eventRows as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
+    if ((eventRows as unknown as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
 
     return c.json({
-      ...(eventRows as Record<string, unknown>[])[0],
+      ...(eventRows as unknown as Record<string, unknown>[])[0],
       attendees: attendeeRows,
     });
   } catch (err) {
@@ -248,7 +248,7 @@ eventsRouter.put('/:id', zValidator('json', EventUpdateSchema), async (c) => {
     const check = await sharedDb.execute(sql`
       SELECT id FROM "events" WHERE id = ${id} AND "tenantId" = ${tenantId} LIMIT 1
     `);
-    if ((check as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
+    if ((check as unknown as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
 
     const parts: ReturnType<typeof sql>[] = [sql`"updatedAt" = now()`];
 
@@ -275,7 +275,7 @@ eventsRouter.put('/:id', zValidator('json', EventUpdateSchema), async (c) => {
       RETURNING *
     `);
 
-    return c.json((rows as unknown[])[0]);
+    return c.json((rows as unknown as unknown[])[0]);
   } catch (err) {
     return handleRouteError(c, err, 'PUT /events/:id');
   }
@@ -290,7 +290,7 @@ eventsRouter.delete('/:id', async (c) => {
     const check = await sharedDb.execute(sql`
       SELECT id FROM "events" WHERE id = ${id} AND "tenantId" = ${tenantId} LIMIT 1
     `);
-    if ((check as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
+    if ((check as unknown as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
 
     await sharedDb.execute(sql`
       DELETE FROM "events" WHERE id = ${id} AND "tenantId" = ${tenantId}
@@ -315,7 +315,7 @@ eventsRouter.put('/:id/cancel', async (c) => {
       RETURNING *
     `);
 
-    if ((rows as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
+    if ((rows as unknown as unknown[]).length === 0) return c.json({ error: 'Not found' }, 404);
 
     // Cancel linked room booking
     await sharedDb.execute(sql`
@@ -324,7 +324,7 @@ eventsRouter.put('/:id/cancel', async (c) => {
       WHERE "eventId" = ${id} AND "tenantId" = ${tenantId} AND status = 'confirmed'
     `);
 
-    return c.json((rows as unknown[])[0]);
+    return c.json((rows as unknown as unknown[])[0]);
   } catch (err) {
     return handleRouteError(c, err, 'PUT /events/:id/cancel');
   }
@@ -345,9 +345,10 @@ eventsRouter.post('/:id/attendees', zValidator('json', AttendeeAddSchema), async
       WHERE id = ${id} AND "tenantId" = ${tenantId}
       LIMIT 1
     `);
-    if ((eventRows as unknown[]).length === 0) return c.json({ error: 'Event not found' }, 404);
+    if ((eventRows as unknown as unknown[]).length === 0) return c.json({ error: 'Event not found' }, 404);
 
-    const event = (eventRows as Record<string, unknown>[])[0];
+    const event = (eventRows as unknown as Record<string, unknown>[])[0];
+    if (!event) return c.json({ error: 'Event not found' }, 404);
     const maxAttendees = event['maxAttendees'] as number | null;
 
     if (maxAttendees !== null) {
@@ -355,7 +356,7 @@ eventsRouter.post('/:id/attendees', zValidator('json', AttendeeAddSchema), async
         SELECT COUNT(*) AS count FROM "eventAttendees"
         WHERE "eventId" = ${id} AND "tenantId" = ${tenantId}
       `);
-      const currentCount = Number((countRows as Record<string, unknown>[])[0]?.['count'] ?? 0);
+      const currentCount = Number((countRows as unknown as Record<string, unknown>[])[0]?.['count'] ?? 0);
       if (currentCount >= maxAttendees) {
         return c.json({ error: 'Event has reached maximum attendees' }, 409);
       }
@@ -370,7 +371,7 @@ eventsRouter.post('/:id/attendees', zValidator('json', AttendeeAddSchema), async
       RETURNING *
     `);
 
-    return c.json((rows as unknown[])[0], 201);
+    return c.json((rows as unknown as unknown[])[0], 201);
   } catch (err) {
     return handleRouteError(c, err, 'POST /events/:id/attendees');
   }
@@ -390,8 +391,8 @@ eventsRouter.put('/:id/attendees/:userId/rsvp', zValidator('json', RsvpSchema), 
       RETURNING *
     `);
 
-    if ((rows as unknown[]).length === 0) return c.json({ error: 'Attendee not found' }, 404);
-    return c.json((rows as unknown[])[0]);
+    if ((rows as unknown as unknown[]).length === 0) return c.json({ error: 'Attendee not found' }, 404);
+    return c.json((rows as unknown as unknown[])[0]);
   } catch (err) {
     return handleRouteError(c, err, 'PUT /events/:id/attendees/:userId/rsvp');
   }
@@ -408,7 +409,7 @@ eventsRouter.delete('/:id/attendees/:userId', async (c) => {
       WHERE "eventId" = ${id} AND "userId" = ${userId} AND "tenantId" = ${tenantId}
       LIMIT 1
     `);
-    if ((check as unknown[]).length === 0) return c.json({ error: 'Attendee not found' }, 404);
+    if ((check as unknown as unknown[]).length === 0) return c.json({ error: 'Attendee not found' }, 404);
 
     await sharedDb.execute(sql`
       DELETE FROM "eventAttendees"

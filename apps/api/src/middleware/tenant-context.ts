@@ -42,7 +42,7 @@ export const tenantContext: MiddlewareHandler<{ Variables: TenantContext & Sessi
     return c.json({ error: 'Tenant not found' }, 404);
   }
 
-  const configAgent = new ConfigAgent(sharedDb, sharedLlm, sharedLlm.opusModel);
+  const configAgent = new ConfigAgent(sharedDb, sharedLlm);
 
   c.set('tenantCtx', { tenantId, identityId, db: sharedDb, configAgent });
   await next();

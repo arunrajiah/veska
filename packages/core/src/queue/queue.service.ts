@@ -1,5 +1,5 @@
 import { Queue, Worker, type Job } from 'bullmq';
-import type IORedis from 'ioredis';
+import type { Redis as IORedis } from 'ioredis';
 import type { JobName, JobPayload } from './jobs.js';
 
 export class QueueService {
