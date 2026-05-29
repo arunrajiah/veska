@@ -5,7 +5,7 @@
 Describe your company in plain language. Veska sets up CRM, support desk, and finance in minutes. Your team works through Slack, WhatsApp, and Email — no accounts, no logins, no training required.
 
 <p align="center">
-  <img src="docs/images/banner.svg" alt="Veska — AI-native ERP" width="100%" />
+  <img src="docs/images/banner.png" alt="Veska — AI-native ERP" width="100%" />
 </p>
 
 [![CI](https://github.com/arunrajiah/veska/actions/workflows/ci.yml/badge.svg)](https://github.com/arunrajiah/veska/actions/workflows/ci.yml)
@@ -25,20 +25,36 @@ Once configured, almost nobody logs in. Employees, customers, and vendors intera
 
 <table>
   <tr>
-    <td><img src="docs/images/screenshot-dashboard.svg" alt="Dashboard" /></td>
-    <td><img src="docs/images/screenshot-ai.svg" alt="AI Actions" /></td>
+    <td><img src="docs/images/screenshot-dashboard.png" alt="Dashboard" /></td>
+    <td><img src="docs/images/screenshot-ai.png" alt="AI Actions" /></td>
   </tr>
   <tr>
     <td align="center"><em>Dashboard — KPIs, recent activity, AI assistant</em></td>
     <td align="center"><em>AI Actions — plain-language ERP commands</em></td>
   </tr>
   <tr>
-    <td><img src="docs/images/screenshot-invoices.svg" alt="Invoices" /></td>
-    <td><img src="docs/images/screenshot-dashboard.svg" alt="Reports" /></td>
+    <td><img src="docs/images/screenshot-crm.png" alt="CRM" /></td>
+    <td><img src="docs/images/screenshot-invoices.png" alt="Invoices" /></td>
   </tr>
   <tr>
+    <td align="center"><em>CRM — leads, contacts, deals pipeline</em></td>
     <td align="center"><em>Invoices — full lifecycle with approval gate</em></td>
+  </tr>
+  <tr>
+    <td><img src="docs/images/screenshot-employees.png" alt="HR" /></td>
+    <td><img src="docs/images/screenshot-reports.png" alt="Reports" /></td>
+  </tr>
+  <tr>
+    <td align="center"><em>HR — employee directory and org chart</em></td>
     <td align="center"><em>Reports — visual builder with AI narrative</em></td>
+  </tr>
+  <tr>
+    <td><img src="docs/images/screenshot-settings.png" alt="Settings" /></td>
+    <td><img src="docs/images/screenshot-login.png" alt="Login" /></td>
+  </tr>
+  <tr>
+    <td align="center"><em>Settings — tenant config, roles, integrations</em></td>
+    <td align="center"><em>Login — magic link &amp; SSO</em></td>
   </tr>
 </table>
 
