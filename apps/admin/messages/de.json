@@ -137,5 +137,63 @@
     "goHome": "Zum Dashboard",
     "serverError": "Etwas ist schiefgelaufen",
     "tryAgain": "Erneut versuchen"
+  },
+  "crm": {
+    "title": "CRM Dashboard",
+    "leads": "Leads",
+    "contacts": "Contacts",
+    "deals": "Deals",
+    "pipeline": "Pipeline"
+  },
+  "hr": {
+    "title": "HR & People",
+    "employees": "Employees",
+    "leaveRequests": "Leave Requests",
+    "department": "Departments"
+  },
+  "support": {
+    "title": "Support",
+    "tickets": "Tickets",
+    "newTicket": "New Ticket",
+    "open": "Open",
+    "inProgress": "In Progress",
+    "resolved": "Resolved",
+    "closed": "Closed"
+  },
+  "approvals": {
+    "title": "Approvals",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "approve": "Approve",
+    "reject": "Reject"
+  },
+  "projects": {
+    "title": "Projects",
+    "newProject": "New Project",
+    "tasks": "Tasks",
+    "members": "Members",
+    "status": "Status"
+  },
+  "payroll": {
+    "title": "Payroll",
+    "runPayroll": "Run Payroll",
+    "period": "Pay Period",
+    "employees": "Employees",
+    "totalGross": "Total Gross"
+  },
+  "onboarding": {
+    "title": "Set up your workspace",
+    "step": "Step",
+    "of": "of",
+    "next": "Next",
+    "back": "Back",
+    "complete": "Complete setup"
+  },
+  "portal": {
+    "title": "Customer Portal",
+    "invite": "Invite Customer",
+    "active": "Active",
+    "expired": "Expired"
   }
 }
