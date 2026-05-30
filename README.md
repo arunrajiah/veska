@@ -26,35 +26,35 @@ Once configured, almost nobody logs in. Employees, customers, and vendors intera
 <table>
   <tr>
     <td><img src="docs/images/screenshot-dashboard.png" alt="Dashboard" /></td>
-    <td><img src="docs/images/screenshot-crm.png" alt="CRM" /></td>
+    <td><img src="docs/images/screenshot-analytics.png" alt="Analytics" /></td>
   </tr>
   <tr>
     <td align="center"><em>Dashboard — live KPIs across finance, HR &amp; ops</em></td>
-    <td align="center"><em>CRM — 8 contacts, 12 deals, $564K pipeline</em></td>
+    <td align="center"><em>Analytics — revenue chart, pipeline, headcount by dept</em></td>
   </tr>
   <tr>
+    <td><img src="docs/images/screenshot-crm.png" alt="CRM" /></td>
     <td><img src="docs/images/screenshot-support.png" alt="Support inbox" /></td>
+  </tr>
+  <tr>
+    <td align="center"><em>CRM — contacts, deals pipeline &amp; $564K in open deals</em></td>
+    <td align="center"><em>Support — ticket inbox with channel badges &amp; thread view</em></td>
+  </tr>
+  <tr>
     <td><img src="docs/images/screenshot-channels.png" alt="Channels" /></td>
-  </tr>
-  <tr>
-    <td align="center"><em>Support inbox — tickets from Slack, Email &amp; WhatsApp</em></td>
-    <td align="center"><em>Channels — connect Slack, Email, WhatsApp &amp; Telegram</em></td>
-  </tr>
-  <tr>
     <td><img src="docs/images/screenshot-workflows.png" alt="Workflows" /></td>
-    <td><img src="docs/images/screenshot-developer.png" alt="Developer portal" /></td>
   </tr>
   <tr>
+    <td align="center"><em>Channels — connect Slack, Email, WhatsApp &amp; Telegram</em></td>
     <td align="center"><em>Workflows — AI-powered automation builder</em></td>
-    <td align="center"><em>Developer portal — API keys, webhooks &amp; job queues</em></td>
   </tr>
   <tr>
+    <td><img src="docs/images/screenshot-developer.png" alt="Developer portal" /></td>
     <td><img src="docs/images/screenshot-settings.png" alt="Settings" /></td>
-    <td><img src="docs/images/screenshot-login.png" alt="Login" /></td>
   </tr>
   <tr>
+    <td align="center"><em>Developer portal — API keys, webhooks &amp; job queues</em></td>
     <td align="center"><em>Settings — company profile, roles &amp; integrations</em></td>
-    <td align="center"><em>Login — password, magic link &amp; SSO</em></td>
   </tr>
 </table>
 
