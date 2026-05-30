@@ -1,5 +1,5 @@
-import { apiFetch } from '@/lib/api.js';
-import { KBPageClient } from './_components.js';
+import { apiFetch } from '@/lib/api';
+import { KBPageClient } from './_components';
 
 export interface Article {
   id: string;
@@ -7,6 +7,7 @@ export interface Article {
     title?: string;
     content?: string;
     category?: string;
+    categoryId?: string;
     status?: 'draft' | 'published';
     author?: string;
     views?: number;
@@ -19,16 +20,42 @@ export interface Article {
   };
 }
 
+export interface KBCategory {
+  id: string;
+  name: string;
+  parentId?: string | null;
+  articleCount?: number;
+  children?: KBCategory[];
+}
+
+export interface KBSummary {
+  totalArticles?: number;
+  publishedArticles?: number;
+  totalCategories?: number;
+  [key: string]: unknown;
+}
+
+const TENANT_ID =
+  process.env.VESKA_TENANT_ID ??
+  process.env.NEXT_PUBLIC_TENANT_ID ??
+  'demo-tenant';
+
 export default async function KBPage() {
-  const tenantId = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
-
   let articles: Article[] = [];
-  try {
-    const res = await apiFetch<{ data: Article[] }>('/api/v1/kb?limit=50', tenantId);
-    articles = Array.isArray(res) ? res : (res?.data ?? []);
-  } catch {
-    articles = [];
-  }
+  let categories: KBCategory[] = [];
+  let summary: KBSummary = {};
 
-  return <KBPageClient articles={articles} />;
+  await Promise.all([
+    apiFetch<{ data: Article[] } | Article[]>('/api/v1/knowledge-base/articles?limit=50', TENANT_ID)
+      .then((res) => { articles = Array.isArray(res) ? res : (res?.data ?? []); })
+      .catch(() => {}),
+    apiFetch<{ data: KBCategory[] } | KBCategory[]>('/api/v1/knowledge-base/categories', TENANT_ID)
+      .then((res) => { categories = Array.isArray(res) ? res : (res?.data ?? []); })
+      .catch(() => {}),
+    apiFetch<KBSummary>('/api/v1/knowledge-base/summary', TENANT_ID)
+      .then((res) => { summary = res ?? {}; })
+      .catch(() => {}),
+  ]);
+
+  return <KBPageClient articles={articles} categories={categories} summary={summary} />;
 }
