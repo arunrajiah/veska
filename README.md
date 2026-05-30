@@ -26,35 +26,35 @@ Once configured, almost nobody logs in. Employees, customers, and vendors intera
 <table>
   <tr>
     <td><img src="docs/images/screenshot-dashboard.png" alt="Dashboard" /></td>
-    <td><img src="docs/images/screenshot-ai.png" alt="AI Actions" /></td>
+    <td><img src="docs/images/screenshot-channels.png" alt="Channels" /></td>
   </tr>
   <tr>
-    <td align="center"><em>Dashboard — KPIs, recent activity, AI assistant</em></td>
-    <td align="center"><em>AI Actions — plain-language ERP commands</em></td>
+    <td align="center"><em>Dashboard — live KPIs, finance, HR &amp; ops at a glance</em></td>
+    <td align="center"><em>Channels — connect Slack, Email, WhatsApp &amp; Telegram</em></td>
   </tr>
   <tr>
-    <td><img src="docs/images/screenshot-crm.png" alt="CRM" /></td>
+    <td><img src="docs/images/screenshot-workflows.png" alt="Workflows" /></td>
+    <td><img src="docs/images/screenshot-developer.png" alt="Developer portal" /></td>
+  </tr>
+  <tr>
+    <td align="center"><em>Workflows — visual AI automation builder</em></td>
+    <td align="center"><em>Developer portal — API keys, webhooks, job queues</em></td>
+  </tr>
+  <tr>
+    <td><img src="docs/images/screenshot-reports.png" alt="Reports" /></td>
     <td><img src="docs/images/screenshot-invoices.png" alt="Invoices" /></td>
   </tr>
   <tr>
-    <td align="center"><em>CRM — leads, contacts, deals pipeline</em></td>
-    <td align="center"><em>Invoices — full lifecycle with approval gate</em></td>
-  </tr>
-  <tr>
-    <td><img src="docs/images/screenshot-employees.png" alt="HR" /></td>
-    <td><img src="docs/images/screenshot-reports.png" alt="Reports" /></td>
-  </tr>
-  <tr>
-    <td align="center"><em>HR — employee directory and org chart</em></td>
-    <td align="center"><em>Reports — visual builder with AI narrative</em></td>
+    <td align="center"><em>Reports — custom report builder with AI narrative</em></td>
+    <td align="center"><em>Invoices — full lifecycle, filters &amp; recurring billing</em></td>
   </tr>
   <tr>
     <td><img src="docs/images/screenshot-settings.png" alt="Settings" /></td>
     <td><img src="docs/images/screenshot-login.png" alt="Login" /></td>
   </tr>
   <tr>
-    <td align="center"><em>Settings — tenant config, roles, integrations</em></td>
-    <td align="center"><em>Login — magic link &amp; SSO</em></td>
+    <td align="center"><em>Settings — company profile, roles &amp; integrations</em></td>
+    <td align="center"><em>Login — password, magic link &amp; SSO (Google, GitHub, Microsoft)</em></td>
   </tr>
 </table>
 
