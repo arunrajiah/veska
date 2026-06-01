@@ -10,8 +10,29 @@ Describe your company in plain language. Veska sets up CRM, support desk, and fi
 
 [![CI](https://github.com/arunrajiah/veska/actions/workflows/ci.yml/badge.svg)](https://github.com/arunrajiah/veska/actions/workflows/ci.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![Docker](https://img.shields.io/badge/docker-compose%20up-blue?logo=docker)](docker-compose.yml)
+[![Self-host](https://img.shields.io/badge/self--host-in%205%20minutes-green)](SELF_HOSTING.md)
 
 > **Looking for a hosted version?** Veska Cloud is a fully managed deployment at [veska.com](https://veska.com) — no servers to run, automatic updates, 99.9% SLAs. This repository is the self-hosted edition.
+
+---
+
+## The future of ERP is a conversation
+
+<p align="center">
+  <img src="docs/images/demo.gif" alt="Veska AI onboarding — describe your company, get your ERP" width="100%" />
+</p>
+
+> *Type one sentence. Veska's AI configures your entire back office — CRM, support desk, finance, HR — and connects it to Slack, WhatsApp, and Email. Your team never needs to log in.*
+
+Traditional ERP systems take months to implement, require consultants, and need constant training. Veska works the way your team already communicates:
+
+| Old way | Veska way |
+|---|---|
+| Months of setup, IT consultants | Describe your business in plain English → live in minutes |
+| Employees log into complex dashboards | Everything happens in Slack, WhatsApp, Email |
+| Rigid workflows, expensive customisation | AI understands context and adapts automatically |
+| $50K–$500K implementation cost | Free to self-host, $29/mo on Veska Cloud |
 
 ---
 
