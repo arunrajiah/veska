@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { MarketingNav } from './_nav.js';
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.veska.io';
+
 export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -21,7 +23,7 @@ export default function HomePage() {
           </p>
           <div className="mt-10 flex items-center justify-center gap-4 flex-wrap">
             <Link
-              href="http://localhost:3000"
+              href={APP_URL}
               className="bg-indigo-600 text-white text-base font-medium px-6 py-3 rounded-xl hover:bg-indigo-700 transition-colors"
             >
               Start free trial →
@@ -84,6 +86,37 @@ export default function HomePage() {
               <p className="text-gray-500 text-xs font-mono mt-1 pl-3">
                 Your top 3: Product Sales ($184K · 65%), Services ($67K · 24%), Subscriptions ($33K · 11%).
               </p>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Demo ── */}
+        <section id="demo" className="py-20 bg-gray-950">
+          <div className="max-w-5xl mx-auto px-6 text-center">
+            <h2 className="text-3xl font-bold text-white mb-3">See Veska in action</h2>
+            <p className="text-gray-400 text-lg mb-10">
+              Describe your company. Watch the AI build your ERP.
+            </p>
+            {/* Video player placeholder */}
+            <div className="relative mx-auto max-w-3xl rounded-2xl overflow-hidden bg-gray-900 border border-gray-700 shadow-2xl aspect-video flex flex-col items-center justify-center gap-4">
+              {/* Fake browser chrome */}
+              <div className="absolute top-0 left-0 right-0 flex items-center gap-1.5 px-4 py-3 bg-gray-800 border-b border-gray-700">
+                <div className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
+                <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
+                <div className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
+                <span className="ml-2 text-gray-500 text-xs font-mono flex-1 text-center">
+                  AI onboarding demo · 60 seconds
+                </span>
+              </div>
+              {/* Play button */}
+              <div className="flex flex-col items-center gap-3 mt-8">
+                <div className="w-16 h-16 rounded-full bg-white/10 border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors cursor-pointer">
+                  <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </div>
+                <p className="text-gray-500 text-sm">Demo coming soon</p>
+              </div>
             </div>
           </div>
         </section>
@@ -183,7 +216,7 @@ export default function HomePage() {
                   desc: 'For small teams getting started.',
                   features: ['Up to 5 users', 'Core modules', 'Community support', '1 GB storage'],
                   cta: 'Get started',
-                  href: 'http://localhost:3000',
+                  href: APP_URL,
                   highlight: false,
                 },
                 {
@@ -193,7 +226,7 @@ export default function HomePage() {
                   desc: 'For growing teams that need more.',
                   features: ['Unlimited users', 'All modules', 'AI Assistant included', 'Priority support'],
                   cta: 'Start trial',
-                  href: 'http://localhost:3000',
+                  href: APP_URL,
                   highlight: true,
                 },
                 {

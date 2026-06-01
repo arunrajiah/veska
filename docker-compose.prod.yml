@@ -1,0 +1,30 @@
+# Production overrides — use with: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+version: '3.9'
+
+services:
+  postgres:
+    restart: unless-stopped
+
+  redis:
+    restart: unless-stopped
+
+  api:
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+
+  admin:
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+
+  marketing:
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+
+  marketplace:
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
