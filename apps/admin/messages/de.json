@@ -188,7 +188,12 @@
     "of": "of",
     "next": "Next",
     "back": "Back",
-    "complete": "Complete setup"
+    "complete": "Complete setup",
+    "step1": "Company",
+    "step2": "Modules",
+    "step3": "Team",
+    "step4": "AI Setup",
+    "step5": "Done"
   },
   "portal": {
     "title": "Customer Portal",

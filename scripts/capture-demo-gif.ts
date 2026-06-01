@@ -1,47 +1,49 @@
 /**
- * Captures a demo GIF showing the Veska AI onboarding flow:
- *   Setup page → AI chat → onboarding wizard → configured dashboard
- *
- * Run:  npx tsx scripts/capture-demo-gif.ts
- * Needs: ffmpeg, playwright chromium
+ * Captures the Veska AI onboarding demo GIF.
+ * Run: /path/to/tsx scripts/capture-demo-gif.ts
  */
-
 import { chromium, type Page, type BrowserContext } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
 import { execSync } from 'child_process';
 
-const BASE   = 'http://localhost:3000';
-const TENANT = '608cb01b-ad89-4e51-b690-65ffa4400fe5';
+const BASE     = 'http://localhost:3000';
+const TENANT   = '608cb01b-ad89-4e51-b690-65ffa4400fe5';
 const IDENTITY = 'c66aa930-ec16-421c-9616-731b4aee618c';
 const SESSION  = 'dev-test-token-veska-2026';
+const W = 1280, H = 800;
 
 const FRAMES_DIR = '/tmp/veska-demo-frames';
-const OUT_GIF    = path.join(__dirname, '../docs/images/demo.gif');
-const OUT_MP4    = path.join(__dirname, '../docs/images/demo.mp4');
+const OUT_GIF    = path.resolve(__dirname, '../docs/images/demo.gif');
+const OUT_MP4    = path.resolve(__dirname, '../docs/images/demo.mp4');
 
-let frameIndex = 0;
+// GIF speed: 3 fps = 333ms per frame — slow enough to read each screen
+const FPS = 3;
 
-async function frame(page: Page, delayMs = 0) {
-  if (delayMs > 0) await page.waitForTimeout(delayMs);
-  const p = path.join(FRAMES_DIR, `frame-${String(frameIndex).padStart(4, '0')}.png`);
-  await page.screenshot({ path: p, fullPage: false });
-  frameIndex++;
-}
+let fi = 0;
 
-/** Slowly type text character by character, capturing frames as we go */
-async function typeSlowly(page: Page, selector: string, text: string) {
-  const el = page.locator(selector);
-  await el.click();
-  for (const char of text) {
-    await el.pressSequentially(char, { delay: 60 });
-    // Capture a frame every ~4 chars so typing is visible
-    if (frameIndex % 4 === 0) await frame(page);
+/** Take N identical frames to "hold" on the current screen for N * (1/fps) seconds */
+async function hold(page: Page, frames: number, pauseMsFirst = 0) {
+  if (pauseMsFirst > 0) await page.waitForTimeout(pauseMsFirst);
+  for (let i = 0; i < frames; i++) {
+    await page.screenshot({ path: `${FRAMES_DIR}/f${String(fi).padStart(5, '0')}.png`, fullPage: false });
+    fi++;
+    if (i < frames - 1) await page.waitForTimeout(80); // small gap between dupe frames
   }
-  await frame(page, 200);
 }
 
-async function seedCookies(ctx: BrowserContext) {
+/** Type text slowly, one char at a time, snapping every N chars */
+async function typeSlowly(page: Page, sel: string, text: string, snapEvery = 5) {
+  const el = page.locator(sel).first();
+  await el.click();
+  for (let i = 0; i < text.length; i++) {
+    await el.pressSequentially(text[i]!, { delay: 70 });
+    if (i % snapEvery === 0) await hold(page, 1);
+  }
+  await hold(page, 2, 200); // hold on completed text
+}
+
+async function addAuthCookies(ctx: BrowserContext) {
   await ctx.addCookies([
     { name: 'veska_session',         value: SESSION,  domain: 'localhost', path: '/' },
     { name: 'veska_tenant',          value: TENANT,   domain: 'localhost', path: '/' },
@@ -50,146 +52,174 @@ async function seedCookies(ctx: BrowserContext) {
   ]);
 }
 
+/** Hide Next.js dev error overlay before taking screenshots */
+async function hideDevOverlay(page: Page) {
+  await page.evaluate(() => {
+    // Hide Next.js error badge/overlay
+    const selectors = [
+      'nextjs-portal',
+      '[data-nextjs-toast]',
+      'button[aria-label*="error" i]',
+      '#__next-build-watcher',
+    ];
+    for (const sel of selectors) {
+      document.querySelectorAll(sel).forEach((el) => {
+        (el as HTMLElement).style.display = 'none';
+      });
+    }
+    // Also hide shadow DOM error badge
+    const portal = document.querySelector('nextjs-portal');
+    if (portal?.shadowRoot) {
+      (portal as HTMLElement).style.display = 'none';
+    }
+  }).catch(() => {}); // ignore if elements don't exist
+}
+
+async function navigate(page: Page, url: string, holdFrames = 6) {
+  // Use 'load' — dashboard has SSE streams that block 'networkidle' forever
+  await page.goto(url, { waitUntil: 'load', timeout: 25000 });
+  await page.waitForTimeout(1200); // extra wait for JS hydration + data fetch
+  await hideDevOverlay(page);
+  await hold(page, holdFrames);
+}
+
+async function warmup(browser: ReturnType<typeof chromium.launch> extends Promise<infer T> ? T : never) {
+  console.log('Warming up pages (triggering CSS compilation)...');
+  const ctx = await browser.newContext({ viewport: { width: W, height: H } });
+  const p = await ctx.newPage();
+  await addAuthCookies(ctx);
+
+  // Visit each page once to trigger Next.js compilation
+  const pages = [
+    `${BASE}/onboarding/step/1`,
+    `${BASE}/onboarding/step/2`,
+    `${BASE}/onboarding/step/3`,
+    `${BASE}/onboarding/step/4`,
+    `${BASE}/onboarding/step/5`,
+    `${BASE}/dashboard`,
+    `${BASE}/dashboard/crm`,
+    `${BASE}/dashboard/analytics`,
+    `${BASE}/dashboard/channels`,
+    `${BASE}/dashboard/settings`,
+  ];
+
+  for (const url of pages) {
+    try {
+      await p.goto(url, { waitUntil: 'load', timeout: 25000 });
+      await p.waitForTimeout(400);
+      process.stdout.write('.');
+    } catch {
+      process.stdout.write('x');
+    }
+  }
+  console.log('\nWarmup done. Starting capture...');
+  await ctx.close();
+}
+
 async function main() {
   fs.rmSync(FRAMES_DIR, { recursive: true, force: true });
   fs.mkdirSync(FRAMES_DIR, { recursive: true });
 
   const browser = await chromium.launch({ headless: true });
-  const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
-  const page = await ctx.newPage();
 
-  // ── Scene 1: Setup / AI onboarding chat ──────────────────────────────────
-  // Show the clean setup page as if a new user just arrived
-  const setupCtx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
-  const setupPage = await setupCtx.newPage();
-  await setupPage.goto(`${BASE}/setup`, { waitUntil: 'load', timeout: 20000 });
-  await frame(setupPage, 1200); // hold on clean page
+  // Pre-warm all pages so CSS is compiled
+  await warmup(browser);
 
-  // Type the AI prompt slowly
-  const PROMPT = "We're Acme Corp, a 20-person B2B software company. Our sales team needs CRM to track leads and deals, we invoice clients monthly, and need basic HR for leave requests. We use Slack.";
+  // ── Scene 1: Onboarding wizard — step 1: Company profile ────────────────
+  console.log('\nScene 1: Onboarding wizard...');
+  const ctx1 = await browser.newContext({ viewport: { width: W, height: H } });
+  const p1 = await ctx1.newPage();
 
-  // Find the textarea or input in the setup chat
-  const inputSel = 'textarea, input[type="text"]';
-  try {
-    await setupPage.waitForSelector(inputSel, { timeout: 5000 });
-    await typeSlowly(setupPage, inputSel, PROMPT);
-    await frame(setupPage, 300);
+  // Step 1 — Company profile
+  await p1.goto(`${BASE}/onboarding/step/1`, { waitUntil: 'load', timeout: 20000 });
+  await p1.waitForTimeout(600);
+  await hideDevOverlay(p1);
+  await hold(p1, 9); // Hold 3s on step 1
 
-    // Click send button
-    const sendBtn = setupPage.locator('button[type="submit"], button:has-text("Send"), button:has-text("→")').first();
-    if (await sendBtn.count() > 0) {
-      await sendBtn.click();
-      // Capture "AI thinking" frames
-      for (let i = 0; i < 8; i++) await frame(setupPage, 400);
+  // Fill in company name (type it slowly)
+  const nameInput = p1.locator('input[placeholder*="Acme"], input[name="name"], input[placeholder*="company" i]').first();
+  if (await nameInput.count() > 0) {
+    await nameInput.click();
+    for (const ch of 'Acme Corp') {
+      await nameInput.pressSequentially(ch, { delay: 80 });
+      if (Math.random() > 0.5) await hold(p1, 1);
     }
-  } catch {
-    // Setup page might not have the chat input — just capture what's there
-    for (let i = 0; i < 6; i++) await frame(setupPage, 300);
+    await hold(p1, 3, 200);
   }
-  await setupCtx.close();
-
-  // ── Scene 2: Onboarding wizard steps ─────────────────────────────────────
-  // Show the 5-step onboarding wizard
-  const obCtx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
-  const obPage = await obCtx.newPage();
-  await obPage.goto(`${BASE}/onboarding/step/1`, { waitUntil: 'load', timeout: 20000 });
-  await frame(obPage, 800);
-  await frame(obPage, 600);
 
   // Step 2 — Modules
-  await obPage.goto(`${BASE}/onboarding/step/2`, { waitUntil: 'load', timeout: 15000 });
-  await frame(obPage, 700);
-  await frame(obPage, 500);
+  await navigate(p1, `${BASE}/onboarding/step/2`, 9);
 
   // Step 3 — Team
-  await obPage.goto(`${BASE}/onboarding/step/3`, { waitUntil: 'load', timeout: 15000 });
-  await frame(obPage, 700);
+  await navigate(p1, `${BASE}/onboarding/step/3`, 9);
 
   // Step 4 — AI Setup
-  await obPage.goto(`${BASE}/onboarding/step/4`, { waitUntil: 'load', timeout: 15000 });
-  await frame(obPage, 700);
+  await navigate(p1, `${BASE}/onboarding/step/4`, 9);
 
   // Step 5 — Done / confetti
-  await obPage.goto(`${BASE}/onboarding/step/5`, { waitUntil: 'load', timeout: 15000 });
-  await frame(obPage, 500);
-  await frame(obPage, 500);
-  await frame(obPage, 500);
-  await obCtx.close();
+  await navigate(p1, `${BASE}/onboarding/step/5`, 12); // Hold longer on completion
+  await ctx1.close();
 
-  // ── Scene 3: Dashboard — the configured workspace ─────────────────────────
-  await page.goto(BASE, { waitUntil: 'domcontentloaded' });
-  await seedCookies(ctx);
+  // ── Scene 2: Dashboard overview ──────────────────────────────────────────
+  console.log('Scene 2: Dashboard...');
+  const ctx2 = await browser.newContext({ viewport: { width: W, height: H } });
+  const p2 = await ctx2.newPage();
+  await p2.goto(BASE, { waitUntil: 'domcontentloaded' });
+  await addAuthCookies(ctx2);
 
-  await page.goto(`${BASE}/dashboard`, { waitUntil: 'load', timeout: 20000 });
-  await frame(page, 1000);
-  await frame(page, 500);
+  await navigate(p2, `${BASE}/dashboard`, 12); // Dashboard — hold 4s
 
-  // Pan to CRM
-  await page.goto(`${BASE}/dashboard/crm`, { waitUntil: 'load', timeout: 20000 });
-  await frame(page, 800);
+  // ── Scene 3: CRM ─────────────────────────────────────────────────────────
+  console.log('Scene 3: CRM...');
+  await navigate(p2, `${BASE}/dashboard/crm`, 9);
 
-  // Pan to Finance
-  await page.goto(`${BASE}/dashboard/finance/invoices`, { waitUntil: 'load', timeout: 20000 });
-  await frame(page, 800);
+  // ── Scene 4: Analytics with real charts ──────────────────────────────────
+  console.log('Scene 4: Analytics...');
+  await navigate(p2, `${BASE}/dashboard/analytics`, 12);
 
-  // Pan to Analytics
-  await page.goto(`${BASE}/dashboard/analytics`, { waitUntil: 'load', timeout: 20000 });
-  await frame(page, 1000);
-  await frame(page, 500);
+  // ── Scene 5: Channels — the "no login" story ────────────────────────────
+  console.log('Scene 5: Channels...');
+  await navigate(p2, `${BASE}/dashboard/channels`, 9);
 
-  // Pan to Channels (the AI integration story)
-  await page.goto(`${BASE}/dashboard/channels`, { waitUntil: 'load', timeout: 20000 });
-  await frame(page, 800);
-  await frame(page, 400);
+  // ── Scene 6: Settings / company config ───────────────────────────────────
+  console.log('Scene 6: Settings...');
+  await navigate(p2, `${BASE}/dashboard/settings`, 9);
 
+  await ctx2.close();
   await browser.close();
 
-  const totalFrames = frameIndex;
-  console.log(`Captured ${totalFrames} frames. Encoding...`);
+  const totalFrames = fi;
+  const durationSec = (totalFrames / FPS).toFixed(1);
+  console.log(`\nCaptured ${totalFrames} frames → ${durationSec}s at ${FPS} fps`);
+  console.log('Encoding...');
 
-  // ── Encode MP4 first (better quality reference) ───────────────────────────
+  // ── Encode MP4 ────────────────────────────────────────────────────────────
   execSync(
-    `ffmpeg -y -framerate 4 -i "${FRAMES_DIR}/frame-%04d.png" \
-      -vf "scale=1280:800:flags=lanczos,fps=4" \
-      -c:v libx264 -pix_fmt yuv420p -crf 23 \
-      "${OUT_MP4}" 2>/dev/null`,
+    `ffmpeg -y -framerate ${FPS} -pattern_type glob -i '${FRAMES_DIR}/f?????.png' \
+     -vf "scale=${W}:${H}:flags=lanczos" \
+     -c:v libx264 -pix_fmt yuv420p -crf 20 \
+     "${OUT_MP4}" 2>/dev/null`,
     { stdio: 'inherit' },
   );
-  console.log(`✓ MP4 saved: ${OUT_MP4}`);
+  console.log(`✓ MP4  → ${OUT_MP4}`);
 
-  // ── Encode GIF (for README / GitHub) ────────────────────────────────────
-  // Two-pass palette approach for best quality
+  // ── Encode GIF (two-pass palette for best quality) ────────────────────────
   execSync(
-    `ffmpeg -y -framerate 4 -i "${FRAMES_DIR}/frame-%04d.png" \
-      -vf "fps=4,scale=1280:-1:flags=lanczos,palettegen=max_colors=128" \
-      /tmp/palette.png 2>/dev/null`,
+    `ffmpeg -y -framerate ${FPS} -pattern_type glob -i '${FRAMES_DIR}/f?????.png' \
+     -vf "fps=${FPS},scale=1280:-1:flags=lanczos,palettegen=max_colors=128:stats_mode=diff" \
+     /tmp/vp.png 2>/dev/null`,
     { stdio: 'inherit' },
   );
   execSync(
-    `ffmpeg -y -framerate 4 -i "${FRAMES_DIR}/frame-%04d.png" -i /tmp/palette.png \
-      -lavfi "fps=4,scale=1280:-1:flags=lanczos [x]; [x][1:v] paletteuse=dither=bayer" \
-      "${OUT_GIF}" 2>/dev/null`,
+    `ffmpeg -y -framerate ${FPS} -pattern_type glob -i '${FRAMES_DIR}/f?????.png' -i /tmp/vp.png \
+     -lavfi "fps=${FPS},scale=1280:-1:flags=lanczos [x]; [x][1:v] paletteuse=dither=bayer:bayer_scale=3" \
+     "${OUT_GIF}" 2>/dev/null`,
     { stdio: 'inherit' },
   );
 
-  const gifSize = fs.statSync(OUT_GIF).size;
-  console.log(`✓ GIF saved: ${OUT_GIF} (${(gifSize / 1024 / 1024).toFixed(1)} MB)`);
-
-  // If GIF > 15 MB, create a smaller 640px version for README
-  if (gifSize > 15 * 1024 * 1024) {
-    const smallGif = OUT_GIF.replace('.gif', '-small.gif');
-    execSync(
-      `ffmpeg -y -framerate 3 -i "${FRAMES_DIR}/frame-%04d.png" -i /tmp/palette.png \
-        -lavfi "fps=3,scale=900:-1:flags=lanczos [x]; [x][1:v] paletteuse=dither=bayer" \
-        "${smallGif}" 2>/dev/null`,
-      { stdio: 'inherit' },
-    );
-    const smallSize = fs.statSync(smallGif).size;
-    console.log(`✓ Small GIF: ${smallGif} (${(smallSize / 1024 / 1024).toFixed(1)} MB)`);
-  }
+  const sz = fs.statSync(OUT_GIF).size;
+  console.log(`✓ GIF  → ${OUT_GIF}  (${(sz / 1024 / 1024).toFixed(1)} MB, ${totalFrames} frames)`);
+  console.log(`  Duration: ~${durationSec} seconds, ${FPS} fps`);
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+main().catch((e) => { console.error(e); process.exit(1); });

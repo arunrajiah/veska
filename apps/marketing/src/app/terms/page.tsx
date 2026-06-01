@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { MarketingNav } from '../_nav.js';
+import { MarketingNav } from '../_nav';
 
 export const metadata = {
   title: 'Terms of Service — Veska',

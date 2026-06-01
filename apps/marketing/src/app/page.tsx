@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { MarketingNav } from './_nav.js';
+import { MarketingNav } from './_nav';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.veska.io';
 
@@ -108,7 +108,6 @@ export default function HomePage() {
                   app.veska.io/setup
                 </span>
               </div>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/demo.gif"
                 alt="Veska AI onboarding — describe your company in plain English and watch your ERP configure itself"
