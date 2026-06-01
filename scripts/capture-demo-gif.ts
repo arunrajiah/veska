@@ -52,27 +52,29 @@ async function addAuthCookies(ctx: BrowserContext) {
   ]);
 }
 
-/** Hide Next.js dev error overlay before taking screenshots */
+/** Inject CSS to permanently hide the Next.js dev error overlay on this page */
 async function hideDevOverlay(page: Page) {
+  // CSS injection is more reliable than JS DOM manipulation for shadow DOM elements
+  await page.addStyleTag({
+    content: `
+      /* Hide ALL Next.js dev overlays and error badges */
+      nextjs-portal,
+      #nextjs-toast-errors-portal,
+      [data-nextjs-toast],
+      [data-nextjs-dialog-overlay],
+      [data-nextjs-dialog],
+      #__nextjs-build-watcher,
+      #__next-build-watcher,
+      .__next-error-overlay,
+      body > [data-nextjs-toast] { display: none !important; }
+    `,
+  }).catch(() => {});
+  // Also try JS in case the element is in a shadow root
   await page.evaluate(() => {
-    // Hide Next.js error badge/overlay
-    const selectors = [
-      'nextjs-portal',
-      '[data-nextjs-toast]',
-      'button[aria-label*="error" i]',
-      '#__next-build-watcher',
-    ];
-    for (const sel of selectors) {
-      document.querySelectorAll(sel).forEach((el) => {
-        (el as HTMLElement).style.display = 'none';
-      });
-    }
-    // Also hide shadow DOM error badge
-    const portal = document.querySelector('nextjs-portal');
-    if (portal?.shadowRoot) {
-      (portal as HTMLElement).style.display = 'none';
-    }
-  }).catch(() => {}); // ignore if elements don't exist
+    const hide = (el: Element | null) => { if (el) (el as HTMLElement).style.cssText += 'display:none!important'; };
+    hide(document.querySelector('nextjs-portal'));
+    document.querySelectorAll('[data-nextjs-toast],[data-nextjs-dialog]').forEach(hide);
+  }).catch(() => {});
 }
 
 async function navigate(page: Page, url: string, holdFrames = 6) {
@@ -144,10 +146,11 @@ async function main() {
       await nameInput.pressSequentially(ch, { delay: 80 });
       if (Math.random() > 0.5) await hold(p1, 1);
     }
+    await hideDevOverlay(p1);
     await hold(p1, 3, 200);
   }
 
-  // Step 2 — Modules
+  // Step 2 — Choose Features
   await navigate(p1, `${BASE}/onboarding/step/2`, 9);
 
   // Step 3 — Team

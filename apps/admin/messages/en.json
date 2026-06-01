@@ -189,11 +189,11 @@
     "next": "Next",
     "back": "Back",
     "complete": "Complete setup",
-    "step1": "Company",
-    "step2": "Modules",
-    "step3": "Team",
-    "step4": "AI Setup",
-    "step5": "Done"
+    "step1": "Your Business",
+    "step2": "Choose Features",
+    "step3": "Invite Team",
+    "step4": "Connect AI",
+    "step5": "You're Ready!"
   },
   "portal": {
     "title": "Customer Portal",
