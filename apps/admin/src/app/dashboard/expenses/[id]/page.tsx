@@ -23,9 +23,9 @@ export interface ExpenseRecord {
   updatedAt?: string;
 }
 
-export default async function ExpenseDetailPage({ params }: { params: { id: string } }) {
+export default async function ExpenseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const tenantId = process.env.VESKA_TENANT_ID ?? 'demo-tenant';
-  const { id } = params;
+  const { id } = await params;
 
   let record: ExpenseRecord | null = null;
   try {

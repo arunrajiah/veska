@@ -42,8 +42,8 @@ const STATUS_COLORS: Record<string, string> = {
   cancelled: 'bg-red-50 text-red-600',
 };
 
-export default async function SalesOrderDetailPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default async function SalesOrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   let record: OrderRecord | null = null;
 
   try {

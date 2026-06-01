@@ -66,8 +66,8 @@ function getField(d: Record<string, unknown>, ...keys: string[]): string {
   return '';
 }
 
-export default async function EmployeeDetailPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default async function EmployeeDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   let record: EmployeeRecord | null = null;
   let leaveRecords: LeaveRecord[] = [];
 

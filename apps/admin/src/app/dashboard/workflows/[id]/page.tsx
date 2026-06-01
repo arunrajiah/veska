@@ -65,10 +65,10 @@ const ACTION_LABELS: Record<string, string> = {
 export default async function WorkflowDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const tenantId = process.env.VESKA_TENANT_ID ?? '';
-  const { id } = params;
+  const { id } = await params;
 
   let workflow: WorkflowDefinition | null = null;
 

@@ -71,8 +71,9 @@ function groupPermissions(permissions: string[]) {
   return grouped;
 }
 
-export default async function RoleDetailPage({ params }: { params: { id: string } }) {
-  const role = await getRole(params.id);
+export default async function RoleDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const role = await getRole(id);
 
   if (!role) notFound();
 

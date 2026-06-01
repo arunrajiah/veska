@@ -5,7 +5,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get('veska_session')?.value;
@@ -13,7 +13,7 @@ export async function POST(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { id } = params;
+  const { id } = await params;
   const body = await req.json() as Record<string, unknown>;
 
   const res = await fetch(`${API_BASE}/api/v1/support/tickets/${id}/reply`, {

@@ -56,8 +56,9 @@ const statusStyles = {
   deactivated: 'bg-gray-100 text-gray-500',
 };
 
-export default async function UserDetailPage({ params }: { params: { id: string } }) {
-  const [user, allRoles] = await Promise.all([getUser(params.id), getRoles()]);
+export default async function UserDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const [user, allRoles] = await Promise.all([getUser(id), getRoles()]);
 
   if (!user) notFound();
 

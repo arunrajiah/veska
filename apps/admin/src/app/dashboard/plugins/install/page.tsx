@@ -1,12 +1,13 @@
 // Server component — read query params, look up plugin info, show confirmation UI
 import InstallConfirm from './install-confirm.js';
 
-export default function PluginInstallPage({
+export default async function PluginInstallPage({
   searchParams,
 }: {
-  searchParams: { pluginId?: string; source?: string };
+  searchParams: Promise<{ pluginId?: string; source?: string }>;
 }) {
-  const pluginId = searchParams.pluginId ?? '';
+  const { pluginId: pluginIdParam, source } = await searchParams;
+  const pluginId = pluginIdParam ?? '';
   if (!pluginId) {
     return (
       <div className="px-8 py-8">
@@ -19,7 +20,7 @@ export default function PluginInstallPage({
       <h1 className="text-2xl font-semibold text-gray-900 mb-2">Install plugin</h1>
       <p className="text-sm text-gray-500 mb-6">
         Plugin ID: <span className="font-mono text-gray-700">{pluginId}</span>
-        {searchParams.source === 'marketplace' && (
+        {source === 'marketplace' && (
           <span className="ml-2 text-xs text-indigo-600">from Marketplace</span>
         )}
       </p>

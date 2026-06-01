@@ -55,8 +55,8 @@ function MovementTypeBadge({ type }: { type?: string | undefined }) {
   return <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${colors[t] ?? 'bg-gray-100 text-gray-600'}`}>{t}</span>;
 }
 
-export default async function ProductDetailPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   let record: ProductRecord | null = null;
   let movements: MovementRecord[] = [];
 

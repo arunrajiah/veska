@@ -32,9 +32,9 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-export default async function TimeEntryDetailPage({ params }: { params: { id: string } }) {
+export default async function TimeEntryDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const tenantId = process.env.VESKA_TENANT_ID ?? '';
-  const { id } = params;
+  const { id } = await params;
 
   let record: TimeEntryRecord | null = null;
   try {
