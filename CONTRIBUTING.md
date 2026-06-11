@@ -4,14 +4,14 @@ Thanks for considering a contribution. Here's everything you need to know.
 
 ## Before you start
 
-- Check [GitHub Issues](https://github.com/veska-dev/veska/issues) to see if your idea or bug is already tracked.
+- Check [GitHub Issues](https://github.com/arunrajiah/veska/issues) to see if your idea or bug is already tracked.
 - For large changes (new modules, architectural changes), open a discussion first so we can align before you invest the time.
 - Small fixes (typos, minor bugs, test coverage) — just open a PR.
 
 ## Development setup
 
 ```bash
-git clone https://github.com/veska-dev/veska.git
+git clone https://github.com/arunrajiah/veska.git
 cd veska
 pnpm install
 cp .env.example .env
@@ -34,7 +34,7 @@ pnpm dev
 1. Fork the repo and create a branch: `git checkout -b feat/my-feature`
 2. Make your changes and add tests.
 3. Run `pnpm typecheck && pnpm lint && pnpm test` and fix any failures.
-4. Push and open a PR against `develop`.
+4. Push and open a PR against `main`.
 5. Fill in the PR template.
 
 PRs are reviewed within 3 business days. We may ask for changes; we won't close without explanation.
@@ -45,4 +45,4 @@ Major decisions live in `docs/adr/`. If your PR introduces a significant technic
 
 ## Questions?
 
-Open a [GitHub Discussion](https://github.com/veska-dev/veska/discussions). We read everything.
+Open a [GitHub Discussion](https://github.com/arunrajiah/veska/discussions). We read everything.

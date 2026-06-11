@@ -26,7 +26,7 @@ Examples of unacceptable behavior:
 
 Community leaders will remove, edit, or reject comments, commits, code, issues, and other contributions that violate this Code of Conduct.
 
-Instances of abusive or unacceptable behavior may be reported to **conduct@veska.com**.
+Instances of abusive or unacceptable behavior may be reported to the maintainer at **arunrajiah@gmail.com**.
 
 All complaints will be reviewed and investigated promptly and fairly. Community leaders are obligated to respect the privacy of the reporter.
 

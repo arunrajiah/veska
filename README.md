@@ -12,8 +12,9 @@ Describe your company in plain language. Veska sets up CRM, support desk, and fi
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Docker](https://img.shields.io/badge/docker-compose%20up-blue?logo=docker)](docker-compose.yml)
 [![Self-host](https://img.shields.io/badge/self--host-in%205%20minutes-green)](SELF_HOSTING.md)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-> **Looking for a hosted version?** Veska Cloud is a fully managed deployment at [veska.com](https://veska.com) — no servers to run, automatic updates, 99.9% SLAs. This repository is the self-hosted edition.
+> Veska is **self-hosted and free** (Apache 2.0). A managed cloud edition is planned but not yet available — if you'd use one, [open a discussion](https://github.com/arunrajiah/veska/discussions) and tell us.
 
 ---
 
@@ -32,15 +33,53 @@ Traditional ERP systems take months to implement, require consultants, and need 
 | Months of setup, IT consultants | Describe your business in plain English → live in minutes |
 | Employees log into complex dashboards | Everything happens in Slack, WhatsApp, Email |
 | Rigid workflows, expensive customisation | AI understands context and adapts automatically |
-| $50K–$500K implementation cost | Free to self-host, $29/mo on Veska Cloud |
+| $50K–$500K implementation cost | Free and open source — run it on your own server |
 
 ---
+
+## Try it in 5 minutes
+
+Spin up a complete demo company — contacts, a $564K deal pipeline, invoices, expenses, support tickets — and click around:
+
+```bash
+# Prerequisites: Node.js 22+, pnpm 9+, Docker
+
+git clone https://github.com/arunrajiah/veska.git
+cd veska
+cp .env.example .env          # works out of the box; add ANTHROPIC_API_KEY (or local Ollama) for AI features
+pnpm install
+docker compose up -d          # starts Postgres 16 + Redis 7
+pnpm db:migrate
+pnpm seed                     # loads the "Acme Corp" demo company
+pnpm dev
+```
+
+Then open the Admin UI and log in as the demo admin:
+
+| | |
+|---|---|
+| Admin UI | http://localhost:3000 |
+| Demo login | `admin@acme.com` / `demo1234` |
+| API | http://localhost:3001 |
+| Marketplace | http://localhost:3003 |
+
+Other demo users: `finance@acme.com`, `hr@acme.com`, `john@acme.com` (same password) — each sees the app through a different role. Wipe the demo data anytime with `pnpm seed:clear`.
+
+For production deployment, see **[SELF_HOSTING.md](SELF_HOSTING.md)**.
 
 ## What is Veska?
 
 Veska is an open-source, AI-first ERP for small businesses. A founder describes their company and Veska configures the complete back office — CRM, support, finance — in under 20 minutes.
 
 Once configured, almost nobody logs in. Employees, customers, and vendors interact with Veska through **Slack, WhatsApp, Email, and Telegram**. The AI does the work; humans just talk.
+
+Under the hood it is not a thin wrapper around a chat model:
+
+- **Real double-entry accounting** — an immutable ledger, invoices, expenses, budgets, recurring billing
+- **An AI action agent with 57 ERP tools** — create invoices, approve expenses, search contacts, forecast revenue — every action audit-logged with the AI's reasoning trace
+- **Multi-tenant by design** — tenant isolation enforced at the database layer, capability-based RBAC, TOTP 2FA
+- **A workflow engine** — triggers on any entity event, with approvals routed to Slack/Email
+- **A plugin SDK** — Stripe, QuickBooks, and Google Calendar plugins ship in-repo
 
 ## Screenshots
 
@@ -79,18 +118,20 @@ Once configured, almost nobody logs in. Employees, customers, and vendors intera
   </tr>
 </table>
 
-## Self-hosted vs. Veska Cloud
+## How is Veska different?
 
-| | Self-hosted (this repo) | [Veska Cloud](https://veska.com) |
-|---|---|---|
-| License | Apache 2.0 | Proprietary |
-| Hosting | Your infrastructure | Managed by Veska |
-| Setup | `docker compose up` | Sign up and go |
-| Updates | Manual | Automatic |
-| Support | Community (GitHub) | Email + SLA |
-| Price | Free | Paid plans |
+**Short version: Twenty is a CRM you log into. Odoo is an ERP you configure. Veska is a back office you talk to.**
 
-Both run the same core engine. The Cloud edition adds managed provisioning, automatic backups, and a support SLA — it does not have different features or a different codebase.
+| | Veska | Odoo / ERPNext | Twenty |
+|---|---|---|---|
+| Scope | CRM + support + finance + HR | Full ERP suite | CRM |
+| Setup | Describe your business in plain English | Manual module configuration | Manual setup |
+| Daily use | Slack / WhatsApp / Email — chat-first | Web dashboard | Web dashboard |
+| AI | Agent with 57 ERP tools at the core | Add-ons | Assistive features |
+| Stack | TypeScript end-to-end | Python | TypeScript |
+| Maturity | Early (v0.x) — honest about it | Very mature | Mature |
+
+If you need a battle-tested system today, Odoo or ERPNext are great choices. If you want to help build what comes after the dashboard, you're in the right place.
 
 ## Architecture
 
@@ -107,26 +148,21 @@ packages/
   cli/          Developer CLI (veska create-plugin, veska dev)
 
 plugins/
-  official/     Official first-party plugins (Stripe, QuickBooks, Shopify, …)
+  official/     Official first-party plugins (Stripe, QuickBooks, Google Calendar)
 ```
 
-**Stack:** TypeScript · Hono · PostgreSQL 16 + pgvector · Drizzle ORM · BullMQ · Redis · Next.js 15 · Anthropic Claude
+**Stack:** TypeScript · Hono · PostgreSQL 16 + pgvector · Drizzle ORM · BullMQ · Redis · Next.js 15 · Anthropic Claude (or local Ollama)
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the full design.
 
 ## Docker
 
 Run the full stack (Postgres, Redis, API, Admin UI) with a single command:
 
 ```bash
-cp .env.example .env          # fill in ANTHROPIC_API_KEY at minimum
+cp .env.example .env
 docker compose up --build
 ```
-
-| Service | URL |
-|---|---|
-| API | http://localhost:3001 |
-| Admin UI | http://localhost:3000 |
-| Marketing site | http://localhost:3002 |
-| Marketplace | http://localhost:3003 |
 
 The compose file uses `develop.watch` for live reload during development — run `docker compose up --watch` to enable it.
 
@@ -139,28 +175,6 @@ docker build -f apps/marketing/Dockerfile   -t veska-marketing   .
 docker build -f apps/marketplace/Dockerfile -t veska-marketplace .
 ```
 
-## Quick start
-
-See **[SELF_HOSTING.md](SELF_HOSTING.md)** for the full guide.
-
-```bash
-# Prerequisites: Node.js 22+, pnpm 9+, Docker
-
-git clone https://github.com/arunrajiah/veska.git
-cd veska
-cp .env.example .env          # add your ANTHROPIC_API_KEY
-pnpm install
-docker compose up -d          # starts Postgres 16 + Redis 7
-pnpm db:migrate
-pnpm dev
-```
-
-| Service | URL |
-|---|---|
-| API | http://localhost:3001 |
-| Admin UI | http://localhost:3000 |
-| Marketplace | http://localhost:3003 |
-
 ## Build a plugin
 
 ```bash
@@ -168,14 +182,18 @@ npx @veska/cli create-plugin my-plugin
 cd my-plugin && pnpm install && pnpm dev
 ```
 
-Full SDK reference: [developers.veska.com](https://developers.veska.com)
+SDK source and reference: [packages/sdk](packages/sdk). The official plugins in [plugins/official](plugins/official) are the best working examples.
+
+## Roadmap
+
+See [ROADMAP.md](ROADMAP.md) for what's planned. Highlights: hardening the WhatsApp and Telegram adapters, one-click deploy templates, a hosted demo instance, and a managed cloud edition.
 
 ## Contributing
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a PR. Questions go in [GitHub Discussions](https://github.com/arunrajiah/veska/discussions).
+Veska is young and contributions genuinely shape it. Start with issues labeled [`good first issue`](https://github.com/arunrajiah/veska/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22), read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a PR, and bring questions to [GitHub Discussions](https://github.com/arunrajiah/veska/discussions).
 
 ## License
 
 Apache 2.0 — see [LICENSE](LICENSE).
 
-The "Veska" name and logo are trademarks of Veska, Inc. Forks offering a competing hosted service must rebrand.
+The "Veska" name and logo are trademarks of the Veska project. Forks offering a competing hosted service must rebrand.

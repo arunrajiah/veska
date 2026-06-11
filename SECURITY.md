@@ -4,7 +4,7 @@
 
 **Do not open a public GitHub issue for security vulnerabilities.**
 
-Email **security@veska.com** with:
+Report it privately via [GitHub Security Advisories](https://github.com/arunrajiah/veska/security/advisories/new) (preferred) or email **arunrajiah@gmail.com** with:
 
 - Description of the vulnerability
 - Steps to reproduce

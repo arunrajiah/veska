@@ -37,36 +37,6 @@ Veska is now running. Visit http://localhost:3000 to complete onboarding.
 
 ## Deployment targets
 
-### Railway
-
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/veska)
-
-Provides Postgres and Redis out of the box. Set your environment variables in the Railway dashboard.
-
-### Fly.io
-
-```bash
-fly launch --config fly.toml
-fly secrets set ANTHROPIC_API_KEY=sk-ant-...
-fly secrets set MAGIC_LINK_SECRET=$(openssl rand -hex 32)
-fly deploy
-```
-
-### DigitalOcean App Platform
-
-Use the `do-app-spec.yaml` in the repo root or click the Deploy button in the DigitalOcean Marketplace listing.
-
-### Kubernetes
-
-An official Helm chart is available:
-
-```bash
-helm repo add veska https://charts.veska.com
-helm install veska veska/veska \
-  --set anthropic.apiKey=sk-ant-... \
-  --set magicLink.secret=$(openssl rand -hex 32)
-```
-
 ### Bare VPS (Ubuntu 22.04+)
 
 ```bash
@@ -82,6 +52,8 @@ cp .env.example .env
 # Start
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 ```
+
+One-click deploy templates (Railway, Fly.io, Helm) are planned — see [ROADMAP.md](ROADMAP.md). Contributions welcome.
 
 ## Environment variables
 
@@ -100,8 +72,6 @@ See [.env.example](.env.example) for the full list with descriptions. Minimum re
 2. Enable Socket Mode (for development) or Events API (for production)
 3. Add the bot token and signing secret to your `.env`
 4. Invite the bot to your workspace channels
-
-Full Slack setup guide: [docs.veska.com/channels/slack](https://docs.veska.com/channels/slack)
 
 ## Upgrades
 
@@ -137,7 +107,4 @@ For production deployments:
 ## Getting help
 
 - [GitHub Discussions](https://github.com/arunrajiah/veska/discussions) — community support
-- [docs.veska.com](https://docs.veska.com) — full documentation
 - [GitHub Issues](https://github.com/arunrajiah/veska/issues) — bug reports
-
-For a fully managed, supported deployment with no ops burden, see [veska.com](https://veska.com).
