@@ -83,36 +83,18 @@ open http://localhost:3000`}</pre>
         <h2 className="text-base font-semibold text-gray-900 mb-3 pb-2 border-b border-gray-100">Deployment targets</h2>
         <div className="grid grid-cols-1 gap-4">
           <div className="rounded-lg border border-gray-200 p-4">
-            <h3 className="text-sm font-medium text-gray-900 mb-2">Railway</h3>
-            <p className="text-xs text-gray-500 mb-3">Provides Postgres and Redis out of the box. Set environment variables in the Railway dashboard.</p>
-            <span className="inline-block font-mono text-xs bg-gray-50 border border-gray-200 rounded px-2 py-1 text-gray-600">Deploy via Railway template</span>
-          </div>
-          <div className="rounded-lg border border-gray-200 p-4">
-            <h3 className="text-sm font-medium text-gray-900 mb-2">Fly.io</h3>
-            <div className="rounded-lg bg-gray-50 border border-gray-200 p-4">
-              <pre className="text-xs text-gray-700 leading-relaxed overflow-x-auto whitespace-pre">{`fly launch --config fly.toml
-fly secrets set ANTHROPIC_API_KEY=sk-ant-...
-fly secrets set MAGIC_LINK_SECRET=$(openssl rand -hex 32)
-fly deploy`}</pre>
-            </div>
-          </div>
-          <div className="rounded-lg border border-gray-200 p-4">
-            <h3 className="text-sm font-medium text-gray-900 mb-2">Kubernetes (Helm)</h3>
-            <div className="rounded-lg bg-gray-50 border border-gray-200 p-4">
-              <pre className="text-xs text-gray-700 leading-relaxed overflow-x-auto whitespace-pre">{`helm repo add veska https://charts.veska.com
-helm install veska veska/veska \\
-  --set anthropic.apiKey=sk-ant-... \\
-  --set magicLink.secret=$(openssl rand -hex 32)`}</pre>
-            </div>
-          </div>
-          <div className="rounded-lg border border-gray-200 p-4">
             <h3 className="text-sm font-medium text-gray-900 mb-2">Bare VPS (Ubuntu 22.04+)</h3>
             <div className="rounded-lg bg-gray-50 border border-gray-200 p-4">
               <pre className="text-xs text-gray-700 leading-relaxed overflow-x-auto whitespace-pre">{`curl -fsSL https://get.docker.com | sh
 git clone https://github.com/arunrajiah/veska.git /opt/veska
 cd /opt/veska && cp .env.example .env
+# Edit .env, then:
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d`}</pre>
             </div>
+          </div>
+          <div className="rounded-lg border border-amber-100 bg-amber-50 p-4">
+            <h3 className="text-sm font-medium text-gray-900 mb-1">Railway / Fly.io / Kubernetes</h3>
+            <p className="text-xs text-gray-500">One-click deploy templates are on the roadmap. <a href="https://github.com/arunrajiah/veska/issues/4" className="text-indigo-600 hover:underline">Track progress or contribute →</a></p>
           </div>
         </div>
       </section>
@@ -193,7 +175,7 @@ docker compose exec api node apps/api/dist/db/migrate.js`}</pre>
           {[
             { label: 'GitHub Discussions', href: 'https://github.com/arunrajiah/veska/discussions' },
             { label: 'GitHub Issues', href: 'https://github.com/arunrajiah/veska/issues' },
-            { label: 'Veska Cloud (managed)', href: 'https://veska.com' },
+            { label: 'GitHub Discussions', href: 'https://github.com/arunrajiah/veska/discussions' },
           ].map((link) => (
             <a
               key={link.label}

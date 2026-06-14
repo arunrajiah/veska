@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { MarketingNav } from './_nav';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.veska.io';
+const GITHUB_URL = 'https://github.com/arunrajiah/veska';
 
 export default function HomePage() {
   return (
@@ -12,21 +12,22 @@ export default function HomePage() {
         {/* ── Hero ── */}
         <section className="text-center px-6 pt-24 pb-20 max-w-6xl mx-auto">
           <div className="inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 text-xs font-medium px-3 py-1 rounded-full mb-8">
-            ✨ AI-Native ERP · Now in beta
+            Open source · Apache 2.0 · v0.1
           </div>
           <h1 className="text-5xl font-bold text-gray-900 leading-tight max-w-3xl mx-auto">
-            The AI-native ERP that works the way you think
+            The ERP your team uses through Slack, not dashboards
           </h1>
           <p className="mt-6 text-xl text-gray-500 max-w-2xl mx-auto leading-relaxed">
-            Veska connects your finance, HR, CRM, projects and inventory — with an AI assistant
-            that understands your business.
+            Describe your company in plain English. Veska configures your CRM, support desk,
+            finance, and HR in minutes — then your team runs everything from Slack, WhatsApp,
+            and Email.
           </p>
           <div className="mt-10 flex items-center justify-center gap-4 flex-wrap">
             <Link
-              href={APP_URL}
+              href={GITHUB_URL}
               className="bg-indigo-600 text-white text-base font-medium px-6 py-3 rounded-xl hover:bg-indigo-700 transition-colors"
             >
-              Start free trial →
+              View on GitHub →
             </Link>
             <Link
               href="#demo"
@@ -61,7 +62,6 @@ export default function HomePage() {
                   </p>
                   <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
                   <p className="text-gray-500 text-xs mt-1">{stat.sub}</p>
-                  {/* mini bar chart */}
                   <div className="mt-2 flex gap-0.5 items-end h-5">
                     {[40, 60, 45, 70, 55, 80, 65].map((h, i) => (
                       <div
@@ -97,15 +97,13 @@ export default function HomePage() {
             <p className="text-gray-400 text-lg mb-10">
               Describe your company. Watch the AI build your ERP.
             </p>
-            {/* Live demo GIF */}
             <div className="relative mx-auto max-w-4xl rounded-2xl overflow-hidden border border-gray-700 shadow-2xl">
-              {/* Browser chrome */}
               <div className="flex items-center gap-1.5 px-4 py-3 bg-gray-800 border-b border-gray-700">
                 <div className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
                 <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
                 <div className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
                 <span className="ml-3 text-gray-500 text-xs font-mono">
-                  app.veska.io/setup
+                  localhost:3000/setup
                 </span>
               </div>
               <img
@@ -120,192 +118,193 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── Social proof ── */}
-        <section className="border-y border-gray-100 py-10 px-6">
-          <div className="max-w-4xl mx-auto text-center">
-            <p className="text-xs text-gray-400 uppercase tracking-widest font-medium mb-6">
-              Trusted by growing businesses
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-10 md:gap-16">
-              {['Acme Corp', 'TechFlow', 'Buildwise', 'Nexora'].map((name) => (
-                <span key={name} className="text-gray-400 font-semibold text-sm">
-                  {name}
-                </span>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── Features grid ── */}
-        <section id="features" className="px-6 py-24 max-w-6xl mx-auto">
+        {/* ── How it works ── */}
+        <section className="px-6 py-24 max-w-5xl mx-auto">
           <div className="text-center mb-14">
-            <h2 className="text-3xl font-bold text-gray-900">Everything your business needs</h2>
-            <p className="mt-3 text-lg text-gray-500">
-              One platform. Every module. Powered by AI.
+            <h2 className="text-3xl font-bold text-gray-900">How Veska is different</h2>
+            <p className="mt-3 text-lg text-gray-500 max-w-2xl mx-auto">
+              Other ERPs give your team dashboards. Veska gives them a conversation.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
-                icon: '🤖',
-                iconBg: 'bg-indigo-50',
-                title: 'AI Assistant',
-                desc: 'Ask anything about your business in plain English',
+                step: '1',
+                title: 'Describe your company',
+                desc: 'Type one sentence about your business. The AI configures CRM, support, finance, and HR — no forms, no consultants.',
               },
               {
-                icon: '💰',
-                iconBg: 'bg-green-50',
-                title: 'Finance & Invoicing',
-                desc: 'Send invoices, track expenses, run payroll',
+                step: '2',
+                title: 'Connect your channels',
+                desc: 'Link Slack, WhatsApp, and email. Your team can now interact with Veska through the tools they already use.',
               },
               {
-                icon: '👥',
-                iconBg: 'bg-blue-50',
-                title: 'HR & People',
-                desc: 'Onboard employees, manage leave, run performance reviews',
+                step: '3',
+                title: 'Work in chat',
+                desc: 'File expenses, approve invoices, handle support tickets — all from Slack or email. The AI does the data entry.',
               },
-              {
-                icon: '📦',
-                iconBg: 'bg-amber-50',
-                title: 'Inventory & Purchasing',
-                desc: 'Track stock, raise POs, manage vendors',
-              },
-              {
-                icon: '🎯',
-                iconBg: 'bg-rose-50',
-                title: 'CRM & Sales',
-                desc: 'Pipeline management, contact tracking, deal forecasting',
-              },
-              {
-                icon: '🔌',
-                iconBg: 'bg-purple-50',
-                title: 'Integrations',
-                desc: 'Connect Slack, WhatsApp, Stripe, and your existing tools',
-              },
-            ].map((card) => (
-              <div
-                key={card.title}
-                className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md transition-shadow"
-              >
-                <div
-                  className={`inline-flex items-center justify-center w-11 h-11 rounded-xl ${card.iconBg} mb-4 text-xl`}
-                >
-                  {card.icon}
+            ].map((item) => (
+              <div key={item.step} className="relative">
+                <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 font-bold text-sm flex items-center justify-center mb-4">
+                  {item.step}
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">{card.title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{card.desc}</p>
+                <h3 className="font-semibold text-gray-900 mb-2">{item.title}</h3>
+                <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
         </section>
 
-        {/* ── Pricing ── */}
-        <section id="pricing" className="bg-gray-50 px-6 py-24">
-          <div className="max-w-5xl mx-auto">
+        {/* ── Features grid ── */}
+        <section id="features" className="px-6 py-24 bg-gray-50">
+          <div className="max-w-6xl mx-auto">
             <div className="text-center mb-14">
-              <h2 className="text-3xl font-bold text-gray-900">Simple, transparent pricing</h2>
-              <p className="mt-3 text-lg text-gray-500">From free to enterprise — no hidden fees.</p>
+              <h2 className="text-3xl font-bold text-gray-900">Everything your business needs</h2>
+              <p className="mt-3 text-lg text-gray-500">
+                One platform. Every module. AI at the core.
+              </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
                 {
-                  name: 'Starter',
-                  price: 'Free',
-                  period: 'forever',
-                  desc: 'For small teams getting started.',
-                  features: ['Up to 5 users', 'Core modules', 'Community support', '1 GB storage'],
-                  cta: 'Get started',
-                  href: APP_URL,
-                  highlight: false,
+                  icon: '🤖',
+                  iconBg: 'bg-indigo-50',
+                  title: 'AI Agent',
+                  desc: '57 ERP tools — create invoices, search contacts, forecast revenue — all in plain English. Every action audit-logged.',
                 },
                 {
-                  name: 'Growth',
-                  price: '$49',
-                  period: 'per month',
-                  desc: 'For growing teams that need more.',
-                  features: ['Unlimited users', 'All modules', 'AI Assistant included', 'Priority support'],
-                  cta: 'Start trial',
-                  href: APP_URL,
-                  highlight: true,
+                  icon: '💰',
+                  iconBg: 'bg-green-50',
+                  title: 'Finance & Invoicing',
+                  desc: 'Real double-entry accounting. Invoices, expenses with approval gates, budgets, recurring billing.',
                 },
                 {
-                  name: 'Enterprise',
-                  price: 'Custom',
-                  period: 'contact us',
-                  desc: 'For large organizations.',
-                  features: ['Dedicated support', 'On-prem option', 'SSO & audit logs', 'SLA guarantee'],
-                  cta: 'Contact sales',
-                  href: 'mailto:sales@veska.io',
-                  highlight: false,
+                  icon: '👥',
+                  iconBg: 'bg-blue-50',
+                  title: 'HR & People',
+                  desc: 'Employees, leave, attendance, payroll runs with journal posting. All accessible from Slack.',
                 },
-              ].map((plan) => (
+                {
+                  icon: '🎯',
+                  iconBg: 'bg-rose-50',
+                  title: 'CRM & Sales',
+                  desc: 'Pipeline management, contact tracking, deal forecasting. Deals close in chat.',
+                },
+                {
+                  icon: '🎧',
+                  iconBg: 'bg-amber-50',
+                  title: 'Support Desk',
+                  desc: 'Tickets, SLAs, conversation threading. Customers contact you via email or WhatsApp.',
+                },
+                {
+                  icon: '🔌',
+                  iconBg: 'bg-purple-50',
+                  title: 'Plugins & SDK',
+                  desc: 'Stripe, QuickBooks, Google Calendar built-in. Build your own with the open-source plugin SDK.',
+                },
+              ].map((card) => (
                 <div
-                  key={plan.name}
-                  className={`rounded-2xl p-6 flex flex-col ${
-                    plan.highlight
-                      ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-200'
-                      : 'bg-white border border-gray-200'
-                  }`}
+                  key={card.title}
+                  className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md transition-shadow"
                 >
-                  <p
-                    className={`text-xs font-semibold uppercase tracking-wide mb-2 ${
-                      plan.highlight ? 'text-indigo-200' : 'text-gray-400'
-                    }`}
+                  <div
+                    className={`inline-flex items-center justify-center w-11 h-11 rounded-xl ${card.iconBg} mb-4 text-xl`}
                   >
-                    {plan.name}
-                  </p>
-                  <div className="flex items-end gap-1 mb-1">
-                    <span
-                      className={`text-3xl font-bold ${
-                        plan.highlight ? 'text-white' : 'text-gray-900'
-                      }`}
-                    >
-                      {plan.price}
-                    </span>
-                    <span
-                      className={`text-sm mb-1 ${
-                        plan.highlight ? 'text-indigo-200' : 'text-gray-400'
-                      }`}
-                    >
-                      / {plan.period}
-                    </span>
+                    {card.icon}
                   </div>
-                  <p
-                    className={`text-sm mb-5 ${
-                      plan.highlight ? 'text-indigo-100' : 'text-gray-500'
-                    }`}
-                  >
-                    {plan.desc}
-                  </p>
-                  <ul className="space-y-2 mb-8 flex-1">
-                    {plan.features.map((f) => (
-                      <li key={f} className="flex items-center gap-2 text-sm">
-                        <span
-                          className={`w-4 h-4 rounded-full flex items-center justify-center text-xs flex-shrink-0 ${
-                            plan.highlight ? 'bg-indigo-500 text-white' : 'bg-gray-100 text-gray-600'
-                          }`}
-                        >
-                          ✓
-                        </span>
-                        <span className={plan.highlight ? 'text-indigo-100' : 'text-gray-600'}>
-                          {f}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Link
-                    href={plan.href}
-                    className={`text-center text-sm font-semibold py-2.5 rounded-xl transition-colors ${
-                      plan.highlight
-                        ? 'bg-white text-indigo-600 hover:bg-indigo-50'
-                        : 'bg-gray-900 text-white hover:bg-gray-700'
-                    }`}
-                  >
-                    {plan.cta}
-                  </Link>
+                  <h3 className="font-semibold text-gray-900 mb-2">{card.title}</h3>
+                  <p className="text-sm text-gray-500 leading-relaxed">{card.desc}</p>
                 </div>
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* ── Self-hosting CTA ── */}
+        <section id="pricing" className="px-6 py-24">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-14">
+              <h2 className="text-3xl font-bold text-gray-900">Free and open source</h2>
+              <p className="mt-3 text-lg text-gray-500">Self-host on your own infrastructure. Apache 2.0 — no feature gating, no hidden costs.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Self-hosted */}
+              <div className="rounded-2xl border border-gray-200 bg-white p-8 flex flex-col">
+                <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Self-hosted</p>
+                <div className="flex items-end gap-1 mb-4">
+                  <span className="text-4xl font-bold text-gray-900">Free</span>
+                  <span className="text-sm text-gray-400 mb-1">/ forever</span>
+                </div>
+                <p className="text-sm text-gray-500 mb-6">Run Veska on your own server. Full access to every feature.</p>
+                <ul className="space-y-2 mb-8 flex-1">
+                  {[
+                    'All modules: CRM, finance, HR, support',
+                    'Unlimited users and data',
+                    'Bring your own LLM (Anthropic or local Ollama)',
+                    'Community support via GitHub',
+                    'Apache 2.0 — modify and deploy freely',
+                  ].map((f) => (
+                    <li key={f} className="flex items-start gap-2 text-sm">
+                      <span className="w-4 h-4 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-xs flex-shrink-0 mt-0.5">✓</span>
+                      <span className="text-gray-600">{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href={GITHUB_URL}
+                  className="text-center text-sm font-semibold py-2.5 rounded-xl bg-gray-900 text-white hover:bg-gray-700 transition-colors"
+                >
+                  Get started on GitHub →
+                </Link>
+              </div>
+
+              {/* Cloud — coming soon */}
+              <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-8 flex flex-col relative overflow-hidden">
+                <div className="absolute top-4 right-4 bg-indigo-600 text-white text-xs font-semibold px-2.5 py-1 rounded-full">Coming soon</div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-indigo-500 mb-2">Veska Cloud</p>
+                <div className="flex items-end gap-1 mb-4">
+                  <span className="text-4xl font-bold text-gray-900">TBD</span>
+                </div>
+                <p className="text-sm text-gray-600 mb-6">A fully managed Veska — no servers, automatic updates, support SLA.</p>
+                <ul className="space-y-2 mb-8 flex-1">
+                  {[
+                    'Everything in self-hosted',
+                    'Managed Postgres and Redis',
+                    'Automatic updates and backups',
+                    'Email + SLA support',
+                    'Hosted demo environment',
+                  ].map((f) => (
+                    <li key={f} className="flex items-start gap-2 text-sm">
+                      <span className="w-4 h-4 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs flex-shrink-0 mt-0.5">✓</span>
+                      <span className="text-gray-600">{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <a
+                  href={`${GITHUB_URL}/discussions`}
+                  className="text-center text-sm font-semibold py-2.5 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+                >
+                  Join the waitlist discussion →
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Quick start strip ── */}
+        <section className="bg-gray-950 px-6 py-16">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-2xl font-bold text-white mb-2">Try it in 5 minutes</h2>
+            <p className="text-gray-400 text-sm mb-8">A full demo company is included — contacts, a $564K deal pipeline, invoices, tickets.</p>
+            <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 text-left mb-6">
+              <pre className="text-sm text-gray-300 leading-relaxed overflow-x-auto whitespace-pre">{`git clone https://github.com/arunrajiah/veska.git && cd veska
+cp .env.example .env          # add ANTHROPIC_API_KEY (or use Ollama)
+pnpm install && docker compose up -d
+pnpm db:migrate && pnpm seed && pnpm dev`}</pre>
+            </div>
+            <p className="text-gray-500 text-sm">
+              Open <span className="font-mono text-gray-300">localhost:3000</span> → log in as <span className="font-mono text-gray-300">admin@acme.com</span> / <span className="font-mono text-gray-300">demo1234</span>
+            </p>
           </div>
         </section>
       </main>
@@ -313,20 +312,12 @@ export default function HomePage() {
       {/* ── Footer ── */}
       <footer className="bg-white border-t border-gray-200 px-6 py-8">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-gray-400">© 2026 Veska</p>
+          <p className="text-sm text-gray-400">© 2026 Veska · Apache 2.0</p>
           <div className="flex items-center gap-6 text-sm text-gray-500">
-            <Link href="/privacy" className="hover:text-gray-900 transition-colors">
-              Privacy
-            </Link>
-            <Link href="/terms" className="hover:text-gray-900 transition-colors">
-              Terms
-            </Link>
-            <Link
-              href="https://github.com/arunrajiah/veska"
-              className="hover:text-gray-900 transition-colors"
-            >
-              GitHub
-            </Link>
+            <Link href="/privacy" className="hover:text-gray-900 transition-colors">Privacy</Link>
+            <Link href="/terms" className="hover:text-gray-900 transition-colors">Terms</Link>
+            <Link href="/docs" className="hover:text-gray-900 transition-colors">Docs</Link>
+            <Link href={GITHUB_URL} className="hover:text-gray-900 transition-colors">GitHub</Link>
           </div>
         </div>
       </footer>

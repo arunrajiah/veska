@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useState } from 'react';
 
+const GITHUB_URL = 'https://github.com/arunrajiah/veska';
+
 export function MarketingNav() {
   const [open, setOpen] = useState(false);
 
@@ -15,29 +17,23 @@ export function MarketingNav() {
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-8 text-sm text-gray-600">
-          <Link href="#features" className="hover:text-gray-900 transition-colors">
-            Features
-          </Link>
-          <Link href="#pricing" className="hover:text-gray-900 transition-colors">
-            Pricing
-          </Link>
-          <Link href="/docs" className="hover:text-gray-900 transition-colors">
-            Docs
-          </Link>
+          <Link href="#features" className="hover:text-gray-900 transition-colors">Features</Link>
+          <Link href="#pricing" className="hover:text-gray-900 transition-colors">Pricing</Link>
+          <Link href="/docs" className="hover:text-gray-900 transition-colors">Docs</Link>
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
           <Link
-            href="http://localhost:3000"
+            href={GITHUB_URL}
             className="text-sm text-gray-600 hover:text-gray-900 transition-colors px-3 py-1.5"
           >
-            Sign in
+            GitHub
           </Link>
           <Link
-            href="http://localhost:3000"
+            href={`${GITHUB_URL}#readme`}
             className="bg-indigo-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
           >
-            Start free trial
+            Self-host free →
           </Link>
         </div>
 
@@ -49,19 +45,11 @@ export function MarketingNav() {
         >
           {open ? (
             <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-              <path
-                fillRule="evenodd"
-                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                clipRule="evenodd"
-              />
+              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
             </svg>
           ) : (
             <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-              <path
-                fillRule="evenodd"
-                d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-                clipRule="evenodd"
-              />
+              <path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
             </svg>
           )}
         </button>
@@ -70,41 +58,17 @@ export function MarketingNav() {
       {/* Mobile menu */}
       {open && (
         <div className="md:hidden border-t border-gray-100 bg-white px-6 py-4 flex flex-col gap-4">
-          <Link
-            href="#features"
-            className="text-sm text-gray-700 hover:text-gray-900"
-            onClick={() => setOpen(false)}
-          >
-            Features
-          </Link>
-          <Link
-            href="#pricing"
-            className="text-sm text-gray-700 hover:text-gray-900"
-            onClick={() => setOpen(false)}
-          >
-            Pricing
-          </Link>
-          <Link
-            href="/docs"
-            className="text-sm text-gray-700 hover:text-gray-900"
-            onClick={() => setOpen(false)}
-          >
-            Docs
-          </Link>
+          <Link href="#features" className="text-sm text-gray-700 hover:text-gray-900" onClick={() => setOpen(false)}>Features</Link>
+          <Link href="#pricing" className="text-sm text-gray-700 hover:text-gray-900" onClick={() => setOpen(false)}>Pricing</Link>
+          <Link href="/docs" className="text-sm text-gray-700 hover:text-gray-900" onClick={() => setOpen(false)}>Docs</Link>
           <div className="border-t border-gray-100 pt-4 flex flex-col gap-3">
+            <Link href={GITHUB_URL} className="text-sm text-gray-700 hover:text-gray-900" onClick={() => setOpen(false)}>GitHub</Link>
             <Link
-              href="http://localhost:3000"
-              className="text-sm text-gray-700 hover:text-gray-900"
-              onClick={() => setOpen(false)}
-            >
-              Sign in
-            </Link>
-            <Link
-              href="http://localhost:3000"
+              href={`${GITHUB_URL}#readme`}
               className="bg-indigo-600 text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-indigo-700 transition-colors text-center"
               onClick={() => setOpen(false)}
             >
-              Start free trial
+              Self-host free →
             </Link>
           </div>
         </div>
