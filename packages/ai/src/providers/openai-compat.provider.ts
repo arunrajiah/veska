@@ -1,4 +1,4 @@
-// OpenAI-compatible provider for the @veska-cloud/ai LLMProvider interface.
+// OpenAI-compatible provider for the @veska/ai LLMProvider interface.
 // Works with: OpenAI, Azure OpenAI, Groq, Together.ai, LM Studio, vLLM, Jan.
 // Uses pure fetch — no openai npm package required.
 

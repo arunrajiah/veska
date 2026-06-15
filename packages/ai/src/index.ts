@@ -1,4 +1,4 @@
-// @veska-cloud/ai — cloud AI package for Veska
+// @veska/ai — cloud AI package for Veska
 //
 // Exports the cloud ActionAgent (HTTP-based), cloud-only tools, and all provider
 // implementations. Also re-exports OSS core AI exports for convenience.

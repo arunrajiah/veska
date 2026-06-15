@@ -222,7 +222,7 @@ const api = new Hono();
 api.use('*', requireSession());
 api.use('*', tenantContext);
 api.use('*', rateLimit(sharedRedis, { windowMs: 60_000, max: 120 }));
-// Sliding-window rate limiters (package: @veska-cloud/rate-limit)
+// Sliding-window rate limiters (package: @veska/rate-limit)
 api.use('*', standardLimit);
 api.use('/ai/*', aiLimit);
 // Per-route in-memory limits (belt-and-suspenders on top of Redis limits)

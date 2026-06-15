@@ -3,7 +3,7 @@
  * Uses REDIS_URL env var (falls back to localhost:6379).
  *
  * Usage:
- *   import { enqueueNotification } from '@veska-cloud/notifications';
+ *   import { enqueueNotification } from '@veska/notifications';
  *   await enqueueNotification(payload, channels);
  */
 import type { NotificationPayload, ChannelConfig } from './types';

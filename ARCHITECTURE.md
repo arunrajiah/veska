@@ -14,14 +14,14 @@ veska/
 │   ├── marketing/    # Marketing site (@veska/marketing)
 │   └── marketplace/  # Plugin marketplace (@veska/marketplace)
 ├── packages/
-│   ├── core/         # OSS core library (@veska/core)
-│   ├── sdk/          # OSS public SDK (@veska/sdk)
-│   ├── cli/          # OSS CLI tool (@veska/cli)
-│   ├── ui/           # OSS UI components (@veska/ui)
-│   ├── ai/           # Cloud AI features (@veska-cloud/ai)
-│   ├── notifications/ # Cloud notifications (@veska-cloud/notifications)
-│   ├── rate-limit/   # Cloud rate limiting (@veska-cloud/rate-limit)
-│   └── storage/      # Cloud storage (@veska-cloud/storage)
+│   ├── core/         # Core library — entities, DB, agent runtime (@veska/core)
+│   ├── sdk/          # Public plugin SDK (@veska/sdk)
+│   ├── cli/          # Developer CLI (@veska/cli)
+│   ├── ui/           # Shared React UI components (@veska/ui)
+│   ├── ai/           # LLM providers and AI agent (@veska/ai)
+│   ├── notifications/ # Email and notification delivery (@veska/notifications)
+│   ├── rate-limit/   # Rate limiting middleware (@veska/rate-limit)
+│   └── storage/      # File and blob storage (@veska/storage)
 ├── plugins/          # First-party and community plugins
 ├── scripts/          # Developer and CI scripts
 └── turbo.json
@@ -31,99 +31,95 @@ veska/
 
 ## Package Taxonomy
 
-Packages fall into two scopes with different licenses and distribution models:
+All packages in this repository are licensed **Apache 2.0**.
 
-| Package | npm scope | License | Purpose |
-|---|---|---|---|
-| `packages/core` | `@veska/core` | Apache 2.0 | Core data models, database layer, agent runtime |
-| `packages/sdk` | `@veska/sdk` | Apache 2.0 | Public-facing SDK for third-party integrations |
-| `packages/cli` | `@veska/cli` | Apache 2.0 | Command-line interface for Veska |
-| `packages/ui` | `@veska/ui` | Apache 2.0 | Shared React UI component library |
-| `apps/admin` | `@veska/admin` | Apache 2.0 | Admin dashboard application |
-| `apps/api` | `@veska/api` | Apache 2.0 | REST/GraphQL API server |
-| `apps/marketing` | `@veska/marketing` | Apache 2.0 | Marketing and documentation site |
-| `apps/marketplace` | `@veska/marketplace` | Apache 2.0 | Plugin marketplace application |
-| `packages/ai` | `@veska-cloud/ai` | Proprietary | LLM integrations, AI tool orchestration |
-| `packages/notifications` | `@veska-cloud/notifications` | Proprietary | Email, SMS, push notification delivery |
-| `packages/rate-limit` | `@veska-cloud/rate-limit` | Proprietary | Cloud-tier rate limiting and quotas |
-| `packages/storage` | `@veska-cloud/storage` | Proprietary | Managed blob and file storage |
+| Package | npm scope | Purpose |
+|---|---|---|
+| `packages/core` | `@veska/core` | Core data models, database layer, agent runtime |
+| `packages/sdk` | `@veska/sdk` | Public-facing SDK for third-party plugins |
+| `packages/cli` | `@veska/cli` | Command-line interface for Veska |
+| `packages/ui` | `@veska/ui` | Shared React UI component library |
+| `packages/ai` | `@veska/ai` | LLM provider abstraction and AI action agent |
+| `packages/notifications` | `@veska/notifications` | Email, SMS, and push notification delivery |
+| `packages/rate-limit` | `@veska/rate-limit` | Rate limiting middleware |
+| `packages/storage` | `@veska/storage` | File and blob storage abstraction |
+| `apps/admin` | `@veska/admin` | Admin dashboard application |
+| `apps/api` | `@veska/api` | REST API server |
+| `apps/marketing` | `@veska/marketing` | Marketing and documentation site |
+| `apps/marketplace` | `@veska/marketplace` | Plugin marketplace application |
 
-### OSS packages (`@veska/*`)
+### Core packages (`@veska/core`, `@veska/sdk`, `@veska/cli`, `@veska/ui`)
 
-Published under Apache 2.0. Anyone can run a self-hosted Veska deployment using only these packages. They must remain free of proprietary dependencies.
+The foundational layer. Any self-hosted deployment can run with only these packages plus the apps. No external service dependencies beyond PostgreSQL and Redis.
 
-### Cloud packages (`@veska-cloud/*`)
+### Feature packages (`@veska/ai`, `@veska/notifications`, `@veska/rate-limit`, `@veska/storage`)
 
-Proprietary, published separately for Veska Cloud subscribers. They enhance the platform with managed services but are not required for self-hosting.
+Optional modules that extend the platform. They wrap external services (Anthropic, Resend, etc.) and degrade gracefully when not configured — self-hosted deployments can opt out of any feature module by not setting its environment variables or by swapping in local alternatives (Ollama instead of Anthropic, SMTP instead of Resend, local disk instead of S3).
 
 ---
 
-## OSS/Cloud Boundary Rules
+## Modularity Rules
+
+Feature packages are designed to be **optional at runtime**. This means:
 
 ### The Golden Rule
 
-> **OSS packages (`@veska/*` and `apps/*`) must NOT statically import `@veska-cloud/*` packages.**
+> **Core packages and apps must NOT statically import feature packages if that import would cause startup failure when the feature is not configured.**
 
-A static import is any top-level `import` statement or CommonJS `require()` call that unconditionally pulls in the module at load time.
+A static import is any top-level `import` statement or CommonJS `require()` that unconditionally pulls in the module at load time.
 
 ### What Is Allowed
 
 | Pattern | Allowed | Reason |
 |---|---|---|
-| `@veska-cloud/*` imports `@veska/*` | Yes | Cloud depends on OSS, not the other way |
-| Dynamic `await import('@veska-cloud/...')` with fallback inside OSS code | Yes | Degrades gracefully when cloud pkg absent |
-| `@veska/*` importing other `@veska/*` | Yes | OSS-to-OSS is fine |
-| `@veska-cloud/*` importing other `@veska-cloud/*` | Yes | Cloud-to-cloud is fine |
+| Feature packages import core packages | Yes | Features depend on core, not the other way |
+| Dynamic `await import('@veska/...')` with fallback in app code | Yes | Degrades gracefully when feature not configured |
+| Core packages importing other core packages | Yes | Core-to-core is fine |
+| Feature packages importing other feature packages | Yes | Feature-to-feature is fine |
 
 ### What Is NOT Allowed
 
 ```ts
-// ❌ Static import in an OSS package
-import { SomeFeature } from '@veska-cloud/ai';
+// ❌ Unconditional static import of a feature package in core
+import { sendEmail } from '@veska/notifications';
 
-// ❌ Unconditional require() in an OSS package
-const { SomeFeature } = require('@veska-cloud/storage');
+// ❌ Unconditional require() with no fallback
+const { CloudStorage } = require('@veska/storage');
 ```
 
 ### Why This Matters
 
-Self-hosted deployments do not have access to `@veska-cloud/*` packages. A static import in an OSS package would cause module resolution failures at startup for any self-hosted user — making self-hosting impossible. Keeping the boundary clean ensures that the OSS tier is a first-class, fully functional product.
+Self-hosted deployments may not configure every external service. A static import that fails module resolution at startup would break the entire deployment. The dynamic import pattern ensures that missing or unconfigured feature packages degrade to no-ops or local fallbacks rather than crashing.
 
 ---
 
-## Extending with Cloud Features
+## Extending with Optional Features
 
-To add cloud-only capabilities without breaking the OSS boundary:
+To add a feature that wraps an external service:
 
-1. **Extend `ActionAgent`** from `@veska/core` — create a subclass in `@veska-cloud/ai` that adds cloud-specific behavior.
+1. **Implement a local fallback in `@veska/core`** — define the interface and a default no-op or local implementation. The feature package overrides this at runtime when configured.
 
-2. **Register extra tools** using `registerTools()` — cloud packages call this at initialization time to inject additional agent tools. OSS code never needs to know about them.
-
-3. **Use the `enableCloudTools` flag** — the platform exposes an `enableCloudTools` option that is evaluated at runtime. Cloud deployments set it to `true`; self-hosted deployments leave it `false` (the default). Feature detection happens at runtime, not at import time.
-
-### Pattern: Dynamic Import with Fallback
-
-When OSS code needs to optionally use a cloud feature:
+2. **Use dynamic import with fallback in app code**:
 
 ```ts
-// ✅ Allowed in OSS packages — dynamic import with fallback
+// ✅ Allowed — dynamic import with graceful fallback
 async function getStorage() {
   try {
-    const { CloudStorage } = await import('@veska-cloud/storage');
+    const { CloudStorage } = await import('@veska/storage');
     return new CloudStorage();
   } catch {
-    return new LocalStorage(); // OSS fallback
+    return new LocalStorage(); // always available, no external deps
   }
 }
 ```
 
-This pattern keeps the module graph clean while allowing progressive enhancement on cloud deployments.
+3. **Use the `enableCloudTools` flag** — the platform exposes an `enableCloudTools` option evaluated at runtime. Deployments with external services set it to `true`; minimal self-hosted deployments leave it `false` (the default).
 
 ---
 
 ## CI Enforcement
 
-The boundary is enforced automatically in CI via the `check:boundary` script:
+The modularity boundary is enforced in CI via the `check:boundary` script:
 
 ```bash
 pnpm check:boundary
@@ -131,13 +127,11 @@ pnpm check:boundary
 
 This runs `scripts/check-oss-cloud-boundary.sh`, which:
 
-- Scans all TypeScript source files under OSS package directories.
-- Greps for any static imports of `@veska-cloud/*`.
-- Excludes lines containing `await import(` (dynamic imports are permitted).
-- Exits with code `1` and prints the offending lines if any violations are found.
+- Scans all TypeScript source files under core and app directories.
+- Greps for static imports of feature packages (`@veska/ai`, `@veska/notifications`, `@veska/rate-limit`, `@veska/storage`).
+- Excludes dynamic imports (`await import(`).
+- Exits with code `1` and prints offending lines if any violations are found.
 - Exits with code `0` if the boundary is clean.
-
-The script should be run as part of any pull request that touches `packages/` or `apps/` source files.
 
 ---
 
@@ -162,7 +156,7 @@ pnpm typecheck
 # Lint the entire monorepo
 pnpm lint
 
-# Check the OSS/cloud boundary
+# Check the modularity boundary
 pnpm check:boundary
 
 # Database operations (requires @veska/core configured)

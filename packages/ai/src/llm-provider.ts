@@ -1,4 +1,4 @@
-// Cloud LLM provider interface for @veska-cloud/ai.
+// Cloud LLM provider interface for @veska/ai.
 //
 // Note: this interface uses chat()/chatWithTools() which is distinct from the OSS
 // core LLMProvider (complete()/stream()). The cloud package keeps its own interface

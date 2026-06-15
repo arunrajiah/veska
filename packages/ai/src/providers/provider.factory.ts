@@ -1,4 +1,4 @@
-// LLM provider factory for the @veska-cloud/ai package.
+// LLM provider factory for the @veska/ai package.
 // Selects a provider based on the LLM_PROVIDER environment variable.
 //
 // LLM_PROVIDER values:

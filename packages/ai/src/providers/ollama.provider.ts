@@ -1,4 +1,4 @@
-// Ollama provider for the @veska-cloud/ai LLMProvider interface.
+// Ollama provider for the @veska/ai LLMProvider interface.
 // Uses pure fetch — no npm package required.
 
 import type { LLMProvider, LLMMessage } from '../llm-provider.js';

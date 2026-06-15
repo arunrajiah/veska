@@ -1,8 +1,11 @@
 {
-  "name": "@veska-cloud/storage",
+  "name": "@veska/storage",
   "version": "0.1.0",
   "private": true,
+  "license": "Apache-2.0",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
-  "devDependencies": { "typescript": "^5.0.0" }
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
 }

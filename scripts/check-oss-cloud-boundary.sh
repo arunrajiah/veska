@@ -1,44 +1,53 @@
 #!/usr/bin/env bash
 # check-oss-cloud-boundary.sh
-# Verifies that OSS packages (@veska/*) do not statically import @veska-cloud/* packages.
-# Dynamic imports (await import(...)) are permitted and are excluded from this check.
+# Verifies that core packages do not statically import feature packages
+# (@veska/ai, @veska/notifications, @veska/rate-limit, @veska/storage).
+# Dynamic imports (await import(...)) are permitted and excluded from this check.
+# See ARCHITECTURE.md for the rationale and allowed patterns.
 
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-echo "Checking OSS/cloud boundary..."
+echo "Checking modularity boundary..."
 
-OSS_SRC_DIRS=(
+# Only core packages are checked — apps and feature packages may import feature packages freely
+CORE_DIRS=(
   "packages/core/src"
   "packages/sdk/src"
   "packages/cli/src"
   "packages/ui/src"
-  "apps/admin/src"
-  "apps/api/src"
-  "apps/marketing/src"
-  "apps/marketplace/src"
+)
+
+# Feature packages that must not be statically imported in core
+FEATURE_PACKAGES=(
+  "@veska/ai"
+  "@veska/notifications"
+  "@veska/rate-limit"
+  "@veska/storage"
 )
 
 VIOLATIONS=()
 
-for rel_dir in "${OSS_SRC_DIRS[@]}"; do
+for rel_dir in "${CORE_DIRS[@]}"; do
   dir="$REPO_ROOT/$rel_dir"
   if [ -d "$dir" ]; then
-    # Find static imports of @veska-cloud/* — exclude lines with dynamic imports (await import)
-    matches=$(grep -rn --include="*.ts" --include="*.tsx" "from '@veska-cloud/" "$dir" \
-      | grep -v "await import" || true)
-    if [ -n "$matches" ]; then
-      while IFS= read -r line; do
-        VIOLATIONS+=("$line")
-      done <<< "$matches"
-    fi
+    for pkg in "${FEATURE_PACKAGES[@]}"; do
+      matches=$(grep -rn --include="*.ts" --include="*.tsx" "from '${pkg}" "$dir" \
+        | grep -v "await import" || true)
+      if [ -n "$matches" ]; then
+        while IFS= read -r line; do
+          VIOLATIONS+=("$line")
+        done <<< "$matches"
+      fi
+    done
   fi
 done
 
 if [ "${#VIOLATIONS[@]}" -gt 0 ]; then
   echo ""
-  echo "ERROR: OSS packages must not statically import @veska-cloud/* packages."
+  echo "ERROR: Core packages must not statically import feature packages."
+  echo "Use dynamic import with a fallback instead (see ARCHITECTURE.md)."
   echo ""
   echo "Violations found:"
   for v in "${VIOLATIONS[@]}"; do
@@ -48,5 +57,5 @@ if [ "${#VIOLATIONS[@]}" -gt 0 ]; then
   exit 1
 fi
 
-echo "✓ OSS/cloud boundary clean."
+echo "✓ Modularity boundary clean."
 exit 0

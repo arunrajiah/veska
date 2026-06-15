@@ -32,7 +32,7 @@ invoiceEmailRouter.get('/preview/:invoiceId', async (c) => {
   return c.html(html);
 });
 
-// POST /send/:invoiceId — send invoice via email (uses @veska-cloud/notifications)
+// POST /send/:invoiceId — send invoice via email (uses @veska/notifications)
 invoiceEmailRouter.post('/send/:invoiceId', async (c) => {
   const invoiceId = c.req.param('invoiceId');
   const { tenantId = 'demo', toEmail } = await c.req.json();
@@ -50,7 +50,7 @@ invoiceEmailRouter.post('/send/:invoiceId', async (c) => {
   const d = invoice.data as Record<string, unknown>;
 
   try {
-    const { sendEmail } = await import('@veska-cloud/notifications');
+    const { sendEmail } = await import('@veska/notifications');
     await sendEmail({
       event: 'invoice.sent',
       tenantId,

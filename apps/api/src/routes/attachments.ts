@@ -22,7 +22,7 @@ async function getStorage(): Promise<StorageProvider> {
 
   if (process.env['STORAGE_PROVIDER'] !== 'local' && process.env['AWS_S3_BUCKET']) {
     try {
-      const cloud = await import('@veska-cloud/storage');
+      const cloud = await import('@veska/storage');
       _storage = cloud.createStorage() as StorageProvider;
       return _storage;
     } catch {
