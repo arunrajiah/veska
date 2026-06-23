@@ -9,8 +9,10 @@
   "updateInternalDependencies": "patch",
   "ignore": [
     "@veska/admin",
+    "@veska/api",
+    "@veska/core",
     "@veska/marketing",
     "@veska/marketplace",
-    "@veska/api"
+    "@veska/ui"
   ]
 }

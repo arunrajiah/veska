@@ -33,13 +33,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build
-        run: pnpm build
+      - name: Build publishable packages
+        run: pnpm --filter @veska/sdk --filter @veska/cli build
 
-      - name: Create Release PR or publish
+      - name: Create Release PR or publish to npm
         uses: changesets/action@v1
         with:
-          publish: pnpm changeset publish
+          publish: pnpm changeset:publish
+          title: "chore: version packages"
+          commit: "chore: version packages"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
