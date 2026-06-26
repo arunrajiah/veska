@@ -14,7 +14,7 @@ export interface ChannelConfig {
   enabled: boolean;
   // email channel
   toEmail?: string;
-  fromEmail?: string;      // defaults to 'noreply@veska.com'
+  fromEmail?: string;      // defaults to 'noreply@example.com'
   resendApiKey?: string;
   // slack channel
   slackWebhookUrl?: string;

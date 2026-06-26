@@ -11,7 +11,7 @@ export async function sendPasswordResetEmail(opts: {
   recipientName?: string;
 }): Promise<void> {
   const resendApiKey = process.env['RESEND_API_KEY'];
-  const fromAddress = process.env['EMAIL_FROM_ADDRESS'] ?? 'Veska <noreply@veska.app>';
+  const fromAddress = process.env['EMAIL_FROM_ADDRESS'] ?? 'Veska <noreply@example.com>';
 
   if (!resendApiKey) {
     console.warn('[password-reset-mailer] RESEND_API_KEY not set — skipping email send');

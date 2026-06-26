@@ -4,7 +4,7 @@
  * handle email failures in the happy path.
  */
 
-const FROM = process.env['EMAIL_FROM'] ?? process.env['EMAIL_FROM_ADDRESS'] ?? 'Veska <notifications@veska.app>';
+const FROM = process.env['EMAIL_FROM'] ?? process.env['EMAIL_FROM_ADDRESS'] ?? 'Veska <noreply@example.com>';
 
 async function send(opts: { to: string; subject: string; html: string }): Promise<void> {
   const resendApiKey = process.env['RESEND_API_KEY'];

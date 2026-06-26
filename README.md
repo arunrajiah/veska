@@ -13,6 +13,7 @@ Describe your company in plain language. Veska sets up CRM, support desk, and fi
 [![Docker](https://img.shields.io/badge/docker-compose%20up-blue?logo=docker)](docker-compose.yml)
 [![Self-host](https://img.shields.io/badge/self--host-in%205%20minutes-green)](SELF_HOSTING.md)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Website](https://img.shields.io/badge/website-hub.arunrajiah.com-indigo)](https://hub.arunrajiah.com/products/veska)
 
 > Veska is **self-hosted and free** (Apache 2.0). A managed cloud edition is planned but not yet available — if you'd use one, [open a discussion](https://github.com/arunrajiah/veska/discussions) and tell us.
 

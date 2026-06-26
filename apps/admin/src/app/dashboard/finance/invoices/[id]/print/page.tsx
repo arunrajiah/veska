@@ -194,8 +194,8 @@ export default async function InvoicePrintPage({
         <div className="inv-header">
           <div>
             <div className="logo">V</div>
-            <div className="company-name">Veska Inc.</div>
-            <div className="company-sub">billing@veska.io</div>
+            <div className="company-name">Your Company</div>
+            <div className="company-sub">billing@example.com</div>
           </div>
           <div className="invoice-meta">
             <h1>INVOICE</h1>
@@ -208,8 +208,8 @@ export default async function InvoicePrintPage({
         <div className="parties">
           <div className="party-block">
             <div className="party-label">From</div>
-            <div className="party-name">Veska Inc.</div>
-            <div className="party-detail">billing@veska.io</div>
+            <div className="party-name">Your Company</div>
+            <div className="party-detail">billing@example.com</div>
           </div>
           <div className="party-block right">
             <div className="party-label">Bill To</div>

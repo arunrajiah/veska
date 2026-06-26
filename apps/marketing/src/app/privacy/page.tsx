@@ -60,7 +60,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">5. Data Retention</h2>
             <p className="text-gray-600 text-sm leading-relaxed">
-              We retain account data for as long as your account is active. You may request deletion of your data at any time by emailing <a href="mailto:privacy@veska.io" className="text-indigo-600 hover:underline">privacy@veska.io</a>. We will fulfill deletion requests within 30 days, subject to legal retention requirements.
+              We retain account data for as long as your account is active. You may request deletion of your data at any time by emailing <a href="mailto:arunrajiah@gmail.com" className="text-indigo-600 hover:underline">arunrajiah@gmail.com</a>. We will fulfill deletion requests within 30 days, subject to legal retention requirements.
             </p>
           </section>
 
@@ -100,7 +100,7 @@ export default function PrivacyPage() {
             <h2 className="text-xl font-semibold text-gray-900 mb-3">10. Contact Us</h2>
             <p className="text-gray-600 text-sm leading-relaxed">
               For privacy-related questions or requests, contact us at{' '}
-              <a href="mailto:privacy@veska.io" className="text-indigo-600 hover:underline">privacy@veska.io</a>.
+              <a href="mailto:arunrajiah@gmail.com" className="text-indigo-600 hover:underline">arunrajiah@gmail.com</a>.
             </p>
           </section>
 

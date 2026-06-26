@@ -181,7 +181,7 @@ export default async function PayslipPrintPage({
           <div>
             <div className="logo">V</div>
             <div className="company-name">Veska Inc.</div>
-            <div className="company-sub">payroll@veska.io</div>
+            <div className="company-sub">payroll@example.com</div>
           </div>
           <div className="slip-meta">
             <h1>PAYSLIP</h1>

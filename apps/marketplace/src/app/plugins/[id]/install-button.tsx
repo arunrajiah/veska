@@ -10,7 +10,7 @@ export default function InstallButton({ pluginId, pluginName }: { pluginId: stri
 
   // Cloud install: redirect to cloud dashboard install page
   function handleCloudInstall() {
-    window.location.href = `https://app.veska.com/dashboard/plugins/install?pluginId=${encodeURIComponent(pluginId)}`;
+    window.location.href = `https://hub.arunrajiah.com/products/veska?pluginId=${encodeURIComponent(pluginId)}`;
   }
 
   // Self-hosted install: redirect to user's instance admin

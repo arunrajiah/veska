@@ -19,7 +19,7 @@ docsRouter.get('/openapi.json', (c) => {
     },
     servers: [
       { url: 'http://localhost:3001', description: 'Local development' },
-      { url: 'https://api.veska.app', description: 'Production' },
+      { url: 'https://hub.arunrajiah.com/products/veska/api', description: 'Production' },
     ],
     security: [{ bearerAuth: [] }],
     components: {

@@ -24,7 +24,7 @@ export async function sendEmail(
     `;
 
     await resend.emails.send({
-      from: config.fromEmail ?? 'Veska ERP <noreply@veska.com>',
+      from: config.fromEmail ?? 'Veska ERP <noreply@example.com>',
       to: config.toEmail,
       subject: payload.title,
       html,

@@ -119,19 +119,19 @@ export default async function DeveloperOverviewPage() {
     {
       title: 'API Reference',
       description: 'Explore endpoints, authentication, and request/response schemas.',
-      href: 'https://docs.veska.io/api',
+      href: 'https://github.com/arunrajiah/veska/blob/main/apps/api/src/routes/docs.ts',
       label: 'Open Docs',
     },
     {
       title: 'Webhook Setup Guide',
       description: 'Learn how to configure outbound webhooks and verify payloads.',
-      href: 'https://docs.veska.io/webhooks',
+      href: 'https://github.com/arunrajiah/veska/blob/main/SELF_HOSTING.md',
       label: 'View Guide',
     },
     {
       title: 'Plugin SDK',
       description: 'Build custom integrations and extensions using the Veska SDK.',
-      href: 'https://docs.veska.io/sdk',
+      href: 'https://github.com/arunrajiah/veska/tree/main/packages/sdk',
       label: 'SDK Docs',
     },
   ];

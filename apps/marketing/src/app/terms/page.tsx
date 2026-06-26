@@ -106,7 +106,7 @@ export default function TermsPage() {
             <h2 className="text-xl font-semibold text-gray-900 mb-3">11. Contact</h2>
             <p className="text-gray-600 text-sm leading-relaxed">
               Questions about these Terms may be directed to{' '}
-              <a href="mailto:legal@veska.io" className="text-indigo-600 hover:underline">legal@veska.io</a>.
+              <a href="mailto:arunrajiah@gmail.com" className="text-indigo-600 hover:underline">arunrajiah@gmail.com</a>.
             </p>
           </section>
 

@@ -6,7 +6,7 @@
   "author": {
     "name": "Veska",
     "developerId": "veska-official",
-    "email": "plugins@veska.com"
+    "email": "arunrajiah@gmail.com"
   },
   "veskaMinVersion": "0.1.0",
   "capabilitiesRequired": ["contact.create", "contact.read", "invoice.create", "invoice.read", "audit.*"],
@@ -18,6 +18,6 @@
   "networkWhitelist": ["api.stripe.com"],
   "pricing": { "model": "free" },
   "license": "Apache-2.0",
-  "homepage": "https://veska.com/plugins/stripe",
-  "supportEmail": "plugins@veska.com"
+  "homepage": "https://hub.arunrajiah.com/products/veska",
+  "supportEmail": "arunrajiah@gmail.com"
 }

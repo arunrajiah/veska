@@ -572,8 +572,8 @@ export function InvoiceDetailClient({
                   <span className="text-white text-xs font-bold">V</span>
                 </div>
                 <p className="text-xs text-gray-400">From</p>
-                <p className="text-sm font-medium text-gray-900">Veska Inc.</p>
-                <p className="text-xs text-gray-500">billing@veska.io</p>
+                <p className="text-sm font-medium text-gray-900">Your Company</p>
+                <p className="text-xs text-gray-500">billing@example.com</p>
               </div>
               <div className="text-right">
                 <p className="text-xs text-gray-400">To</p>

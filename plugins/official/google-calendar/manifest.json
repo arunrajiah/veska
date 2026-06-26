@@ -6,7 +6,7 @@
   "author": {
     "name": "Veska",
     "developerId": "veska-official",
-    "email": "plugins@veska.com"
+    "email": "arunrajiah@gmail.com"
   },
   "veskaMinVersion": "0.1.0",
   "capabilitiesRequired": ["deal.read", "ticket.read", "contact.read", "audit.*"],
@@ -16,6 +16,6 @@
   "networkWhitelist": ["www.googleapis.com"],
   "pricing": { "model": "free" },
   "license": "Apache-2.0",
-  "homepage": "https://veska.com/plugins/google-calendar",
-  "supportEmail": "plugins@veska.com"
+  "homepage": "https://hub.arunrajiah.com/products/veska",
+  "supportEmail": "arunrajiah@gmail.com"
 }
