@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/assets/logo.svg" alt="Veska logo" width="96" height="96">
+</p>
+
 # Veska
 
 **Self-hosted, AI-native operations platform for small and medium businesses.**
