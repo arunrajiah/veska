@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import InstallButton from './install-button.js';
+import InstallButton from './install-button';
 
 const PLUGINS = [
   {
