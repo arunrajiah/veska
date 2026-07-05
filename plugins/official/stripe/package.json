@@ -1,6 +1,6 @@
 {
   "name": "@veska-official/plugin-stripe",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Official Veska Stripe integration plugin",
   "license": "Apache-2.0",
   "type": "module",
