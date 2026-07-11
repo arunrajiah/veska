@@ -7,7 +7,7 @@ Veska is early (v0.x) and built in the open. This roadmap is directional, not a 
 - [ ] Cut and publish the first tagged release (v0.1.0)
 - [ ] Battle-test the WhatsApp adapter end-to-end against the WhatsApp Business API
 - [ ] Battle-test the Telegram adapter end-to-end
-- [ ] Unit test coverage for API routes (today coverage is mostly E2E)
+- [~] Unit test coverage for API routes (harness landed + first 9 modules; ~70 to go)
 - [ ] Load testing and published performance numbers
 - [ ] Publish `@veska/sdk` and `@veska/cli` to npm
 

@@ -4,6 +4,21 @@ All notable changes to Veska are documented here. The format follows [Keep a Cha
 
 ## [Unreleased]
 
+### Fixed
+
+- **Critical: raw-SQL routes returned malformed results and could throw at runtime.** The
+  `postgres-js` driver resolves `db.execute(sql`...`)` to an Array with no `.rows`
+  property, but roughly forty route files read `result.rows`, which was `undefined` (so
+  `result.rows[0]` threw). `createDatabase` now attaches non-enumerable `.rows` /
+  `.rowCount` aliases to execute results, so both `result[0]` and `result.rows[0]` work.
+
+### Added
+
+- Unit-test harness for the API route layer (`apps/api/src/routes/__tests__/_harness.ts`)
+  that mocks the `shared.js` singleton and drives Hono routers via `app.request()`, plus
+  135 route tests across vendors, currencies, tax-rates, expenses, budgets, contracts,
+  assets, custom-fields, and notifications. See [docs/testing.md](docs/testing.md).
+
 ## [0.1.0] — first public release
 
 The first tagged release of Veska: a self-hosted, AI-native operations platform for small and medium businesses.
