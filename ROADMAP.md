@@ -17,7 +17,7 @@ Veska is early (v0.x) and built in the open. This roadmap is directional, not a 
 - [ ] One-click deploy templates: Railway, Fly.io, DigitalOcean
 - [ ] Official Helm chart for Kubernetes
 - [ ] Onboarding improvements: AI setup flow works fully offline with Ollama
-- [~] More official plugins (Shopify shipped; Xero next)
+- [x] More official plugins (Shopify + Xero shipped)
 
 ## Later — growing up (v1.0 and beyond)
 

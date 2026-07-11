@@ -14,6 +14,9 @@ All notable changes to Veska are documented here. The format follows [Keep a Cha
 
 ### Added
 
+- **Official Xero plugin** (`plugins/official/xero`). Posts paid Veska invoices to Xero as
+  ACCREC invoices (resolving the linked contact name and mapping line items) and syncs new
+  Veska contacts to Xero contacts. Covered by 6 unit tests.
 - **Official Shopify plugin** (`plugins/official/shopify`). Syncs Shopify `customers/create`
   into Veska Contacts (deduped by email), `orders/create` into Invoices with mapped line
   items, and `orders/paid` reconciles the matching invoice to paid (or creates it). Covered

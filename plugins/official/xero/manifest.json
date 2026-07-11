@@ -1,0 +1,23 @@
+{
+  "id": "com.veska.xero",
+  "name": "Xero",
+  "version": "1.0.0",
+  "description": "Export invoices and contacts to Xero accounting. When a Veska invoice is paid it is posted to Xero, and new Veska contacts sync as Xero contacts.",
+  "author": {
+    "name": "Veska",
+    "developerId": "veska-official",
+    "email": "arunrajiah@gmail.com"
+  },
+  "veskaMinVersion": "0.1.0",
+  "capabilitiesRequired": ["invoice.read", "invoice.create", "contact.read", "audit.*"],
+  "capabilitiesProvided": [],
+  "entities": ["Invoice", "Contact"],
+  "workflows": [],
+  "agents": [],
+  "channels": [],
+  "networkWhitelist": ["api.xero.com"],
+  "pricing": { "model": "free" },
+  "license": "Apache-2.0",
+  "homepage": "https://hub.arunrajiah.com/products/veska",
+  "supportEmail": "arunrajiah@gmail.com"
+}
