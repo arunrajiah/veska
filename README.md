@@ -191,7 +191,9 @@ npx @veska/cli create-plugin my-plugin
 cd my-plugin && pnpm install && pnpm dev
 ```
 
-SDK source and reference: [packages/sdk](packages/sdk). The official plugins in [plugins/official](plugins/official) are the best working examples.
+SDK source and reference: [packages/sdk](packages/sdk). The official plugins in [plugins/official](plugins/official) are the best working examples: [Stripe](plugins/official/stripe) and [Shopify](plugins/official/shopify) show inbound webhook sync, [QuickBooks](plugins/official/quickbooks) and [Xero](plugins/official/xero) show outbound API sync.
+
+**Want to see Veska talk to a tool you use?** Plugins are the easiest and most valuable way to contribute. Every plugin is a small folder (`manifest.json`, `package.json`, `src/index.ts`) that maps events to Veska entities through a sandboxed context, so you never touch the database directly. HubSpot, Salesforce, Notion, Slack workflows, Shopify fulfilment, WooCommerce, Zoho, Freshdesk, PayPal, Wise, Mailchimp: all fair game and all wanted. Open a [discussion](https://github.com/arunrajiah/veska/discussions) with your idea, or read the [plugin contribution guide](CONTRIBUTING.md#contributing-a-plugin) and open a PR. Good plugins get promoted to the official set.
 
 ## Roadmap
 
