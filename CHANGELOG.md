@@ -14,6 +14,10 @@ All notable changes to Veska are documented here. The format follows [Keep a Cha
 
 ### Added
 
+- **Official Shopify plugin** (`plugins/official/shopify`). Syncs Shopify `customers/create`
+  into Veska Contacts (deduped by email), `orders/create` into Invoices with mapped line
+  items, and `orders/paid` reconciles the matching invoice to paid (or creates it). Covered
+  by 9 unit tests.
 - Unit-test harness for the API route layer (`apps/api/src/routes/__tests__/_harness.ts`)
   that mocks the `shared.js` singleton and drives Hono routers via `app.request()`, plus
   135 route tests across vendors, currencies, tax-rates, expenses, budgets, contracts,

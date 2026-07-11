@@ -88,7 +88,7 @@ Under the hood it is not a thin wrapper around a chat model:
 - **An AI action agent with 57 ERP tools** — create invoices, approve expenses, search contacts, forecast revenue — every action audit-logged with the AI's reasoning trace
 - **Multi-tenant by design** — tenant isolation enforced at the database layer, capability-based RBAC, TOTP 2FA
 - **A workflow engine** — triggers on any entity event, with approvals routed to Slack/Email
-- **A plugin SDK** — Stripe, QuickBooks, and Google Calendar plugins ship in-repo
+- **A plugin SDK** — Stripe, QuickBooks, Shopify, and Google Calendar plugins ship in-repo
 
 ## Screenshots
 
@@ -157,7 +157,7 @@ packages/
   cli/          Developer CLI (veska create-plugin, veska dev)
 
 plugins/
-  official/     Official first-party plugins (Stripe, QuickBooks, Google Calendar)
+  official/     Official first-party plugins (Stripe, QuickBooks, Shopify, Google Calendar)
 ```
 
 **Stack:** TypeScript · Hono · PostgreSQL 16 + pgvector · Drizzle ORM · BullMQ · Redis · Next.js 15 · Anthropic Claude (or local Ollama)

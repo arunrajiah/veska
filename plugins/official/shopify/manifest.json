@@ -1,0 +1,23 @@
+{
+  "id": "com.veska.shopify",
+  "name": "Shopify",
+  "version": "1.0.0",
+  "description": "Sync Shopify customers and orders into Veska. New Shopify customers become Contacts, orders become Invoices, and paid orders reconcile automatically.",
+  "author": {
+    "name": "Veska",
+    "developerId": "veska-official",
+    "email": "arunrajiah@gmail.com"
+  },
+  "veskaMinVersion": "0.1.0",
+  "capabilitiesRequired": ["contact.create", "contact.read", "invoice.create", "invoice.read", "invoice.update", "audit.*"],
+  "capabilitiesProvided": [],
+  "entities": ["Contact", "Invoice"],
+  "workflows": [],
+  "agents": [],
+  "channels": [],
+  "networkWhitelist": ["*.myshopify.com"],
+  "pricing": { "model": "free" },
+  "license": "Apache-2.0",
+  "homepage": "https://hub.arunrajiah.com/products/veska",
+  "supportEmail": "arunrajiah@gmail.com"
+}
