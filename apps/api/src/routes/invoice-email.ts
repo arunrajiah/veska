@@ -1,18 +1,19 @@
 import { Hono } from 'hono';
 import { sql } from 'drizzle-orm';
 import { sharedDb } from '../shared.js';
+import type { TenantContext } from '../middleware/tenant-context.js';
 
-const invoiceEmailRouter = new Hono();
+const invoiceEmailRouter = new Hono<{ Variables: TenantContext }>();
 
 // GET /preview/:invoiceId — generate HTML invoice
 invoiceEmailRouter.get('/preview/:invoiceId', async (c) => {
   const invoiceId = c.req.param('invoiceId');
-  const tenantId = c.req.query('tenantId') ?? 'demo';
+  const { tenantId } = c.get('tenantCtx');
 
   const db = sharedDb;
   const result = await db.execute(sql`
     SELECT * FROM "entityRecords"
-    WHERE id = ${invoiceId}::uuid AND "tenantId" = ${tenantId} AND "entityType" = 'invoice'
+    WHERE id = ${invoiceId}::uuid AND "tenantId" = ${tenantId} AND "entityType" = 'Invoice'
   `);
   const invoice = result.rows?.[0];
   if (!invoice) return c.json({ error: 'Not found' }, 404);

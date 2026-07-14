@@ -2,12 +2,13 @@ import { Hono } from 'hono';
 import { sql } from 'drizzle-orm';
 import { randomBytes } from 'node:crypto';
 import { sharedDb } from '../shared.js';
+import type { TenantContext } from '../middleware/tenant-context.js';
 
-export const usersRouter = new Hono();
+export const usersRouter = new Hono<{ Variables: TenantContext }>();
 
 // GET / — list all users for a tenant with their roles
 usersRouter.get('/', async (c) => {
-  const tenantId = c.req.query('tenantId') ?? 'demo';
+  const { tenantId } = c.get('tenantCtx');
 
   const result = await sharedDb.execute(sql`
     SELECT
@@ -38,7 +39,7 @@ usersRouter.get('/', async (c) => {
 // GET /:id — single user with roles
 usersRouter.get('/:id', async (c) => {
   const id = c.req.param('id');
-  const tenantId = c.req.query('tenantId') ?? 'demo';
+  const { tenantId } = c.get('tenantCtx');
 
   const result = await sharedDb.execute(sql`
     SELECT
@@ -106,7 +107,7 @@ usersRouter.post('/', async (c) => {
 // PATCH /:id — update name, avatarUrl, status
 usersRouter.patch('/:id', async (c) => {
   const id = c.req.param('id');
-  const tenantId = c.req.query('tenantId') ?? 'demo';
+  const { tenantId } = c.get('tenantCtx');
   const body = await c.req.json<{ name?: string; avatarUrl?: string; status?: string }>();
 
   // Verify user exists
@@ -152,7 +153,7 @@ usersRouter.patch('/:id', async (c) => {
 // DELETE /:id — hard delete (cascades userRoles)
 usersRouter.delete('/:id', async (c) => {
   const id = c.req.param('id');
-  const tenantId = c.req.query('tenantId') ?? 'demo';
+  const { tenantId } = c.get('tenantCtx');
 
   const existing = await sharedDb.execute(sql`
     SELECT "id" FROM "users"
@@ -171,7 +172,7 @@ usersRouter.delete('/:id', async (c) => {
 // POST /:id/roles — assign a role to a user
 usersRouter.post('/:id/roles', async (c) => {
   const userId = c.req.param('id');
-  const tenantId = c.req.query('tenantId') ?? 'demo';
+  const { tenantId } = c.get('tenantCtx');
   const body = await c.req.json<{ roleId: string }>();
 
   if (!body.roleId) return c.json({ error: 'roleId is required' }, 400);
@@ -203,7 +204,7 @@ usersRouter.post('/:id/roles', async (c) => {
 usersRouter.delete('/:id/roles/:roleId', async (c) => {
   const userId = c.req.param('id');
   const roleId = c.req.param('roleId');
-  const tenantId = c.req.query('tenantId') ?? 'demo';
+  const { tenantId } = c.get('tenantCtx');
 
   // Verify user exists in tenant
   const userCheck = await sharedDb.execute(sql`

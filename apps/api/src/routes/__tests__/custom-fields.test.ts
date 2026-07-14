@@ -41,12 +41,18 @@ describe('custom-fields router', () => {
       expect(sqlOf(h.execute.mock.calls[0][0])).toContain('contact');
     });
 
-    it('returns 400 and hits no DB when tenantId is missing', async () => {
-      const res = await req(app, 'GET', '/defs');
+    it('scopes to the session tenant and ignores a client-supplied tenantId', async () => {
+      // tenantId used to come from ?tenantId=, which let a caller read another
+      // tenant's data. It now comes from the authenticated session, so a spoofed
+      // query param must have no effect.
+      h.execute.mockResolvedValueOnce(rows([]));
 
-      expect(res.status).toBe(400);
-      expect(res.body).toEqual({ error: 'tenantId is required' });
-      expect(h.execute).not.toHaveBeenCalled();
+      const res = await req(app, 'GET', '/defs?entityType=contact&tenantId=11111111-1111-1111-1111-111111111111');
+
+      expect(res.status).toBe(200);
+      const issued = sqlOf(h.execute.mock.calls[0][0]);
+      expect(issued).toContain(TENANT_ID);
+      expect(issued).not.toContain('11111111-1111-1111-1111-111111111111');
     });
   });
 

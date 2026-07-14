@@ -8,7 +8,12 @@ import { cookies } from 'next/headers';
  * accessible to JavaScript (XSS-safe).
  */
 export async function POST(req: NextRequest) {
-  const { token } = (await req.json()) as { token?: string };
+  const { token, identityId, tenantId, onboardingComplete } = (await req.json()) as {
+    token?: string;
+    identityId?: string;
+    tenantId?: string;
+    onboardingComplete?: boolean;
+  };
 
   if (!token || typeof token !== 'string') {
     return NextResponse.json({ error: 'Missing token' }, { status: 400 });
@@ -22,6 +27,20 @@ export async function POST(req: NextRequest) {
     path: '/',
     maxAge: 60 * 60 * 24 * 7, // 7 days
   });
+
+  const week = 60 * 60 * 24 * 7;
+  // Read by dashboard server components to build the X-Veska-Identity-Id header.
+  if (identityId) {
+    cookieStore.set('veska_identity', identityId, { sameSite: 'strict', path: '/', maxAge: week });
+  }
+  if (tenantId) {
+    cookieStore.set('veska_tenant', tenantId, { sameSite: 'strict', path: '/', maxAge: week });
+  }
+
+  // An already-configured tenant must not be pushed back through the setup wizard.
+  if (onboardingComplete) {
+    cookieStore.set('veska_onboarding_done', '1', { path: '/', maxAge: 60 * 60 * 24 * 365 });
+  }
 
   return NextResponse.json({ ok: true });
 }

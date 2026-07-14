@@ -38,7 +38,7 @@ function parseCSV(text: string): Record<string, string>[] {
 importExportRouter.get('/export/invoices', async (c) => {
   try {
     const { db } = c.get('tenantCtx');
-    const tenantId = c.req.query('tenantId');
+    const { tenantId } = c.get('tenantCtx');
     if (!tenantId) return c.json({ error: 'tenantId is required' }, 400);
 
     const records = await db.query.entityRecords.findMany({
@@ -69,7 +69,7 @@ importExportRouter.get('/export/invoices', async (c) => {
 importExportRouter.get('/export/employees', async (c) => {
   try {
     const { db } = c.get('tenantCtx');
-    const tenantId = c.req.query('tenantId');
+    const { tenantId } = c.get('tenantCtx');
     if (!tenantId) return c.json({ error: 'tenantId is required' }, 400);
 
     const records = await db.query.entityRecords.findMany({
@@ -100,7 +100,7 @@ importExportRouter.get('/export/employees', async (c) => {
 importExportRouter.get('/export/inventory', async (c) => {
   try {
     const { db } = c.get('tenantCtx');
-    const tenantId = c.req.query('tenantId');
+    const { tenantId } = c.get('tenantCtx');
     if (!tenantId) return c.json({ error: 'tenantId is required' }, 400);
 
     const records = await db.query.entityRecords.findMany({
@@ -131,7 +131,7 @@ importExportRouter.get('/export/inventory', async (c) => {
 importExportRouter.get('/export/expenses', async (c) => {
   try {
     const { db } = c.get('tenantCtx');
-    const tenantId = c.req.query('tenantId');
+    const { tenantId } = c.get('tenantCtx');
     if (!tenantId) return c.json({ error: 'tenantId is required' }, 400);
 
     const records = await db.query.entityRecords.findMany({

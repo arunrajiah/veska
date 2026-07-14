@@ -1,8 +1,9 @@
 import { Hono } from 'hono';
 import { sql } from 'drizzle-orm';
 import { sharedDb } from '../shared.js';
+import type { TenantContext } from '../middleware/tenant-context.js';
 
-export const rolesRouter = new Hono();
+export const rolesRouter = new Hono<{ Variables: TenantContext }>();
 
 const SYSTEM_ROLES: Array<{
   name: string;
@@ -69,7 +70,7 @@ const SYSTEM_ROLES: Array<{
 
 // GET / — list all roles for a tenant with member count
 rolesRouter.get('/', async (c) => {
-  const tenantId = c.req.query('tenantId') ?? 'demo';
+  const { tenantId } = c.get('tenantCtx');
 
   const result = await sharedDb.execute(sql`
     SELECT
@@ -168,7 +169,7 @@ rolesRouter.post('/', async (c) => {
 // GET /:id — single role with its members
 rolesRouter.get('/:id', async (c) => {
   const id = c.req.param('id');
-  const tenantId = c.req.query('tenantId') ?? 'demo';
+  const { tenantId } = c.get('tenantCtx');
 
   const roleResult = await sharedDb.execute(sql`
     SELECT "id", "tenantId", "name", "description", "isSystem", "permissions", "createdAt"
@@ -194,7 +195,7 @@ rolesRouter.get('/:id', async (c) => {
 // PATCH /:id — update name, description, permissions (cannot modify system roles)
 rolesRouter.patch('/:id', async (c) => {
   const id = c.req.param('id');
-  const tenantId = c.req.query('tenantId') ?? 'demo';
+  const { tenantId } = c.get('tenantCtx');
   const body = await c.req.json<{
     name?: string;
     description?: string;
@@ -234,7 +235,7 @@ rolesRouter.patch('/:id', async (c) => {
 // DELETE /:id — hard delete (cannot delete system roles)
 rolesRouter.delete('/:id', async (c) => {
   const id = c.req.param('id');
-  const tenantId = c.req.query('tenantId') ?? 'demo';
+  const { tenantId } = c.get('tenantCtx');
 
   const existing = await sharedDb.execute(sql`
     SELECT "id", "isSystem" FROM "roles"

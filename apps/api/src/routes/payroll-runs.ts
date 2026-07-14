@@ -42,7 +42,7 @@ async function buildPayrollItems(
     SELECT id, data
     FROM "entityRecords"
     WHERE "tenantId" = ${tenantId}
-      AND "entityType" = 'employee'
+      AND "entityType" = 'Employee'
       AND data->>'status' = 'active'
       AND "deletedAt" IS NULL
   `);

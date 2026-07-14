@@ -25,7 +25,7 @@ vendorsRouter.get('/summary', async (c) => {
       SELECT COALESCE(SUM((data->>'amount')::numeric), 0) AS "outstandingAmount"
       FROM "entityRecords"
       WHERE "tenantId" = ${tenantId}
-        AND "entityType" = 'invoice'
+        AND "entityType" = 'Invoice'
         AND (data->>'status' IS NULL OR data->>'status' NOT IN ('paid', 'cancelled'))
         AND (data->>'vendorId' IS NOT NULL OR data->>'supplierId' IS NOT NULL)
     `),
@@ -453,7 +453,7 @@ vendorsRouter.get('/:id/invoices', async (c) => {
       ) AS "outstandingAmount"
     FROM "entityRecords"
     WHERE "tenantId" = ${tenantId}
-      AND "entityType" = 'invoice'
+      AND "entityType" = 'Invoice'
       AND (data->>'vendorId' = ${vendorId} OR data->>'supplierId' = ${vendorId})
   `);
 

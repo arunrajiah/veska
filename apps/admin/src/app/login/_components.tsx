@@ -47,6 +47,8 @@ export function LoginClient() {
       });
       const data = (await res.json()) as {
         token?: string;
+        identityId?: string;
+        onboardingComplete?: boolean;
         mfaRequired?: boolean;
         requires2fa?: boolean;
         tempToken?: string;
@@ -72,9 +74,14 @@ export function LoginClient() {
         await fetch('/api/auth/set-cookie', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token: data.token }),
+          body: JSON.stringify({
+            token: data.token,
+            identityId: data.identityId,
+            tenantId: data.user?.tenantId,
+            onboardingComplete: data.onboardingComplete,
+          }),
         });
-        router.push('/dashboard');
+        router.push(data.onboardingComplete ? '/dashboard' : '/onboarding');
       }
     } catch {
       setError('Network error. Please try again.');
@@ -96,6 +103,8 @@ export function LoginClient() {
       });
       const data = (await res.json()) as {
         token?: string;
+        identityId?: string;
+        onboardingComplete?: boolean;
         error?: string;
         message?: string;
         user?: { id: string; tenantId: string; permissions?: string[]; role?: string };
@@ -112,7 +121,12 @@ export function LoginClient() {
         await fetch('/api/auth/set-cookie', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token: data.token }),
+          body: JSON.stringify({
+            token: data.token,
+            identityId: data.identityId,
+            tenantId: data.user?.tenantId,
+            onboardingComplete: data.onboardingComplete,
+          }),
         });
         router.push('/dashboard');
       }

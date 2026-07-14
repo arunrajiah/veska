@@ -64,7 +64,7 @@ budgetsRouter.get('/summary', async (c) => {
         SELECT COALESCE(SUM((data->>'amount')::numeric), 0) AS total
         FROM "entityRecords"
         WHERE "tenantId" = ${tenantId}
-          AND "entityType" = 'expense'
+          AND "entityType" = 'Expense'
           AND COALESCE(data->>'date', data->>'issueDate') >= ${`${currentYear}-01-01`}
           AND COALESCE(data->>'date', data->>'issueDate') <= ${`${currentYear}-12-31`}
           AND "deletedAt" IS NULL
@@ -73,7 +73,7 @@ budgetsRouter.get('/summary', async (c) => {
         SELECT COALESCE(SUM((data->>'amount')::numeric), 0) AS total
         FROM "entityRecords"
         WHERE "tenantId" = ${tenantId}
-          AND "entityType" = 'invoice'
+          AND "entityType" = 'Invoice'
           AND COALESCE(data->>'date', data->>'issueDate') >= ${`${currentYear}-01-01`}
           AND COALESCE(data->>'date', data->>'issueDate') <= ${`${currentYear}-12-31`}
           AND "deletedAt" IS NULL
@@ -551,7 +551,7 @@ budgetsRouter.get('/:id/cashflow', async (c) => {
         COALESCE(SUM((data->>'amount')::numeric), 0) AS total
       FROM "entityRecords"
       WHERE "tenantId" = ${tenantId}
-        AND "entityType" = 'invoice'
+        AND "entityType" = 'Invoice'
         AND EXTRACT(YEAR FROM COALESCE(data->>'date', data->>'issueDate')::date) = ${fy}
         AND "deletedAt" IS NULL
       GROUP BY 1
@@ -564,7 +564,7 @@ budgetsRouter.get('/:id/cashflow', async (c) => {
         COALESCE(SUM((data->>'amount')::numeric), 0) AS total
       FROM "entityRecords"
       WHERE "tenantId" = ${tenantId}
-        AND "entityType" = 'expense'
+        AND "entityType" = 'Expense'
         AND EXTRACT(YEAR FROM COALESCE(data->>'date', data->>'issueDate')::date) = ${fy}
         AND "deletedAt" IS NULL
       GROUP BY 1

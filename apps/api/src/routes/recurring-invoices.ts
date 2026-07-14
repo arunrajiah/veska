@@ -54,7 +54,7 @@ const patchSchema = z.object({
 
 recurringInvoicesRouter.get('/', async (c) => {
   const { db } = c.get('tenantCtx');
-  const tenantId = c.req.query('tenantId');
+  const { tenantId } = c.get('tenantCtx');
   const status = c.req.query('status');
 
   if (!tenantId) {

@@ -1,8 +1,9 @@
 import { Hono } from 'hono';
 import { sql } from 'drizzle-orm';
 import { sharedDb as db } from '../shared.js';
+import type { TenantContext } from '../middleware/tenant-context.js';
 
-export const dashboardRouter = new Hono();
+export const dashboardRouter = new Hono<{ Variables: TenantContext }>();
 
 // ── Types ─────────────────────────────────────────────────────
 
@@ -12,23 +13,28 @@ interface ActivityItem {
   label: string;
   verb: string;
   status: string | undefined;
-  timestamp: unknown;
+  createdAt: unknown;
 }
 
 // ── Helpers ───────────────────────────────────────────────────
 
+// Keys are entity types as stored in "entityRecords" (PascalCase). They used to be
+// snake_case here, so every lookup missed and the feed showed a generic verb.
 function getVerb(entityType: string, status?: string): string {
   const map: Record<string, string> = {
-    invoice: status === 'paid' ? 'Invoice paid' : 'Invoice updated',
-    expense: status === 'approved' ? 'Expense approved' : 'Expense submitted',
-    employee: 'Employee record updated',
-    sales_order: status === 'delivered' ? 'Order delivered' : 'Order updated',
-    purchase_order: status === 'approved' ? 'PO approved' : 'PO updated',
-    project: 'Project updated',
-    deal: status === 'won' ? 'Deal won' : 'Deal updated',
-    payroll_run: status === 'completed' ? 'Payroll completed' : 'Payroll updated',
-    time_entry: 'Time logged',
-    inventory_item: 'Inventory updated',
+    Invoice: status === 'paid' ? 'Invoice paid' : 'Invoice updated',
+    Expense: status === 'approved' ? 'Expense approved' : 'Expense submitted',
+    Employee: 'Employee record updated',
+    SalesOrder: status === 'delivered' ? 'Order delivered' : 'Order updated',
+    PurchaseOrder: status === 'approved' ? 'PO approved' : 'PO updated',
+    Project: 'Project updated',
+    Deal: status === 'won' ? 'Deal won' : 'Deal updated',
+    PayrollRun: status === 'completed' ? 'Payroll completed' : 'Payroll updated',
+    TimeEntry: 'Time logged',
+    InventoryItem: 'Inventory updated',
+    Task: 'Task updated',
+    Contact: 'Contact updated',
+    SupportTicket: status === 'resolved' ? 'Ticket resolved' : 'Ticket updated',
   };
   return map[entityType] ?? 'Record updated';
 }
@@ -50,7 +56,9 @@ function toActivity(record: Record<string, unknown>): ActivityItem {
     label,
     verb,
     status,
-    timestamp: record['updated_at'] ?? record['updatedAt'],
+    // The Admin UI reads `createdAt`; this used to be emitted as `timestamp`, so the
+    // feed rendered "NaNd ago" for every row.
+    createdAt: record['updatedAt'] ?? record['createdAt'],
   };
 }
 
@@ -71,7 +79,7 @@ function allRows(result: unknown): Record<string, unknown>[] {
 }
 
 dashboardRouter.get('/stats', async (c) => {
-  const tenantId = c.req.query('tenantId') ?? 'demo';
+  const { tenantId } = c.get('tenantCtx');
 
   // Helper to safely run a query and return undefined on error
   async function safeQuery<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
@@ -153,13 +161,13 @@ dashboardRouter.get('/stats', async (c) => {
       const res = await db.execute(sql`
         SELECT
           COUNT(*) AS total_products,
-          COUNT(CASE WHEN (data->>'stock_level')::numeric < (data->>'reorder_level')::numeric THEN 1 END) AS low_stock,
-          COALESCE(SUM((data->>'stock_level')::numeric * (data->>'cost_price')::numeric), 0) AS total_value
+          COUNT(CASE WHEN (data->>'stockQuantity')::numeric < (data->>'reorderLevel')::numeric THEN 1 END) AS low_stock,
+          COALESCE(SUM((data->>'stockQuantity')::numeric * (data->>'cost')::numeric), 0) AS total_value
         FROM "entityRecords"
         WHERE "tenantId" = ${tenantId}
           AND "entityType" = 'InventoryItem'
-          AND (data->>'stock_level') IS NOT NULL
-          AND (data->>'reorder_level') IS NOT NULL
+          AND (data->>'stockQuantity') IS NOT NULL
+          AND (data->>'reorderLevel') IS NOT NULL
       `);
       return firstRow(res);
     }, undefined),
@@ -185,7 +193,7 @@ dashboardRouter.get('/stats', async (c) => {
         FROM "entityRecords"
         WHERE "tenantId" = ${tenantId}
           AND "entityType" = 'Deal'
-          AND data->>'status' NOT IN ('won', 'lost')
+          AND COALESCE(data->>'stage', '') NOT IN ('closed_won', 'closed_lost')
       `);
       return firstRow(res);
     }, undefined),
@@ -292,7 +300,7 @@ dashboardRouter.get('/stats', async (c) => {
 // ── GET /activity ─────────────────────────────────────────────
 
 dashboardRouter.get('/activity', async (c) => {
-  const tenantId = c.req.query('tenantId') ?? 'demo';
+  const { tenantId } = c.get('tenantCtx');
   const rawLimit = parseInt(c.req.query('limit') ?? '20', 10);
   const limit = Math.min(isNaN(rawLimit) ? 20 : rawLimit, 50);
 
@@ -340,7 +348,7 @@ dashboardRouter.get('/activity', async (c) => {
 // ── GET /quick-stats ──────────────────────────────────────────
 
 dashboardRouter.get('/quick-stats', async (c) => {
-  const tenantId = c.req.query('tenantId') ?? 'demo';
+  const { tenantId } = c.get('tenantCtx');
 
   async function safeQuery<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
     try {
@@ -356,7 +364,7 @@ dashboardRouter.get('/quick-stats', async (c) => {
         SELECT COALESCE(SUM((data->>'amount')::numeric), 0) AS outstanding
         FROM "entityRecords"
         WHERE "tenantId" = ${tenantId}
-          AND "entityType" = 'invoice'
+          AND "entityType" = 'Invoice'
           AND data->>'status' IN ('sent', 'overdue')
       `);
       return firstRow(res);

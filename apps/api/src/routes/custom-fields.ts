@@ -48,7 +48,7 @@ const patchDefSchema = z.object({
 customFieldsRouter.get('/defs', async (c) => {
   try {
     const { db } = c.get('tenantCtx');
-    const tenantId = c.req.query('tenantId');
+    const { tenantId } = c.get('tenantCtx');
     const entityType = c.req.query('entityType');
 
     if (!tenantId) {

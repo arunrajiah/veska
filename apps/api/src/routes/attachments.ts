@@ -44,7 +44,7 @@ attachmentsRouter.get('/', async (c) => {
     const { db } = c.get('tenantCtx');
     const entityType = c.req.query('entityType');
     const entityId = c.req.query('entityId');
-    const tenantId = c.req.query('tenantId');
+    const { tenantId } = c.get('tenantCtx');
 
     if (!entityType || !entityId || !tenantId) {
       return c.json({ error: 'entityType, entityId, and tenantId are required' }, 400);

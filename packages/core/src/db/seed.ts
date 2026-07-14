@@ -261,7 +261,7 @@ async function seed() {
     await db.insert(schema.entityRecords).values({
       id: randomUUID(),
       tenantId,
-      entityType: 'invoice',
+      entityType: 'Invoice',
       data: {
         number: inv.number,
         customerName: inv.customerName,
@@ -330,7 +330,7 @@ async function seed() {
     await db.insert(schema.entityRecords).values({
       id,
       tenantId,
-      entityType: 'employee',
+      entityType: 'Employee',
       data: {
         ...emp,
         status: 'active',
@@ -355,7 +355,7 @@ async function seed() {
     await db.insert(schema.entityRecords).values({
       id: randomUUID(),
       tenantId,
-      entityType: 'leave_request',
+      entityType: 'LeaveRequest',
       data: {
         ...leave,
         employeeId: employeeRecordIds[leave.employeeIdx],
@@ -537,7 +537,7 @@ async function seed() {
     await db.insert(schema.entityRecords).values({
       id: randomUUID(),
       tenantId,
-      entityType: 'inventory_item',
+      entityType: 'InventoryItem',
       data: {
         name: item.name,
         sku: item.sku,

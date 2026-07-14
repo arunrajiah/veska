@@ -153,31 +153,46 @@ async function resolveSession(token: string): Promise<Record<string, unknown> | 
 
 authRouter.post('/login', async (c) => {
   try {
-    const body = await c.req.json<{ email: string; password: string; tenantId: string }>();
-    const { email, password, tenantId } = body;
+    const body = await c.req.json<{ email: string; password: string; tenantId?: string }>();
+    const { email, password } = body;
 
-    if (!email || !password || !tenantId) {
-      return c.json({ error: 'email, password, and tenantId are required' }, 400);
+    if (!email || !password) {
+      return c.json({ error: 'email and password are required' }, 400);
     }
 
-    // Look up user
+    // tenantId is optional. A sign-in form should not have to know a tenant UUID, so
+    // resolve the tenant from the email address and only require an explicit tenantId
+    // when the same address exists in more than one tenant.
+    const requestedTenantId = body.tenantId ?? null;
+
     const userResult = await sharedDb.execute(sql`
-      SELECT id, email, "passwordHash", "isActive"
+      SELECT id, email, "tenantId", "passwordHash", "isActive"
       FROM users
       WHERE email = ${email}
-        AND "tenantId" = ${tenantId}
+        AND (${requestedTenantId}::text IS NULL OR "tenantId" = ${requestedTenantId}::text)
     `);
 
-    if (!userResult.rows.length) {
+    const matches = userResult.rows as Array<{
+      id: string;
+      email: string;
+      tenantId: string;
+      passwordHash: string | null;
+      isActive: boolean;
+    }>;
+
+    if (!matches.length) {
       return c.json({ error: 'Invalid credentials' }, 401);
     }
 
-    const user = userResult.rows[0] as {
-      id: string;
-      email: string;
-      passwordHash: string | null;
-      isActive: boolean;
-    };
+    if (matches.length > 1) {
+      return c.json(
+        { error: 'This email belongs to multiple tenants. Specify tenantId.' },
+        400,
+      );
+    }
+
+    const user = matches[0]!;
+    const tenantId = user.tenantId;
 
     if (!user.isActive) {
       return c.json({ error: 'Account is not active' }, 403);
@@ -231,10 +246,33 @@ authRouter.post('/login', async (c) => {
       )
     `);
 
+    // The Admin UI needs two more things to land the user on a working dashboard:
+    // the identity to send as X-Veska-Identity-Id, and whether this tenant has
+    // already been configured. Without the latter the middleware bounces every
+    // login into the setup wizard, even for a fully seeded company.
+    const identityResult = await sharedDb.execute(sql`
+      SELECT id FROM "identities"
+      WHERE "tenantId" = ${tenantId}::uuid
+        AND "channelIds"->>'email' = ${user.email}
+      LIMIT 1
+    `);
+    const identityId = (identityResult.rows[0] as { id: string } | undefined)?.id ?? user.id;
+
+    const configuredResult = await sharedDb.execute(sql`
+      SELECT EXISTS (
+        SELECT 1 FROM "entityRecords" WHERE "tenantId" = ${tenantId}::uuid
+      ) AS "configured"
+    `);
+    const onboardingComplete = Boolean(
+      (configuredResult.rows[0] as { configured: boolean } | undefined)?.configured,
+    );
+
     return c.json({
       token,
       expiresAt: expiresAt.toISOString(),
-      user: { id: user.id, email: user.email },
+      identityId,
+      onboardingComplete,
+      user: { id: user.id, email: user.email, tenantId },
     });
   } catch (err) {
     console.error('[auth/login]', err);
