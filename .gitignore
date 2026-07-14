@@ -43,3 +43,6 @@ pnpm-debug.log*
 # Test
 playwright-report/
 test-results/
+
+# Redis snapshot artifact
+dump.rdb
