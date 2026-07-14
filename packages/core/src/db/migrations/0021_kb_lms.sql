@@ -10,8 +10,8 @@ CREATE TABLE IF NOT EXISTS "kbCategories" (
   icon         TEXT DEFAULT 'BookOpen',
   "createdAt"  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE UNIQUE INDEX IF NOT EXISTS idx_kb_categories_slug ON "kbCategories"("tenantId", slug);
-CREATE INDEX IF NOT EXISTS idx_kb_categories_parent ON "kbCategories"("tenantId", "parentId");
+CREATE UNIQUE INDEX IF NOT EXISTS "idxKbCategoriesSlug" ON "kbCategories"("tenantId", slug);
+CREATE INDEX IF NOT EXISTS "idxKbCategoriesParent" ON "kbCategories"("tenantId", "parentId");
 
 -- Knowledge base articles
 CREATE TABLE IF NOT EXISTS "kbArticles" (
@@ -33,9 +33,9 @@ CREATE TABLE IF NOT EXISTS "kbArticles" (
   "createdAt"  TIMESTAMPTZ NOT NULL DEFAULT now(),
   "updatedAt"  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE UNIQUE INDEX IF NOT EXISTS idx_kb_articles_slug ON "kbArticles"("tenantId", slug);
-CREATE INDEX IF NOT EXISTS idx_kb_articles_tenant ON "kbArticles"("tenantId", status);
-CREATE INDEX IF NOT EXISTS idx_kb_articles_fts ON "kbArticles" USING gin(to_tsvector('english', title || ' ' || content));
+CREATE UNIQUE INDEX IF NOT EXISTS "idxKbArticlesSlug" ON "kbArticles"("tenantId", slug);
+CREATE INDEX IF NOT EXISTS "idxKbArticlesTenant" ON "kbArticles"("tenantId", status);
+CREATE INDEX IF NOT EXISTS "idxKbArticlesFts" ON "kbArticles" USING gin(to_tsvector('english', title || ' ' || content));
 
 -- LMS courses
 CREATE TABLE IF NOT EXISTS "lmsCourses" (
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS "lmsCourses" (
   "createdAt"     TIMESTAMPTZ NOT NULL DEFAULT now(),
   "updatedAt"     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_lms_courses_tenant ON "lmsCourses"("tenantId", status);
+CREATE INDEX IF NOT EXISTS "idxLmsCoursesTenant" ON "lmsCourses"("tenantId", status);
 
 -- LMS enrollments
 CREATE TABLE IF NOT EXISTS "lmsEnrollments" (
@@ -71,9 +71,9 @@ CREATE TABLE IF NOT EXISTS "lmsEnrollments" (
   score          INTEGER,  -- quiz score if applicable
   "dueDate"      DATE
 );
-CREATE UNIQUE INDEX IF NOT EXISTS idx_lms_enrollment_unique ON "lmsEnrollments"("tenantId", "courseId", "userId");
-CREATE INDEX IF NOT EXISTS idx_lms_enrollments_user ON "lmsEnrollments"("tenantId", "userId");
-CREATE INDEX IF NOT EXISTS idx_lms_enrollments_course ON "lmsEnrollments"("tenantId", "courseId");
+CREATE UNIQUE INDEX IF NOT EXISTS "idxLmsEnrollmentUnique" ON "lmsEnrollments"("tenantId", "courseId", "userId");
+CREATE INDEX IF NOT EXISTS "idxLmsEnrollmentsUser" ON "lmsEnrollments"("tenantId", "userId");
+CREATE INDEX IF NOT EXISTS "idxLmsEnrollmentsCourse" ON "lmsEnrollments"("tenantId", "courseId");
 
 -- LMS certifications
 CREATE TABLE IF NOT EXISTS "lmsCertifications" (
@@ -87,4 +87,4 @@ CREATE TABLE IF NOT EXISTS "lmsCertifications" (
   "expiresAt"    TIMESTAMPTZ,
   "certificateNumber" TEXT NOT NULL  -- e.g. "CERT-2026-0042"
 );
-CREATE INDEX IF NOT EXISTS idx_lms_certs_user ON "lmsCertifications"("tenantId", "userId");
+CREATE INDEX IF NOT EXISTS "idxLmsCertsUser" ON "lmsCertifications"("tenantId", "userId");

@@ -119,9 +119,9 @@ contractsRouter.get('/', async (c) => {
       SELECT *
       FROM "contracts"
       WHERE "tenantId" = ${tenantId}
-        AND (${status ?? null} IS NULL OR status = ${status ?? null})
-        AND (${type ?? null} IS NULL OR type = ${type ?? null})
-        AND (${search ?? null} IS NULL OR (
+        AND (${status ?? null}::text IS NULL OR status = ${status ?? null})
+        AND (${type ?? null}::text IS NULL OR type = ${type ?? null})
+        AND (${search ?? null}::text IS NULL OR (
           title ILIKE ${'%' + (search ?? '') + '%'}
           OR "partyB" ILIKE ${'%' + (search ?? '') + '%'}
         ))

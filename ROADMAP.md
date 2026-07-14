@@ -8,6 +8,7 @@ Veska is early (v0.x) and built in the open. This roadmap is directional, not a 
 - [ ] Battle-test the WhatsApp adapter end-to-end against the WhatsApp Business API
 - [ ] Battle-test the Telegram adapter end-to-end
 - [~] Unit test coverage for API routes (harness landed + first 9 modules; ~70 to go)
+- [ ] Green up the Playwright E2E suite (30 of 78 UI specs currently fail)
 - [ ] Load testing and published performance numbers
 - [ ] Publish `@veska/sdk` and `@veska/cli` to npm
 
@@ -34,4 +35,4 @@ Veska is early (v0.x) and built in the open. This roadmap is directional, not a 
 - [x] AI action agent with 57 ERP tools (Anthropic Claude or local Ollama)
 - [x] Slack and Email channel adapters
 - [x] Plugin SDK + Stripe, QuickBooks, Google Calendar plugins
-- [x] Docker Compose self-hosting, CI, 166 tests (52 Playwright E2E)
+- [x] Docker Compose self-hosting, CI, 222 unit tests (core + API routes + plugins)

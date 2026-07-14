@@ -1,5 +1,5 @@
 -- Full-text search index on entityRecords
-CREATE INDEX IF NOT EXISTS idx_entity_records_fts
+CREATE INDEX IF NOT EXISTS "idxEntityRecordsFts"
   ON "entityRecords" USING gin(to_tsvector('english', data::text));
 
 -- Saved reports
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS "savedReports" (
   "createdAt"   TIMESTAMPTZ NOT NULL DEFAULT now(),
   "updatedAt"   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_saved_reports_tenant ON "savedReports"("tenantId");
+CREATE INDEX IF NOT EXISTS "idxSavedReportsTenant" ON "savedReports"("tenantId");
 
 -- Report schedules
 CREATE TABLE IF NOT EXISTS "reportSchedules" (

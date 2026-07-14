@@ -70,14 +70,14 @@ analyticsRouter.get('/revenue', async (c) => {
   try {
     const result = await db.execute(sql`
       SELECT
-        DATE_TRUNC(${trunc}, created_at)::date AS bucket,
+        DATE_TRUNC(${trunc}, "createdAt")::date AS bucket,
         COALESCE(SUM(CAST(COALESCE(data->>'total', data->>'amount') AS numeric)), 0) AS revenue
-      FROM entity_records
-      WHERE tenant_id = ${tenantId}
-        AND entity_type = 'Invoice'
+      FROM "entityRecords"
+      WHERE "tenantId" = ${tenantId}
+        AND "entityType" = 'Invoice'
         AND data->>'status' = 'paid'
-        AND created_at >= NOW() - (${days} || ' days')::interval
-        AND deleted_at IS NULL
+        AND "createdAt" >= NOW() - (${days} || ' days')::interval
+        AND "deletedAt" IS NULL
       GROUP BY bucket
       ORDER BY bucket ASC
     `);
@@ -121,11 +121,11 @@ analyticsRouter.get('/expenses', async (c) => {
       SELECT
         COALESCE(data->>'category', 'Uncategorised') AS category,
         COALESCE(SUM(CAST(data->>'amount' AS numeric)), 0) AS total
-      FROM entity_records
-      WHERE tenant_id = ${tenantId}
-        AND entity_type = 'Expense'
-        AND created_at >= NOW() - (${days} || ' days')::interval
-        AND deleted_at IS NULL
+      FROM "entityRecords"
+      WHERE "tenantId" = ${tenantId}
+        AND "entityType" = 'Expense'
+        AND "createdAt" >= NOW() - (${days} || ' days')::interval
+        AND "deletedAt" IS NULL
       GROUP BY category
       ORDER BY total DESC
     `);
@@ -169,10 +169,10 @@ analyticsRouter.get('/headcount', async (c) => {
       SELECT
         COALESCE(data->>'department', 'Unassigned') AS department,
         COUNT(*) AS headcount
-      FROM entity_records
-      WHERE tenant_id = ${tenantId}
-        AND entity_type = 'Employee'
-        AND deleted_at IS NULL
+      FROM "entityRecords"
+      WHERE "tenantId" = ${tenantId}
+        AND "entityType" = 'Employee'
+        AND "deletedAt" IS NULL
       GROUP BY department
       ORDER BY headcount DESC
     `);
@@ -197,7 +197,7 @@ analyticsRouter.get('/headcount', async (c) => {
 });
 
 // ── GET /analytics/pipeline ───────────────────────────────────
-// Uses entity_records for deals (Deal entity type)
+// Uses "entityRecords" for deals (Deal entity type)
 
 analyticsRouter.get('/pipeline', async (c) => {
   const { db, tenantId } = c.get('tenantCtx');
@@ -208,11 +208,11 @@ analyticsRouter.get('/pipeline', async (c) => {
         COALESCE(data->>'stage', data->>'status', 'Unknown') AS stage,
         COUNT(*) AS deal_count,
         COALESCE(SUM(CAST(COALESCE(data->>'value', data->>'amount') AS numeric)), 0) AS pipeline_value
-      FROM entity_records
-      WHERE tenant_id = ${tenantId}
-        AND entity_type = 'Deal'
+      FROM "entityRecords"
+      WHERE "tenantId" = ${tenantId}
+        AND "entityType" = 'Deal'
         AND data->>'status' NOT IN ('won', 'lost')
-        AND deleted_at IS NULL
+        AND "deletedAt" IS NULL
       GROUP BY stage
       ORDER BY pipeline_value DESC
     `);
@@ -254,10 +254,10 @@ analyticsRouter.get('/inventory-value', async (c) => {
           CAST(COALESCE(data->>'cost_price', data->>'unitPrice', '0') AS numeric) *
           CAST(COALESCE(data->>'stock_level', data->>'stockQuantity', '0') AS numeric)
         ), 0) AS inventory_value
-      FROM entity_records
-      WHERE tenant_id = ${tenantId}
-        AND entity_type = 'InventoryItem'
-        AND deleted_at IS NULL
+      FROM "entityRecords"
+      WHERE "tenantId" = ${tenantId}
+        AND "entityType" = 'InventoryItem'
+        AND "deletedAt" IS NULL
       GROUP BY category
       ORDER BY inventory_value DESC
     `);
@@ -291,13 +291,13 @@ analyticsRouter.get('/ticket-volume', async (c) => {
   try {
     const result = await db.execute(sql`
       SELECT
-        DATE_TRUNC('day', created_at)::date AS day,
+        DATE_TRUNC('day', "createdAt")::date AS day,
         COUNT(*) AS ticket_count
-      FROM entity_records
-      WHERE tenant_id = ${tenantId}
-        AND entity_type IN ('SupportTicket', 'Ticket', 'ServiceTicket')
-        AND created_at >= NOW() - (${days} || ' days')::interval
-        AND deleted_at IS NULL
+      FROM "entityRecords"
+      WHERE "tenantId" = ${tenantId}
+        AND "entityType" IN ('SupportTicket', 'Ticket', 'ServiceTicket')
+        AND "createdAt" >= NOW() - (${days} || ' days')::interval
+        AND "deletedAt" IS NULL
       GROUP BY day
       ORDER BY day ASC
     `);
@@ -333,53 +333,53 @@ analyticsRouter.get('/summary', async (c) => {
     await Promise.all([
       safeQuery(() => db.execute(sql`
         SELECT COALESCE(SUM(CAST(COALESCE(data->>'total', data->>'amount') AS numeric)), 0) AS total
-        FROM entity_records
-        WHERE tenant_id = ${tenantId}
-          AND entity_type = 'Invoice'
+        FROM "entityRecords"
+        WHERE "tenantId" = ${tenantId}
+          AND "entityType" = 'Invoice'
           AND data->>'status' = 'paid'
-          AND created_at >= NOW() - INTERVAL '30 days'
-          AND deleted_at IS NULL
+          AND "createdAt" >= NOW() - INTERVAL '30 days'
+          AND "deletedAt" IS NULL
       `), null),
       safeQuery(() => db.execute(sql`
         SELECT COALESCE(SUM(CAST(data->>'amount' AS numeric)), 0) AS total
-        FROM entity_records
-        WHERE tenant_id = ${tenantId}
-          AND entity_type = 'Expense'
-          AND created_at >= NOW() - INTERVAL '30 days'
-          AND deleted_at IS NULL
+        FROM "entityRecords"
+        WHERE "tenantId" = ${tenantId}
+          AND "entityType" = 'Expense'
+          AND "createdAt" >= NOW() - INTERVAL '30 days'
+          AND "deletedAt" IS NULL
       `), null),
       safeQuery(() => db.execute(sql`
         SELECT
           COUNT(*) AS count,
           COALESCE(SUM(CAST(COALESCE(data->>'total', data->>'amount') AS numeric)), 0) AS value
-        FROM entity_records
-        WHERE tenant_id = ${tenantId}
-          AND entity_type = 'Invoice'
+        FROM "entityRecords"
+        WHERE "tenantId" = ${tenantId}
+          AND "entityType" = 'Invoice'
           AND data->>'status' NOT IN ('paid', 'cancelled')
-          AND deleted_at IS NULL
+          AND "deletedAt" IS NULL
       `), null),
       safeQuery(() => db.execute(sql`
         SELECT COUNT(*) AS count
-        FROM entity_records
-        WHERE tenant_id = ${tenantId}
-          AND entity_type = 'Employee'
-          AND deleted_at IS NULL
+        FROM "entityRecords"
+        WHERE "tenantId" = ${tenantId}
+          AND "entityType" = 'Employee'
+          AND "deletedAt" IS NULL
       `), null),
       safeQuery(() => db.execute(sql`
         SELECT COUNT(*) AS count
-        FROM entity_records
-        WHERE tenant_id = ${tenantId}
-          AND entity_type IN ('SupportTicket', 'Ticket', 'ServiceTicket')
+        FROM "entityRecords"
+        WHERE "tenantId" = ${tenantId}
+          AND "entityType" IN ('SupportTicket', 'Ticket', 'ServiceTicket')
           AND data->>'status' NOT IN ('resolved', 'closed')
-          AND deleted_at IS NULL
+          AND "deletedAt" IS NULL
       `), null),
       safeQuery(() => db.execute(sql`
         SELECT COALESCE(SUM(CAST(COALESCE(data->>'value', data->>'amount') AS numeric)), 0) AS total
-        FROM entity_records
-        WHERE tenant_id = ${tenantId}
-          AND entity_type = 'Deal'
+        FROM "entityRecords"
+        WHERE "tenantId" = ${tenantId}
+          AND "entityType" = 'Deal'
           AND data->>'status' NOT IN ('won', 'lost')
-          AND deleted_at IS NULL
+          AND "deletedAt" IS NULL
       `), null),
     ]);
 

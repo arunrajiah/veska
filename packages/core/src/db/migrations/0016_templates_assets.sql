@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS "documentTemplates" (
   "createdAt"  TIMESTAMPTZ NOT NULL DEFAULT now(),
   "updatedAt"  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_doc_templates_tenant ON "documentTemplates"("tenantId");
+CREATE INDEX IF NOT EXISTS "idxDocTemplatesTenant" ON "documentTemplates"("tenantId");
 
 -- Generated documents (render history)
 CREATE TABLE IF NOT EXISTS "generatedDocuments" (
@@ -26,8 +26,8 @@ CREATE TABLE IF NOT EXISTS "generatedDocuments" (
   "createdBy"  TEXT,
   "createdAt"  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_gen_docs_tenant ON "generatedDocuments"("tenantId");
-CREATE INDEX IF NOT EXISTS idx_gen_docs_entity ON "generatedDocuments"("tenantId", "entityType", "entityId");
+CREATE INDEX IF NOT EXISTS "idxGenDocsTenant" ON "generatedDocuments"("tenantId");
+CREATE INDEX IF NOT EXISTS "idxGenDocsEntity" ON "generatedDocuments"("tenantId", "entityType", "entityId");
 
 -- Assets
 CREATE TABLE IF NOT EXISTS "assets" (
@@ -49,5 +49,5 @@ CREATE TABLE IF NOT EXISTS "assets" (
   "createdAt"       TIMESTAMPTZ NOT NULL DEFAULT now(),
   "updatedAt"       TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_assets_tenant ON "assets"("tenantId");
-CREATE INDEX IF NOT EXISTS idx_assets_status ON "assets"("tenantId", status);
+CREATE INDEX IF NOT EXISTS "idxAssetsTenant" ON "assets"("tenantId");
+CREATE INDEX IF NOT EXISTS "idxAssetsStatus" ON "assets"("tenantId", status);

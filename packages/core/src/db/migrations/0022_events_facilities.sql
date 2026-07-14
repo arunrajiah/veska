@@ -19,8 +19,8 @@ CREATE TABLE IF NOT EXISTS "events" (
   "createdAt"     TIMESTAMPTZ NOT NULL DEFAULT now(),
   "updatedAt"     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_events_tenant ON "events"("tenantId");
-CREATE INDEX IF NOT EXISTS idx_events_dates ON "events"("tenantId", "startAt", "endAt");
+CREATE INDEX IF NOT EXISTS "idxEventsTenant" ON "events"("tenantId");
+CREATE INDEX IF NOT EXISTS "idxEventsDates" ON "events"("tenantId", "startAt", "endAt");
 
 -- Event attendees
 CREATE TABLE IF NOT EXISTS "eventAttendees" (
@@ -34,9 +34,9 @@ CREATE TABLE IF NOT EXISTS "eventAttendees" (
   "respondedAt" TIMESTAMPTZ,
   "createdAt"  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE UNIQUE INDEX IF NOT EXISTS idx_event_attendees_unique ON "eventAttendees"("tenantId", "eventId", "userId");
-CREATE INDEX IF NOT EXISTS idx_event_attendees_event ON "eventAttendees"("tenantId", "eventId");
-CREATE INDEX IF NOT EXISTS idx_event_attendees_user ON "eventAttendees"("tenantId", "userId");
+CREATE UNIQUE INDEX IF NOT EXISTS "idxEventAttendeesUnique" ON "eventAttendees"("tenantId", "eventId", "userId");
+CREATE INDEX IF NOT EXISTS "idxEventAttendeesEvent" ON "eventAttendees"("tenantId", "eventId");
+CREATE INDEX IF NOT EXISTS "idxEventAttendeesUser" ON "eventAttendees"("tenantId", "userId");
 
 -- Rooms / meeting spaces
 CREATE TABLE IF NOT EXISTS "rooms" (
@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS "rooms" (
   "createdAt"    TIMESTAMPTZ NOT NULL DEFAULT now(),
   "updatedAt"    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_rooms_tenant ON "rooms"("tenantId");
+CREATE INDEX IF NOT EXISTS "idxRoomsTenant" ON "rooms"("tenantId");
 
 -- Room bookings
 CREATE TABLE IF NOT EXISTS "roomBookings" (
@@ -68,8 +68,8 @@ CREATE TABLE IF NOT EXISTS "roomBookings" (
   status         TEXT NOT NULL DEFAULT 'confirmed', -- 'confirmed'|'cancelled'
   "createdAt"    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_room_bookings_room ON "roomBookings"("tenantId", "roomId");
-CREATE INDEX IF NOT EXISTS idx_room_bookings_dates ON "roomBookings"("tenantId", "startAt", "endAt");
+CREATE INDEX IF NOT EXISTS "idxRoomBookingsRoom" ON "roomBookings"("tenantId", "roomId");
+CREATE INDEX IF NOT EXISTS "idxRoomBookingsDates" ON "roomBookings"("tenantId", "startAt", "endAt");
 
 -- Facilities maintenance requests
 CREATE TABLE IF NOT EXISTS "facilityRequests" (
@@ -89,4 +89,4 @@ CREATE TABLE IF NOT EXISTS "facilityRequests" (
   "createdAt"    TIMESTAMPTZ NOT NULL DEFAULT now(),
   "updatedAt"    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_facility_requests_tenant ON "facilityRequests"("tenantId");
+CREATE INDEX IF NOT EXISTS "idxFacilityRequestsTenant" ON "facilityRequests"("tenantId");

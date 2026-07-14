@@ -17,8 +17,8 @@ CREATE TABLE IF NOT EXISTS "productVariants" (
   "createdAt"     TIMESTAMPTZ NOT NULL DEFAULT now(),
   "updatedAt"     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE UNIQUE INDEX IF NOT EXISTS idx_product_variants_sku ON "productVariants"("tenantId", sku);
-CREATE INDEX IF NOT EXISTS idx_product_variants_product ON "productVariants"("tenantId", "productId");
+CREATE UNIQUE INDEX IF NOT EXISTS "idxProductVariantsSku" ON "productVariants"("tenantId", sku);
+CREATE INDEX IF NOT EXISTS "idxProductVariantsProduct" ON "productVariants"("tenantId", "productId");
 
 -- Price lists (for B2B tiers, regions, customer segments)
 CREATE TABLE IF NOT EXISTS "priceLists" (
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS "priceLists" (
   "createdAt"  TIMESTAMPTZ NOT NULL DEFAULT now(),
   "updatedAt"  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_price_lists_tenant ON "priceLists"("tenantId");
+CREATE INDEX IF NOT EXISTS "idxPriceListsTenant" ON "priceLists"("tenantId");
 
 -- Price list items (product-specific overrides within a price list)
 CREATE TABLE IF NOT EXISTS "priceListItems" (
@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS "priceListItems" (
   "minQuantity"   INTEGER NOT NULL DEFAULT 1,  -- quantity break pricing
   "createdAt"     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_price_list_items_list ON "priceListItems"("tenantId", "priceListId");
+CREATE INDEX IF NOT EXISTS "idxPriceListItemsList" ON "priceListItems"("tenantId", "priceListId");
 
 -- Discount rules
 CREATE TABLE IF NOT EXISTS "discountRules" (
@@ -72,5 +72,5 @@ CREATE TABLE IF NOT EXISTS "discountRules" (
   "createdAt"     TIMESTAMPTZ NOT NULL DEFAULT now(),
   "updatedAt"     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_discount_rules_tenant ON "discountRules"("tenantId");
-CREATE INDEX IF NOT EXISTS idx_discount_rules_code ON "discountRules"("tenantId", code);
+CREATE INDEX IF NOT EXISTS "idxDiscountRulesTenant" ON "discountRules"("tenantId");
+CREATE INDEX IF NOT EXISTS "idxDiscountRulesCode" ON "discountRules"("tenantId", code);

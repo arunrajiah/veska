@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS "payrollRuns" (
   "createdAt"    TIMESTAMPTZ NOT NULL DEFAULT now(),
   "updatedAt"    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_payroll_runs_tenant ON "payrollRuns"("tenantId");
+CREATE INDEX IF NOT EXISTS "idxPayrollRunsTenant" ON "payrollRuns"("tenantId");
 
 -- Payroll line items (one per employee per run)
 CREATE TABLE IF NOT EXISTS "payrollItems" (
@@ -43,8 +43,8 @@ CREATE TABLE IF NOT EXISTS "payrollItems" (
   "payslipGenerated" BOOLEAN NOT NULL DEFAULT false,
   "createdAt"      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_payroll_items_run ON "payrollItems"("tenantId", "runId");
-CREATE INDEX IF NOT EXISTS idx_payroll_items_employee ON "payrollItems"("tenantId", "employeeId");
+CREATE INDEX IF NOT EXISTS "idxPayrollItemsRun" ON "payrollItems"("tenantId", "runId");
+CREATE INDEX IF NOT EXISTS "idxPayrollItemsEmployee" ON "payrollItems"("tenantId", "employeeId");
 
 -- Contracts
 CREATE TABLE IF NOT EXISTS "contracts" (
@@ -72,8 +72,8 @@ CREATE TABLE IF NOT EXISTS "contracts" (
   "createdAt"     TIMESTAMPTZ NOT NULL DEFAULT now(),
   "updatedAt"     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_contracts_tenant ON "contracts"("tenantId");
-CREATE INDEX IF NOT EXISTS idx_contracts_status ON "contracts"("tenantId", status);
+CREATE INDEX IF NOT EXISTS "idxContractsTenant" ON "contracts"("tenantId");
+CREATE INDEX IF NOT EXISTS "idxContractsStatus" ON "contracts"("tenantId", status);
 
 -- Contract events (lifecycle log)
 CREATE TABLE IF NOT EXISTS "contractEvents" (
@@ -86,4 +86,4 @@ CREATE TABLE IF NOT EXISTS "contractEvents" (
   metadata     JSONB NOT NULL DEFAULT '{}',
   "createdAt"  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_contract_events_contract ON "contractEvents"("tenantId", "contractId");
+CREATE INDEX IF NOT EXISTS "idxContractEventsContract" ON "contractEvents"("tenantId", "contractId");

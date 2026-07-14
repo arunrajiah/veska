@@ -12,5 +12,5 @@ CREATE TABLE IF NOT EXISTS "attachments" (
   "createdAt" timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS "attachments_entity_idx" ON "attachments"("entityType", "entityId");
+CREATE INDEX IF NOT EXISTS "attachmentsEntityIdx" ON "attachments"("entityType", "entityId");
 CREATE INDEX IF NOT EXISTS "attachments_tenantId_idx" ON "attachments"("tenantId");

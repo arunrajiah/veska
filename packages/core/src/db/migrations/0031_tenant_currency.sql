@@ -7,4 +7,4 @@ CREATE TABLE IF NOT EXISTS "exchangeRateCache" (
   "rates" jsonb NOT NULL,
   "fetchedAt" timestamptz NOT NULL DEFAULT now()
 );
-CREATE UNIQUE INDEX IF NOT EXISTS "exchange_rate_base_idx" ON "exchangeRateCache"("baseCurrency");
+CREATE UNIQUE INDEX IF NOT EXISTS "exchangeRateBaseIdx" ON "exchangeRateCache"("baseCurrency");

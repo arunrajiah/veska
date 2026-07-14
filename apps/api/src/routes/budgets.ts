@@ -119,8 +119,8 @@ budgetsRouter.get('/', async (c) => {
       FROM "budgets" b
       WHERE b."tenantId" = ${tenantId}
         AND (${fiscalYear ?? null}::integer IS NULL OR b."fiscalYear" = ${fiscalYear ? parseInt(fiscalYear, 10) : null}::integer)
-        AND (${status ?? null} IS NULL OR b.status = ${status ?? null})
-        AND (${period ?? null} IS NULL OR b.period = ${period ?? null})
+        AND (${status ?? null}::text IS NULL OR b.status = ${status ?? null})
+        AND (${period ?? null}::text IS NULL OR b.period = ${period ?? null})
       ORDER BY b."createdAt" DESC
     `);
 

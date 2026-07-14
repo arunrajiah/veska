@@ -58,9 +58,9 @@ vendorsRouter.get('/', async (c) => {
     SELECT *
     FROM "vendors"
     WHERE "tenantId" = ${tenantId}
-      AND (${status} IS NULL OR status = ${status})
-      AND (${category} IS NULL OR category = ${category})
-      AND (${searchPattern} IS NULL OR (
+      AND (${status}::text IS NULL OR status = ${status})
+      AND (${category}::text IS NULL OR category = ${category})
+      AND (${searchPattern}::text IS NULL OR (
         name ILIKE ${searchPattern}
         OR code ILIKE ${searchPattern}
         OR email ILIKE ${searchPattern}

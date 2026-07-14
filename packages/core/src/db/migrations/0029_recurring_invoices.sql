@@ -10,5 +10,5 @@ CREATE TABLE IF NOT EXISTS "recurringInvoiceSchedules" (
   "createdAt" timestamptz NOT NULL DEFAULT now(),
   "updatedAt" timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS "recurring_tenant_idx" ON "recurringInvoiceSchedules"("tenantId");
-CREATE INDEX IF NOT EXISTS "recurring_next_run_idx" ON "recurringInvoiceSchedules"("nextRunAt") WHERE "enabled" = true;
+CREATE INDEX IF NOT EXISTS "recurringTenantIdx" ON "recurringInvoiceSchedules"("tenantId");
+CREATE INDEX IF NOT EXISTS "recurringNextRunIdx" ON "recurringInvoiceSchedules"("nextRunAt") WHERE "enabled" = true;

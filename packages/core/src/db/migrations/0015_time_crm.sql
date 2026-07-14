@@ -15,8 +15,8 @@ CREATE TABLE IF NOT EXISTS "timeEntries" (
   "createdAt"  TIMESTAMPTZ NOT NULL DEFAULT now(),
   "updatedAt"  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_time_entries_tenant_user ON "timeEntries"("tenantId", "userId");
-CREATE INDEX IF NOT EXISTS idx_time_entries_date ON "timeEntries"("tenantId", date);
+CREATE INDEX IF NOT EXISTS "idxTimeEntriesTenantUser" ON "timeEntries"("tenantId", "userId");
+CREATE INDEX IF NOT EXISTS "idxTimeEntriesDate" ON "timeEntries"("tenantId", date);
 
 -- CRM: contacts
 CREATE TABLE IF NOT EXISTS "crmContacts" (
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS "crmContacts" (
   "createdAt"  TIMESTAMPTZ NOT NULL DEFAULT now(),
   "updatedAt"  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_crm_contacts_tenant ON "crmContacts"("tenantId");
+CREATE INDEX IF NOT EXISTS "idxCrmContactsTenant" ON "crmContacts"("tenantId");
 
 -- CRM: deal stages (pipeline definition)
 CREATE TABLE IF NOT EXISTS "dealStages" (
@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS "dealStages" (
   probability INTEGER NOT NULL DEFAULT 0, -- 0-100
   "createdAt" TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_deal_stages_tenant ON "dealStages"("tenantId");
+CREATE INDEX IF NOT EXISTS "idxDealStagesTenant" ON "dealStages"("tenantId");
 
 -- CRM: deals
 CREATE TABLE IF NOT EXISTS "crmDeals" (
@@ -63,5 +63,5 @@ CREATE TABLE IF NOT EXISTS "crmDeals" (
   "createdAt"  TIMESTAMPTZ NOT NULL DEFAULT now(),
   "updatedAt"  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_crm_deals_tenant ON "crmDeals"("tenantId");
-CREATE INDEX IF NOT EXISTS idx_crm_deals_stage ON "crmDeals"("tenantId", "stageId");
+CREATE INDEX IF NOT EXISTS "idxCrmDealsTenant" ON "crmDeals"("tenantId");
+CREATE INDEX IF NOT EXISTS "idxCrmDealsStage" ON "crmDeals"("tenantId", "stageId");

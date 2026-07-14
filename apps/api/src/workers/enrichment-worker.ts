@@ -19,7 +19,7 @@ import type { EnrichEntityJob } from '@veska/core';
  * Job payload: { tenantId, entityType, entityId, fields: string[] }
  *
  * Steps:
- * 1. Load the entity record from entity_records by id = entityId.
+ * 1. Load the entity record from "entityRecords" by id = entityId.
  * 2. Load the entity definition by tenantId + name = entityType.
  * 3. Build a prompt asking Claude to fill in the `fields` array based
  *    on existing record.data values.

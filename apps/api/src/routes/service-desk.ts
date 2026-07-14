@@ -134,11 +134,11 @@ serviceDeskRouter.get('/tickets', async (c) => {
     FROM "serviceTickets" t
     LEFT JOIN "ticketComments" c ON c."ticketId" = t.id AND c."tenantId" = t."tenantId"
     WHERE t."tenantId" = ${tenantId}
-      AND (${status} IS NULL OR t.status = ${status})
-      AND (${category} IS NULL OR t.category = ${category})
-      AND (${priority} IS NULL OR t.priority = ${priority})
-      AND (${assignedTo} IS NULL OR t."assignedTo" = ${assignedTo})
-      AND (${requestedBy} IS NULL OR t."requestedBy" = ${requestedBy})
+      AND (${status}::text IS NULL OR t.status = ${status})
+      AND (${category}::text IS NULL OR t.category = ${category})
+      AND (${priority}::text IS NULL OR t.priority = ${priority})
+      AND (${assignedTo}::text IS NULL OR t."assignedTo" = ${assignedTo})
+      AND (${requestedBy}::text IS NULL OR t."requestedBy" = ${requestedBy})
     GROUP BY t.id
     ORDER BY t."createdAt" DESC
   `);

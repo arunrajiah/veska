@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS "workflowRunSteps" (
   "completedAt"   TIMESTAMPTZ,
   "createdAt"     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_workflow_run_steps_run ON "workflowRunSteps"("tenantId", "workflowRunId");
+CREATE INDEX IF NOT EXISTS "idxWorkflowRunStepsRun" ON "workflowRunSteps"("tenantId", "workflowRunId");
 
 -- Workflow templates (pre-built common automations)
 CREATE TABLE IF NOT EXISTS "workflowTemplates" (

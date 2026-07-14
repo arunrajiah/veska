@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS "budgets" (
   "createdAt"  TIMESTAMPTZ NOT NULL DEFAULT now(),
   "updatedAt"  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_budgets_tenant ON "budgets"("tenantId");
+CREATE INDEX IF NOT EXISTS "idxBudgetsTenant" ON "budgets"("tenantId");
 
 -- Budget line items
 CREATE TABLE IF NOT EXISTS "budgetLineItems" (
@@ -31,4 +31,4 @@ CREATE TABLE IF NOT EXISTS "budgetLineItems" (
   "createdAt"  TIMESTAMPTZ NOT NULL DEFAULT now(),
   "updatedAt"  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_budget_items_budget ON "budgetLineItems"("tenantId", "budgetId");
+CREATE INDEX IF NOT EXISTS "idxBudgetItemsBudget" ON "budgetLineItems"("tenantId", "budgetId");

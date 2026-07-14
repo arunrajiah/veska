@@ -298,7 +298,7 @@ workflowsRouter.get('/:id/runs', async (c) => {
   try {
     // Verify workflow exists for this tenant
     const defRows = await sharedDb.execute(
-      sql`SELECT id FROM workflow_definitions WHERE id = ${id} AND tenant_id = ${tenantId} LIMIT 1`,
+      sql`SELECT id FROM "workflowDefinitions" WHERE id = ${id} AND "tenantId" = ${tenantId} LIMIT 1`,
     );
     const defs = defRows.rows ?? (defRows as unknown as unknown[]);
     if (!Array.isArray(defs) || defs.length === 0) {
@@ -307,7 +307,7 @@ workflowsRouter.get('/:id/runs', async (c) => {
 
     // Fetch up to 50 most recent runs
     const runRows = await sharedDb.execute(
-      sql`SELECT * FROM workflow_runs WHERE workflow_id = ${id} AND tenant_id = ${tenantId} ORDER BY started_at DESC LIMIT 50`,
+      sql`SELECT * FROM "workflowRuns" WHERE "workflowId" = ${id} AND "tenantId" = ${tenantId} ORDER BY "startedAt" DESC LIMIT 50`,
     );
     const runs = (runRows.rows ?? (runRows as unknown as unknown[])) as Record<string, unknown>[];
 
@@ -340,7 +340,7 @@ workflowsRouter.post('/:id/test-run', async (c) => {
   try {
     // Verify workflow exists for this tenant
     const defRows = await sharedDb.execute(
-      sql`SELECT id FROM workflow_definitions WHERE id = ${id} AND tenant_id = ${tenantId} LIMIT 1`,
+      sql`SELECT id FROM "workflowDefinitions" WHERE id = ${id} AND "tenantId" = ${tenantId} LIMIT 1`,
     );
     const defs = defRows.rows ?? (defRows as unknown as unknown[]);
     if (!Array.isArray(defs) || defs.length === 0) {
@@ -351,7 +351,7 @@ workflowsRouter.post('/:id/test-run', async (c) => {
     let runId: string | null = null;
     try {
       const insertRows = await sharedDb.execute(
-        sql`INSERT INTO workflow_runs (tenant_id, workflow_id, status, context, started_at)
+        sql`INSERT INTO "workflowRuns" ("tenantId", "workflowId", status, context, "startedAt")
             VALUES (${tenantId}, ${id}, 'running', '{"triggeredBy":"manual_test"}'::jsonb, now())
             RETURNING id`,
       );

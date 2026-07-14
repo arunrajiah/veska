@@ -4,6 +4,43 @@ All notable changes to Veska are documented here. The format follows [Keep a Cha
 
 ## [Unreleased]
 
+### Fixed — the app now actually runs end to end
+
+Veska did not boot from a clean clone. The database could not be created, and the
+documented demo login returned HTTP 500. The following fixes were needed to get from
+`git clone` to a working, logged-in app.
+
+- **`pnpm db:migrate` did nothing.** The migration folder had 32 `.sql` files but no
+  `meta/_journal.json`, which drizzle's migrator requires, so a fresh clone could never
+  create its schema. Added the journal; all migrations now apply.
+- **The schema used two conflicting naming conventions.** 12 tables were snake_case
+  (`entity_records`) while 61 were camelCase (`"vendors"."tenantId"`), and raw SQL in the
+  routes referenced the camelCase spelling of tables that had been created snake_case. In
+  Postgres those are different identifiers, so 15 route files (reports, search, budgets,
+  hr, product-catalog, ai, …) failed with `relation "entityRecords" does not exist`.
+  Everything is now camelCase, matching the API response contract the admin UI consumes.
+- **Two migrations aborted partway.** `0013` referenced a table that did not exist, and
+  `0024` did `CREATE TABLE IF NOT EXISTS notifications` against a table 0004 had already
+  created with a different shape, so the create silently no-opped and the next statement
+  failed.
+- **The audit trail was split across two tables.** `audit_log` (written by the core
+  AuditService) and `auditLog` (read by the `/audit` route) both existed, so the audit UI
+  never showed what the service recorded. Merged into one canonical `"auditLog"`.
+- **Login was impossible.** `/auth/login` queried `users."passwordHash"` and
+  `users."isActive"`, which no migration ever created; the seed wrote credentials only to
+  `identities`, and hashed them with sha256 while login verified with bcrypt. Added the
+  columns, switched the seed to bcrypt, and had it create the matching `users` and
+  `userRoles` rows (without a `userRoles` row, RBAC denied every request with a 403).
+- **`(${x} IS NULL OR col = ${x})` filters crashed on null.** Postgres could not infer the
+  parameter type, so listing budgets, contracts, vendors, service-desk tickets, and payroll
+  runs returned 500. Added explicit casts (15 sites).
+- **A custom `DATABASE_URL` in `.env` was ignored.** turbo did not forward it and
+  `drizzle.config.ts` never loaded `.env`, so migrations silently used the default URL.
+
+Verified against a live Postgres: `db:migrate` → `seed` → login returns 200 with a session
+token (wrong password correctly 401s), and 19 core API routes return 200 with real data and
+zero 500s.
+
 ### Fixed
 
 - **Critical: raw-SQL routes returned malformed results and could throw at runtime.** The

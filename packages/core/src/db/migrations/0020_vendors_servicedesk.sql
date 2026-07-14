@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS "vendors" (
   "createdAt"     TIMESTAMPTZ NOT NULL DEFAULT now(),
   "updatedAt"     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_vendors_tenant ON "vendors"("tenantId");
+CREATE INDEX IF NOT EXISTS "idxVendorsTenant" ON "vendors"("tenantId");
 
 -- Vendor contacts
 CREATE TABLE IF NOT EXISTS "vendorContacts" (
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS "vendorContacts" (
   "isPrimary"  BOOLEAN NOT NULL DEFAULT false,
   "createdAt"  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_vendor_contacts_vendor ON "vendorContacts"("tenantId", "vendorId");
+CREATE INDEX IF NOT EXISTS "idxVendorContactsVendor" ON "vendorContacts"("tenantId", "vendorId");
 
 -- Vendor performance ratings
 CREATE TABLE IF NOT EXISTS "vendorRatings" (
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS "vendorRatings" (
   "ratedBy"    TEXT,
   "createdAt"  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_vendor_ratings_vendor ON "vendorRatings"("tenantId", "vendorId");
+CREATE INDEX IF NOT EXISTS "idxVendorRatingsVendor" ON "vendorRatings"("tenantId", "vendorId");
 
 -- Service desk tickets
 CREATE TABLE IF NOT EXISTS "serviceTickets" (
@@ -69,9 +69,9 @@ CREATE TABLE IF NOT EXISTS "serviceTickets" (
   "createdAt"     TIMESTAMPTZ NOT NULL DEFAULT now(),
   "updatedAt"     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_service_tickets_tenant ON "serviceTickets"("tenantId");
-CREATE INDEX IF NOT EXISTS idx_service_tickets_status ON "serviceTickets"("tenantId", status);
-CREATE INDEX IF NOT EXISTS idx_service_tickets_assigned ON "serviceTickets"("tenantId", "assignedTo");
+CREATE INDEX IF NOT EXISTS "idxServiceTicketsTenant" ON "serviceTickets"("tenantId");
+CREATE INDEX IF NOT EXISTS "idxServiceTicketsStatus" ON "serviceTickets"("tenantId", status);
+CREATE INDEX IF NOT EXISTS "idxServiceTicketsAssigned" ON "serviceTickets"("tenantId", "assignedTo");
 
 -- Ticket comments
 CREATE TABLE IF NOT EXISTS "ticketComments" (
@@ -84,4 +84,4 @@ CREATE TABLE IF NOT EXISTS "ticketComments" (
   "isInternal" BOOLEAN NOT NULL DEFAULT false,  -- internal note vs customer-visible
   "createdAt"  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_ticket_comments_ticket ON "ticketComments"("tenantId", "ticketId");
+CREATE INDEX IF NOT EXISTS "idxTicketCommentsTicket" ON "ticketComments"("tenantId", "ticketId");

@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS "dataRequests" (
   "createdAt"  TIMESTAMPTZ NOT NULL DEFAULT now(),
   "updatedAt"  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_data_requests_tenant ON "dataRequests"("tenantId");
+CREATE INDEX IF NOT EXISTS "idxDataRequestsTenant" ON "dataRequests"("tenantId");
 
 -- Consent log
 CREATE TABLE IF NOT EXISTS "consentLog" (
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS "consentLog" (
   "userAgent"  TEXT,
   "createdAt"  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_consent_tenant_user ON "consentLog"("tenantId", "userId");
+CREATE INDEX IF NOT EXISTS "idxConsentTenantUser" ON "consentLog"("tenantId", "userId");
 
 -- Data retention policies
 CREATE TABLE IF NOT EXISTS "retentionPolicies" (
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS "retentionPolicies" (
   "createdAt"  TIMESTAMPTZ NOT NULL DEFAULT now(),
   "updatedAt"  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE UNIQUE INDEX IF NOT EXISTS idx_retention_tenant_type ON "retentionPolicies"("tenantId", "entityType");
+CREATE UNIQUE INDEX IF NOT EXISTS "idxRetentionTenantType" ON "retentionPolicies"("tenantId", "entityType");
 
 -- Integration configurations
 CREATE TABLE IF NOT EXISTS "integrationConfigs" (
@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS "integrationConfigs" (
   "createdAt"  TIMESTAMPTZ NOT NULL DEFAULT now(),
   "updatedAt"  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_integrations_tenant ON "integrationConfigs"("tenantId");
+CREATE INDEX IF NOT EXISTS "idxIntegrationsTenant" ON "integrationConfigs"("tenantId");
 
 -- Integration event log
 CREATE TABLE IF NOT EXISTS "integrationEvents" (
@@ -66,5 +66,5 @@ CREATE TABLE IF NOT EXISTS "integrationEvents" (
   "deliveredAt"  TIMESTAMPTZ,
   "createdAt"    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_integration_events_tenant ON "integrationEvents"("tenantId");
-CREATE INDEX IF NOT EXISTS idx_integration_events_integration ON "integrationEvents"("integrationId");
+CREATE INDEX IF NOT EXISTS "idxIntegrationEventsTenant" ON "integrationEvents"("tenantId");
+CREATE INDEX IF NOT EXISTS "idxIntegrationEventsIntegration" ON "integrationEvents"("integrationId");

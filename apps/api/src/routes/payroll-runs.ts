@@ -203,8 +203,8 @@ payrollRunsRouter.get('/', zValidator('query', listRunsQuerySchema), async (c) =
       SELECT *
       FROM "payrollRuns"
       WHERE "tenantId" = ${tenantId}
-        AND (${status ?? null} IS NULL OR status = ${status ?? null})
-        AND (${yearNum ?? null} IS NULL OR EXTRACT(YEAR FROM "periodStart") = ${yearNum ?? null}::integer)
+        AND (${status ?? null}::text IS NULL OR status = ${status ?? null})
+        AND (${yearNum ?? null}::text IS NULL OR EXTRACT(YEAR FROM "periodStart") = ${yearNum ?? null}::integer)
       ORDER BY "createdAt" DESC
     `);
 

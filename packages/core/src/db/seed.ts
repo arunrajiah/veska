@@ -4,8 +4,9 @@
  */
 import { createDatabase } from './client.js';
 import * as schema from './schema.js';
-import { createHash, randomUUID } from 'node:crypto';
-import { eq } from 'drizzle-orm';
+import { randomUUID } from 'node:crypto';
+import { eq, sql } from 'drizzle-orm';
+import bcrypt from 'bcrypt';
 
 const DATABASE_URL = process.env['DATABASE_URL'];
 if (!DATABASE_URL) {
@@ -25,8 +26,10 @@ function isoDate(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
 
+// /auth/login verifies with bcrypt.compare, so the seed must produce a bcrypt hash.
+// It previously wrote a sha256 digest here, which bcrypt could never match.
 function hashPassword(pw: string): string {
-  return createHash('sha256').update(pw).digest('hex');
+  return bcrypt.hashSync(pw, 10);
 }
 
 const DEMO_PW = hashPassword('demo1234');
@@ -143,6 +146,34 @@ async function seed() {
       deniedCapabilities: [],
     },
   ]);
+
+  // /auth/login authenticates against "users" (and sessions.userId references it),
+  // while RBAC and channels key off "identities". The seed previously created only
+  // identities, so the demo credentials could never log in. Create the matching
+  // users rows, reusing the identity ids so userId and identityId line up.
+  const demoUsers: Array<{ id: string; email: string; name: string; roleId: string }> = [
+    { id: adminId, email: 'admin@acme.com', name: 'Admin User', roleId: adminRoleId },
+    { id: hrId, email: 'hr@acme.com', name: 'HR Manager', roleId: hrRoleId },
+    { id: financeId, email: 'finance@acme.com', name: 'Finance Manager', roleId: financeRoleId },
+    { id: johnId, email: 'john@acme.com', name: 'John Employee', roleId: employeeRoleId },
+  ];
+
+  for (const u of demoUsers) {
+    await db.execute(sql`
+      INSERT INTO "users" ("id", "tenantId", "email", "name", "status", "passwordHash", "isActive")
+      VALUES (${u.id}, ${tenantId}, ${u.email}, ${u.name}, 'active', ${DEMO_PW}, true)
+      ON CONFLICT ("tenantId", "email") DO NOTHING
+    `);
+
+    // requirePermission() resolves capabilities via userRoles -> roles, so a user with
+    // no userRoles row is denied everything (403) even if their identity grants '*'.
+    await db.execute(sql`
+      INSERT INTO "userRoles" ("userId", "roleId")
+      VALUES (${u.id}, ${u.roleId})
+      ON CONFLICT ("userId", "roleId") DO NOTHING
+    `);
+  }
+
   console.log('  Users created: admin@acme.com, hr@acme.com, finance@acme.com, john@acme.com');
 
   // ── Contacts (CRM) ─────────────────────────────────────────────────────────
@@ -531,6 +562,10 @@ async function seed() {
   console.log('  hr@acme.com     / demo1234  (HR Manager)');
   console.log('  finance@acme.com/ demo1234  (Finance)');
   console.log('  john@acme.com   / demo1234  (Employee)');
+
+  console.log('\nAdd these to your .env so the Admin UI can reach the API:');
+  console.log(`  NEXT_PUBLIC_TENANT_ID=${tenantId}`);
+  console.log(`  NEXT_PUBLIC_ADMIN_IDENTITY_ID=${adminId}`);
 }
 
 seed()

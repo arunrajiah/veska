@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS "taxRates" (
   "createdAt"     TIMESTAMPTZ NOT NULL DEFAULT now(),
   "updatedAt"     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_tax_rates_tenant ON "taxRates"("tenantId");
+CREATE INDEX IF NOT EXISTS "idxTaxRatesTenant" ON "taxRates"("tenantId");
 
 -- Email send log (records every email attempt)
 CREATE TABLE IF NOT EXISTS "emailLog" (
@@ -59,4 +59,4 @@ CREATE TABLE IF NOT EXISTS "emailLog" (
   "sentAt"      TIMESTAMPTZ,
   "createdAt"   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_email_log_tenant ON "emailLog"("tenantId", "createdAt" DESC);
+CREATE INDEX IF NOT EXISTS "idxEmailLogTenant" ON "emailLog"("tenantId", "createdAt" DESC);

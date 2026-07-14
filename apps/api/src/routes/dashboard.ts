@@ -101,12 +101,12 @@ dashboardRouter.get('/stats', async (c) => {
       const res = await db.execute(sql`
         SELECT
           COALESCE(SUM(CASE WHEN data->>'status' IN ('sent','overdue') THEN (data->>'amount')::numeric ELSE 0 END), 0) AS outstanding,
-          COALESCE(SUM(CASE WHEN data->>'status' = 'paid' AND updated_at >= date_trunc('month', now()) THEN (data->>'amount')::numeric ELSE 0 END), 0) AS paid_this_month,
+          COALESCE(SUM(CASE WHEN data->>'status' = 'paid' AND "updatedAt" >= date_trunc('month', now()) THEN (data->>'amount')::numeric ELSE 0 END), 0) AS paid_this_month,
           COALESCE(SUM(CASE WHEN data->>'status' IN ('submitted','approved') THEN (data->>'amount')::numeric ELSE 0 END), 0) AS expenses_pending,
           COUNT(CASE WHEN data->>'status' = 'overdue' THEN 1 END) AS overdue_count
-        FROM entity_records
-        WHERE tenant_id = ${tenantId}
-          AND entity_type IN ('Invoice', 'Expense')
+        FROM "entityRecords"
+        WHERE "tenantId" = ${tenantId}
+          AND "entityType" IN ('Invoice', 'Expense')
       `);
       return firstRow(res);
     }, undefined),
@@ -115,9 +115,9 @@ dashboardRouter.get('/stats', async (c) => {
     safeQuery(async () => {
       const res = await db.execute(sql`
         SELECT COUNT(*) AS count
-        FROM entity_records
-        WHERE tenant_id = ${tenantId}
-          AND entity_type = 'Employee'
+        FROM "entityRecords"
+        WHERE "tenantId" = ${tenantId}
+          AND "entityType" = 'Employee'
           AND data->>'status' = 'active'
       `);
       return firstRow(res);
@@ -127,9 +127,9 @@ dashboardRouter.get('/stats', async (c) => {
     safeQuery(async () => {
       const res = await db.execute(sql`
         SELECT COUNT(*) AS count
-        FROM entity_records
-        WHERE tenant_id = ${tenantId}
-          AND entity_type = 'LeaveRequest'
+        FROM "entityRecords"
+        WHERE "tenantId" = ${tenantId}
+          AND "entityType" = 'LeaveRequest'
           AND data->>'status' = 'pending'
       `);
       return firstRow(res);
@@ -139,11 +139,11 @@ dashboardRouter.get('/stats', async (c) => {
     safeQuery(async () => {
       const res = await db.execute(sql`
         SELECT COUNT(*) AS count
-        FROM entity_records
-        WHERE tenant_id = ${tenantId}
-          AND entity_type = 'PayrollRun'
-          AND created_at >= date_trunc('month', now())
-          AND created_at <= now()
+        FROM "entityRecords"
+        WHERE "tenantId" = ${tenantId}
+          AND "entityType" = 'PayrollRun'
+          AND "createdAt" >= date_trunc('month', now())
+          AND "createdAt" <= now()
       `);
       return firstRow(res);
     }, undefined),
@@ -155,9 +155,9 @@ dashboardRouter.get('/stats', async (c) => {
           COUNT(*) AS total_products,
           COUNT(CASE WHEN (data->>'stock_level')::numeric < (data->>'reorder_level')::numeric THEN 1 END) AS low_stock,
           COALESCE(SUM((data->>'stock_level')::numeric * (data->>'cost_price')::numeric), 0) AS total_value
-        FROM entity_records
-        WHERE tenant_id = ${tenantId}
-          AND entity_type = 'InventoryItem'
+        FROM "entityRecords"
+        WHERE "tenantId" = ${tenantId}
+          AND "entityType" = 'InventoryItem'
           AND (data->>'stock_level') IS NOT NULL
           AND (data->>'reorder_level') IS NOT NULL
       `);
@@ -168,9 +168,9 @@ dashboardRouter.get('/stats', async (c) => {
     safeQuery(async () => {
       const res = await db.execute(sql`
         SELECT COUNT(*) AS count
-        FROM entity_records
-        WHERE tenant_id = ${tenantId}
-          AND entity_type = 'SalesOrder'
+        FROM "entityRecords"
+        WHERE "tenantId" = ${tenantId}
+          AND "entityType" = 'SalesOrder'
           AND data->>'status' NOT IN ('delivered', 'cancelled')
       `);
       return firstRow(res);
@@ -182,9 +182,9 @@ dashboardRouter.get('/stats', async (c) => {
         SELECT
           COUNT(*) AS count,
           COALESCE(SUM((data->>'value')::numeric), 0) AS total_value
-        FROM entity_records
-        WHERE tenant_id = ${tenantId}
-          AND entity_type = 'Deal'
+        FROM "entityRecords"
+        WHERE "tenantId" = ${tenantId}
+          AND "entityType" = 'Deal'
           AND data->>'status' NOT IN ('won', 'lost')
       `);
       return firstRow(res);
@@ -194,9 +194,9 @@ dashboardRouter.get('/stats', async (c) => {
     safeQuery(async () => {
       const res = await db.execute(sql`
         SELECT COUNT(*) AS count
-        FROM entity_records
-        WHERE tenant_id = ${tenantId}
-          AND entity_type = 'Project'
+        FROM "entityRecords"
+        WHERE "tenantId" = ${tenantId}
+          AND "entityType" = 'Project'
           AND data->>'status' IN ('active', 'in_progress')
       `);
       return firstRow(res);
@@ -206,9 +206,9 @@ dashboardRouter.get('/stats', async (c) => {
     safeQuery(async () => {
       const res = await db.execute(sql`
         SELECT COUNT(*) AS count
-        FROM entity_records
-        WHERE tenant_id = ${tenantId}
-          AND entity_type = 'Task'
+        FROM "entityRecords"
+        WHERE "tenantId" = ${tenantId}
+          AND "entityType" = 'Task'
           AND data->>'status' = 'in_progress'
       `);
       return firstRow(res);
@@ -218,9 +218,9 @@ dashboardRouter.get('/stats', async (c) => {
     safeQuery(async () => {
       const res = await db.execute(sql`
         SELECT COUNT(*) AS count
-        FROM entity_records
-        WHERE tenant_id = ${tenantId}
-          AND entity_type = 'PurchaseOrder'
+        FROM "entityRecords"
+        WHERE "tenantId" = ${tenantId}
+          AND "entityType" = 'PurchaseOrder'
           AND data->>'status' NOT IN ('received', 'cancelled')
       `);
       return firstRow(res);
@@ -241,11 +241,11 @@ dashboardRouter.get('/stats', async (c) => {
     safeQuery(async () => {
       const res = await db.execute(sql`
         SELECT COALESCE(SUM((data->>'hours')::numeric), 0) AS total_hours
-        FROM entity_records
-        WHERE tenant_id = ${tenantId}
-          AND entity_type = 'TimeEntry'
-          AND created_at >= date_trunc('week', now())
-          AND created_at <= now()
+        FROM "entityRecords"
+        WHERE "tenantId" = ${tenantId}
+          AND "entityType" = 'TimeEntry'
+          AND "createdAt" >= date_trunc('week', now())
+          AND "createdAt" <= now()
       `);
       return firstRow(res);
     }, undefined),
@@ -300,18 +300,18 @@ dashboardRouter.get('/activity', async (c) => {
     const result = await db.execute(sql`
       SELECT
         id,
-        entity_type,
+        "entityType",
         data->>'status' AS status,
         data->>'title' AS title,
         data->>'name' AS name,
         data->>'number' AS number,
         data->>'subject' AS subject,
         data,
-        created_at,
-        updated_at
-      FROM entity_records
-      WHERE tenant_id = ${tenantId}
-      ORDER BY updated_at DESC
+        "createdAt",
+        "updatedAt"
+      FROM "entityRecords"
+      WHERE "tenantId" = ${tenantId}
+      ORDER BY "updatedAt" DESC
       LIMIT ${limit}
     `);
 
@@ -354,9 +354,9 @@ dashboardRouter.get('/quick-stats', async (c) => {
     safeQuery(async () => {
       const res = await db.execute(sql`
         SELECT COALESCE(SUM((data->>'amount')::numeric), 0) AS outstanding
-        FROM entity_records
-        WHERE tenant_id = ${tenantId}
-          AND entity_type = 'invoice'
+        FROM "entityRecords"
+        WHERE "tenantId" = ${tenantId}
+          AND "entityType" = 'invoice'
           AND data->>'status' IN ('sent', 'overdue')
       `);
       return firstRow(res);
@@ -365,9 +365,9 @@ dashboardRouter.get('/quick-stats', async (c) => {
     safeQuery(async () => {
       const res = await db.execute(sql`
         SELECT COUNT(*) AS count
-        FROM entity_records
-        WHERE tenant_id = ${tenantId}
-          AND entity_type = 'Employee'
+        FROM "entityRecords"
+        WHERE "tenantId" = ${tenantId}
+          AND "entityType" = 'Employee'
           AND data->>'status' = 'active'
       `);
       return firstRow(res);
@@ -376,9 +376,9 @@ dashboardRouter.get('/quick-stats', async (c) => {
     safeQuery(async () => {
       const res = await db.execute(sql`
         SELECT COUNT(*) AS count
-        FROM entity_records
-        WHERE tenant_id = ${tenantId}
-          AND entity_type = 'SalesOrder'
+        FROM "entityRecords"
+        WHERE "tenantId" = ${tenantId}
+          AND "entityType" = 'SalesOrder'
           AND data->>'status' NOT IN ('delivered', 'cancelled')
       `);
       return firstRow(res);

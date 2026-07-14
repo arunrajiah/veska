@@ -1,0 +1,237 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1747000000000,
+      "tag": "0000_initial_schema",
+      "breakpoints": false
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1747000001000,
+      "tag": "0001_integration_instances",
+      "breakpoints": false
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1747000002000,
+      "tag": "0002_webhook_subscriptions",
+      "breakpoints": false
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1747000003000,
+      "tag": "0003_api_keys",
+      "breakpoints": false
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1747000004000,
+      "tag": "0004_notifications",
+      "breakpoints": false
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1747000005000,
+      "tag": "0005_developer",
+      "breakpoints": false
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1747000006000,
+      "tag": "0006_rbac",
+      "breakpoints": false
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1747000007000,
+      "tag": "0007_notification_channels",
+      "breakpoints": false
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1747000008000,
+      "tag": "0008_ai_chat",
+      "breakpoints": false
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1747000009000,
+      "tag": "0009_attachments",
+      "breakpoints": false
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1747000010000,
+      "tag": "0010_approvals",
+      "breakpoints": false
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1747000011000,
+      "tag": "0011_currencies",
+      "breakpoints": false
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1747000012000,
+      "tag": "0012_custom_fields_recurring",
+      "breakpoints": false
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1747000013000,
+      "tag": "0013_search_reports",
+      "breakpoints": false
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1747000014000,
+      "tag": "0014_auth",
+      "breakpoints": false
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1747000015000,
+      "tag": "0015_time_crm",
+      "breakpoints": false
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1747000016000,
+      "tag": "0016_templates_assets",
+      "breakpoints": false
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1747000017000,
+      "tag": "0017_budgets",
+      "breakpoints": false
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1747000018000,
+      "tag": "0018_privacy_integrations",
+      "breakpoints": false
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1747000019000,
+      "tag": "0019_payroll_contracts",
+      "breakpoints": false
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1747000020000,
+      "tag": "0020_vendors_servicedesk",
+      "breakpoints": false
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1747000021000,
+      "tag": "0021_kb_lms",
+      "breakpoints": false
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1747000022000,
+      "tag": "0022_events_facilities",
+      "breakpoints": false
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1747000023000,
+      "tag": "0023_catalog",
+      "breakpoints": false
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1747000024000,
+      "tag": "0024_portal_notifications",
+      "breakpoints": false
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1747000025000,
+      "tag": "0025_settings_tax",
+      "breakpoints": false
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1747000026000,
+      "tag": "0026_workflow_enhancements",
+      "breakpoints": false
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1747000027000,
+      "tag": "0027_ai_usage_approvals",
+      "breakpoints": false
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1747000028000,
+      "tag": "0028_stripe_payment",
+      "breakpoints": false
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1747000029000,
+      "tag": "0029_recurring_invoices",
+      "breakpoints": false
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1747000030000,
+      "tag": "0030_audit_diff",
+      "breakpoints": false
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1747000031000,
+      "tag": "0031_tenant_currency",
+      "breakpoints": false
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1747000032000,
+      "tag": "0032_user_auth",
+      "breakpoints": false
+    }
+  ]
+}

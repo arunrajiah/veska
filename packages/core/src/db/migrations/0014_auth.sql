@@ -10,8 +10,8 @@ CREATE TABLE IF NOT EXISTS "sessions" (
   "createdAt" TIMESTAMPTZ NOT NULL DEFAULT now(),
   "lastSeenAt" TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token);
-CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions("tenantId", "userId");
+CREATE INDEX IF NOT EXISTS "idxSessionsToken" ON sessions(token);
+CREATE INDEX IF NOT EXISTS "idxSessionsUser" ON sessions("tenantId", "userId");
 
 -- SSO configurations (per tenant)
 CREATE TABLE IF NOT EXISTS "ssoConfigs" (
@@ -36,4 +36,4 @@ CREATE TABLE IF NOT EXISTS "mfaSecrets" (
   "backupCodes" JSONB NOT NULL DEFAULT '[]',
   "createdAt" TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE UNIQUE INDEX IF NOT EXISTS idx_mfa_user ON "mfaSecrets"("tenantId", "userId");
+CREATE UNIQUE INDEX IF NOT EXISTS "idxMfaUser" ON "mfaSecrets"("tenantId", "userId");

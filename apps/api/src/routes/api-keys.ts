@@ -13,13 +13,13 @@ apiKeysRouter.get('/', async (c) => {
     const { tenantId } = c.get('tenantCtx');
 
     const result = await sharedDb.execute(sql`
-      SELECT "id", "tenant_id" AS "tenantId", "name", "key_prefix" AS "keyPrefix",
-             "scopes", "last_used_at" AS "lastUsedAt", "expires_at" AS "expiresAt",
-             "revoked_at" AS "revokedAt", "created_at" AS "createdAt"
-      FROM "api_keys"
-      WHERE "tenant_id" = ${tenantId}
-        AND "revoked_at" IS NULL
-      ORDER BY "created_at" DESC
+      SELECT "id", "tenantId", "name", "keyPrefix",
+             "scopes", "lastUsedAt", "expiresAt",
+             "revokedAt", "createdAt"
+      FROM "apiKeys"
+      WHERE "tenantId" = ${tenantId}
+        AND "revokedAt" IS NULL
+      ORDER BY "createdAt" DESC
     `);
 
     return c.json({ keys: result.rows });
@@ -43,10 +43,10 @@ apiKeysRouter.post('/', async (c) => {
     const expiresAt = body.expiresAt ? new Date(body.expiresAt) : null;
 
     const result = await sharedDb.execute(sql`
-      INSERT INTO "api_keys" ("tenant_id", "name", "key_hash", "key_prefix", "scopes", "expires_at")
+      INSERT INTO "apiKeys" ("tenantId", "name", "keyHash", "keyPrefix", "scopes", "expiresAt")
       VALUES (${tenantId}, ${body.name.trim()}, ${keyHash}, ${keyPrefix}, ${scopes}, ${expiresAt})
-      RETURNING "id", "name", "key_prefix" AS "keyPrefix", "scopes",
-                "expires_at" AS "expiresAt", "created_at" AS "createdAt"
+      RETURNING "id", "name", "keyPrefix", "scopes",
+                "expiresAt", "createdAt"
     `);
 
     const created = result.rows[0] as Record<string, unknown>;
@@ -65,11 +65,11 @@ apiKeysRouter.delete('/:id', async (c) => {
     const { tenantId } = c.get('tenantCtx');
 
     await sharedDb.execute(sql`
-      UPDATE "api_keys"
-      SET "revoked_at" = now()
+      UPDATE "apiKeys"
+      SET "revokedAt" = now()
       WHERE "id" = ${id}::uuid
-        AND "tenant_id" = ${tenantId}
-        AND "revoked_at" IS NULL
+        AND "tenantId" = ${tenantId}
+        AND "revokedAt" IS NULL
     `);
 
     return c.json({ success: true });

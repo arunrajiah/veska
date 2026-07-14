@@ -1,6 +1,7 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
+  "globalEnv": ["DATABASE_URL", "REDIS_URL", "NODE_ENV"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

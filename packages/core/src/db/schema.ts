@@ -20,55 +20,55 @@ export const tenants = pgTable('tenants', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull(),
   slug: text('slug').notNull(),
-  currentConfigId: uuid('current_config_id'),
+  currentConfigId: uuid('currentConfigId'),
   timezone: text('timezone').notNull().default('UTC'),
-  defaultCurrency: text('default_currency').notNull().default('USD'),
-  fiscalYearStart: text('fiscal_year_start').notNull().default('01-01'),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-  deletedAt: timestamp('deleted_at', { withTimezone: true }),
+  defaultCurrency: text('defaultCurrency').notNull().default('USD'),
+  fiscalYearStart: text('fiscalYearStart').notNull().default('01-01'),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { withTimezone: true }).notNull().defaultNow(),
+  deletedAt: timestamp('deletedAt', { withTimezone: true }),
 }, (t) => [
-  unique('tenants_slug_key').on(t.slug),
+  unique('tenantsSlugKey').on(t.slug),
 ]);
 
 // ──────────────────────────────────────────────────────────────
 // Configuration versioning
 // ──────────────────────────────────────────────────────────────
 
-export const configVersions = pgTable('config_versions', {
+export const configVersions = pgTable('configVersions', {
   id: uuid('id').primaryKey().defaultRandom(),
-  tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  tenantId: uuid('tenantId').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   version: text('version').notNull(),
   config: jsonb('config').notNull(),
-  appliedBy: uuid('applied_by'),
-  naturalLanguageRequest: text('natural_language_request'),
+  appliedBy: uuid('appliedBy'),
+  naturalLanguageRequest: text('naturalLanguageRequest'),
   diff: jsonb('diff'),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
-  index('config_versions_tenant_id_idx').on(t.tenantId),
+  index('configVersionsTenantIdIdx').on(t.tenantId),
 ]);
 
 // ──────────────────────────────────────────────────────────────
 // Entity definitions (schema-as-data)
 // ──────────────────────────────────────────────────────────────
 
-export const entityDefinitions = pgTable('entity_definitions', {
+export const entityDefinitions = pgTable('entityDefinitions', {
   id: uuid('id').primaryKey().defaultRandom(),
-  tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  tenantId: uuid('tenantId').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
-  pluralName: text('plural_name').notNull(),
+  pluralName: text('pluralName').notNull(),
   label: text('label').notNull(),
-  pluralLabel: text('plural_label').notNull(),
+  pluralLabel: text('pluralLabel').notNull(),
   description: text('description'),
   fields: jsonb('fields').notNull().default(sql`'[]'::jsonb`),
-  isSystem: boolean('is_system').notNull().default(false),
+  isSystem: boolean('isSystem').notNull().default(false),
   icon: text('icon'),
-  aiDescription: text('ai_description'),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  aiDescription: text('aiDescription'),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
-  unique('entity_definitions_tenant_name_key').on(t.tenantId, t.name),
-  index('entity_definitions_tenant_id_idx').on(t.tenantId),
+  unique('entityDefinitionsTenantNameKey').on(t.tenantId, t.name),
+  index('entityDefinitionsTenantIdIdx').on(t.tenantId),
 ]);
 
 // ──────────────────────────────────────────────────────────────
@@ -76,59 +76,59 @@ export const entityDefinitions = pgTable('entity_definitions', {
 // Using JSONB for flexible field storage; strong indexes on common lookups
 // ──────────────────────────────────────────────────────────────
 
-export const entityRecords = pgTable('entity_records', {
+export const entityRecords = pgTable('entityRecords', {
   id: uuid('id').primaryKey().defaultRandom(),
-  tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
-  entityType: text('entity_type').notNull(),
+  tenantId: uuid('tenantId').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  entityType: text('entityType').notNull(),
   data: jsonb('data').notNull().default(sql`'{}'::jsonb`),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-  createdBy: uuid('created_by'),
-  deletedAt: timestamp('deleted_at', { withTimezone: true }),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { withTimezone: true }).notNull().defaultNow(),
+  createdBy: uuid('createdBy'),
+  deletedAt: timestamp('deletedAt', { withTimezone: true }),
 }, (t) => [
-  index('entity_records_tenant_type_idx').on(t.tenantId, t.entityType),
-  index('entity_records_tenant_id_idx').on(t.tenantId),
+  index('entityRecordsTenantTypeIdx').on(t.tenantId, t.entityType),
+  index('entityRecordsTenantIdIdx').on(t.tenantId),
   // GIN index for JSONB field queries
-  index('entity_records_data_gin_idx').using('gin', t.data),
+  index('entityRecordsDataGinIdx').using('gin', t.data),
 ]);
 
 // ──────────────────────────────────────────────────────────────
 // Workflow definitions
 // ──────────────────────────────────────────────────────────────
 
-export const workflowDefinitions = pgTable('workflow_definitions', {
+export const workflowDefinitions = pgTable('workflowDefinitions', {
   id: uuid('id').primaryKey().defaultRandom(),
-  tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  tenantId: uuid('tenantId').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   description: text('description'),
   trigger: jsonb('trigger').notNull(),
   steps: jsonb('steps').notNull(),
-  entryStep: text('entry_step').notNull(),
+  entryStep: text('entryStep').notNull(),
   enabled: boolean('enabled').notNull().default(true),
-  isSystem: boolean('is_system').notNull().default(false),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  isSystem: boolean('isSystem').notNull().default(false),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
-  index('workflow_definitions_tenant_id_idx').on(t.tenantId),
+  index('workflowDefinitionsTenantIdIdx').on(t.tenantId),
 ]);
 
 // ──────────────────────────────────────────────────────────────
 // Workflow runs
 // ──────────────────────────────────────────────────────────────
 
-export const workflowRuns = pgTable('workflow_runs', {
+export const workflowRuns = pgTable('workflowRuns', {
   id: uuid('id').primaryKey().defaultRandom(),
-  tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
-  workflowId: uuid('workflow_id').notNull().references(() => workflowDefinitions.id),
+  tenantId: uuid('tenantId').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  workflowId: uuid('workflowId').notNull().references(() => workflowDefinitions.id),
   status: text('status').notNull().default('pending'),
-  currentStep: text('current_step'),
+  currentStep: text('currentStep'),
   context: jsonb('context').notNull().default(sql`'{}'::jsonb`),
-  startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
-  completedAt: timestamp('completed_at', { withTimezone: true }),
+  startedAt: timestamp('startedAt', { withTimezone: true }).notNull().defaultNow(),
+  completedAt: timestamp('completedAt', { withTimezone: true }),
   error: text('error'),
 }, (t) => [
-  index('workflow_runs_tenant_workflow_idx').on(t.tenantId, t.workflowId),
-  index('workflow_runs_status_idx').on(t.status),
+  index('workflowRunsTenantWorkflowIdx').on(t.tenantId, t.workflowId),
+  index('workflowRunsStatusIdx').on(t.status),
 ]);
 
 // ──────────────────────────────────────────────────────────────
@@ -137,15 +137,15 @@ export const workflowRuns = pgTable('workflow_runs', {
 
 export const roles = pgTable('roles', {
   id: uuid('id').primaryKey().defaultRandom(),
-  tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  tenantId: uuid('tenantId').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   description: text('description'),
   capabilities: jsonb('capabilities').notNull().default(sql`'[]'::jsonb`),
-  isSystem: boolean('is_system').notNull().default(false),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  isSystem: boolean('isSystem').notNull().default(false),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
-  unique('roles_tenant_name_key').on(t.tenantId, t.name),
+  unique('rolesTenantNameKey').on(t.tenantId, t.name),
 ]);
 
 // ──────────────────────────────────────────────────────────────
@@ -154,143 +154,143 @@ export const roles = pgTable('roles', {
 
 export const identities = pgTable('identities', {
   id: uuid('id').primaryKey().defaultRandom(),
-  tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  tenantId: uuid('tenantId').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   type: text('type').notNull(),
-  channelIds: jsonb('channel_ids').notNull().default(sql`'{}'::jsonb`),
-  roleIds: jsonb('role_ids').notNull().default(sql`'[]'::jsonb`),
-  additionalCapabilities: jsonb('additional_capabilities').notNull().default(sql`'[]'::jsonb`),
-  deniedCapabilities: jsonb('denied_capabilities').notNull().default(sql`'[]'::jsonb`),
-  entityId: uuid('entity_id'),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  channelIds: jsonb('channelIds').notNull().default(sql`'{}'::jsonb`),
+  roleIds: jsonb('roleIds').notNull().default(sql`'[]'::jsonb`),
+  additionalCapabilities: jsonb('additionalCapabilities').notNull().default(sql`'[]'::jsonb`),
+  deniedCapabilities: jsonb('deniedCapabilities').notNull().default(sql`'[]'::jsonb`),
+  entityId: uuid('entityId'),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
-  index('identities_tenant_id_idx').on(t.tenantId),
+  index('identitiesTenantIdIdx').on(t.tenantId),
 ]);
 
 // ──────────────────────────────────────────────────────────────
 // Channel configurations
 // ──────────────────────────────────────────────────────────────
 
-export const channelConfigs = pgTable('channel_configs', {
+export const channelConfigs = pgTable('channelConfigs', {
   id: uuid('id').primaryKey().defaultRandom(),
-  tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
-  channelName: text('channel_name').notNull(),
+  tenantId: uuid('tenantId').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  channelName: text('channelName').notNull(),
   enabled: boolean('enabled').notNull().default(true),
-  credentialsRef: text('credentials_ref').notNull(),
+  credentialsRef: text('credentialsRef').notNull(),
   metadata: jsonb('metadata').notNull().default(sql`'{}'::jsonb`),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
-  unique('channel_configs_tenant_channel_key').on(t.tenantId, t.channelName),
+  unique('channelConfigsTenantChannelKey').on(t.tenantId, t.channelName),
 ]);
 
 // ──────────────────────────────────────────────────────────────
 // Double-entry ledger — immutable journal entries
 // ──────────────────────────────────────────────────────────────
 
-export const ledgerEntries = pgTable('ledger_entries', {
+export const ledgerEntries = pgTable('ledgerEntries', {
   id: uuid('id').primaryKey().defaultRandom(),
-  tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
-  journalId: uuid('journal_id').notNull(),
-  accountCode: text('account_code').notNull(),
+  tenantId: uuid('tenantId').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  journalId: uuid('journalId').notNull(),
+  accountCode: text('accountCode').notNull(),
   // Debit amount in the smallest currency unit (cents)
-  debitAmount: text('debit_amount').notNull().default('0'),
+  debitAmount: text('debitAmount').notNull().default('0'),
   // Credit amount in the smallest currency unit (cents)
-  creditAmount: text('credit_amount').notNull().default('0'),
+  creditAmount: text('creditAmount').notNull().default('0'),
   currency: text('currency').notNull(),
   description: text('description').notNull(),
-  referenceType: text('reference_type'),
-  referenceId: uuid('reference_id'),
-  postedAt: timestamp('posted_at', { withTimezone: true }).notNull(),
-  periodYear: text('period_year').notNull(),
-  periodMonth: text('period_month').notNull(),
-  createdBy: uuid('created_by'),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  referenceType: text('referenceType'),
+  referenceId: uuid('referenceId'),
+  postedAt: timestamp('postedAt', { withTimezone: true }).notNull(),
+  periodYear: text('periodYear').notNull(),
+  periodMonth: text('periodMonth').notNull(),
+  createdBy: uuid('createdBy'),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
   // No updatedAt — ledger entries are immutable
 }, (t) => [
-  index('ledger_entries_tenant_journal_idx').on(t.tenantId, t.journalId),
-  index('ledger_entries_tenant_account_idx').on(t.tenantId, t.accountCode),
-  index('ledger_entries_posted_at_idx').on(t.postedAt),
+  index('ledgerEntriesTenantJournalIdx').on(t.tenantId, t.journalId),
+  index('ledgerEntriesTenantAccountIdx').on(t.tenantId, t.accountCode),
+  index('ledgerEntriesPostedAtIdx').on(t.postedAt),
 ]);
 
 // ──────────────────────────────────────────────────────────────
 // Audit log — append-only, covers all state changes + AI reasoning
 // ──────────────────────────────────────────────────────────────
 
-export const auditLog = pgTable('audit_log', {
+export const auditLog = pgTable('auditLog', {
   id: uuid('id').primaryKey().defaultRandom(),
-  tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
-  actorIdentityId: uuid('actor_identity_id'),
-  actorType: text('actor_type').notNull(),
+  tenantId: uuid('tenantId').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  actorIdentityId: uuid('actorIdentityId'),
+  actorType: text('actorType').notNull(),
   channel: text('channel'),
   action: text('action').notNull(),
-  resourceType: text('resource_type'),
-  resourceId: uuid('resource_id'),
+  resourceType: text('resourceType'),
+  resourceId: uuid('resourceId'),
   capability: text('capability'),
   before: jsonb('before'),
   after: jsonb('after'),
   // AI reasoning trace for LLM-driven actions
-  aiReasoningTrace: text('ai_reasoning_trace'),
+  aiReasoningTrace: text('aiReasoningTrace'),
   metadata: jsonb('metadata').default(sql`'{}'::jsonb`),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
-  index('audit_log_tenant_id_idx').on(t.tenantId),
-  index('audit_log_actor_idx').on(t.actorIdentityId),
-  index('audit_log_resource_idx').on(t.resourceType, t.resourceId),
-  index('audit_log_created_at_idx').on(t.createdAt),
+  index('auditLogTenantIdIdx').on(t.tenantId),
+  index('auditLogActorIdx').on(t.actorIdentityId),
+  index('auditLogResourceIdx').on(t.resourceType, t.resourceId),
+  index('auditLogCreatedAtIdx').on(t.createdAt),
 ]);
 
 // ──────────────────────────────────────────────────────────────
 // Integration instances (per-tenant configured integrations)
 // ──────────────────────────────────────────────────────────────
 
-export const integrationInstances = pgTable('integration_instances', {
+export const integrationInstances = pgTable('integrationInstances', {
   id: uuid('id').primaryKey().defaultRandom(),
-  tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  tenantId: uuid('tenantId').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   enabled: boolean('enabled').notNull().default(true),
   config: jsonb('config').notNull().default(sql`'{}'::jsonb`),
-  lastSyncedAt: timestamp('last_synced_at', { withTimezone: true }),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  lastSyncedAt: timestamp('lastSyncedAt', { withTimezone: true }),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
-  unique('integration_instances_tenant_name_key').on(t.tenantId, t.name),
-  index('integration_instances_tenant_id_idx').on(t.tenantId),
+  unique('integrationInstancesTenantNameKey').on(t.tenantId, t.name),
+  index('integrationInstancesTenantIdIdx').on(t.tenantId),
 ]);
 
 // ──────────────────────────────────────────────────────────────
 // Webhook subscriptions — outbound event delivery
 // ──────────────────────────────────────────────────────────────
 
-export const webhookSubscriptions = pgTable('webhook_subscriptions', {
+export const webhookSubscriptions = pgTable('webhookSubscriptions', {
   id: uuid('id').primaryKey().defaultRandom(),
-  tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  tenantId: uuid('tenantId').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   url: text('url').notNull(),
   events: text('events').array().notNull().default([]),
   secret: text('secret').notNull(),
   enabled: boolean('enabled').notNull().default(true),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
-  index('webhook_subscriptions_tenant_id_idx').on(t.tenantId),
+  index('webhookSubscriptionsTenantIdIdx').on(t.tenantId),
 ]);
 
 // ──────────────────────────────────────────────────────────────
 // API keys — programmatic access for CI/CD and integrations
 // ──────────────────────────────────────────────────────────────
 
-export const apiKeys = pgTable('api_keys', {
+export const apiKeys = pgTable('apiKeys', {
   id: uuid('id').primaryKey().defaultRandom(),
-  tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  tenantId: uuid('tenantId').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
-  keyHash: text('key_hash').notNull().unique(),
-  keyPrefix: text('key_prefix').notNull(),
-  lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
-  expiresAt: timestamp('expires_at', { withTimezone: true }),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  keyHash: text('keyHash').notNull().unique(),
+  keyPrefix: text('keyPrefix').notNull(),
+  lastUsedAt: timestamp('lastUsedAt', { withTimezone: true }),
+  expiresAt: timestamp('expiresAt', { withTimezone: true }),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
-  index('api_keys_tenant_id_idx').on(t.tenantId),
-  index('api_keys_key_hash_idx').on(t.keyHash),
+  index('apiKeysTenantIdIdx').on(t.tenantId),
+  index('apiKeysKeyHashIdx').on(t.keyHash),
 ]);
 
 // ──────────────────────────────────────────────────────────────
@@ -299,36 +299,36 @@ export const apiKeys = pgTable('api_keys', {
 
 export const notifications = pgTable('notifications', {
   id: uuid('id').primaryKey().defaultRandom(),
-  tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  tenantId: uuid('tenantId').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   title: text('title').notNull(),
   body: text('body'),
   type: text('type').notNull().default('info'),
   link: text('link'),
   read: boolean('read').notNull().default(false),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
-  index('notifications_tenant_read_idx').on(t.tenantId, t.read),
-  index('notifications_tenant_created_at_idx').on(t.tenantId, t.createdAt),
+  index('notificationsTenantReadIdx').on(t.tenantId, t.read),
+  index('notificationsTenantCreatedAtIdx').on(t.tenantId, t.createdAt),
 ]);
 
 // ──────────────────────────────────────────────────────────────
 // Magic links
 // ──────────────────────────────────────────────────────────────
 
-export const magicLinks = pgTable('magic_links', {
+export const magicLinks = pgTable('magicLinks', {
   id: uuid('id').primaryKey().defaultRandom(),
-  tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  tenantId: uuid('tenantId').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   token: text('token').notNull(),
-  identityId: uuid('identity_id').notNull(),
-  resourceType: text('resource_type').notNull(),
-  resourceId: uuid('resource_id'),
+  identityId: uuid('identityId').notNull(),
+  resourceType: text('resourceType').notNull(),
+  resourceId: uuid('resourceId'),
   action: text('action').notNull(),
-  usedAt: timestamp('used_at', { withTimezone: true }),
-  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  usedAt: timestamp('usedAt', { withTimezone: true }),
+  expiresAt: timestamp('expiresAt', { withTimezone: true }).notNull(),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
-  unique('magic_links_token_key').on(t.token),
-  index('magic_links_expires_at_idx').on(t.expiresAt),
+  unique('magicLinksTokenKey').on(t.token),
+  index('magicLinksExpiresAtIdx').on(t.expiresAt),
 ]);
 
 // ──────────────────────────────────────────────────────────────
@@ -372,7 +372,7 @@ export const recurringInvoiceSchedules = pgTable('recurringInvoiceSchedules', {
   createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updatedAt', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
-  index('recurring_tenant_idx').on(t.tenantId),
+  index('recurringTenantIdx').on(t.tenantId),
 ]);
 
 // ──────────────────────────────────────────────────────────────

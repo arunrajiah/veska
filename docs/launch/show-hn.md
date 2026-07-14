@@ -21,7 +21,7 @@ What's under the hood (it's not a thin LLM wrapper):
 - Works fully offline with Ollama or any OpenAI-compatible endpoint if you don't want data leaving your network
 - Multi-tenant Postgres (Drizzle, 32 migrations), capability-based RBAC, TOTP 2FA
 - TypeScript monorepo: Hono API, Next.js admin, plugin SDK with Stripe/QuickBooks/Google Calendar plugins
-- 166 tests including 52 Playwright E2E flows
+- 222 unit tests across core, the API route layer, and the official plugins
 
 Try it with seeded demo data in ~5 minutes: clone, `docker compose up -d`, `pnpm db:migrate && pnpm seed && pnpm dev`, log in as admin@acme.com / demo1234.
 
