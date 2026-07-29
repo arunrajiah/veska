@@ -9,7 +9,7 @@ export default async function EmployeesPage() {
       '/api/v1/hr/employees?limit=50',
       process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
     );
-    employees = Array.isArray(res) ? res : (res as { data: EmployeeRecord[] }).data ?? [];
+    employees = Array.isArray(res) ? res : ((res as { data: EmployeeRecord[] }).data ?? []);
   } catch {
     employees = [];
   }

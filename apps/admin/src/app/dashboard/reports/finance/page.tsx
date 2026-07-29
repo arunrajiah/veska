@@ -52,10 +52,7 @@ export default async function FinanceReportPage() {
       {/* Stat cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
         {stats.map((s) => (
-          <div
-            key={s.label}
-            className="bg-white border border-gray-200 rounded-xl p-5"
-          >
+          <div key={s.label} className="bg-white border border-gray-200 rounded-xl p-5">
             <p className="text-xs text-gray-500 mb-2">{s.label}</p>
             <p className={`text-xl font-semibold ${s.color}`}>{s.value}</p>
           </div>
@@ -76,12 +73,17 @@ export default async function FinanceReportPage() {
                 <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Month</th>
                 <th className="text-right px-5 py-3 text-xs font-medium text-gray-500">Invoiced</th>
                 <th className="text-right px-5 py-3 text-xs font-medium text-gray-500">Paid</th>
-                <th className="text-right px-5 py-3 text-xs font-medium text-gray-500">Outstanding</th>
+                <th className="text-right px-5 py-3 text-xs font-medium text-gray-500">
+                  Outstanding
+                </th>
               </tr>
             </thead>
             <tbody>
               {report.byMonth.map((row) => (
-                <tr key={row.month} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                <tr
+                  key={row.month}
+                  className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
+                >
                   <td className="px-5 py-3 font-mono text-xs text-gray-600">{row.month}</td>
                   <td className="px-5 py-3 text-right text-gray-900">{fmt(row.invoiced)}</td>
                   <td className="px-5 py-3 text-right text-green-700">{fmt(row.paid)}</td>

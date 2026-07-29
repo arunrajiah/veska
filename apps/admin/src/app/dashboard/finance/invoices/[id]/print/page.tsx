@@ -45,12 +45,7 @@ function getInvoiceNumber(record: InvoiceRecord): string {
 }
 
 function getClientName(record: InvoiceRecord): string {
-  return (
-    record.data.clientName ??
-    record.data.customer ??
-    record.data.customer_name ??
-    '—'
-  );
+  return record.data.clientName ?? record.data.customer ?? record.data.customer_name ?? '—';
 }
 
 function getLineItems(record: InvoiceRecord) {
@@ -74,20 +69,13 @@ function getLineItems(record: InvoiceRecord) {
 }
 
 // ── Page ──────────────────────────────────────────────────────
-export default async function InvoicePrintPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function InvoicePrintPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const tenantId = process.env.VESKA_TENANT_ID ?? 'demo-tenant';
 
   let invoice: InvoiceRecord | null = null;
   try {
-    invoice = await apiFetch<InvoiceRecord>(
-      `/api/v1/finance/invoices/${id}`,
-      tenantId,
-    );
+    invoice = await apiFetch<InvoiceRecord>(`/api/v1/finance/invoices/${id}`, tenantId);
   } catch {
     invoice = null;
   }

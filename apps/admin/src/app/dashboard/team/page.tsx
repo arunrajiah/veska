@@ -1,3 +1,4 @@
+import { apiFetch } from '@/lib/api.js';
 import Link from 'next/link';
 import { UserPlus } from 'lucide-react';
 
@@ -12,12 +13,8 @@ interface User {
 
 async function getUsers(): Promise<User[]> {
   try {
-    const res = await fetch((process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/users?tenantId=demo', {
-      cache: 'no-store',
-    });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.users ?? data ?? [];
+    const data = await apiFetch<User[] | { users?: User[]; data?: User[] }>('/api/v1/users', '');
+    return Array.isArray(data) ? data : (data.users ?? data.data ?? []);
   } catch {
     return [];
   }
@@ -39,7 +36,9 @@ function StatusBadge({ status }: { status: User['status'] }) {
     deactivated: 'bg-gray-100 text-gray-500',
   };
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${styles[status]}`}>
+    <span
+      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${styles[status]}`}
+    >
       {status.charAt(0).toUpperCase() + status.slice(1)}
     </span>
   );
@@ -131,9 +130,7 @@ export default async function TeamPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
-                    {user.lastLogin
-                      ? new Date(user.lastLogin).toLocaleDateString()
-                      : '—'}
+                    {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : '—'}
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-3">

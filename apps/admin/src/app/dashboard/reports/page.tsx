@@ -1,6 +1,6 @@
 import { ReportsClient } from './_components.js';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+const API_BASE = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 interface Report {
   id: string;
@@ -20,8 +20,10 @@ export default async function ReportsPage() {
       headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
     });
     if (res.ok) {
-      const json = await res.json() as Report[] | { results?: Report[]; data?: Report[] };
-      reports = Array.isArray(json) ? json : ((json as { results?: Report[] }).results ?? (json as { data?: Report[] }).data ?? []);
+      const json = (await res.json()) as Report[] | { results?: Report[]; data?: Report[] };
+      reports = Array.isArray(json)
+        ? json
+        : ((json as { results?: Report[] }).results ?? (json as { data?: Report[] }).data ?? []);
     }
   } catch {
     // fall through

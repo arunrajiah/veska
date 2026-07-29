@@ -20,9 +20,7 @@ export interface NotifRoute {
 
 export default async function ChannelsPage() {
   const tenantId =
-    process.env.VESKA_TENANT_ID ??
-    process.env.NEXT_PUBLIC_TENANT_ID ??
-    'demo-tenant';
+    process.env.VESKA_TENANT_ID ?? process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
   let channels: NotifChannel[] = [];
   let routes: NotifRoute[] = [];

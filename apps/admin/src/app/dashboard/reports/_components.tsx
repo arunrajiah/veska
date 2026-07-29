@@ -3,16 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import {
-  BarChart2,
-  Plus,
-  Trash2,
-  Edit2,
-  Play,
-  ChevronLeft,
-  X,
-  Wand2,
-} from 'lucide-react';
+import { BarChart2, Plus, Trash2, Edit2, Play, ChevronLeft, X, Wand2 } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
@@ -127,7 +118,10 @@ function RunResultsPanel({ results }: { results: RunResult }) {
             <thead>
               <tr className="bg-gray-50 border-b border-gray-100">
                 {columns.map((col) => (
-                  <th key={col} className="text-left px-4 py-2.5 text-xs font-medium text-gray-500 whitespace-nowrap">
+                  <th
+                    key={col}
+                    className="text-left px-4 py-2.5 text-xs font-medium text-gray-500 whitespace-nowrap"
+                  >
                     {col}
                   </th>
                 ))}
@@ -137,7 +131,10 @@ function RunResultsPanel({ results }: { results: RunResult }) {
               {rows.map((row, i) => (
                 <tr key={i} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
                   {columns.map((col) => (
-                    <td key={col} className="px-4 py-2.5 text-gray-700 whitespace-nowrap font-mono text-xs">
+                    <td
+                      key={col}
+                      className="px-4 py-2.5 text-gray-700 whitespace-nowrap font-mono text-xs"
+                    >
                       {row[col] === null || row[col] === undefined ? (
                         <span className="text-gray-300">—</span>
                       ) : (
@@ -212,14 +209,15 @@ function ReportBuilder({ initial, onBack, onSaved }: ReportBuilderProps) {
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
-    if (!config.name.trim()) { setError('Name is required'); return; }
+    if (!config.name.trim()) {
+      setError('Name is required');
+      return;
+    }
     setSaving(true);
     setError('');
     try {
       const method = savedId ? 'PUT' : 'POST';
-      const url = savedId
-        ? `${API_BASE}/reports/${savedId}`
-        : `${API_BASE}/reports`;
+      const url = savedId ? `${API_BASE}/reports/${savedId}` : `${API_BASE}/reports`;
       const res = await fetch(url, {
         method,
         headers: tenantHeaders(),
@@ -235,11 +233,11 @@ function ReportBuilder({ initial, onBack, onSaved }: ReportBuilderProps) {
         }),
       });
       if (!res.ok) {
-        const d = await res.json() as { error?: string };
+        const d = (await res.json()) as { error?: string };
         setError(d.error ?? 'Failed to save');
         return;
       }
-      const saved = await res.json() as { id?: string };
+      const saved = (await res.json()) as { id?: string };
       if (saved.id) setSavedId(saved.id);
       onSaved();
     } catch {
@@ -251,7 +249,10 @@ function ReportBuilder({ initial, onBack, onSaved }: ReportBuilderProps) {
 
   async function handleRun() {
     const id = savedId;
-    if (!id) { setError('Save the report first before running it.'); return; }
+    if (!id) {
+      setError('Save the report first before running it.');
+      return;
+    }
     setRunning(true);
     setError('');
     setRunResults(null);
@@ -262,11 +263,11 @@ function ReportBuilder({ initial, onBack, onSaved }: ReportBuilderProps) {
         body: JSON.stringify({}),
       });
       if (!res.ok) {
-        const d = await res.json() as { error?: string };
+        const d = (await res.json()) as { error?: string };
         setError(d.error ?? 'Run failed');
         return;
       }
-      const data = await res.json() as RunResult;
+      const data = (await res.json()) as RunResult;
       setRunResults(data);
     } catch {
       setError('Failed to run report');
@@ -313,7 +314,9 @@ function ReportBuilder({ initial, onBack, onSaved }: ReportBuilderProps) {
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
               >
                 {ENTITY_TYPES.map((t) => (
-                  <option key={t} value={t}>{t}</option>
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
                 ))}
               </select>
             </div>
@@ -349,7 +352,11 @@ function ReportBuilder({ initial, onBack, onSaved }: ReportBuilderProps) {
                   onChange={(e) => updateMetric(i, { aggregation: e.target.value })}
                   className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
                 >
-                  {AGGREGATIONS.map((a) => <option key={a} value={a}>{a}</option>)}
+                  {AGGREGATIONS.map((a) => (
+                    <option key={a} value={a}>
+                      {a}
+                    </option>
+                  ))}
                 </select>
                 <input
                   type="text"
@@ -358,7 +365,11 @@ function ReportBuilder({ initial, onBack, onSaved }: ReportBuilderProps) {
                   placeholder="Label"
                   className="flex-1 border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
                 />
-                <button type="button" onClick={() => removeMetric(i)} className="text-gray-400 hover:text-red-500 transition-colors">
+                <button
+                  type="button"
+                  onClick={() => removeMetric(i)}
+                  className="text-gray-400 hover:text-red-500 transition-colors"
+                >
                   <Trash2 size={14} />
                 </button>
               </div>
@@ -395,7 +406,11 @@ function ReportBuilder({ initial, onBack, onSaved }: ReportBuilderProps) {
                   onChange={(e) => updateFilter(i, { operator: e.target.value })}
                   className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
                 >
-                  {OPERATORS.map((op) => <option key={op} value={op}>{op}</option>)}
+                  {OPERATORS.map((op) => (
+                    <option key={op} value={op}>
+                      {op}
+                    </option>
+                  ))}
                 </select>
                 <input
                   type="text"
@@ -404,7 +419,11 @@ function ReportBuilder({ initial, onBack, onSaved }: ReportBuilderProps) {
                   placeholder="Value"
                   className="flex-1 border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
                 />
-                <button type="button" onClick={() => removeFilter(i)} className="text-gray-400 hover:text-red-500 transition-colors">
+                <button
+                  type="button"
+                  onClick={() => removeFilter(i)}
+                  className="text-gray-400 hover:text-red-500 transition-colors"
+                >
                   <Trash2 size={14} />
                 </button>
               </div>
@@ -431,7 +450,9 @@ function ReportBuilder({ initial, onBack, onSaved }: ReportBuilderProps) {
               <input
                 type="text"
                 value={config.dateRange.field}
-                onChange={(e) => updateConfig({ dateRange: { ...config.dateRange, field: e.target.value } })}
+                onChange={(e) =>
+                  updateConfig({ dateRange: { ...config.dateRange, field: e.target.value } })
+                }
                 placeholder="e.g. createdAt"
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
               />
@@ -441,7 +462,9 @@ function ReportBuilder({ initial, onBack, onSaved }: ReportBuilderProps) {
               <input
                 type="date"
                 value={config.dateRange.from}
-                onChange={(e) => updateConfig({ dateRange: { ...config.dateRange, from: e.target.value } })}
+                onChange={(e) =>
+                  updateConfig({ dateRange: { ...config.dateRange, from: e.target.value } })
+                }
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
               />
             </div>
@@ -450,7 +473,9 @@ function ReportBuilder({ initial, onBack, onSaved }: ReportBuilderProps) {
               <input
                 type="date"
                 value={config.dateRange.to}
-                onChange={(e) => updateConfig({ dateRange: { ...config.dateRange, to: e.target.value } })}
+                onChange={(e) =>
+                  updateConfig({ dateRange: { ...config.dateRange, to: e.target.value } })
+                }
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
               />
             </div>
@@ -476,9 +501,7 @@ function ReportBuilder({ initial, onBack, onSaved }: ReportBuilderProps) {
             <Play size={14} />
             {running ? 'Running…' : 'Run now'}
           </button>
-          {!savedId && (
-            <p className="self-center text-xs text-gray-400">Save first to run</p>
-          )}
+          {!savedId && <p className="self-center text-xs text-gray-400">Save first to run</p>}
         </div>
       </form>
 
@@ -508,8 +531,13 @@ export function ReportsClient({ reports: initialReports }: ReportsClientProps) {
     return (
       <ReportBuilder
         initial={editing}
-        onBack={() => { setView('list'); setEditing(null); }}
-        onSaved={() => { router.refresh(); }}
+        onBack={() => {
+          setView('list');
+          setEditing(null);
+        }}
+        onSaved={() => {
+          router.refresh();
+        }}
       />
     );
   }
@@ -542,11 +570,11 @@ export function ReportsClient({ reports: initialReports }: ReportsClientProps) {
         body: JSON.stringify({}),
       });
       if (!res.ok) {
-        const d = await res.json() as { error?: string };
+        const d = (await res.json()) as { error?: string };
         setError(d.error ?? 'Run failed');
         return;
       }
-      const data = await res.json() as RunResult;
+      const data = (await res.json()) as RunResult;
       setRunResults({ id, data });
     } catch {
       setError('Failed to run report');
@@ -572,7 +600,10 @@ export function ReportsClient({ reports: initialReports }: ReportsClientProps) {
             <Wand2 size={15} /> Build Custom Report
           </Link>
           <button
-            onClick={() => { setEditing(null); setView('builder'); }}
+            onClick={() => {
+              setEditing(null);
+              setView('builder');
+            }}
             className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-700 transition-colors"
           >
             <Plus size={15} /> New report
@@ -583,7 +614,9 @@ export function ReportsClient({ reports: initialReports }: ReportsClientProps) {
       {error && (
         <div className="mb-4 flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
           <span className="flex-1">{error}</span>
-          <button onClick={() => setError('')}><X size={14} /></button>
+          <button onClick={() => setError('')}>
+            <X size={14} />
+          </button>
         </div>
       )}
 
@@ -600,7 +633,10 @@ export function ReportsClient({ reports: initialReports }: ReportsClientProps) {
               <Wand2 size={15} /> Build Custom Report
             </Link>
             <button
-              onClick={() => { setEditing(null); setView('builder'); }}
+              onClick={() => {
+                setEditing(null);
+                setView('builder');
+              }}
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-700 transition-colors"
             >
               <Plus size={15} /> New report
@@ -620,7 +656,10 @@ export function ReportsClient({ reports: initialReports }: ReportsClientProps) {
             </thead>
             <tbody>
               {reports.map((report) => (
-                <tr key={report.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                <tr
+                  key={report.id}
+                  className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
+                >
                   <td className="px-5 py-3">
                     <p className="font-medium text-gray-900">{report.name}</p>
                     {report.description && (
@@ -635,7 +674,9 @@ export function ReportsClient({ reports: initialReports }: ReportsClientProps) {
                   <td className="px-5 py-3 text-gray-500 text-xs">
                     {report.createdAt
                       ? new Date(report.createdAt).toLocaleDateString('en-US', {
-                          month: 'short', day: 'numeric', year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
                         })
                       : '—'}
                   </td>
@@ -650,7 +691,10 @@ export function ReportsClient({ reports: initialReports }: ReportsClientProps) {
                         {runningId === report.id ? 'Running…' : 'Run'}
                       </button>
                       <button
-                        onClick={() => { setEditing(report); setView('builder'); }}
+                        onClick={() => {
+                          setEditing(report);
+                          setView('builder');
+                        }}
                         className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
                       >
                         <Edit2 size={14} />

@@ -31,8 +31,11 @@ export function EnrichButton({ employeeId }: { employeeId: string }) {
     }
   }
   return (
-    <button onClick={() => void handleEnrich()} disabled={state !== 'idle'}
-      className="text-sm px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors disabled:opacity-50">
+    <button
+      onClick={() => void handleEnrich()}
+      disabled={state !== 'idle'}
+      className="text-sm px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors disabled:opacity-50"
+    >
       {state === 'loading' ? 'Enriching…' : state === 'done' ? 'Enriched!' : 'Enrich with AI'}
     </button>
   );
@@ -40,14 +43,18 @@ export function EnrichButton({ employeeId }: { employeeId: string }) {
 
 // ---------- Edit Employee Form ----------
 interface EmployeeData {
-  firstName?: string; first_name?: string;
-  lastName?: string; last_name?: string;
+  firstName?: string;
+  first_name?: string;
+  lastName?: string;
+  last_name?: string;
   email?: string;
   phone?: string;
   department?: string;
-  position?: string; title?: string;
+  position?: string;
+  title?: string;
   status?: string;
-  startDate?: string; hire_date?: string;
+  startDate?: string;
+  hire_date?: string;
   salary?: number;
 }
 
@@ -101,7 +108,8 @@ export function EditEmployeeForm({
     }
   }
 
-  const inputClass = 'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900';
+  const inputClass =
+    'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900';
 
   return (
     <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
@@ -117,7 +125,13 @@ export function EditEmployeeForm({
       </div>
       <div>
         <label className="block text-xs font-medium text-gray-700 mb-1">Email *</label>
-        <input name="email" type="email" defaultValue={data.email ?? ''} required className={inputClass} />
+        <input
+          name="email"
+          type="email"
+          defaultValue={data.email ?? ''}
+          required
+          className={inputClass}
+        />
       </div>
       <div>
         <label className="block text-xs font-medium text-gray-700 mb-1">Phone</label>
@@ -145,16 +159,28 @@ export function EditEmployeeForm({
       </div>
       <div>
         <label className="block text-xs font-medium text-gray-700 mb-1">Salary (USD)</label>
-        <input name="salary" type="number" min="0" defaultValue={data.salary ?? ''} className={inputClass} />
+        <input
+          name="salary"
+          type="number"
+          min="0"
+          defaultValue={data.salary ?? ''}
+          className={inputClass}
+        />
       </div>
       {error && <p className="text-xs text-red-500">{error}</p>}
       <div className="flex gap-3 pt-2">
-        <button type="submit" disabled={saving}
-          className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
+        <button
+          type="submit"
+          disabled={saving}
+          className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors"
+        >
           {saving ? 'Saving…' : 'Save Changes'}
         </button>
-        <button type="button" onClick={onCancel}
-          className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+        >
           Cancel
         </button>
       </div>
@@ -174,8 +200,10 @@ export function EditToggle({ employeeId, data }: { employeeId: string; data: Emp
     );
   }
   return (
-    <button onClick={() => setEditing(true)}
-      className="text-sm px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors">
+    <button
+      onClick={() => setEditing(true)}
+      className="text-sm px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
+    >
       Edit
     </button>
   );

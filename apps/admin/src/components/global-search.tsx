@@ -159,17 +159,14 @@ export function GlobalSearch({ open, onClose }: GlobalSearchProps) {
           : undefined;
       const token = cookieMatch ? decodeURIComponent(cookieMatch.split('=')[1] ?? '') : null;
       const authHeaders: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
-      const res = await fetch(
-        `${API_BASE}/search?q=${encodeURIComponent(q.trim())}&limit=20`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Veska-Tenant-Id': TENANT_ID,
-            'X-Veska-Identity-Id': IDENTITY_ID,
-            ...authHeaders,
-          },
+      const res = await fetch(`${API_BASE}/search?q=${encodeURIComponent(q.trim())}&limit=20`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Veska-Tenant-Id': TENANT_ID,
+          'X-Veska-Identity-Id': IDENTITY_ID,
+          ...authHeaders,
         },
-      );
+      });
       if (res.ok) {
         const data = (await res.json()) as SearchResponse;
         setResults(data.results ?? []);
@@ -299,7 +296,11 @@ export function GlobalSearch({ open, onClose }: GlobalSearchProps) {
             {query && (
               <button
                 type="button"
-                onClick={() => { setQuery(''); setResults([]); inputRef.current?.focus(); }}
+                onClick={() => {
+                  setQuery('');
+                  setResults([]);
+                  inputRef.current?.focus();
+                }}
                 className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 aria-label="Clear"
               >
@@ -336,7 +337,10 @@ export function GlobalSearch({ open, onClose }: GlobalSearchProps) {
                   type="button"
                   role="option"
                   aria-selected={activeIndex === i}
-                  onClick={() => { setQuery(q); setActiveIndex(-1); }}
+                  onClick={() => {
+                    setQuery(q);
+                    setActiveIndex(-1);
+                  }}
                   className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
                     activeIndex === i
                       ? 'bg-gray-100 dark:bg-gray-800'
@@ -406,23 +410,29 @@ export function GlobalSearch({ open, onClose }: GlobalSearchProps) {
             ))}
 
           {/* Hint when nothing to show yet */}
-          {!showRecent && !showEmpty && results.length === 0 && !isLoading && query.trim().length < 2 && (
-            <div className="flex flex-col items-center py-16 text-center">
-              <Search size={32} className="text-gray-200 dark:text-gray-700 mb-3" />
-              <p className="text-sm text-gray-400 dark:text-gray-500">
-                Start typing to search across all entities
-              </p>
-              <p className="text-xs text-gray-300 dark:text-gray-600 mt-1">
-                Invoices, contacts, employees, projects and more
-              </p>
-            </div>
-          )}
+          {!showRecent &&
+            !showEmpty &&
+            results.length === 0 &&
+            !isLoading &&
+            query.trim().length < 2 && (
+              <div className="flex flex-col items-center py-16 text-center">
+                <Search size={32} className="text-gray-200 dark:text-gray-700 mb-3" />
+                <p className="text-sm text-gray-400 dark:text-gray-500">
+                  Start typing to search across all entities
+                </p>
+                <p className="text-xs text-gray-300 dark:text-gray-600 mt-1">
+                  Invoices, contacts, employees, projects and more
+                </p>
+              </div>
+            )}
         </div>
 
         {/* Footer hint */}
         {results.length > 0 && (
           <div className="flex items-center justify-between px-4 py-2 border-t border-gray-100 dark:border-gray-800 text-[10px] text-gray-400 dark:text-gray-500">
-            <span>{results.length} result{results.length !== 1 ? 's' : ''}</span>
+            <span>
+              {results.length} result{results.length !== 1 ? 's' : ''}
+            </span>
             <span className="flex items-center gap-2">
               <span>
                 <kbd className="font-mono">↑↓</kbd> navigate

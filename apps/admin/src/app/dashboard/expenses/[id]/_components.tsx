@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { CheckCircle, XCircle, DollarSign } from 'lucide-react';
 import type { ExpenseRecord } from './page.js';
 
-
 function authHeaders(tenantId: string): HeadersInit {
   return {
     'Content-Type': 'application/json',
@@ -210,7 +209,10 @@ export function ExpenseDetailClient({
               />
               <div className="flex gap-2 mt-2 justify-end">
                 <button
-                  onClick={() => { setShowReject(false); setRejectNotes(''); }}
+                  onClick={() => {
+                    setShowReject(false);
+                    setRejectNotes('');
+                  }}
                   className="text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50"
                 >
                   Cancel
@@ -237,7 +239,9 @@ export function ExpenseDetailClient({
           {fields.map(({ label, value }) => (
             <div key={label} className="px-5 py-3 flex items-start gap-4">
               <dt className="text-xs text-gray-500 w-28 shrink-0 mt-0.5">{label}</dt>
-              <dd className="text-sm text-gray-900">{value || <span className="text-gray-300">—</span>}</dd>
+              <dd className="text-sm text-gray-900">
+                {value || <span className="text-gray-300">—</span>}
+              </dd>
             </div>
           ))}
         </dl>
@@ -257,7 +261,15 @@ export function ExpenseDetailClient({
 }
 
 // Keep existing export for backward compat
-export function ActionButtons({ expenseId, tenantId, currentStatus }: { expenseId: string; tenantId: string; currentStatus: string }) {
+export function ActionButtons({
+  expenseId,
+  tenantId,
+  currentStatus,
+}: {
+  expenseId: string;
+  tenantId: string;
+  currentStatus: string;
+}) {
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
 
@@ -274,14 +286,30 @@ export function ActionButtons({ expenseId, tenantId, currentStatus }: { expenseI
     return (
       <div className="flex gap-2">
         <button
-          onClick={async () => { setLoading('approve'); try { await patch({ status: 'approved' }); router.refresh(); } finally { setLoading(null); } }}
+          onClick={async () => {
+            setLoading('approve');
+            try {
+              await patch({ status: 'approved' });
+              router.refresh();
+            } finally {
+              setLoading(null);
+            }
+          }}
           disabled={loading !== null}
           className="text-sm px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
         >
           {loading === 'approve' ? 'Approving…' : 'Approve'}
         </button>
         <button
-          onClick={async () => { setLoading('reject'); try { await patch({ status: 'rejected' }); router.refresh(); } finally { setLoading(null); } }}
+          onClick={async () => {
+            setLoading('reject');
+            try {
+              await patch({ status: 'rejected' });
+              router.refresh();
+            } finally {
+              setLoading(null);
+            }
+          }}
           disabled={loading !== null}
           className="text-sm px-4 py-2 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50"
         >

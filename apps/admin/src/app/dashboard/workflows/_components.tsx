@@ -422,10 +422,7 @@ export function WorkflowsClient({ initialWorkflows }: { initialWorkflows: Workfl
       <div className="flex-1 overflow-y-auto bg-gray-50">
         {selected ? (
           showHistory && selected.id ? (
-            <WorkflowRunHistory
-              workflowId={selected.id}
-              onBack={() => setShowHistory(false)}
-            />
+            <WorkflowRunHistory workflowId={selected.id} onBack={() => setShowHistory(false)} />
           ) : (
             <WorkflowEditor
               workflow={selected}
@@ -455,16 +452,10 @@ export function WorkflowsClient({ initialWorkflows }: { initialWorkflows: Workfl
 
       {/* Overlays */}
       {showTemplates && (
-        <TemplatesGallery
-          onUse={handleUseTemplate}
-          onClose={() => setShowTemplates(false)}
-        />
+        <TemplatesGallery onUse={handleUseTemplate} onClose={() => setShowTemplates(false)} />
       )}
       {showAISuggest && (
-        <AISuggestPanel
-          onUse={handleUseAISuggestion}
-          onClose={() => setShowAISuggest(false)}
-        />
+        <AISuggestPanel onUse={handleUseAISuggestion} onClose={() => setShowAISuggest(false)} />
       )}
       {toast && <Toast message={toast.message} type={toast.type} />}
     </div>
@@ -534,9 +525,7 @@ function WorkflowEditor({
   async function handleSave() {
     setSaving(true);
     try {
-      const url = workflow.id
-        ? `${API_BASE}/workflows/${workflow.id}`
-        : `${API_BASE}/workflows`;
+      const url = workflow.id ? `${API_BASE}/workflows/${workflow.id}` : `${API_BASE}/workflows`;
       const method = workflow.id ? 'PUT' : 'POST';
       const res = await fetch(url, {
         method,
@@ -584,9 +573,7 @@ function WorkflowEditor({
         />
         <select
           value={workflow.status ?? 'draft'}
-          onChange={(e) =>
-            onChange({ ...workflow, status: e.target.value as Workflow['status'] })
-          }
+          onChange={(e) => onChange({ ...workflow, status: e.target.value as Workflow['status'] })}
           className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300"
         >
           <option value="active">Active</option>
@@ -627,9 +614,7 @@ function WorkflowEditor({
             <label className="block text-xs text-gray-500 mb-1">When</label>
             <select
               value={trigger.type}
-              onChange={(e) =>
-                updateTrigger({ type: e.target.value as WorkflowTrigger['type'] })
-              }
+              onChange={(e) => updateTrigger({ type: e.target.value as WorkflowTrigger['type'] })}
               className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300"
             >
               <option value="entity_created">Entity Created</option>
@@ -690,9 +675,7 @@ function WorkflowEditor({
                 className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-300"
               />
               {trigger.cron && (
-                <p className="text-xs text-indigo-600 mt-1">
-                  {cronToHuman(trigger.cron)}
-                </p>
+                <p className="text-xs text-indigo-600 mt-1">{cronToHuman(trigger.cron)}</p>
               )}
             </div>
           )}
@@ -851,9 +834,21 @@ function WorkflowBlock({
   children: React.ReactNode;
 }) {
   const iconMap = {
-    trigger: { bg: 'bg-yellow-50 border-yellow-200', badge: 'bg-yellow-100 text-yellow-700', symbol: '⚡' },
-    condition: { bg: 'bg-blue-50 border-blue-200', badge: 'bg-blue-100 text-blue-700', symbol: '◇' },
-    action: { bg: 'bg-green-50 border-green-200', badge: 'bg-green-100 text-green-700', symbol: '▶' },
+    trigger: {
+      bg: 'bg-yellow-50 border-yellow-200',
+      badge: 'bg-yellow-100 text-yellow-700',
+      symbol: '⚡',
+    },
+    condition: {
+      bg: 'bg-blue-50 border-blue-200',
+      badge: 'bg-blue-100 text-blue-700',
+      symbol: '◇',
+    },
+    action: {
+      bg: 'bg-green-50 border-green-200',
+      badge: 'bg-green-100 text-green-700',
+      symbol: '▶',
+    },
   };
   const style = iconMap[icon];
 
@@ -948,8 +943,7 @@ function ActionFields({
           </div>
           <div>
             <label className="block text-xs text-gray-500 mb-1">
-              User ID{' '}
-              <span className="text-gray-400">(optional — blank = all admins)</span>
+              User ID <span className="text-gray-400">(optional — blank = all admins)</span>
             </label>
             <input
               value={action.userId ?? ''}
@@ -1163,13 +1157,7 @@ function ActionFields({
 // WorkflowRunHistory
 // ---------------------------------------------------------------------------
 
-function WorkflowRunHistory({
-  workflowId,
-  onBack,
-}: {
-  workflowId: string;
-  onBack: () => void;
-}) {
+function WorkflowRunHistory({ workflowId, onBack }: { workflowId: string; onBack: () => void }) {
   const [runs, setRuns] = useState<WorkflowRun[] | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -1239,7 +1227,10 @@ function WorkflowRunHistory({
       {!loading && runs && runs.length > 0 && (
         <div className="space-y-2">
           {runs.map((run) => (
-            <div key={run.id} className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+            <div
+              key={run.id}
+              className="bg-white border border-gray-200 rounded-xl overflow-hidden"
+            >
               <button
                 onClick={() => setExpanded(expanded === run.id ? null : run.id)}
                 className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors text-left"
@@ -1307,7 +1298,12 @@ const MOCK_TEMPLATES: WorkflowTemplate[] = [
     name: 'Invoice Reminder',
     description: 'Send a reminder email when an invoice is overdue',
     category: 'finance',
-    trigger: { type: 'entity_updated', entityType: 'Invoice', fieldName: 'status', newValue: 'overdue' },
+    trigger: {
+      type: 'entity_updated',
+      entityType: 'Invoice',
+      fieldName: 'status',
+      newValue: 'overdue',
+    },
     conditions: [{ field: 'amount', operator: 'gt', value: '0' }],
     actions: [{ type: 'send_email', emailTemplate: 'invoice_reminder' }],
   },
@@ -1334,7 +1330,12 @@ const MOCK_TEMPLATES: WorkflowTemplate[] = [
     name: 'Contract Expiry Alert',
     description: 'Alert when a contract is nearing expiry',
     category: 'finance',
-    trigger: { type: 'entity_updated', entityType: 'Contract', fieldName: 'status', newValue: 'expiring_soon' },
+    trigger: {
+      type: 'entity_updated',
+      entityType: 'Contract',
+      fieldName: 'status',
+      newValue: 'expiring_soon',
+    },
     conditions: [],
     actions: [{ type: 'send_email', emailTemplate: 'contract_expiry' }],
   },
@@ -1343,7 +1344,12 @@ const MOCK_TEMPLATES: WorkflowTemplate[] = [
     name: 'Escalate Critical Ticket',
     description: 'Auto-escalate support tickets marked critical',
     category: 'support',
-    trigger: { type: 'entity_updated', entityType: 'ServiceTicket', fieldName: 'priority', newValue: 'critical' },
+    trigger: {
+      type: 'entity_updated',
+      entityType: 'ServiceTicket',
+      fieldName: 'priority',
+      newValue: 'critical',
+    },
     conditions: [{ field: 'status', operator: 'ne', value: 'resolved' }],
     actions: [
       { type: 'send_notification', message: 'Critical ticket requires immediate attention.' },
@@ -1366,14 +1372,25 @@ const MOCK_TEMPLATES: WorkflowTemplate[] = [
     category: 'finance',
     trigger: { type: 'schedule', cron: '0 8 * * *' },
     conditions: [],
-    actions: [{ type: 'ai_analysis', prompt: 'Summarise today\'s outstanding invoices and flag any anomalies.', outputField: 'finance_digest' }],
+    actions: [
+      {
+        type: 'ai_analysis',
+        prompt: "Summarise today's outstanding invoices and flag any anomalies.",
+        outputField: 'finance_digest',
+      },
+    ],
   },
   {
     id: 'tpl-8',
     name: 'Portal Invite on Hire',
     description: 'Send portal invite to a new employee on their start date',
     category: 'hr',
-    trigger: { type: 'entity_updated', entityType: 'Employee', fieldName: 'status', newValue: 'active' },
+    trigger: {
+      type: 'entity_updated',
+      entityType: 'Employee',
+      fieldName: 'status',
+      newValue: 'active',
+    },
     conditions: [],
     actions: [{ type: 'send_email', emailTemplate: 'portal_invite' }],
   },
@@ -1399,7 +1416,7 @@ function TemplatesGallery({
   useState(() => {
     setLoading(true);
     fetch(`${API_BASE}/workflows/templates`, { headers: TENANT_HEADERS })
-      .then((r) => r.ok ? r.json() : null)
+      .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (data) {
           const list = Array.isArray(data) ? data : (data.templates ?? null);
@@ -1421,7 +1438,10 @@ function TemplatesGallery({
             <LayoutTemplate size={18} className="text-gray-600" />
             <h2 className="text-base font-semibold text-gray-900">Workflow Templates</h2>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-700 p-1 rounded-lg hover:bg-gray-100">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-700 p-1 rounded-lg hover:bg-gray-100"
+          >
             <X size={18} />
           </button>
         </div>
@@ -1431,38 +1451,43 @@ function TemplatesGallery({
               <Loader2 size={24} className="animate-spin text-gray-300" />
             </div>
           )}
-          {!loading && categories.map((cat) => (
-            <div key={cat} className="mb-6">
-              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-                {cat}
-              </h3>
-              <div className="grid grid-cols-2 gap-3">
-                {templates.filter((t) => t.category === cat).map((tpl) => (
-                  <div
-                    key={tpl.id}
-                    className="border border-gray-200 rounded-xl p-4 hover:border-indigo-300 hover:bg-indigo-50/30 transition-colors group"
-                  >
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <span className="text-sm font-medium text-gray-900">{tpl.name}</span>
-                      <span className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 ${CATEGORY_BADGE[tpl.category]}`}>
-                        {tpl.category}
-                      </span>
-                    </div>
-                    <p className="text-xs text-gray-500 mb-3">{tpl.description}</p>
-                    <div className="flex items-center justify-between">
-                      {triggerChip(tpl.trigger.type)}
-                      <button
-                        onClick={() => onUse(tpl)}
-                        className="text-xs text-indigo-600 hover:text-indigo-800 font-medium opacity-0 group-hover:opacity-100 transition-opacity"
+          {!loading &&
+            categories.map((cat) => (
+              <div key={cat} className="mb-6">
+                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                  {cat}
+                </h3>
+                <div className="grid grid-cols-2 gap-3">
+                  {templates
+                    .filter((t) => t.category === cat)
+                    .map((tpl) => (
+                      <div
+                        key={tpl.id}
+                        className="border border-gray-200 rounded-xl p-4 hover:border-indigo-300 hover:bg-indigo-50/30 transition-colors group"
                       >
-                        Use Template
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <span className="text-sm font-medium text-gray-900">{tpl.name}</span>
+                          <span
+                            className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 ${CATEGORY_BADGE[tpl.category]}`}
+                          >
+                            {tpl.category}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500 mb-3">{tpl.description}</p>
+                        <div className="flex items-center justify-between">
+                          {triggerChip(tpl.trigger.type)}
+                          <button
+                            onClick={() => onUse(tpl)}
+                            className="text-xs text-indigo-600 hover:text-indigo-800 font-medium opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            Use Template
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
       </div>
     </div>
@@ -1529,7 +1554,10 @@ function AISuggestPanel({
             <Sparkles size={18} className="text-indigo-600" />
             <h2 className="text-base font-semibold text-gray-900">AI Workflow Suggest</h2>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-700 p-1 rounded-lg hover:bg-gray-100">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-700 p-1 rounded-lg hover:bg-gray-100"
+          >
             <X size={18} />
           </button>
         </div>
@@ -1568,8 +1596,7 @@ function AISuggestPanel({
           {/* Context */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Additional context{' '}
-              <span className="text-gray-400 font-normal">(optional)</span>
+              Additional context <span className="text-gray-400 font-normal">(optional)</span>
             </label>
             <textarea
               value={context}
@@ -1637,7 +1664,8 @@ function AISuggestPanel({
                       {result.actions.map((a, i) => (
                         <li key={i} className="text-gray-500">
                           {ACTION_TYPES.find((t) => t.value === a.type)?.label ?? a.type}
-                          {(a as WorkflowAction).message && `: ${(a as WorkflowAction).message?.slice(0, 60)}`}
+                          {(a as WorkflowAction).message &&
+                            `: ${(a as WorkflowAction).message?.slice(0, 60)}`}
                         </li>
                       ))}
                     </ul>

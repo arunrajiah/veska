@@ -25,7 +25,10 @@ export default async function DealDetailPage({ params }: { params: Promise<{ id:
     return (
       <div className="px-4 py-8 max-w-3xl">
         <p className="text-gray-500 text-sm">Deal not found.</p>
-        <Link href="/dashboard/crm/deals" className="mt-4 inline-block text-sm text-gray-600 hover:text-gray-900">
+        <Link
+          href="/dashboard/crm/deals"
+          className="mt-4 inline-block text-sm text-gray-600 hover:text-gray-900"
+        >
           ← Back to deals
         </Link>
       </div>
@@ -39,17 +42,15 @@ export default async function DealDetailPage({ params }: { params: Promise<{ id:
   return (
     <div className="px-4 py-8 max-w-5xl">
       <div className="mb-6">
-        <Link href="/dashboard/crm/deals" className="text-xs text-gray-400 hover:text-gray-700 transition-colors">
+        <Link
+          href="/dashboard/crm/deals"
+          className="text-xs text-gray-400 hover:text-gray-700 transition-colors"
+        >
           ← Deals
         </Link>
       </div>
 
-      <DealDetailClient
-        dealId={id}
-        data={d}
-        stage={stage}
-        aiSummary={aiSummary}
-      />
+      <DealDetailClient dealId={id} data={d} stage={stage} aiSummary={aiSummary} />
     </div>
   );
 }

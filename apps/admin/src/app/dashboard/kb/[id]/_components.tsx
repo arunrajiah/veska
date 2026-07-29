@@ -42,7 +42,12 @@ function EditModal({ article, onClose }: { article: Article; onClose: () => void
           title,
           content,
           category: category || undefined,
-          tags: tags ? tags.split(',').map((t) => t.trim()).filter(Boolean) : [],
+          tags: tags
+            ? tags
+                .split(',')
+                .map((t) => t.trim())
+                .filter(Boolean)
+            : [],
           status,
         }),
       });
@@ -64,39 +69,62 @@ function EditModal({ article, onClose }: { article: Article; onClose: () => void
           <h2 className="text-base font-semibold text-gray-900">Edit Article</h2>
           <div className="flex items-center gap-2">
             {error && <span className="text-xs text-red-500">{error}</span>}
-            <button onClick={() => void save('draft')} disabled={saving}
-              className="border border-gray-300 text-gray-700 text-sm px-3 py-1.5 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors">
+            <button
+              onClick={() => void save('draft')}
+              disabled={saving}
+              className="border border-gray-300 text-gray-700 text-sm px-3 py-1.5 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
+            >
               Save Draft
             </button>
-            <button onClick={() => void save('published')} disabled={saving}
-              className="bg-gray-900 text-white text-sm px-3 py-1.5 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
+            <button
+              onClick={() => void save('published')}
+              disabled={saving}
+              className="bg-gray-900 text-white text-sm px-3 py-1.5 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors"
+            >
               Publish
             </button>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 ml-1"><X size={18} /></button>
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 ml-1">
+              <X size={18} />
+            </button>
           </div>
         </div>
         <div className="flex-1 px-6 py-5 space-y-4">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Title</label>
-            <input value={title} onChange={(e) => setTitle(e.target.value)}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Category</label>
-              <input value={category} onChange={(e) => setCategory(e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+              <input
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Tags (comma-separated)</label>
-              <input value={tags} onChange={(e) => setTags(e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+              <label className="block text-xs font-medium text-gray-700 mb-1">
+                Tags (comma-separated)
+              </label>
+              <input
+                value={tags}
+                onChange={(e) => setTags(e.target.value)}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Content</label>
-            <textarea value={content} onChange={(e) => setContent(e.target.value)} rows={20}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none font-mono" />
+            <textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              rows={20}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none font-mono"
+            />
           </div>
         </div>
       </div>
@@ -137,7 +165,9 @@ export function ArticleDetailClient({ article }: { article: Article }) {
       <div className="px-8 py-8 max-w-7xl">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-gray-400 mb-5">
-          <a href="/dashboard/kb" className="hover:text-gray-600">Knowledge Base</a>
+          <a href="/dashboard/kb" className="hover:text-gray-600">
+            Knowledge Base
+          </a>
           <span>/</span>
           <span className="text-gray-700 font-medium line-clamp-1">{d.title}</span>
         </div>
@@ -146,7 +176,9 @@ export function ArticleDetailClient({ article }: { article: Article }) {
         <div className="flex items-start justify-between gap-4 mb-6">
           <div>
             <div className="flex items-center gap-2 mb-2 flex-wrap">
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[currentStatus] ?? 'bg-gray-100 text-gray-600'}`}>
+              <span
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[currentStatus] ?? 'bg-gray-100 text-gray-600'}`}
+              >
                 {currentStatus}
               </span>
               {d.category && (
@@ -183,7 +215,9 @@ export function ArticleDetailClient({ article }: { article: Article }) {
           <div className="col-span-2">
             <div className="bg-white border border-gray-200 rounded-xl px-8 py-8 shadow-sm">
               {d.content ? (
-                <pre className="text-sm text-gray-700 whitespace-pre-wrap font-sans leading-relaxed">{d.content}</pre>
+                <pre className="text-sm text-gray-700 whitespace-pre-wrap font-sans leading-relaxed">
+                  {d.content}
+                </pre>
               ) : (
                 <p className="text-gray-400 italic text-sm">No content.</p>
               )}
@@ -196,29 +230,54 @@ export function ArticleDetailClient({ article }: { article: Article }) {
               <h3 className="text-sm font-semibold text-gray-900">Details</h3>
               {[
                 { label: 'Author', value: d.author ?? '—' },
-                { label: 'Published', value: d.publishedAt ? new Date(d.publishedAt).toLocaleDateString() : '—' },
-                { label: 'Updated', value: d.updatedAt ? new Date(d.updatedAt).toLocaleDateString() : '—' },
+                {
+                  label: 'Published',
+                  value: d.publishedAt ? new Date(d.publishedAt).toLocaleDateString() : '—',
+                },
+                {
+                  label: 'Updated',
+                  value: d.updatedAt ? new Date(d.updatedAt).toLocaleDateString() : '—',
+                },
               ].map(({ label, value }) => (
                 <div key={label}>
-                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-0.5">{label}</p>
+                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-0.5">
+                    {label}
+                  </p>
                   <p className="text-sm text-gray-900">{value}</p>
                 </div>
               ))}
               <div>
-                <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Feedback</p>
+                <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">
+                  Feedback
+                </p>
                 <div className="flex items-center gap-3 text-sm">
-                  <span className="flex items-center gap-1 text-green-600"><ThumbsUp size={13} />{d.helpful ?? 0}</span>
-                  <span className="flex items-center gap-1 text-red-400"><ThumbsDown size={13} />{d.notHelpful ?? 0}</span>
-                  <span className="flex items-center gap-1 text-gray-400"><Eye size={13} />{d.views ?? 0} views</span>
+                  <span className="flex items-center gap-1 text-green-600">
+                    <ThumbsUp size={13} />
+                    {d.helpful ?? 0}
+                  </span>
+                  <span className="flex items-center gap-1 text-red-400">
+                    <ThumbsDown size={13} />
+                    {d.notHelpful ?? 0}
+                  </span>
+                  <span className="flex items-center gap-1 text-gray-400">
+                    <Eye size={13} />
+                    {d.views ?? 0} views
+                  </span>
                 </div>
               </div>
               {(d.tags ?? []).length > 0 && (
                 <div>
-                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Tags</p>
+                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">
+                    Tags
+                  </p>
                   <div className="flex flex-wrap gap-1">
                     {(d.tags ?? []).map((tag) => (
-                      <span key={tag} className="inline-flex items-center gap-0.5 text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
-                        <Tag size={9} />{tag}
+                      <span
+                        key={tag}
+                        className="inline-flex items-center gap-0.5 text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600"
+                      >
+                        <Tag size={9} />
+                        {tag}
                       </span>
                     ))}
                   </div>
@@ -229,9 +288,7 @@ export function ArticleDetailClient({ article }: { article: Article }) {
         </div>
       </div>
 
-      {showEdit && (
-        <EditModal article={article} onClose={() => setShowEdit(false)} />
-      )}
+      {showEdit && <EditModal article={article} onClose={() => setShowEdit(false)} />}
     </>
   );
 }

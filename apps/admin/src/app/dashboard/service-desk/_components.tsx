@@ -117,24 +117,36 @@ function NewRequestSlideOver({ open, onClose }: { open: boolean; onClose: () => 
       <div className="relative bg-white w-full max-w-lg h-full overflow-y-auto shadow-xl flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-base font-semibold text-gray-900">New Service Request</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <X size={18} />
+          </button>
         </div>
         <form onSubmit={(e) => void handleSubmit(e)} className="flex-1 px-6 py-5 space-y-4">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Title *</label>
-            <input name="title" required
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              name="title"
+              required
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
-            <textarea name="description" rows={4}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none" />
+            <textarea
+              name="description"
+              rows={4}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none"
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Type *</label>
-              <select name="type" required defaultValue="incident"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900">
+              <select
+                name="type"
+                required
+                defaultValue="incident"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              >
                 <option value="incident">Incident</option>
                 <option value="service_request">Service Request</option>
                 <option value="change">Change</option>
@@ -143,8 +155,11 @@ function NewRequestSlideOver({ open, onClose }: { open: boolean; onClose: () => 
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Priority</label>
-              <select name="priority" defaultValue="medium"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900">
+              <select
+                name="priority"
+                defaultValue="medium"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              >
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
@@ -154,22 +169,35 @@ function NewRequestSlideOver({ open, onClose }: { open: boolean; onClose: () => 
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Requestor Name</label>
-            <input name="requestorName"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              name="requestorName"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">SLA (e.g. 4h, 1d)</label>
-            <input name="sla" placeholder="e.g. 4h"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <label className="block text-xs font-medium text-gray-700 mb-1">
+              SLA (e.g. 4h, 1d)
+            </label>
+            <input
+              name="sla"
+              placeholder="e.g. 4h"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           {error && <p className="text-xs text-red-500">{error}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="submit" disabled={saving}
-              className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
+            <button
+              type="submit"
+              disabled={saving}
+              className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors"
+            >
               {saving ? 'Creating…' : 'Create Request'}
             </button>
-            <button type="button" onClick={onClose}
-              className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+            <button
+              type="button"
+              onClick={onClose}
+              className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+            >
               Cancel
             </button>
           </div>
@@ -221,9 +249,16 @@ export function ServiceDeskListClient({ items }: { items: ServiceDeskItem[] }) {
           { label: 'Total Requests', value: total, color: 'text-gray-900' },
           { label: 'New', value: newCount, color: 'text-blue-600' },
           { label: 'In Progress', value: inProgressCount, color: 'text-yellow-600' },
-          { label: 'SLA Breached', value: slaBreached, color: slaBreached > 0 ? 'text-red-600' : 'text-gray-400' },
+          {
+            label: 'SLA Breached',
+            value: slaBreached,
+            color: slaBreached > 0 ? 'text-red-600' : 'text-gray-400',
+          },
         ].map((s) => (
-          <div key={s.label} className="bg-white border border-gray-200 rounded-xl px-5 py-4 shadow-sm">
+          <div
+            key={s.label}
+            className="bg-white border border-gray-200 rounded-xl px-5 py-4 shadow-sm"
+          >
             <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
             <p className="text-xs text-gray-500 mt-0.5">{s.label}</p>
           </div>
@@ -276,7 +311,9 @@ export function ServiceDeskListClient({ items }: { items: ServiceDeskItem[] }) {
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Priority</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Requestor</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Assigned To</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Assigned To
+                </th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">SLA Due</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">SLA</th>
               </tr>
@@ -296,20 +333,28 @@ export function ServiceDeskListClient({ items }: { items: ServiceDeskItem[] }) {
                       </span>
                     </td>
                     <td className="px-4 py-3 max-w-xs">
-                      <span className="font-medium text-gray-900 truncate block">{d.title ?? '—'}</span>
+                      <span className="font-medium text-gray-900 truncate block">
+                        {d.title ?? '—'}
+                      </span>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${TYPE_COLORS[d.type ?? ''] ?? 'bg-gray-100 text-gray-600'}`}>
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${TYPE_COLORS[d.type ?? ''] ?? 'bg-gray-100 text-gray-600'}`}
+                      >
                         {(d.type ?? '—').replace(/_/g, ' ')}
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${PRIORITY_COLORS[d.priority ?? 'medium'] ?? 'bg-gray-100 text-gray-600'}`}>
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${PRIORITY_COLORS[d.priority ?? 'medium'] ?? 'bg-gray-100 text-gray-600'}`}
+                      >
                         {d.priority ?? '—'}
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[d.status ?? 'new'] ?? 'bg-gray-100 text-gray-600'}`}>
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[d.status ?? 'new'] ?? 'bg-gray-100 text-gray-600'}`}
+                      >
                         {(d.status ?? 'new').replace(/_/g, ' ')}
                       </span>
                     </td>

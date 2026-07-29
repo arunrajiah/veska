@@ -18,7 +18,11 @@ function formatCurrency(value: unknown): string {
   if (value == null || value === '') return '—';
   const num = Number(value);
   if (isNaN(num)) return '—';
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(num);
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(num);
 }
 
 const STAGE_BADGE: Record<string, string> = {
@@ -30,11 +34,16 @@ const STAGE_BADGE: Record<string, string> = {
   closed_lost: 'bg-red-100 text-red-600',
 };
 
-interface Toast { message: string; type: 'success' | 'error' }
+interface Toast {
+  message: string;
+  type: 'success' | 'error';
+}
 
 function ToastBubble({ toast }: { toast: Toast }) {
   return (
-    <div className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl shadow-lg text-sm font-medium ${toast.type === 'success' ? 'bg-gray-900 text-white' : 'bg-red-600 text-white'}`}>
+    <div
+      className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl shadow-lg text-sm font-medium ${toast.type === 'success' ? 'bg-gray-900 text-white' : 'bg-red-600 text-white'}`}
+    >
       {toast.message}
     </div>
   );
@@ -97,8 +106,12 @@ export function EditCompanySlideOver({ companyId, initial, onClose, onSaved }: E
   const [phone, setPhone] = useState(String(initial['phone'] ?? ''));
   const [city, setCity] = useState(String(initial['city'] ?? ''));
   const [address, setAddress] = useState(String(initial['address'] ?? ''));
-  const [employeeCount, setEmployeeCount] = useState(initial['employee_count'] != null ? String(initial['employee_count']) : '');
-  const [revenue, setRevenue] = useState(initial['revenue'] != null ? String(initial['revenue']) : '');
+  const [employeeCount, setEmployeeCount] = useState(
+    initial['employee_count'] != null ? String(initial['employee_count']) : '',
+  );
+  const [revenue, setRevenue] = useState(
+    initial['revenue'] != null ? String(initial['revenue']) : '',
+  );
   const [notes, setNotes] = useState(String(initial['notes'] ?? ''));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -111,7 +124,12 @@ export function EditCompanySlideOver({ companyId, initial, onClose, onSaved }: E
         method: 'PATCH',
         headers: apiHeaders(),
         body: JSON.stringify({
-          name, industry, website, phone, city, address,
+          name,
+          industry,
+          website,
+          phone,
+          city,
+          address,
           employee_count: employeeCount ? Number(employeeCount) : undefined,
           revenue: revenue ? Number(revenue) : undefined,
           notes,
@@ -132,7 +150,9 @@ export function EditCompanySlideOver({ companyId, initial, onClose, onSaved }: E
       <div className="w-[420px] bg-white shadow-2xl flex flex-col overflow-y-auto">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <h2 className="text-sm font-semibold text-gray-900">Edit Company</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors"><X size={16} /></button>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+            <X size={16} />
+          </button>
         </div>
 
         <div className="flex-1 px-6 py-4 space-y-4">
@@ -143,29 +163,50 @@ export function EditCompanySlideOver({ companyId, initial, onClose, onSaved }: E
             { label: 'Phone', value: phone, setter: setPhone, type: 'tel' },
             { label: 'City', value: city, setter: setCity, type: 'text' },
             { label: 'Address', value: address, setter: setAddress, type: 'text' },
-            { label: 'Employee Count', value: employeeCount, setter: setEmployeeCount, type: 'number' },
+            {
+              label: 'Employee Count',
+              value: employeeCount,
+              setter: setEmployeeCount,
+              type: 'number',
+            },
             { label: 'Annual Revenue ($)', value: revenue, setter: setRevenue, type: 'number' },
           ].map(({ label, value, setter, type }) => (
             <div key={label}>
               <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
-              <input type={type} value={value} onChange={(e) => setter(e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+              <input
+                type={type}
+                value={value}
+                onChange={(e) => setter(e.target.value)}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+              />
             </div>
           ))}
 
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1">Notes</label>
-            <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-none" />
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={3}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-none"
+            />
           </div>
 
           {error && <p className="text-xs text-red-600">{error}</p>}
         </div>
 
         <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-2">
-          <button onClick={onClose} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors">Cancel</button>
-          <button onClick={() => void handleSave()} disabled={saving}
-            className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-60">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => void handleSave()}
+            disabled={saving}
+            className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-60"
+          >
             {saving ? 'Saving…' : 'Save Changes'}
           </button>
         </div>
@@ -176,8 +217,14 @@ export function EditCompanySlideOver({ companyId, initial, onClose, onSaved }: E
 
 // ─── Company Detail Client ────────────────────────────────────────────────────
 
-interface ContactRecord { id: string; data: Record<string, unknown> }
-interface DealRecord { id: string; data: Record<string, unknown> }
+interface ContactRecord {
+  id: string;
+  data: Record<string, unknown>;
+}
+interface DealRecord {
+  id: string;
+  data: Record<string, unknown>;
+}
 
 interface CompanyDetailClientProps {
   companyId: string;
@@ -187,7 +234,13 @@ interface CompanyDetailClientProps {
   deals: DealRecord[];
 }
 
-export function CompanyDetailClient({ companyId, data: d, aiSummary, contacts, deals }: CompanyDetailClientProps) {
+export function CompanyDetailClient({
+  companyId,
+  data: d,
+  aiSummary,
+  contacts,
+  deals,
+}: CompanyDetailClientProps) {
   const router = useRouter();
   const [showEdit, setShowEdit] = useState(false);
   const [toast, setToast] = useState<Toast | null>(null);
@@ -209,7 +262,10 @@ export function CompanyDetailClient({ companyId, data: d, aiSummary, contacts, d
     { label: 'Phone', value: String(d['phone'] ?? '') },
     { label: 'Address', value: String(d['address'] ?? '') },
     { label: 'City', value: String(d['city'] ?? '') },
-    { label: 'Employees', value: d['employee_count'] != null ? Number(d['employee_count']).toLocaleString() : '' },
+    {
+      label: 'Employees',
+      value: d['employee_count'] != null ? Number(d['employee_count']).toLocaleString() : '',
+    },
     { label: 'Revenue', value: formatCurrency(d['revenue']) },
     { label: 'Notes', value: String(d['notes'] ?? '') },
   ];
@@ -239,7 +295,9 @@ export function CompanyDetailClient({ companyId, data: d, aiSummary, contacts, d
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
             <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
-              <h2 className="text-xs font-medium uppercase tracking-widest text-gray-400">Details</h2>
+              <h2 className="text-xs font-medium uppercase tracking-widest text-gray-400">
+                Details
+              </h2>
             </div>
             <dl className="divide-y divide-gray-50">
               {fields.map(({ label, value }) => (
@@ -259,7 +317,9 @@ export function CompanyDetailClient({ companyId, data: d, aiSummary, contacts, d
           {/* Contacts */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
             <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
-              <h2 className="text-xs font-medium uppercase tracking-widest text-gray-400">Contacts ({contacts.length})</h2>
+              <h2 className="text-xs font-medium uppercase tracking-widest text-gray-400">
+                Contacts ({contacts.length})
+              </h2>
             </div>
             <div className="px-5 py-3">
               {contacts.length === 0 ? (
@@ -268,14 +328,21 @@ export function CompanyDetailClient({ companyId, data: d, aiSummary, contacts, d
                 <div className="space-y-2">
                   {contacts.map((c) => {
                     const cd = c.data;
-                    const name = [cd['first_name'] ?? cd['firstName'], cd['last_name'] ?? cd['lastName']].filter(Boolean).join(' ') || String(cd['email'] ?? '');
+                    const name =
+                      [cd['first_name'] ?? cd['firstName'], cd['last_name'] ?? cd['lastName']]
+                        .filter(Boolean)
+                        .join(' ') || String(cd['email'] ?? '');
                     return (
                       <div key={c.id} className="flex items-center justify-between py-1">
                         <div>
                           <p className="text-sm font-medium text-gray-900">{name || '—'}</p>
-                          {Boolean(cd['title']) && <p className="text-xs text-gray-400">{String(cd['title'])}</p>}
+                          {Boolean(cd['title']) && (
+                            <p className="text-xs text-gray-400">{String(cd['title'])}</p>
+                          )}
                         </div>
-                        {Boolean(cd['email']) && <p className="text-xs text-gray-500">{String(cd['email'])}</p>}
+                        {Boolean(cd['email']) && (
+                          <p className="text-xs text-gray-500">{String(cd['email'])}</p>
+                        )}
                       </div>
                     );
                   })}
@@ -287,7 +354,9 @@ export function CompanyDetailClient({ companyId, data: d, aiSummary, contacts, d
           {/* Deals */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
             <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
-              <h2 className="text-xs font-medium uppercase tracking-widest text-gray-400">Deals ({deals.length})</h2>
+              <h2 className="text-xs font-medium uppercase tracking-widest text-gray-400">
+                Deals ({deals.length})
+              </h2>
             </div>
             <div className="px-5 py-3">
               {deals.length === 0 ? (
@@ -300,14 +369,20 @@ export function CompanyDetailClient({ companyId, data: d, aiSummary, contacts, d
                     return (
                       <div key={deal.id} className="flex items-center justify-between py-1">
                         <div>
-                          <p className="text-sm font-medium text-gray-900">{String(dd['name'] ?? '(Unnamed)')}</p>
+                          <p className="text-sm font-medium text-gray-900">
+                            {String(dd['name'] ?? '(Unnamed)')}
+                          </p>
                           {stage && (
-                            <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${STAGE_BADGE[stage] ?? 'bg-gray-100 text-gray-600'}`}>
+                            <span
+                              className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${STAGE_BADGE[stage] ?? 'bg-gray-100 text-gray-600'}`}
+                            >
                               {stage}
                             </span>
                           )}
                         </div>
-                        <span className="text-sm font-medium text-gray-700">{formatCurrency(dd['value'])}</span>
+                        <span className="text-sm font-medium text-gray-700">
+                          {formatCurrency(dd['value'])}
+                        </span>
                       </div>
                     );
                   })}
@@ -320,7 +395,9 @@ export function CompanyDetailClient({ companyId, data: d, aiSummary, contacts, d
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
             <div className="px-5 py-3 border-b border-gray-100 bg-gray-50 flex items-center gap-2">
               <Sparkles size={13} className="text-indigo-500" />
-              <h2 className="text-xs font-medium uppercase tracking-widest text-gray-400">AI Insights</h2>
+              <h2 className="text-xs font-medium uppercase tracking-widest text-gray-400">
+                AI Insights
+              </h2>
             </div>
             <div className="px-5 py-4">
               {aiSummary ? (

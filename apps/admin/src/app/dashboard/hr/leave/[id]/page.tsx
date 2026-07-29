@@ -47,7 +47,10 @@ export default async function LeaveDetailPage({ params }: { params: Promise<{ id
     return (
       <div className="px-8 py-8 max-w-3xl">
         <p className="text-gray-500 text-sm">Leave request not found.</p>
-        <Link href="/dashboard/hr/leave" className="mt-4 inline-block text-sm text-gray-600 hover:text-gray-900">
+        <Link
+          href="/dashboard/hr/leave"
+          className="mt-4 inline-block text-sm text-gray-600 hover:text-gray-900"
+        >
           ← Back to leave requests
         </Link>
       </div>
@@ -60,7 +63,10 @@ export default async function LeaveDetailPage({ params }: { params: Promise<{ id
 
   const fields: Array<{ label: string; value: React.ReactNode }> = [
     { label: 'Employee', value: employee },
-    { label: 'Leave type', value: <span className="capitalize">{String(d['leave_type'] ?? '—')}</span> },
+    {
+      label: 'Leave type',
+      value: <span className="capitalize">{String(d['leave_type'] ?? '—')}</span>,
+    },
     { label: 'Start date', value: d['start_date'] ? String(d['start_date']).slice(0, 10) : '—' },
     { label: 'End date', value: d['end_date'] ? String(d['end_date']).slice(0, 10) : '—' },
     { label: 'Status', value: <StatusBadge status={status} /> },
@@ -77,7 +83,9 @@ export default async function LeaveDetailPage({ params }: { params: Promise<{ id
       <div className="flex items-start justify-between mb-8">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">{employee}</h1>
-          <p className="text-sm text-gray-500 mt-0.5 capitalize">{String(d['leave_type'] ?? '')} leave</p>
+          <p className="text-sm text-gray-500 mt-0.5 capitalize">
+            {String(d['leave_type'] ?? '')} leave
+          </p>
         </div>
         <div className="flex gap-2">
           <ApproveButton leaveId={id} tenantId={tenantId} currentStatus={status} />
@@ -106,7 +114,9 @@ export default async function LeaveDetailPage({ params }: { params: Promise<{ id
           <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
             <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Notes</h2>
           </div>
-          <p className="px-5 py-4 text-sm text-gray-700 whitespace-pre-wrap">{String(d['notes'])}</p>
+          <p className="px-5 py-4 text-sm text-gray-700 whitespace-pre-wrap">
+            {String(d['notes'])}
+          </p>
         </div>
       )}
     </div>

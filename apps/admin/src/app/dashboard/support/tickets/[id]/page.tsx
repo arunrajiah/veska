@@ -34,7 +34,10 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
   if (!ticket) {
     return (
       <div className="px-8 py-8 max-w-3xl">
-        <Link href="/dashboard/support/tickets" className="text-xs text-gray-400 hover:text-gray-700">
+        <Link
+          href="/dashboard/support/tickets"
+          className="text-xs text-gray-400 hover:text-gray-700"
+        >
           ← Tickets
         </Link>
         <p className="text-gray-500 text-sm mt-4">Ticket not found.</p>

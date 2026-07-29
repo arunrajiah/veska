@@ -9,7 +9,7 @@ export default async function SalesOrdersPage() {
       '/api/v1/sales/orders?limit=50',
       process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
     );
-    orders = Array.isArray(res) ? res : (res as { data: OrderRecord[] }).data ?? [];
+    orders = Array.isArray(res) ? res : ((res as { data: OrderRecord[] }).data ?? []);
   } catch {
     orders = [];
   }

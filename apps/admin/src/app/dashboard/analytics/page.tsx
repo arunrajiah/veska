@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { AnalyticsClient } from './_components.js';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+const API_BASE = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 interface AnalyticsSummary {
   revenue30d?: number;
@@ -14,9 +14,11 @@ interface AnalyticsSummary {
 
 export default async function AnalyticsPage() {
   const cookieStore = await cookies();
-  const tenantId = cookieStore.get('veska_tenant')?.value ?? process.env.VESKA_TENANT_ID ?? 'demo-tenant';
+  const tenantId =
+    cookieStore.get('veska_tenant')?.value ?? process.env.VESKA_TENANT_ID ?? 'demo-tenant';
   const sessionToken = cookieStore.get('veska_session')?.value;
-  const identityId = cookieStore.get('veska_identity')?.value ?? cookieStore.get('veska_user')?.value ?? 'system';
+  const identityId =
+    cookieStore.get('veska_identity')?.value ?? cookieStore.get('veska_user')?.value ?? 'system';
 
   let summary: AnalyticsSummary = {};
 

@@ -70,7 +70,15 @@ interface AIReportResult {
 
 // ─── Chart colours palette ────────────────────────────────────────────────────
 
-const PALETTE: string[] = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899'];
+const PALETTE: string[] = [
+  '#6366f1',
+  '#10b981',
+  '#f59e0b',
+  '#ef4444',
+  '#8b5cf6',
+  '#06b6d4',
+  '#ec4899',
+];
 function paletteColor(i: number): string {
   return PALETTE[i % PALETTE.length] ?? '#6366f1';
 }
@@ -78,12 +86,7 @@ function paletteColor(i: number): string {
 // ─── Chart skeleton ───────────────────────────────────────────────────────────
 
 function ChartSkeleton({ height = 260 }: { height?: number }) {
-  return (
-    <div
-      className="animate-pulse bg-gray-100 rounded-xl w-full"
-      style={{ height }}
-    />
-  );
+  return <div className="animate-pulse bg-gray-100 rounded-xl w-full" style={{ height }} />;
 }
 
 function ChartError({ message }: { message: string }) {
@@ -115,10 +118,11 @@ function useChartData<T>(url: string, deps: unknown[]) {
     } finally {
       setLoading(false);
     }
-
   }, [url, ...deps]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   return { data, loading, error };
 }
@@ -151,7 +155,9 @@ function ExpensesDonut({ period }: { period: Period }) {
 
   let slices: DonutSlice[] = [];
   if (data) {
-    const raw = Array.isArray(data) ? data : (data as { categories?: DonutSlice[] }).categories ?? [];
+    const raw = Array.isArray(data)
+      ? data
+      : ((data as { categories?: DonutSlice[] }).categories ?? []);
     slices = raw.map((s, i) => ({ ...s, color: s.color ?? paletteColor(i) }));
   }
 
@@ -163,12 +169,14 @@ function ExpensesDonut({ period }: { period: Period }) {
 // ─── Pipeline bar ─────────────────────────────────────────────────────────────
 
 function PipelineBar() {
-  const { data, loading, error } = useChartData<ChartData | { stages?: { label: string; value: number }[] }>(
-    `/api/veska/analytics/pipeline`,
-    [],
-  );
+  const { data, loading, error } = useChartData<
+    ChartData | { stages?: { label: string; value: number }[] }
+  >(`/api/veska/analytics/pipeline`, []);
 
-  let chartData: ChartData = { labels: [], datasets: [{ label: 'Pipeline', data: [], color: paletteColor(4) }] };
+  let chartData: ChartData = {
+    labels: [],
+    datasets: [{ label: 'Pipeline', data: [], color: paletteColor(4) }],
+  };
 
   if (data) {
     if ('labels' in data && 'datasets' in data) {
@@ -176,7 +184,13 @@ function PipelineBar() {
     } else if ('stages' in data && data.stages) {
       chartData = {
         labels: data.stages.map((s) => s.label),
-        datasets: [{ label: 'Pipeline value', data: data.stages.map((s) => s.value), color: paletteColor(4) }],
+        datasets: [
+          {
+            label: 'Pipeline value',
+            data: data.stages.map((s) => s.value),
+            color: paletteColor(4),
+          },
+        ],
       };
     }
   }
@@ -189,12 +203,14 @@ function PipelineBar() {
 // ─── Headcount bar ────────────────────────────────────────────────────────────
 
 function HeadcountBar() {
-  const { data, loading, error } = useChartData<ChartData | { departments?: { label: string; value: number }[] }>(
-    `/api/veska/analytics/headcount`,
-    [],
-  );
+  const { data, loading, error } = useChartData<
+    ChartData | { departments?: { label: string; value: number }[] }
+  >(`/api/veska/analytics/headcount`, []);
 
-  let chartData: ChartData = { labels: [], datasets: [{ label: 'Headcount', data: [], color: paletteColor(1) }] };
+  let chartData: ChartData = {
+    labels: [],
+    datasets: [{ label: 'Headcount', data: [], color: paletteColor(1) }],
+  };
 
   if (data) {
     if ('labels' in data && 'datasets' in data) {
@@ -202,7 +218,13 @@ function HeadcountBar() {
     } else if ('departments' in data && data.departments) {
       chartData = {
         labels: data.departments.map((d) => d.label),
-        datasets: [{ label: 'Headcount', data: data.departments.map((d) => d.value), color: paletteColor(1) }],
+        datasets: [
+          {
+            label: 'Headcount',
+            data: data.departments.map((d) => d.value),
+            color: paletteColor(1),
+          },
+        ],
       };
     }
   }
@@ -284,11 +306,13 @@ function AIReportBuilder() {
   }
 
   const hasRows = (result?.rows?.length ?? 0) > 0;
-  const columns =
-    result?.columns ?? (result?.rows?.[0] ? Object.keys(result.rows[0]) : []);
+  const columns = result?.columns ?? (result?.rows?.[0] ? Object.keys(result.rows[0]) : []);
 
   // Normalise chartData for known types
-  let chartData: { labels: string[]; datasets: { label: string; data: number[]; color: string }[] } | null = null;
+  let chartData: {
+    labels: string[];
+    datasets: { label: string; data: number[]; color: string }[];
+  } | null = null;
   if (result?.chartData) {
     chartData = result.chartData;
     // ensure colours present
@@ -408,12 +432,8 @@ function AIReportBuilder() {
           </div>
 
           {/* Chart */}
-          {chartData && result.chartType === 'bar' && (
-            <BarChart data={chartData} />
-          )}
-          {chartData && result.chartType === 'line' && (
-            <LineChart data={chartData} />
-          )}
+          {chartData && result.chartType === 'bar' && <BarChart data={chartData} />}
+          {chartData && result.chartType === 'line' && <LineChart data={chartData} />}
           {result.chartType === 'pie' && donutSlices.length > 0 && (
             <DonutChart data={donutSlices} />
           )}
@@ -447,7 +467,10 @@ function AIReportBuilder() {
                         className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
                       >
                         {columns.map((col) => (
-                          <td key={col} className="px-4 py-2 text-gray-700 whitespace-nowrap font-mono">
+                          <td
+                            key={col}
+                            className="px-4 py-2 text-gray-700 whitespace-nowrap font-mono"
+                          >
                             {row[col] === null || row[col] === undefined ? (
                               <span className="text-gray-300">—</span>
                             ) : (

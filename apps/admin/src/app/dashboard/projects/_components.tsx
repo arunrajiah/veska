@@ -49,12 +49,20 @@ const PRIORITY_STYLES: Record<string, string> = {
 
 function fmtDate(d?: string) {
   if (!d) return '—';
-  return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(d).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 }
 
 function usd(v?: number) {
   if (v == null) return '—';
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(v);
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(v);
 }
 
 function ProgressBar({ pct }: { pct: number }) {
@@ -66,7 +74,15 @@ function ProgressBar({ pct }: { pct: number }) {
   );
 }
 
-function NewProjectSlideOver({ open, onClose, onCreated }: { open: boolean; onClose: () => void; onCreated: () => void }) {
+function NewProjectSlideOver({
+  open,
+  onClose,
+  onCreated,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onCreated: () => void;
+}) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -109,40 +125,64 @@ function NewProjectSlideOver({ open, onClose, onCreated }: { open: boolean; onCl
       <div className="relative bg-white w-full max-w-md h-full overflow-y-auto shadow-xl flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-base font-semibold text-gray-900">New Project</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <X size={18} />
+          </button>
         </div>
         <form onSubmit={(e) => void handleSubmit(e)} className="flex-1 px-6 py-5 space-y-4">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Name *</label>
-            <input name="name" required placeholder="Project name"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              name="name"
+              required
+              placeholder="Project name"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
-            <textarea name="description" rows={3} placeholder="Project description…"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none" />
+            <textarea
+              name="description"
+              rows={3}
+              placeholder="Project description…"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none"
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Start Date</label>
-              <input name="startDate" type="date"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+              <input
+                name="startDate"
+                type="date"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Due Date</label>
-              <input name="dueDate" type="date"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+              <input
+                name="dueDate"
+                type="date"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Budget</label>
-            <input name="budget" type="number" min="0" placeholder="0"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              name="budget"
+              type="number"
+              min="0"
+              placeholder="0"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Priority</label>
-            <select name="priority" defaultValue="medium"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900">
+            <select
+              name="priority"
+              defaultValue="medium"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            >
               <option value="low">Low</option>
               <option value="medium">Medium</option>
               <option value="high">High</option>
@@ -151,17 +191,26 @@ function NewProjectSlideOver({ open, onClose, onCreated }: { open: boolean; onCl
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Manager Name</label>
-            <input name="managerName" placeholder="Manager name"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              name="managerName"
+              placeholder="Manager name"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           {error && <p className="text-xs text-red-500">{error}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="submit" disabled={saving}
-              className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
+            <button
+              type="submit"
+              disabled={saving}
+              className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors"
+            >
               {saving ? 'Creating…' : 'Create Project'}
             </button>
-            <button type="button" onClick={onClose}
-              className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+            <button
+              type="button"
+              onClick={onClose}
+              className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+            >
               Cancel
             </button>
           </div>
@@ -172,7 +221,7 @@ function NewProjectSlideOver({ open, onClose, onCreated }: { open: boolean; onCl
 }
 
 const TABS = ['All', 'Active', 'Planning', 'On Hold', 'Completed'] as const;
-type Tab = typeof TABS[number];
+type Tab = (typeof TABS)[number];
 
 const TAB_STATUS_MAP: Record<Tab, string | null> = {
   All: null,
@@ -200,7 +249,9 @@ export function ProjectsClient({ initialProjects }: { initialProjects: Project[]
   }).length;
 
   const filterStatus = TAB_STATUS_MAP[activeTab];
-  const filtered = filterStatus ? initialProjects.filter((p) => p.data?.status === filterStatus) : initialProjects;
+  const filtered = filterStatus
+    ? initialProjects.filter((p) => p.data?.status === filterStatus)
+    : initialProjects;
 
   function handleCreated() {
     startTransition(() => router.refresh());
@@ -211,7 +262,9 @@ export function ProjectsClient({ initialProjects }: { initialProjects: Project[]
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">Projects</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{totalProjects} project{totalProjects !== 1 ? 's' : ''}</p>
+          <p className="text-sm text-gray-500 mt-0.5">
+            {totalProjects} project{totalProjects !== 1 ? 's' : ''}
+          </p>
         </div>
         <button
           onClick={() => setShowNew(true)}
@@ -224,19 +277,27 @@ export function ProjectsClient({ initialProjects }: { initialProjects: Project[]
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4 mb-8">
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-5 py-4">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Total Projects</p>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+            Total Projects
+          </p>
           <p className="text-2xl font-semibold text-gray-900">{totalProjects}</p>
         </div>
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-5 py-4">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Active</p>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+            Active
+          </p>
           <p className="text-2xl font-semibold text-green-700">{activeCount}</p>
         </div>
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-5 py-4">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Completed</p>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+            Completed
+          </p>
           <p className="text-2xl font-semibold text-blue-700">{completedCount}</p>
         </div>
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-5 py-4">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Overdue</p>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+            Overdue
+          </p>
           <p className="text-2xl font-semibold text-red-600">{overdueCount}</p>
         </div>
       </div>
@@ -248,7 +309,9 @@ export function ProjectsClient({ initialProjects }: { initialProjects: Project[]
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
-              activeTab === tab ? 'border-gray-900 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700'
+              activeTab === tab
+                ? 'border-gray-900 text-gray-900'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
           >
             {tab}
@@ -268,7 +331,8 @@ export function ProjectsClient({ initialProjects }: { initialProjects: Project[]
             const status = d?.status ?? 'planning';
             const priority = d?.priority ?? 'medium';
             const progress = d?.progress ?? 0;
-            const isOverdue = d?.dueDate && d.dueDate < today && status !== 'completed' && status !== 'cancelled';
+            const isOverdue =
+              d?.dueDate && d.dueDate < today && status !== 'completed' && status !== 'cancelled';
 
             return (
               <div
@@ -280,7 +344,9 @@ export function ProjectsClient({ initialProjects }: { initialProjects: Project[]
                   <h3 className="font-semibold text-gray-900 text-sm leading-snug line-clamp-1">
                     {d?.name ?? 'Unnamed project'}
                   </h3>
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 capitalize ${STATUS_STYLES[status] ?? 'bg-gray-100 text-gray-600'}`}>
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 capitalize ${STATUS_STYLES[status] ?? 'bg-gray-100 text-gray-600'}`}
+                  >
                     {status.replace(/_/g, ' ')}
                   </span>
                 </div>
@@ -298,23 +364,35 @@ export function ProjectsClient({ initialProjects }: { initialProjects: Project[]
                 </div>
 
                 <div className="flex items-center justify-between text-xs text-gray-400 mb-2">
-                  <span className={`px-1.5 py-0.5 rounded font-medium ${PRIORITY_STYLES[priority] ?? 'bg-gray-100 text-gray-500'}`}>
+                  <span
+                    className={`px-1.5 py-0.5 rounded font-medium ${PRIORITY_STYLES[priority] ?? 'bg-gray-100 text-gray-500'}`}
+                  >
                     {priority}
                   </span>
-                  {isOverdue && (
-                    <span className="text-red-500 font-medium">Overdue</span>
-                  )}
+                  {isOverdue && <span className="text-red-500 font-medium">Overdue</span>}
                 </div>
 
                 <div className="space-y-1 text-xs text-gray-400">
                   {d?.dueDate && (
-                    <p>Due: <span className={`${isOverdue ? 'text-red-500' : 'text-gray-600'}`}>{fmtDate(d.dueDate)}</span></p>
+                    <p>
+                      Due:{' '}
+                      <span className={`${isOverdue ? 'text-red-500' : 'text-gray-600'}`}>
+                        {fmtDate(d.dueDate)}
+                      </span>
+                    </p>
                   )}
                   {d?.managerName && (
-                    <p>Manager: <span className="text-gray-600">{d.managerName}</span></p>
+                    <p>
+                      Manager: <span className="text-gray-600">{d.managerName}</span>
+                    </p>
                   )}
                   {d?.budget != null && (
-                    <p>Budget: <span className="text-gray-600">{usd(d.spent ?? 0)} / {usd(d.budget)}</span></p>
+                    <p>
+                      Budget:{' '}
+                      <span className="text-gray-600">
+                        {usd(d.spent ?? 0)} / {usd(d.budget)}
+                      </span>
+                    </p>
                   )}
                 </div>
               </div>
@@ -323,7 +401,11 @@ export function ProjectsClient({ initialProjects }: { initialProjects: Project[]
         </div>
       )}
 
-      <NewProjectSlideOver open={showNew} onClose={() => setShowNew(false)} onCreated={handleCreated} />
+      <NewProjectSlideOver
+        open={showNew}
+        onClose={() => setShowNew(false)}
+        onCreated={handleCreated}
+      />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { ReportDetailClient } from './_components.js';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+const API_BASE = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 interface ReportConfig {
   metrics?: Array<{ field: string; aggregation: string; label: string }>;
@@ -58,7 +58,7 @@ export default async function ReportDetailPage({ params }: PageProps) {
       headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
     });
     if (res.ok) {
-      const json = await res.json() as Schedule[] | { results?: Schedule[] };
+      const json = (await res.json()) as Schedule[] | { results?: Schedule[] };
       schedules = Array.isArray(json) ? json : (json.results ?? []);
     }
   } catch {

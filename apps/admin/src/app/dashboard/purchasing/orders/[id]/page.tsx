@@ -39,7 +39,10 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
     return (
       <div className="px-8 py-8">
         <p className="text-gray-500">Purchase order not found.</p>
-        <Link href="/dashboard/purchasing/orders" className="text-sm text-gray-600 hover:text-gray-900 mt-2 inline-block">
+        <Link
+          href="/dashboard/purchasing/orders"
+          className="text-sm text-gray-600 hover:text-gray-900 mt-2 inline-block"
+        >
           ← Back to orders
         </Link>
       </div>

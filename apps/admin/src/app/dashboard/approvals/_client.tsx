@@ -36,7 +36,9 @@ function entityTypeLabel(type: string): string {
     contract: 'Contract',
     budget: 'Budget',
   };
-  return labels[type.toLowerCase()] ?? type.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  return (
+    labels[type.toLowerCase()] ?? type.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+  );
 }
 
 function formatRelativeTime(dateString: string): string {
@@ -48,7 +50,11 @@ function formatRelativeTime(dateString: string): string {
   if (diffMins < 60) return `${diffMins}m ago`;
   if (diffHours < 24) return `${diffHours}h ago`;
   if (diffDays < 7) return `${diffDays}d ago`;
-  return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(dateString).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 }
 
 function formatAmount(amount?: number | null, currency?: string | null): string | null {
@@ -126,9 +132,7 @@ export function ApprovalsClient({ pending, all, fetchError }: ApprovalsClientPro
               </span>
             )}
           </div>
-          <p className="text-sm text-gray-500 ml-9">
-            Review and act on pending approval requests.
-          </p>
+          <p className="text-sm text-gray-500 ml-9">Review and act on pending approval requests.</p>
         </div>
       </div>
 
@@ -167,9 +171,7 @@ export function ApprovalsClient({ pending, all, fetchError }: ApprovalsClientPro
       {fetchError && (
         <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl mb-6 text-red-700">
           <AlertCircle size={18} className="flex-shrink-0" />
-          <p className="text-sm">
-            Could not load approval requests. The API may be unavailable.
-          </p>
+          <p className="text-sm">Could not load approval requests. The API may be unavailable.</p>
         </div>
       )}
 
@@ -195,12 +197,15 @@ export function ApprovalsClient({ pending, all, fetchError }: ApprovalsClientPro
                       <div className="flex items-center gap-2 flex-wrap mb-1">
                         <span
                           className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                            ENTITY_TYPE_COLORS[req.entityType.toLowerCase()] ?? 'bg-gray-100 text-gray-700'
+                            ENTITY_TYPE_COLORS[req.entityType.toLowerCase()] ??
+                            'bg-gray-100 text-gray-700'
                           }`}
                         >
                           {entityTypeLabel(req.entityType)}
                         </span>
-                        <span className="font-medium text-gray-900 truncate">{req.entityTitle}</span>
+                        <span className="font-medium text-gray-900 truncate">
+                          {req.entityTitle}
+                        </span>
                         {amountStr && (
                           <span className="text-sm font-semibold text-gray-700">{amountStr}</span>
                         )}
@@ -208,7 +213,8 @@ export function ApprovalsClient({ pending, all, fetchError }: ApprovalsClientPro
                       <p className="text-sm text-gray-500">
                         Step {req.currentStep} of {req.totalSteps}
                         {req.requestedBy ? ` · Requested by ${req.requestedBy}` : ''}
-                        {' · '}{formatRelativeTime(req.createdAt)}
+                        {' · '}
+                        {formatRelativeTime(req.createdAt)}
                       </p>
                     </div>
 
@@ -231,7 +237,9 @@ export function ApprovalsClient({ pending, all, fetchError }: ApprovalsClientPro
                           </button>
                           <button
                             type="button"
-                            onClick={() => { void handleApprove(req.id); }}
+                            onClick={() => {
+                              void handleApprove(req.id);
+                            }}
                             disabled={loadingId === req.id}
                             aria-label={`Approve ${req.entityTitle}`}
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-green-600 text-white hover:bg-green-700 transition-colors disabled:opacity-50"
@@ -252,7 +260,8 @@ export function ApprovalsClient({ pending, all, fetchError }: ApprovalsClientPro
                   {rejectingId === req.id && (
                     <div className="mt-3 pt-3 border-t border-gray-100">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Rejection reason <span className="text-gray-400 font-normal">(optional)</span>
+                        Rejection reason{' '}
+                        <span className="text-gray-400 font-normal">(optional)</span>
                       </label>
                       <textarea
                         value={rejectComment}
@@ -274,7 +283,9 @@ export function ApprovalsClient({ pending, all, fetchError }: ApprovalsClientPro
                         </button>
                         <button
                           type="button"
-                          onClick={() => { void handleRejectSubmit(req.id); }}
+                          onClick={() => {
+                            void handleRejectSubmit(req.id);
+                          }}
                           disabled={loadingId === req.id}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50"
                         >
@@ -326,12 +337,24 @@ function AllRequestsTable({ requests }: { requests: ApprovalRequest[] }) {
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-gray-100 bg-gray-50">
-            <th scope="col" className="text-left px-4 py-3 font-medium text-gray-500">Title</th>
-            <th scope="col" className="text-left px-4 py-3 font-medium text-gray-500">Type</th>
-            <th scope="col" className="text-left px-4 py-3 font-medium text-gray-500">Status</th>
-            <th scope="col" className="text-left px-4 py-3 font-medium text-gray-500">Step</th>
-            <th scope="col" className="text-left px-4 py-3 font-medium text-gray-500">Requested</th>
-            <th scope="col" className="text-left px-4 py-3 font-medium text-gray-500">Actions</th>
+            <th scope="col" className="text-left px-4 py-3 font-medium text-gray-500">
+              Title
+            </th>
+            <th scope="col" className="text-left px-4 py-3 font-medium text-gray-500">
+              Type
+            </th>
+            <th scope="col" className="text-left px-4 py-3 font-medium text-gray-500">
+              Status
+            </th>
+            <th scope="col" className="text-left px-4 py-3 font-medium text-gray-500">
+              Step
+            </th>
+            <th scope="col" className="text-left px-4 py-3 font-medium text-gray-500">
+              Requested
+            </th>
+            <th scope="col" className="text-left px-4 py-3 font-medium text-gray-500">
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-50">
@@ -348,7 +371,9 @@ function AllRequestsTable({ requests }: { requests: ApprovalRequest[] }) {
                 </span>
               </td>
               <td className="px-4 py-3">
-                <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${statusBadge(req.status)}`}>
+                <span
+                  className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${statusBadge(req.status)}`}
+                >
                   {req.status}
                 </span>
               </td>

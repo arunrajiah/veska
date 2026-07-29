@@ -1,17 +1,23 @@
 import { getTranslations } from 'next-intl/server';
+import { apiFetch } from '@/lib/api.js';
 import { ApprovalsClient, type ApprovalRequest } from './_client.js';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
-
-async function fetchApprovals(status?: string): Promise<{ data: ApprovalRequest[]; error: boolean }> {
+// Went through a bare fetch with no session and a hardcoded tenantId=demo, so the API
+// answered 401 and the page always rendered its "could not load" banner. apiFetch
+// attaches the session and derives the tenant from it. The endpoint returns
+// { requests: [...] }, which the previous json.data lookup would have missed anyway.
+async function fetchApprovals(
+  status?: string,
+): Promise<{ data: ApprovalRequest[]; error: boolean }> {
+  const path = status
+    ? `/api/v1/approval-requests?status=${encodeURIComponent(status)}`
+    : '/api/v1/approval-requests';
   try {
-    const url = status
-      ? `${API_BASE}/api/v1/approval-requests?tenantId=demo&status=${status}`
-      : `${API_BASE}/api/v1/approval-requests?tenantId=demo`;
-    const res = await fetch(url, { cache: 'no-store' });
-    if (!res.ok) return { data: [], error: true };
-    const json = (await res.json()) as ApprovalRequest[] | { data: ApprovalRequest[] };
-    return { data: Array.isArray(json) ? json : (json.data ?? []), error: false };
+    const json = await apiFetch<
+      ApprovalRequest[] | { requests?: ApprovalRequest[]; data?: ApprovalRequest[] }
+    >(path, '');
+    const data = Array.isArray(json) ? json : (json.requests ?? json.data ?? []);
+    return { data, error: false };
   } catch {
     return { data: [], error: true };
   }

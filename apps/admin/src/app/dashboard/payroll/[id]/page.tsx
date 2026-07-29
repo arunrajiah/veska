@@ -65,7 +65,10 @@ export default async function PayrollRunDetailPage({
     return (
       <div className="px-8 py-8">
         <p className="text-gray-500 text-sm">Payroll run not found.</p>
-        <a href="/dashboard/payroll" className="mt-4 inline-block text-sm text-gray-600 hover:text-gray-900">
+        <a
+          href="/dashboard/payroll"
+          className="mt-4 inline-block text-sm text-gray-600 hover:text-gray-900"
+        >
           ← Back to payroll
         </a>
       </div>

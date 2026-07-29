@@ -52,12 +52,14 @@ function tryParseJson(str: string): Record<string, unknown> {
 }
 
 function slugify(str: string): string {
-  return str
-    .toLowerCase()
-    .replace(/[^a-z0-9_\s]/g, '')
-    .trim()
-    .replace(/\s+/g, '_')
-    .replace(/^[^a-z]/, 'step') || `step_${Date.now()}`;
+  return (
+    str
+      .toLowerCase()
+      .replace(/[^a-z0-9_\s]/g, '')
+      .trim()
+      .replace(/\s+/g, '_')
+      .replace(/^[^a-z]/, 'step') || `step_${Date.now()}`
+  );
 }
 
 let stepCounter = 0;
@@ -160,7 +162,9 @@ export default function WorkflowBuilder() {
       {/* Basic info */}
       <section className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
-          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Basic info</h2>
+          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            Basic info
+          </h2>
         </div>
         <div className="px-5 py-5 space-y-4">
           <div>
@@ -226,12 +230,16 @@ export default function WorkflowBuilder() {
       <section className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         <div className="px-5 py-3 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
           <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Steps</h2>
-          <span className="text-xs text-gray-400">{steps.length} step{steps.length !== 1 ? 's' : ''}</span>
+          <span className="text-xs text-gray-400">
+            {steps.length} step{steps.length !== 1 ? 's' : ''}
+          </span>
         </div>
 
         {steps.length === 0 ? (
           <div className="px-5 py-10 text-center">
-            <p className="text-sm text-gray-400 mb-4">No steps yet. Add a step to define what this workflow does.</p>
+            <p className="text-sm text-gray-400 mb-4">
+              No steps yet. Add a step to define what this workflow does.
+            </p>
           </div>
         ) : (
           <div className="divide-y divide-gray-100">
@@ -297,7 +305,8 @@ export default function WorkflowBuilder() {
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs font-mono text-gray-900 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-300 resize-none"
                   />
                   <p className="mt-1 text-xs text-gray-400">
-                    Example: <span className="font-mono">{ACTION_CONFIG_HINTS[step.action] ?? '{ }'}</span>
+                    Example:{' '}
+                    <span className="font-mono">{ACTION_CONFIG_HINTS[step.action] ?? '{ }'}</span>
                   </p>
                 </div>
               </div>

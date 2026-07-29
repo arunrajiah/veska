@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-
 const CATEGORIES = [
   { value: 'travel', label: 'Travel' },
   { value: 'meals', label: 'Meals' },

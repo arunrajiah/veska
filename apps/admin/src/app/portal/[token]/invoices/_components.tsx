@@ -39,7 +39,17 @@ const STATUS_BADGE: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-600',
 };
 
-function PayNowButton({ token, invoiceId, invoiceNumber, amount }: { token: string; invoiceId: string; invoiceNumber?: string; amount?: string }) {
+function PayNowButton({
+  token,
+  invoiceId,
+  invoiceNumber,
+  amount,
+}: {
+  token: string;
+  invoiceId: string;
+  invoiceNumber?: string;
+  amount?: string;
+}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const t = useTranslations('portal');
@@ -71,7 +81,9 @@ function PayNowButton({ token, invoiceId, invoiceNumber, amount }: { token: stri
   return (
     <div className="flex flex-col items-end gap-1">
       <button
-        onClick={() => { void handlePay(); }}
+        onClick={() => {
+          void handlePay();
+        }}
         disabled={loading}
         aria-disabled={loading}
         aria-label={`Pay invoice ${invoiceNumber ?? invoiceId}${amount ? ` for ${amount}` : ''}`}
@@ -79,7 +91,11 @@ function PayNowButton({ token, invoiceId, invoiceNumber, amount }: { token: stri
       >
         {loading ? 'Redirecting…' : t('payNow')}
       </button>
-      {error && <span role="alert" aria-live="assertive" className="text-xs text-red-600">{error}</span>}
+      {error && (
+        <span role="alert" aria-live="assertive" className="text-xs text-red-600">
+          {error}
+        </span>
+      )}
     </div>
   );
 }
@@ -100,13 +116,21 @@ export function PortalInvoiceList({
     <div>
       {/* Payment banners */}
       {payment === 'success' && (
-        <div role="alert" aria-live="assertive" className="mb-4 flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800">
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="mb-4 flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800"
+        >
           <span className="text-green-500">&#10003;</span>
           {t('paymentSuccess')}
         </div>
       )}
       {payment === 'cancelled' && (
-        <div role="alert" aria-live="assertive" className="mb-4 flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="mb-4 flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800"
+        >
           <span>&#9888;</span>
           {t('paymentCancelled')}
         </div>
@@ -140,19 +164,32 @@ export function PortalInvoiceList({
                 <th scope="col" className="text-left px-5 py-3 text-xs font-medium text-gray-500">
                   Invoice #
                 </th>
-                <th scope="col" className="text-left px-5 py-3 text-xs font-medium text-gray-500">Date</th>
-                <th scope="col" className="text-left px-5 py-3 text-xs font-medium text-gray-500">Amount</th>
-                <th scope="col" className="text-left px-5 py-3 text-xs font-medium text-gray-500">Status</th>
-                <th scope="col" className="text-left px-5 py-3 text-xs font-medium text-gray-500">Due Date</th>
-                <th scope="col" className="px-5 py-3"><span className="sr-only">Actions</span></th>
+                <th scope="col" className="text-left px-5 py-3 text-xs font-medium text-gray-500">
+                  Date
+                </th>
+                <th scope="col" className="text-left px-5 py-3 text-xs font-medium text-gray-500">
+                  Amount
+                </th>
+                <th scope="col" className="text-left px-5 py-3 text-xs font-medium text-gray-500">
+                  Status
+                </th>
+                <th scope="col" className="text-left px-5 py-3 text-xs font-medium text-gray-500">
+                  Due Date
+                </th>
+                <th scope="col" className="px-5 py-3">
+                  <span className="sr-only">Actions</span>
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {invoices.map((inv) => {
                 const status = inv.status ?? 'pending';
-                const invoiceNum =
-                  inv.invoiceNumber ?? inv.number ?? `INV-${inv.id.slice(0, 6)}`;
-                const canPay = status === 'draft' || status === 'sent' || status === 'pending' || status === 'overdue';
+                const invoiceNum = inv.invoiceNumber ?? inv.number ?? `INV-${inv.id.slice(0, 6)}`;
+                const canPay =
+                  status === 'draft' ||
+                  status === 'sent' ||
+                  status === 'pending' ||
+                  status === 'overdue';
                 return (
                   <tr key={inv.id} className="hover:bg-gray-50/50">
                     <td className="px-5 py-3 font-medium text-gray-900">{invoiceNum}</td>

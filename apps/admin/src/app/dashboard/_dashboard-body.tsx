@@ -96,7 +96,9 @@ function KpiCard({
 }) {
   return (
     <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl px-4 py-4">
-      <p className={`text-2xl font-semibold ${valueColor ?? 'text-gray-900 dark:text-gray-100'}`}>{value}</p>
+      <p className={`text-2xl font-semibold ${valueColor ?? 'text-gray-900 dark:text-gray-100'}`}>
+        {value}
+      </p>
       <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{label}</p>
     </div>
   );
@@ -125,7 +127,9 @@ export function DashboardBody({
   const dash = '—';
 
   const fmt = (usd: number) =>
-    new Intl.NumberFormat('en-US', { style: 'currency', currency, notation: 'compact' }).format(usd);
+    new Intl.NumberFormat('en-US', { style: 'currency', currency, notation: 'compact' }).format(
+      usd,
+    );
 
   return (
     <div className="px-4 sm:px-6 py-6 sm:py-8 max-w-screen-xl mx-auto space-y-6">
@@ -212,13 +216,32 @@ export function DashboardBody({
           <section>
             <div className="flex items-center gap-2 mb-3">
               <TrendingUp size={15} className="text-gray-400" />
-              <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Finance</h2>
+              <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                Finance
+              </h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <KpiCard label="Paid This Month"   value={s ? fmt(converted.totalPaidThisMonth) : dash} valueColor="text-green-600" />
-              <KpiCard label="Outstanding"       value={s ? fmt(converted.totalOutstandingInvoices) : dash} valueColor={s && s.finance.totalOutstandingInvoices > 0 ? 'text-amber-600' : undefined} />
-              <KpiCard label="Pending Expenses"  value={s ? fmt(converted.totalExpensesPending) : dash} />
-              <KpiCard label="Overdue Invoices"  value={s ? String(s.finance.overdueInvoicesCount) : dash} valueColor={s && s.finance.overdueInvoicesCount > 0 ? 'text-red-600' : undefined} />
+              <KpiCard
+                label="Paid This Month"
+                value={s ? fmt(converted.totalPaidThisMonth) : dash}
+                valueColor="text-green-600"
+              />
+              <KpiCard
+                label="Outstanding"
+                value={s ? fmt(converted.totalOutstandingInvoices) : dash}
+                valueColor={
+                  s && s.finance.totalOutstandingInvoices > 0 ? 'text-amber-600' : undefined
+                }
+              />
+              <KpiCard
+                label="Pending Expenses"
+                value={s ? fmt(converted.totalExpensesPending) : dash}
+              />
+              <KpiCard
+                label="Overdue Invoices"
+                value={s ? String(s.finance.overdueInvoicesCount) : dash}
+                valueColor={s && s.finance.overdueInvoicesCount > 0 ? 'text-red-600' : undefined}
+              />
             </div>
           </section>
 
@@ -226,13 +249,22 @@ export function DashboardBody({
           <section>
             <div className="flex items-center gap-2 mb-3">
               <Users size={15} className="text-gray-400" />
-              <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">HR &amp; People</h2>
+              <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                HR &amp; People
+              </h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <KpiCard label="Active Employees"   value={s ? String(s.hr.activeEmployees) : dash} />
-              <KpiCard label="Pending Leave"      value={s ? String(s.hr.pendingLeaveRequests) : dash} valueColor={s && s.hr.pendingLeaveRequests > 0 ? 'text-amber-600' : undefined} />
-              <KpiCard label="Payroll Runs (Mo)"  value={s ? String(s.hr.payrollRunsThisMonth) : dash} />
-              <KpiCard label="Open Deals Value"   value={s ? fmt(converted.openDealsValue) : dash} />
+              <KpiCard label="Active Employees" value={s ? String(s.hr.activeEmployees) : dash} />
+              <KpiCard
+                label="Pending Leave"
+                value={s ? String(s.hr.pendingLeaveRequests) : dash}
+                valueColor={s && s.hr.pendingLeaveRequests > 0 ? 'text-amber-600' : undefined}
+              />
+              <KpiCard
+                label="Payroll Runs (Mo)"
+                value={s ? String(s.hr.payrollRunsThisMonth) : dash}
+              />
+              <KpiCard label="Open Deals Value" value={s ? fmt(converted.openDealsValue) : dash} />
             </div>
           </section>
 
@@ -240,13 +272,34 @@ export function DashboardBody({
           <section>
             <div className="flex items-center gap-2 mb-3">
               <Package size={15} className="text-gray-400" />
-              <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Inventory &amp; Ops</h2>
+              <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                Inventory &amp; Ops
+              </h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <KpiCard label="Total Products"   value={s ? String(s.inventory.totalProducts) : dash} />
-              <KpiCard label="Low Stock Items"  value={s ? String(s.inventory.lowStockItems) : dash} valueColor={s ? (s.inventory.lowStockItems > 0 ? 'text-red-600' : 'text-green-600') : undefined} />
-              <KpiCard label="Inventory Value"  value={s ? fmt(converted.totalInventoryValue) : dash} />
-              <KpiCard label="Hours This Week"  value={s ? `${s.time.hoursLoggedThisWeek}h` : dash} />
+              <KpiCard
+                label="Total Products"
+                value={s ? String(s.inventory.totalProducts) : dash}
+              />
+              <KpiCard
+                label="Low Stock Items"
+                value={s ? String(s.inventory.lowStockItems) : dash}
+                valueColor={
+                  s
+                    ? s.inventory.lowStockItems > 0
+                      ? 'text-red-600'
+                      : 'text-green-600'
+                    : undefined
+                }
+              />
+              <KpiCard
+                label="Inventory Value"
+                value={s ? fmt(converted.totalInventoryValue) : dash}
+              />
+              <KpiCard
+                label="Hours This Week"
+                value={s ? `${s.time.hoursLoggedThisWeek}h` : dash}
+              />
             </div>
           </section>
         </div>
@@ -263,11 +316,17 @@ export function DashboardBody({
             <div className="space-y-3">
               {activity.map((item) => (
                 <div key={item.id} className="flex items-start gap-2.5">
-                  <span className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${entityDot(item.entityType)}`} />
+                  <span
+                    className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${entityDot(item.entityType)}`}
+                  />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs font-medium text-gray-700 truncate">{item.verb}</span>
-                      <span className="text-xs text-gray-400 flex-shrink-0 whitespace-nowrap">{relativeTime(item.createdAt)}</span>
+                      <span className="text-xs font-medium text-gray-700 truncate">
+                        {item.verb}
+                      </span>
+                      <span className="text-xs text-gray-400 flex-shrink-0 whitespace-nowrap">
+                        {relativeTime(item.createdAt)}
+                      </span>
                     </div>
                     {item.label && <p className="text-xs text-gray-500 truncate">{item.label}</p>}
                   </div>
@@ -281,12 +340,12 @@ export function DashboardBody({
       {/* Quick Actions */}
       <div className="flex gap-3 flex-wrap">
         {[
-          { label: '+ New Invoice',      href: '/dashboard/finance/invoices/new' },
-          { label: '+ New Expense',      href: '/dashboard/finance/expenses/new' },
-          { label: '+ New Sales Order',  href: '/dashboard/sales/orders/new' },
-          { label: '+ New Employee',     href: '/dashboard/hr/employees/new' },
-          { label: '+ Log Time',         href: '/dashboard/time/new' },
-          { label: 'View Reports',       href: '/dashboard/reports' },
+          { label: '+ New Invoice', href: '/dashboard/finance/invoices/new' },
+          { label: '+ New Expense', href: '/dashboard/expenses/new' },
+          { label: '+ New Sales Order', href: '/dashboard/sales/orders/new' },
+          { label: '+ New Employee', href: '/dashboard/hr/employees/new' },
+          { label: '+ Log Time', href: '/dashboard/time/new' },
+          { label: 'View Reports', href: '/dashboard/reports' },
         ].map((action) => (
           <Link
             key={action.label}

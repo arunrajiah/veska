@@ -3,7 +3,7 @@ import { PortalInvoiceList } from './_components.js';
 
 export const dynamic = 'force-dynamic';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+const API_BASE = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 interface PortalInvoice {
   id: string;
@@ -25,7 +25,12 @@ export default function InvoicesPage({
 }) {
   const { token } = use(params);
   const sp = use(searchParams);
-  return <InvoicesPageInner token={token} {...(sp['payment'] !== undefined && { payment: sp['payment'] })} />;
+  return (
+    <InvoicesPageInner
+      token={token}
+      {...(sp['payment'] !== undefined && { payment: sp['payment'] })}
+    />
+  );
 }
 
 async function InvoicesPageInner({ token, payment }: { token: string; payment?: string }) {
@@ -43,5 +48,11 @@ async function InvoicesPageInner({ token, payment }: { token: string; payment?: 
     invoices = [];
   }
 
-  return <PortalInvoiceList invoices={invoices} token={token} {...(payment !== undefined && { payment })} />;
+  return (
+    <PortalInvoiceList
+      invoices={invoices}
+      token={token}
+      {...(payment !== undefined && { payment })}
+    />
+  );
 }

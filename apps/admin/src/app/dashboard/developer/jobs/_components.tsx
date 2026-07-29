@@ -11,7 +11,6 @@ import {
   ServerCrash,
 } from 'lucide-react';
 
-
 function getCookieToken(): string {
   if (typeof document === 'undefined') return '';
   const match = document.cookie.split('; ').find((row) => row.startsWith('veska_session='));
@@ -86,22 +85,25 @@ function JobTable({ queueName }: { queueName: string }) {
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
-  const fetchJobs = useCallback(async (status: TabStatus, off: number) => {
-    setLoading(true);
-    try {
-      const res = await fetch(
-        `/api/veska/job-queues/${queueName}/jobs?status=${status}&limit=${PAGE_SIZE}&offset=${off}`,
-        { headers: apiHeaders() },
-      );
-      if (!res.ok) throw new Error(await res.text());
-      const data = (await res.json()) as { jobs: JobRow[] };
-      setJobs(data.jobs);
-    } catch {
-      setJobs([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [queueName]);
+  const fetchJobs = useCallback(
+    async (status: TabStatus, off: number) => {
+      setLoading(true);
+      try {
+        const res = await fetch(
+          `/api/veska/job-queues/${queueName}/jobs?status=${status}&limit=${PAGE_SIZE}&offset=${off}`,
+          { headers: apiHeaders() },
+        );
+        if (!res.ok) throw new Error(await res.text());
+        const data = (await res.json()) as { jobs: JobRow[] };
+        setJobs(data.jobs);
+      } catch {
+        setJobs([]);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [queueName],
+  );
 
   useEffect(() => {
     setOffset(0);
@@ -177,10 +179,16 @@ function JobTable({ queueName }: { queueName: string }) {
             <thead>
               <tr className="bg-gray-50 border-b border-gray-100">
                 <th className="text-left px-4 py-2.5 text-xs font-medium text-gray-500">Job ID</th>
-                <th className="text-left px-4 py-2.5 text-xs font-medium text-gray-500">Job Name</th>
-                <th className="text-left px-4 py-2.5 text-xs font-medium text-gray-500">Attempts</th>
+                <th className="text-left px-4 py-2.5 text-xs font-medium text-gray-500">
+                  Job Name
+                </th>
+                <th className="text-left px-4 py-2.5 text-xs font-medium text-gray-500">
+                  Attempts
+                </th>
                 <th className="text-left px-4 py-2.5 text-xs font-medium text-gray-500">Created</th>
-                <th className="text-left px-4 py-2.5 text-xs font-medium text-gray-500">Processed</th>
+                <th className="text-left px-4 py-2.5 text-xs font-medium text-gray-500">
+                  Processed
+                </th>
                 {activeTab === 'failed' && (
                   <th className="text-left px-4 py-2.5 text-xs font-medium text-gray-500">Error</th>
                 )}
@@ -204,7 +212,9 @@ function JobTable({ queueName }: { queueName: string }) {
                       </td>
                       <td className="px-4 py-2.5 text-gray-800 font-medium">{job.name}</td>
                       <td className="px-4 py-2.5 text-gray-500">{job.attemptsMade}</td>
-                      <td className="px-4 py-2.5 text-gray-400 text-xs">{relativeTime(job.timestamp)}</td>
+                      <td className="px-4 py-2.5 text-gray-400 text-xs">
+                        {relativeTime(job.timestamp)}
+                      </td>
                       <td className="px-4 py-2.5 text-gray-400 text-xs">{fmt(job.processedOn)}</td>
                       {activeTab === 'failed' && (
                         <td className="px-4 py-2.5 max-w-xs">
@@ -335,8 +345,8 @@ function QueueCard({
               hasActive
                 ? 'bg-green-400 shadow-[0_0_0_3px_rgba(74,222,128,0.25)]'
                 : selected
-                ? 'bg-gray-600'
-                : 'bg-gray-300'
+                  ? 'bg-gray-600'
+                  : 'bg-gray-300'
             }`}
           />
           <code
@@ -363,13 +373,19 @@ function QueueCard({
 
       {/* Metric chips */}
       <div className="flex flex-wrap gap-1.5">
-        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${selected ? 'bg-white/15 text-white' : 'bg-amber-50 text-amber-700 border border-amber-100'}`}>
+        <span
+          className={`text-xs px-2 py-0.5 rounded-full font-medium ${selected ? 'bg-white/15 text-white' : 'bg-amber-50 text-amber-700 border border-amber-100'}`}
+        >
           ⏳ {queue.waiting}
         </span>
-        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${selected ? 'bg-white/15 text-white' : 'bg-blue-50 text-blue-700 border border-blue-100'}`}>
+        <span
+          className={`text-xs px-2 py-0.5 rounded-full font-medium ${selected ? 'bg-white/15 text-white' : 'bg-blue-50 text-blue-700 border border-blue-100'}`}
+        >
           ⚡ {queue.active}
         </span>
-        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${selected ? 'bg-white/15 text-white' : 'bg-green-50 text-green-700 border border-green-100'}`}>
+        <span
+          className={`text-xs px-2 py-0.5 rounded-full font-medium ${selected ? 'bg-white/15 text-white' : 'bg-green-50 text-green-700 border border-green-100'}`}
+        >
           ✓ {queue.completed}
         </span>
         <span
@@ -379,13 +395,15 @@ function QueueCard({
                 ? 'bg-red-500/80 text-white'
                 : 'bg-red-50 text-red-700 border border-red-200 font-semibold'
               : selected
-              ? 'bg-white/15 text-white'
-              : 'bg-gray-50 text-gray-500 border border-gray-100'
+                ? 'bg-white/15 text-white'
+                : 'bg-gray-50 text-gray-500 border border-gray-100'
           }`}
         >
           ✗ {queue.failed}
         </span>
-        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${selected ? 'bg-white/15 text-white' : 'bg-purple-50 text-purple-700 border border-purple-100'}`}>
+        <span
+          className={`text-xs px-2 py-0.5 rounded-full font-medium ${selected ? 'bg-white/15 text-white' : 'bg-purple-50 text-purple-700 border border-purple-100'}`}
+        >
           ⏱ {queue.delayed}
         </span>
       </div>
@@ -493,9 +511,7 @@ export function JobQueuesDashboard() {
                 key={queue.name}
                 queue={queue}
                 selected={selectedQueue === queue.name}
-                onSelect={() =>
-                  setSelectedQueue(selectedQueue === queue.name ? null : queue.name)
-                }
+                onSelect={() => setSelectedQueue(selectedQueue === queue.name ? null : queue.name)}
                 onClean={cleanQueue}
               />
             ))}

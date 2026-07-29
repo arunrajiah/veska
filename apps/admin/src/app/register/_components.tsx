@@ -128,18 +128,27 @@ export function RegisterClient() {
   return card(
     <>
       <p className="text-sm text-gray-500 text-center -mt-4 mb-6">
-        {invite.tenantName ? `You've been invited to ${invite.tenantName}` : "You've been invited to Veska"}
+        {invite.tenantName
+          ? `You've been invited to ${invite.tenantName}`
+          : "You've been invited to Veska"}
       </p>
 
       {(error || validationError) && (
-        <div role="alert" aria-live="assertive" className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700"
+        >
           {error || validationError}
         </div>
       )}
 
       <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
         <div>
-          <label htmlFor="register-email" className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label
+            htmlFor="register-email"
+            className="block text-sm font-medium text-gray-700 mb-1.5"
+          >
             Email address
           </label>
           <input
@@ -170,7 +179,10 @@ export function RegisterClient() {
         </div>
 
         <div>
-          <label htmlFor="register-password" className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label
+            htmlFor="register-password"
+            className="block text-sm font-medium text-gray-700 mb-1.5"
+          >
             Password
           </label>
           <div className="relative">
@@ -198,7 +210,10 @@ export function RegisterClient() {
         </div>
 
         <div>
-          <label htmlFor="register-confirm-password" className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label
+            htmlFor="register-confirm-password"
+            className="block text-sm font-medium text-gray-700 mb-1.5"
+          >
             Confirm password
           </label>
           <div className="relative">

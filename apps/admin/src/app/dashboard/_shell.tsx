@@ -24,14 +24,15 @@ function ThemeToggle() {
   }
 
   const icon =
-    theme === 'dark' ? <Moon size={15} /> :
-    theme === 'system' ? <Monitor size={15} /> :
-    <Sun size={15} />;
+    theme === 'dark' ? (
+      <Moon size={15} />
+    ) : theme === 'system' ? (
+      <Monitor size={15} />
+    ) : (
+      <Sun size={15} />
+    );
 
-  const label =
-    theme === 'dark' ? 'Dark mode' :
-    theme === 'system' ? 'System theme' :
-    'Light mode';
+  const label = theme === 'dark' ? 'Dark mode' : theme === 'system' ? 'System theme' : 'Light mode';
 
   return (
     <button
@@ -83,7 +84,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           ].join(' ')}
         >
           <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
-            <span className="font-semibold text-gray-900 dark:text-white tracking-tight">Veska</span>
+            <span className="font-semibold text-gray-900 dark:text-white tracking-tight">
+              Veska
+            </span>
             <div className="flex items-center gap-2">
               <LanguageSwitcher />
               <ThemeToggle />
@@ -135,10 +138,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             >
               <Menu size={20} />
             </button>
-            <span className="font-semibold text-gray-900 dark:text-white tracking-tight flex-1">Veska</span>
+            <span className="font-semibold text-gray-900 dark:text-white tracking-tight flex-1">
+              Veska
+            </span>
             <GlobalSearchTrigger onClick={() => setSearchOpen(true)} />
           </header>
-          <main id="main-content" className="flex-1 min-w-0">{children}</main>
+          <main id="main-content" className="flex-1 min-w-0">
+            {children}
+          </main>
         </div>
 
         {/* Ask Veska floating panel — accessible from every dashboard page */}

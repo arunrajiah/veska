@@ -85,36 +85,52 @@ function NewTicketSlideOver({ open, onClose }: { open: boolean; onClose: () => v
       <div className="relative bg-white w-full max-w-lg h-full overflow-y-auto shadow-xl flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-base font-semibold text-gray-900">New Ticket</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <X size={18} />
+          </button>
         </div>
         <form onSubmit={(e) => void handleSubmit(e)} className="flex-1 px-6 py-5 space-y-4">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Subject *</label>
-            <input name="subject" required
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              name="subject"
+              required
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
-            <textarea name="description" rows={4}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none" />
+            <textarea
+              name="description"
+              rows={4}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none"
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Contact Name</label>
-              <input name="contactName"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+              <input
+                name="contactName"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Contact Email</label>
-              <input name="contactEmail" type="email"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+              <input
+                name="contactEmail"
+                type="email"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Priority</label>
-              <select name="priority" defaultValue="medium"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900">
+              <select
+                name="priority"
+                defaultValue="medium"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              >
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
@@ -123,18 +139,32 @@ function NewTicketSlideOver({ open, onClose }: { open: boolean; onClose: () => v
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Category</label>
-              <input name="category" placeholder="e.g. billing, technical"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+              <input
+                name="category"
+                placeholder="e.g. billing, technical"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
           </div>
-          {error && <p role="alert" className="text-xs text-red-500">{error}</p>}
+          {error && (
+            <p role="alert" className="text-xs text-red-500">
+              {error}
+            </p>
+          )}
           <div className="flex gap-3 pt-2">
-            <button type="submit" disabled={saving} aria-disabled={saving}
-              className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
+            <button
+              type="submit"
+              disabled={saving}
+              aria-disabled={saving}
+              className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors"
+            >
               {saving ? 'Creating…' : 'Create Ticket'}
             </button>
-            <button type="button" onClick={onClose}
-              className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+            <button
+              type="button"
+              onClick={onClose}
+              className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+            >
               Cancel
             </button>
           </div>
@@ -189,10 +219,10 @@ export function TicketsClient({ tickets: initialTickets }: { tickets: Ticket[] }
       <div className="flex items-center justify-between mb-6">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold text-gray-900">{t('title')} {t('tickets')}</h1>
-            {isUpdating && (
-              <span className="text-xs text-gray-400 animate-pulse">Updating…</span>
-            )}
+            <h1 className="text-2xl font-semibold text-gray-900">
+              {t('title')} {t('tickets')}
+            </h1>
+            {isUpdating && <span className="text-xs text-gray-400 animate-pulse">Updating…</span>}
           </div>
           <p className="text-sm text-gray-500 mt-0.5">{openCount} open tickets</p>
         </div>
@@ -213,7 +243,10 @@ export function TicketsClient({ tickets: initialTickets }: { tickets: Ticket[] }
           { label: t('status.in_progress'), value: inProgressCount, color: 'text-yellow-600' },
           { label: t('status.resolved'), value: resolvedToday, color: 'text-green-600' },
         ].map((s) => (
-          <div key={s.label} className="bg-white border border-gray-200 rounded-xl px-5 py-4 shadow-sm">
+          <div
+            key={s.label}
+            className="bg-white border border-gray-200 rounded-xl px-5 py-4 shadow-sm"
+          >
             <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
             <p className="text-xs text-gray-500 mt-0.5">{s.label}</p>
           </div>
@@ -261,14 +294,30 @@ export function TicketsClient({ tickets: initialTickets }: { tickets: Ticket[] }
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
-                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">#</th>
-                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">Subject</th>
-                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">Contact</th>
-                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">{t('assignee')}</th>
-                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">{t('priority')}</th>
-                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
-                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">Created</th>
-                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">SLA</th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  #
+                </th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Subject
+                </th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Contact
+                </th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  {t('assignee')}
+                </th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  {t('priority')}
+                </th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Status
+                </th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Created
+                </th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  SLA
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -312,7 +361,9 @@ export function TicketsClient({ tickets: initialTickets }: { tickets: Ticket[] }
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[d.status ?? 'open'] ?? 'bg-gray-100 text-gray-600'}`}>
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[d.status ?? 'open'] ?? 'bg-gray-100 text-gray-600'}`}
+                      >
                         {(d.status ?? 'open').replace(/_/g, ' ')}
                       </span>
                     </td>

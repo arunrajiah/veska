@@ -27,7 +27,13 @@ export interface WarehouseRecord {
   createdAt: string;
 }
 
-function UtilizationBar({ capacity, current }: { capacity?: number | undefined; current?: number | undefined }) {
+function UtilizationBar({
+  capacity,
+  current,
+}: {
+  capacity?: number | undefined;
+  current?: number | undefined;
+}) {
   const cap = capacity ?? 0;
   const cur = current ?? 0;
   if (cap === 0) return <span className="text-xs text-gray-400">—</span>;
@@ -75,7 +81,8 @@ function AddWarehouseSlideOver({ onClose, onSaved }: { onClose: () => void; onSa
     }
   }
 
-  const inputClass = 'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900';
+  const inputClass =
+    'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900';
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
@@ -83,7 +90,9 @@ function AddWarehouseSlideOver({ onClose, onSaved }: { onClose: () => void; onSa
       <div className="relative bg-white w-full max-w-md h-full overflow-y-auto shadow-xl flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-base font-semibold text-gray-900">Add Warehouse</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <X size={18} />
+          </button>
         </div>
         <form onSubmit={(e) => void handleSubmit(e)} className="flex-1 px-6 py-5 space-y-4">
           <div>
@@ -104,10 +113,18 @@ function AddWarehouseSlideOver({ onClose, onSaved }: { onClose: () => void; onSa
           </div>
           {error && <p className="text-xs text-red-500">{error}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="submit" disabled={saving} className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
+            <button
+              type="submit"
+              disabled={saving}
+              className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors"
+            >
               {saving ? 'Saving…' : 'Add Warehouse'}
             </button>
-            <button type="button" onClick={onClose} className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+            <button
+              type="button"
+              onClick={onClose}
+              className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+            >
               Cancel
             </button>
           </div>
@@ -129,8 +146,10 @@ export function WarehousesClient({ warehouses: initial }: { warehouses: Warehous
           <h1 className="text-2xl font-semibold text-gray-900">Warehouses</h1>
           <p className="text-sm text-gray-500 mt-0.5">{initial.length} warehouses</p>
         </div>
-        <button onClick={() => setShowAdd(true)}
-          className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+        <button
+          onClick={() => setShowAdd(true)}
+          className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+        >
           <Plus size={15} /> Add Warehouse
         </button>
       </div>
@@ -147,8 +166,12 @@ export function WarehousesClient({ warehouses: initial }: { warehouses: Warehous
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Name</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Location</th>
                 <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Capacity</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Current Stock</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Utilization</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">
+                  Current Stock
+                </th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Utilization
+                </th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Manager</th>
               </tr>
             </thead>
@@ -156,11 +179,18 @@ export function WarehousesClient({ warehouses: initial }: { warehouses: Warehous
               {initial.map((wh) => {
                 const d = wh.data;
                 return (
-                  <tr key={wh.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                  <tr
+                    key={wh.id}
+                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
+                  >
                     <td className="px-4 py-3 font-medium text-gray-900">{d.name || '—'}</td>
                     <td className="px-4 py-3 text-gray-500">{d.location || '—'}</td>
-                    <td className="px-4 py-3 text-right text-gray-600">{d.capacity?.toLocaleString() ?? '—'}</td>
-                    <td className="px-4 py-3 text-right text-gray-600">{d.currentStock?.toLocaleString() ?? '—'}</td>
+                    <td className="px-4 py-3 text-right text-gray-600">
+                      {d.capacity?.toLocaleString() ?? '—'}
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-600">
+                      {d.currentStock?.toLocaleString() ?? '—'}
+                    </td>
                     <td className="px-4 py-3">
                       <UtilizationBar capacity={d.capacity} current={d.currentStock} />
                     </td>

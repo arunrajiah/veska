@@ -341,10 +341,7 @@ export function ChannelModal({ mode, channel, onClose, onSaved }: Props) {
           <h2 className="text-base font-semibold text-gray-900">
             {mode === 'add' ? 'Connect a Channel' : 'Edit Channel'}
           </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
             <X size={18} />
           </button>
         </div>
@@ -389,22 +386,18 @@ export function ChannelModal({ mode, channel, onClose, onSaved }: Props) {
                 type === 'slack'
                   ? 'Slack #general'
                   : type === 'email'
-                  ? 'Transactional Email'
-                  : type === 'whatsapp'
-                  ? 'WhatsApp Business'
-                  : 'Telegram Bot'
+                    ? 'Transactional Email'
+                    : type === 'whatsapp'
+                      ? 'WhatsApp Business'
+                      : 'Telegram Bot'
               }
               className={inputClass}
             />
           </Field>
 
           {/* Dynamic config fields */}
-          {type === 'slack' && (
-            <SlackConfigFields config={config} onChange={handleConfigChange} />
-          )}
-          {type === 'email' && (
-            <EmailConfigFields config={config} onChange={handleConfigChange} />
-          )}
+          {type === 'slack' && <SlackConfigFields config={config} onChange={handleConfigChange} />}
+          {type === 'email' && <EmailConfigFields config={config} onChange={handleConfigChange} />}
           {type === 'whatsapp' && (
             <WhatsAppConfigFields config={config} onChange={handleConfigChange} />
           )}

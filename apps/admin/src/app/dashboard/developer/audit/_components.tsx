@@ -19,7 +19,14 @@ function exportCsv(logs: AuditLog[]) {
     const d = l.data;
     const ts = d.timestamp ? new Date(d.timestamp).toLocaleString() : '';
     const escape = (s?: string) => `"${(s ?? '').replace(/"/g, '""')}"`;
-    return [escape(ts), escape(d.userName ?? d.userId), escape(d.action), escape(d.resourceType), escape(d.resourceId), escape(d.ipAddress)].join(',');
+    return [
+      escape(ts),
+      escape(d.userName ?? d.userId),
+      escape(d.action),
+      escape(d.resourceType),
+      escape(d.resourceId),
+      escape(d.ipAddress),
+    ].join(',');
   });
   const csv = [header, ...rows].join('\n');
   const blob = new Blob([csv], { type: 'text/csv' });
@@ -38,7 +45,9 @@ export function AuditLogClient({ logs }: { logs: AuditLog[] }) {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
 
-  const uniqueActions = Array.from(new Set(logs.map((l) => l.data.action).filter(Boolean))) as string[];
+  const uniqueActions = Array.from(
+    new Set(logs.map((l) => l.data.action).filter(Boolean)),
+  ) as string[];
 
   const filtered = logs.filter((l) => {
     const d = l.data;
@@ -73,7 +82,9 @@ export function AuditLogClient({ logs }: { logs: AuditLog[] }) {
         >
           <option value="">All Actions</option>
           {uniqueActions.map((a) => (
-            <option key={a} value={a}>{a}</option>
+            <option key={a} value={a}>
+              {a}
+            </option>
           ))}
         </select>
         <div className="flex items-center gap-2">
@@ -96,7 +107,11 @@ export function AuditLogClient({ logs }: { logs: AuditLog[] }) {
         </div>
         {(actionFilter || dateFrom || dateTo) && (
           <button
-            onClick={() => { setActionFilter(''); setDateFrom(''); setDateTo(''); }}
+            onClick={() => {
+              setActionFilter('');
+              setDateFrom('');
+              setDateTo('');
+            }}
             className="text-xs text-gray-500 hover:text-gray-900 underline"
           >
             Clear filters
@@ -118,9 +133,15 @@ export function AuditLogClient({ logs }: { logs: AuditLog[] }) {
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Timestamp</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">User</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Action</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Resource Type</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Resource ID</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">IP Address</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Resource Type
+                </th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Resource ID
+                </th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  IP Address
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -128,7 +149,10 @@ export function AuditLogClient({ logs }: { logs: AuditLog[] }) {
                 const d = log.data;
                 const action = d.action ?? '';
                 return (
-                  <tr key={log.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                  <tr
+                    key={log.id}
+                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
+                  >
                     <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">
                       {d.timestamp ? new Date(d.timestamp).toLocaleString() : '—'}
                     </td>
@@ -139,15 +163,21 @@ export function AuditLogClient({ logs }: { logs: AuditLog[] }) {
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${ACTION_COLORS[action] ?? 'bg-gray-100 text-gray-600'}`}>
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${ACTION_COLORS[action] ?? 'bg-gray-100 text-gray-600'}`}
+                      >
                         {action || '—'}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-xs text-gray-600">{d.resourceType ?? '—'}</td>
                     <td className="px-4 py-3">
-                      <code className="font-mono text-xs text-gray-500">{d.resourceId ? d.resourceId.slice(0, 12) + '…' : '—'}</code>
+                      <code className="font-mono text-xs text-gray-500">
+                        {d.resourceId ? d.resourceId.slice(0, 12) + '…' : '—'}
+                      </code>
                     </td>
-                    <td className="px-4 py-3 text-xs font-mono text-gray-400">{d.ipAddress ?? '—'}</td>
+                    <td className="px-4 py-3 text-xs font-mono text-gray-400">
+                      {d.ipAddress ?? '—'}
+                    </td>
                   </tr>
                 );
               })}

@@ -88,7 +88,9 @@ export function PortalTicketList({
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-semibold text-gray-900">Support Tickets</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{tickets.length} ticket{tickets.length !== 1 ? 's' : ''}</p>
+          <p className="text-sm text-gray-500 mt-0.5">
+            {tickets.length} ticket{tickets.length !== 1 ? 's' : ''}
+          </p>
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -110,9 +112,7 @@ export function PortalTicketList({
       {showForm && (
         <div className="mb-6 bg-white border border-indigo-100 rounded-xl p-6">
           <h2 className="text-sm font-semibold text-gray-900 mb-4">New Support Request</h2>
-          {error && (
-            <p className="text-xs text-red-600 mb-3">{error}</p>
-          )}
+          {error && <p className="text-xs text-red-600 mb-3">{error}</p>}
           <div className="space-y-3">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Subject</label>
@@ -172,18 +172,20 @@ export function PortalTicketList({
               <div key={t.id} className="flex items-center gap-4 px-5 py-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    {t.code && (
-                      <span className="text-xs font-mono text-gray-400">{t.code}</span>
-                    )}
+                    {t.code && <span className="text-xs font-mono text-gray-400">{t.code}</span>}
                     <p className="text-sm font-medium text-gray-900 truncate">{t.title}</p>
                   </div>
                   <p className="text-xs text-gray-400">{formatDate(t.createdAt)}</p>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium capitalize ${PRIORITY_BADGE[priority] ?? 'bg-gray-100 text-gray-500'}`}>
+                  <span
+                    className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium capitalize ${PRIORITY_BADGE[priority] ?? 'bg-gray-100 text-gray-500'}`}
+                  >
                     {priority}
                   </span>
-                  <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_BADGE[status] ?? 'bg-gray-100 text-gray-600'}`}>
+                  <span
+                    className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_BADGE[status] ?? 'bg-gray-100 text-gray-600'}`}
+                  >
                     {status.replace('_', ' ')}
                   </span>
                 </div>

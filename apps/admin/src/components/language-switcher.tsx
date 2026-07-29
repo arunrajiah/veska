@@ -18,10 +18,8 @@ const LANGUAGES: Language[] = [
 
 function getCurrentLocale(): string {
   if (typeof document === 'undefined') return 'en';
-  const match = document.cookie
-    .split('; ')
-    .find((row) => row.startsWith('veska_locale='));
-  return match ? match.split('=')[1] ?? 'en' : 'en';
+  const match = document.cookie.split('; ').find((row) => row.startsWith('veska_locale='));
+  return match ? (match.split('=')[1] ?? 'en') : 'en';
 }
 
 export function LanguageSwitcher() {

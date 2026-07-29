@@ -16,7 +16,7 @@ export default async function LeadsPage() {
       '/api/v1/crm/leads?limit=50',
       TENANT_ID,
     );
-    leads = Array.isArray(res) ? res : (res as { data: LeadRecord[] }).data ?? [];
+    leads = Array.isArray(res) ? res : ((res as { data: LeadRecord[] }).data ?? []);
   } catch {
     leads = [];
   }

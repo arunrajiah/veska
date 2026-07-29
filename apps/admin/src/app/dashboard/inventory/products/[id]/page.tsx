@@ -9,8 +9,10 @@ interface ProductRecord {
     sku?: string;
     category?: string;
     description?: string;
-    price?: number; unit_price?: number;
-    cost?: number; cost_price?: number;
+    price?: number;
+    unit_price?: number;
+    cost?: number;
+    cost_price?: number;
     stockQuantity?: number;
     reorderLevel?: number;
     warehouseId?: string;
@@ -41,8 +43,17 @@ function formatCurrency(val: unknown) {
 }
 
 function StatusBadge({ status }: { status?: string | undefined }) {
-  if (status === 'active') return <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-green-50 text-green-700">Active</span>;
-  return <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-gray-100 text-gray-500">Inactive</span>;
+  if (status === 'active')
+    return (
+      <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-green-50 text-green-700">
+        Active
+      </span>
+    );
+  return (
+    <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-gray-100 text-gray-500">
+      Inactive
+    </span>
+  );
 }
 
 function MovementTypeBadge({ type }: { type?: string | undefined }) {
@@ -52,7 +63,13 @@ function MovementTypeBadge({ type }: { type?: string | undefined }) {
     transfer: 'bg-blue-50 text-blue-700',
   };
   const t = type ?? 'in';
-  return <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${colors[t] ?? 'bg-gray-100 text-gray-600'}`}>{t}</span>;
+  return (
+    <span
+      className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${colors[t] ?? 'bg-gray-100 text-gray-600'}`}
+    >
+      {t}
+    </span>
+  );
 }
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -61,7 +78,10 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   let movements: MovementRecord[] = [];
 
   try {
-    record = await apiFetch<ProductRecord>(`/api/v1/inventory/products/${id}`, process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant');
+    record = await apiFetch<ProductRecord>(
+      `/api/v1/inventory/products/${id}`,
+      process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
+    );
   } catch {
     record = null;
   }
@@ -72,7 +92,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         `/api/v1/inventory/movements?productId=${id}&limit=10`,
         process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
       );
-      movements = Array.isArray(res) ? res : (res as { data: MovementRecord[] }).data ?? [];
+      movements = Array.isArray(res) ? res : ((res as { data: MovementRecord[] }).data ?? []);
     } catch {
       movements = [];
     }
@@ -82,7 +102,12 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     return (
       <div className="px-8 py-8">
         <p className="text-gray-500 text-sm">Product not found.</p>
-        <Link href="/dashboard/inventory/products" className="mt-4 inline-block text-sm text-gray-600 hover:text-gray-900">← Back to products</Link>
+        <Link
+          href="/dashboard/inventory/products"
+          className="mt-4 inline-block text-sm text-gray-600 hover:text-gray-900"
+        >
+          ← Back to products
+        </Link>
       </div>
     );
   }
@@ -94,7 +119,12 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   return (
     <div className="px-8 py-8 max-w-5xl">
       <div className="mb-4">
-        <Link href="/dashboard/inventory/products" className="text-xs text-gray-400 hover:text-gray-700">← Products</Link>
+        <Link
+          href="/dashboard/inventory/products"
+          className="text-xs text-gray-400 hover:text-gray-700"
+        >
+          ← Products
+        </Link>
       </div>
 
       {/* Header */}
@@ -117,7 +147,9 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         <div className="space-y-4">
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
             <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
-              <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Details</h2>
+              <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                Details
+              </h2>
             </div>
             <dl className="divide-y divide-gray-50">
               {[
@@ -131,7 +163,9 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               ].map(({ label, value }) => (
                 <div key={label} className="px-5 py-3 flex items-center gap-4">
                   <dt className="text-xs text-gray-500 w-28 shrink-0">{label}</dt>
-                  <dd className="text-sm text-gray-900">{value || <span className="text-gray-300">—</span>}</dd>
+                  <dd className="text-sm text-gray-900">
+                    {value || <span className="text-gray-300">—</span>}
+                  </dd>
                 </div>
               ))}
             </dl>
@@ -139,7 +173,9 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
           {d.description && (
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
               <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
-                <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Description</h2>
+                <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  Description
+                </h2>
               </div>
               <p className="px-5 py-4 text-sm text-gray-700 whitespace-pre-wrap">{d.description}</p>
             </div>
@@ -150,7 +186,9 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         <div className="space-y-4">
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
             <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
-              <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Recent Movements</h2>
+              <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                Recent Movements
+              </h2>
             </div>
             {movements.length === 0 ? (
               <p className="px-5 py-4 text-sm text-gray-400">No movements recorded.</p>
@@ -169,9 +207,15 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                     const date = (md.date as string) ?? mv.createdAt ?? '';
                     return (
                       <tr key={mv.id} className="border-b border-gray-50 last:border-0">
-                        <td className="px-4 py-2.5"><MovementTypeBadge type={md.type as string} /></td>
-                        <td className="px-4 py-2.5 text-right font-semibold text-gray-900">{(md.quantity as number) ?? 0}</td>
-                        <td className="px-4 py-2.5 text-xs text-gray-400">{date ? date.slice(0, 10) : '—'}</td>
+                        <td className="px-4 py-2.5">
+                          <MovementTypeBadge type={md.type as string} />
+                        </td>
+                        <td className="px-4 py-2.5 text-right font-semibold text-gray-900">
+                          {(md.quantity as number) ?? 0}
+                        </td>
+                        <td className="px-4 py-2.5 text-xs text-gray-400">
+                          {date ? date.slice(0, 10) : '—'}
+                        </td>
                       </tr>
                     );
                   })}
@@ -181,8 +225,12 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
           </div>
 
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">AI Insights</h2>
-            <p className="text-sm text-gray-400">Click "Enrich with AI" to generate insights for this product.</p>
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+              AI Insights
+            </h2>
+            <p className="text-sm text-gray-400">
+              Click "Enrich with AI" to generate insights for this product.
+            </p>
           </div>
         </div>
       </div>

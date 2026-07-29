@@ -7,7 +7,10 @@ export default async function PurchasingVendorsPage() {
 
   let vendors: PurchasingVendor[] = [];
   try {
-    const res = await apiFetch<{ data: PurchasingVendor[] } | PurchasingVendor[]>('/api/v1/purchasing/vendors?limit=50', tenantId);
+    const res = await apiFetch<{ data: PurchasingVendor[] } | PurchasingVendor[]>(
+      '/api/v1/purchasing/vendors?limit=50',
+      tenantId,
+    );
     vendors = Array.isArray(res) ? res : (res.data ?? []);
   } catch {
     vendors = [];

@@ -133,7 +133,10 @@ export default async function ProjectsReportPage() {
             </thead>
             <tbody>
               {report.projectsWithProgress.map((p) => (
-                <tr key={p.projectId} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                <tr
+                  key={p.projectId}
+                  className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
+                >
                   <td className="px-5 py-3 font-medium text-gray-900">{p.name}</td>
                   <td className="px-5 py-3">
                     <span

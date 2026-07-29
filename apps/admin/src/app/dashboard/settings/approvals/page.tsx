@@ -1,3 +1,4 @@
+import { apiFetch } from '@/lib/api.js';
 import Link from 'next/link';
 import { GitBranch, Plus, Pencil, Trash2 } from 'lucide-react';
 
@@ -21,13 +22,7 @@ interface ApprovalChain {
 
 async function fetchChains(): Promise<ApprovalChain[]> {
   try {
-    const res = await fetch(
-      (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') +
-        '/api/v1/approval-chains?tenantId=demo',
-      { cache: 'no-store' },
-    );
-    if (!res.ok) return [];
-    const data = await res.json();
+    const data = await apiFetch<ApprovalChain[] | { data?: ApprovalChain[] }>('/api/v1/approval-chains', '');
     return Array.isArray(data) ? data : (data.data ?? []);
   } catch {
     return [];

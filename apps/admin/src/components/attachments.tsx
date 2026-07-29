@@ -26,13 +26,21 @@ function humanFileSize(bytes: number): string {
 
 function formatDate(iso: string): string {
   try {
-    return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    return new Date(iso).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
   } catch {
     return iso;
   }
 }
 
-export function AttachmentsPanel({ entityType, entityId, tenantId = 'demo' }: AttachmentsPanelProps) {
+export function AttachmentsPanel({
+  entityType,
+  entityId,
+  tenantId = 'demo',
+}: AttachmentsPanelProps) {
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -45,7 +53,7 @@ export function AttachmentsPanel({ entityType, entityId, tenantId = 'demo' }: At
     setError(null);
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/attachments?entityType=${encodeURIComponent(entityType)}&entityId=${encodeURIComponent(entityId)}&tenantId=${encodeURIComponent(tenantId)}`
+        `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/attachments?entityType=${encodeURIComponent(entityType)}&entityId=${encodeURIComponent(entityId)}&tenantId=${encodeURIComponent(tenantId)}`,
       );
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
@@ -71,10 +79,13 @@ export function AttachmentsPanel({ entityType, entityId, tenantId = 'demo' }: At
       form.append('entityId', entityId);
       form.append('file', file);
 
-      const res = await fetch((process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/attachments/upload', {
-        method: 'POST',
-        body: form,
-      });
+      const res = await fetch(
+        (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/attachments/upload',
+        {
+          method: 'POST',
+          body: form,
+        },
+      );
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       await fetchAttachments();
     } catch (e) {
@@ -88,9 +99,12 @@ export function AttachmentsPanel({ entityType, entityId, tenantId = 'demo' }: At
     // Optimistic removal
     setAttachments((prev) => prev.filter((a) => a.id !== id));
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/attachments/${id}`, {
-        method: 'DELETE',
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/attachments/${id}`,
+        {
+          method: 'DELETE',
+        },
+      );
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
     } catch {
       // Revert on failure
@@ -123,7 +137,10 @@ export function AttachmentsPanel({ entityType, entityId, tenantId = 'demo' }: At
             : 'border-gray-200 bg-white hover:border-gray-300'
         }`}
         onClick={() => fileInputRef.current?.click()}
-        onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragOver(true);
+        }}
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
       >
@@ -148,9 +165,7 @@ export function AttachmentsPanel({ entityType, entityId, tenantId = 'demo' }: At
       </div>
 
       {/* Error */}
-      {error && (
-        <p className="text-xs text-red-500 px-1">{error}</p>
-      )}
+      {error && <p className="text-xs text-red-500 px-1">{error}</p>}
 
       {/* Attachment list */}
       {loading ? (

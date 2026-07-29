@@ -69,7 +69,9 @@ export function CourseDetailClient({ course }: { course: Course }) {
     <div className="px-8 py-8 max-w-5xl">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-gray-400 mb-5">
-        <a href="/dashboard/lms" className="hover:text-gray-600">LMS</a>
+        <a href="/dashboard/lms" className="hover:text-gray-600">
+          LMS
+        </a>
         <span>/</span>
         <span className="text-gray-700 font-medium line-clamp-1">{d.title}</span>
       </div>
@@ -80,7 +82,9 @@ export function CourseDetailClient({ course }: { course: Course }) {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2 flex-wrap">
               <h1 className="text-2xl font-bold text-gray-900">{d.title ?? '—'}</h1>
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[currentStatus] ?? 'bg-gray-100 text-gray-600'}`}>
+              <span
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[currentStatus] ?? 'bg-gray-100 text-gray-600'}`}
+              >
                 {currentStatus}
               </span>
             </div>
@@ -92,11 +96,14 @@ export function CourseDetailClient({ course }: { course: Course }) {
                 </span>
               )}
               {d.duration && <span>{d.duration}</span>}
-              {d.modules != null && <span className="flex items-center gap-1"><BookOpen size={13} />{d.modules} modules</span>}
+              {d.modules != null && (
+                <span className="flex items-center gap-1">
+                  <BookOpen size={13} />
+                  {d.modules} modules
+                </span>
+              )}
             </div>
-            {d.description && (
-              <p className="text-sm text-gray-600">{d.description}</p>
-            )}
+            {d.description && <p className="text-sm text-gray-600">{d.description}</p>}
           </div>
           <button
             onClick={() => void togglePublish()}
@@ -115,12 +122,35 @@ export function CourseDetailClient({ course }: { course: Course }) {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         {[
-          { label: 'Enrollments', value: enrollments.toLocaleString(), color: 'text-blue-600', icon: <Users size={16} className="text-blue-400" /> },
-          { label: 'Completions', value: completions.toLocaleString(), color: 'text-green-600', icon: <Users size={16} className="text-green-400" /> },
-          { label: 'Completion Rate', value: `${completionRate}%`, color: 'text-purple-600', icon: <BarChart2 size={16} className="text-purple-400" /> },
-          { label: 'Avg Rating', value: d.rating != null ? d.rating.toFixed(1) : '—', color: 'text-amber-600', icon: <Star size={16} className="text-amber-400 fill-amber-400" /> },
+          {
+            label: 'Enrollments',
+            value: enrollments.toLocaleString(),
+            color: 'text-blue-600',
+            icon: <Users size={16} className="text-blue-400" />,
+          },
+          {
+            label: 'Completions',
+            value: completions.toLocaleString(),
+            color: 'text-green-600',
+            icon: <Users size={16} className="text-green-400" />,
+          },
+          {
+            label: 'Completion Rate',
+            value: `${completionRate}%`,
+            color: 'text-purple-600',
+            icon: <BarChart2 size={16} className="text-purple-400" />,
+          },
+          {
+            label: 'Avg Rating',
+            value: d.rating != null ? d.rating.toFixed(1) : '—',
+            color: 'text-amber-600',
+            icon: <Star size={16} className="text-amber-400 fill-amber-400" />,
+          },
         ].map((s) => (
-          <div key={s.label} className="bg-white border border-gray-200 rounded-xl px-5 py-4 shadow-sm">
+          <div
+            key={s.label}
+            className="bg-white border border-gray-200 rounded-xl px-5 py-4 shadow-sm"
+          >
             <div className="flex items-center gap-2 mb-1">{s.icon}</div>
             <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
             <p className="text-xs text-gray-500 mt-0.5">{s.label}</p>
@@ -133,7 +163,9 @@ export function CourseDetailClient({ course }: { course: Course }) {
         <div className="bg-white border border-gray-200 rounded-xl px-8 py-5 mb-6 shadow-sm">
           <h3 className="text-sm font-semibold text-gray-900 mb-3">Completion Progress</h3>
           <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
-            <span>{completions} of {enrollments} students completed</span>
+            <span>
+              {completions} of {enrollments} students completed
+            </span>
             <span className="font-medium">{completionRate}%</span>
           </div>
           <div className="w-full bg-gray-100 rounded-full h-3">

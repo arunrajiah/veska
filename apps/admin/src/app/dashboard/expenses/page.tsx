@@ -28,7 +28,7 @@ async function fetchExpenses(tenantId: string): Promise<Expense[]> {
       '/api/v1/expenses?limit=50',
       tenantId,
     );
-    return Array.isArray(res) ? res : (res as { data: Expense[] }).data ?? [];
+    return Array.isArray(res) ? res : ((res as { data: Expense[] }).data ?? []);
   } catch {
     return [];
   }

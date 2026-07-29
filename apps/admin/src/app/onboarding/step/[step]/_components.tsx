@@ -13,14 +13,7 @@ import {
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
-const INDUSTRIES = [
-  'Manufacturing',
-  'Retail',
-  'Services',
-  'Technology',
-  'Healthcare',
-  'Other',
-];
+const INDUSTRIES = ['Manufacturing', 'Retail', 'Services', 'Technology', 'Healthcare', 'Other'];
 
 const COUNTRIES = [
   'United States',
@@ -126,14 +119,7 @@ const MODULES = [
   },
 ];
 
-const STEP_LABELS = [
-  'Company',
-  'Modules',
-  'Team',
-  'AI Setup',
-  'Ready!',
-];
-
+const STEP_LABELS = ['Company', 'Modules', 'Team', 'AI Setup', 'Ready!'];
 
 // ─── Step Indicator ──────────────────────────────────────────────────────────
 
@@ -154,8 +140,8 @@ function StepIndicator({ current, labels }: { current: number; labels?: string[]
                   isCompleted
                     ? 'bg-indigo-600 text-white'
                     : isCurrent
-                    ? 'bg-indigo-600 text-white ring-4 ring-indigo-100'
-                    : 'bg-gray-200 text-gray-500',
+                      ? 'bg-indigo-600 text-white ring-4 ring-indigo-100'
+                      : 'bg-gray-200 text-gray-500',
                 ].join(' ')}
               >
                 {isCompleted ? '✓' : stepNum}
@@ -212,7 +198,8 @@ function Step1({ onNext }: { onNext: () => void }) {
     onNext();
   }
 
-  const fieldClass = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent';
+  const fieldClass =
+    'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent';
   const errorClass = 'text-xs text-red-500 mt-1';
 
   return (
@@ -235,10 +222,16 @@ function Step1({ onNext }: { onNext: () => void }) {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Industry</label>
-          <select value={industry} onChange={(e) => setIndustry(e.target.value)} className={fieldClass}>
+          <select
+            value={industry}
+            onChange={(e) => setIndustry(e.target.value)}
+            className={fieldClass}
+          >
             <option value="">Select industry…</option>
             {INDUSTRIES.map((i) => (
-              <option key={i} value={i}>{i}</option>
+              <option key={i} value={i}>
+                {i}
+              </option>
             ))}
           </select>
           {errors['industry'] && <p className={errorClass}>{errors['industry']}</p>}
@@ -247,10 +240,16 @@ function Step1({ onNext }: { onNext: () => void }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
-            <select value={country} onChange={(e) => setCountry(e.target.value)} className={fieldClass}>
+            <select
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              className={fieldClass}
+            >
               <option value="">Select country…</option>
               {COUNTRIES.map((c) => (
-                <option key={c} value={c}>{c}</option>
+                <option key={c} value={c}>
+                  {c}
+                </option>
               ))}
             </select>
             {errors['country'] && <p className={errorClass}>{errors['country']}</p>}
@@ -258,9 +257,15 @@ function Step1({ onNext }: { onNext: () => void }) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
-            <select value={currency} onChange={(e) => setCurrency(e.target.value)} className={fieldClass}>
+            <select
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value)}
+              className={fieldClass}
+            >
               {CURRENCIES.map((c) => (
-                <option key={c.code} value={c.code}>{c.label}</option>
+                <option key={c.code} value={c.code}>
+                  {c.label}
+                </option>
               ))}
             </select>
             {errors['currency'] && <p className={errorClass}>{errors['currency']}</p>}
@@ -306,9 +311,7 @@ function Step1({ onNext }: { onNext: () => void }) {
 
 function Step2({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
   const data = getOnboardingData();
-  const [enabled, setEnabled] = useState<Set<string>>(
-    new Set(data.modules ?? ['finance'])
-  );
+  const [enabled, setEnabled] = useState<Set<string>>(new Set(data.modules ?? ['finance']));
 
   function toggle(id: string) {
     if (id === 'finance') return; // always on
@@ -346,13 +349,15 @@ function Step2({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
                 mod.alwaysOn
                   ? 'border-indigo-300 bg-indigo-50 opacity-70 cursor-default'
                   : isOn
-                  ? 'border-indigo-500 bg-indigo-50'
-                  : 'border-gray-200 bg-white hover:border-indigo-300',
+                    ? 'border-indigo-500 bg-indigo-50'
+                    : 'border-gray-200 bg-white hover:border-indigo-300',
               ].join(' ')}
             >
               <div className="text-xl mb-1">{mod.icon}</div>
               <div className="flex items-center justify-between gap-1">
-                <span className="text-xs font-semibold text-gray-800 leading-tight">{mod.name}</span>
+                <span className="text-xs font-semibold text-gray-800 leading-tight">
+                  {mod.name}
+                </span>
                 <div
                   className={[
                     'w-8 h-4 rounded-full flex-shrink-0 transition-colors relative',
@@ -370,7 +375,9 @@ function Step2({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
               </div>
               <p className="text-xs text-gray-500 mt-1 leading-tight">{mod.description}</p>
               {mod.alwaysOn && (
-                <span className="absolute top-2 right-2 text-xs text-indigo-500 font-medium">Required</span>
+                <span className="absolute top-2 right-2 text-xs text-indigo-500 font-medium">
+                  Required
+                </span>
               )}
             </button>
           );
@@ -402,12 +409,20 @@ interface TeamMember {
   role: string;
 }
 
-function Step3({ onNext, onBack, onSkip }: { onNext: () => void; onBack: () => void; onSkip: () => void }) {
+function Step3({
+  onNext,
+  onBack,
+  onSkip,
+}: {
+  onNext: () => void;
+  onBack: () => void;
+  onSkip: () => void;
+}) {
   const data = getOnboardingData();
   const [members, setMembers] = useState<TeamMember[]>(
     data.teamMembers && data.teamMembers.length > 0
       ? data.teamMembers
-      : [{ email: '', role: 'Employee' }]
+      : [{ email: '', role: 'Employee' }],
   );
   const [errors, setErrors] = useState<string[]>([]);
 
@@ -443,7 +458,8 @@ function Step3({ onNext, onBack, onSkip }: { onNext: () => void; onBack: () => v
     onNext();
   }
 
-  const fieldClass = 'border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent';
+  const fieldClass =
+    'border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent';
 
   return (
     <div>
@@ -468,7 +484,9 @@ function Step3({ onNext, onBack, onSkip }: { onNext: () => void; onBack: () => v
               className={`${fieldClass} w-32`}
             >
               {ROLES.map((r) => (
-                <option key={r} value={r}>{r}</option>
+                <option key={r} value={r}>
+                  {r}
+                </option>
               ))}
             </select>
             {members.length > 1 && (
@@ -546,7 +564,7 @@ function Step4({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
         headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
       });
       if (res.ok) {
-        const json = await res.json() as ProviderInfo;
+        const json = (await res.json()) as ProviderInfo;
         setProviderInfo(json);
       }
     } catch {
@@ -579,7 +597,8 @@ function Step4({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
     <div>
       <h2 className="text-xl font-semibold text-gray-900 mb-1">AI setup</h2>
       <p className="text-sm text-gray-500 mb-6">
-        Your AI assistant can answer questions, draft invoices, analyse expenses, and help your team work faster.
+        Your AI assistant can answer questions, draft invoices, analyse expenses, and help your team
+        work faster.
       </p>
 
       {/* Provider info */}
@@ -603,7 +622,9 @@ function Step4({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
         <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200">
           <div>
             <p className="text-sm font-medium text-gray-900">Enable AI for all users</p>
-            <p className="text-xs text-gray-500 mt-0.5">Users can chat with the AI assistant and get suggestions.</p>
+            <p className="text-xs text-gray-500 mt-0.5">
+              Users can chat with the AI assistant and get suggestions.
+            </p>
           </div>
           <button
             type="button"
@@ -625,7 +646,9 @@ function Step4({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
         <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200">
           <div>
             <p className="text-sm font-medium text-gray-900">Allow AI to take actions</p>
-            <p className="text-xs text-gray-500 mt-0.5">AI can create records, update statuses, and perform tasks.</p>
+            <p className="text-xs text-gray-500 mt-0.5">
+              AI can create records, update statuses, and perform tasks.
+            </p>
           </div>
           <button
             type="button"
@@ -671,16 +694,25 @@ function Step4({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
 // ─── Confetti ────────────────────────────────────────────────────────────────
 
 const CONFETTI_COLORS = [
-  '#6366f1', '#8b5cf6', '#ec4899', '#f59e0b',
-  '#10b981', '#3b82f6', '#ef4444', '#f97316',
-  '#14b8a6', '#a855f7', '#84cc16', '#06b6d4',
+  '#6366f1',
+  '#8b5cf6',
+  '#ec4899',
+  '#f59e0b',
+  '#10b981',
+  '#3b82f6',
+  '#ef4444',
+  '#f97316',
+  '#14b8a6',
+  '#a855f7',
+  '#84cc16',
+  '#06b6d4',
 ];
 
 function Confetti() {
   const dots = Array.from({ length: 20 }, (_, i) => ({
     id: i,
     color: CONFETTI_COLORS[i % CONFETTI_COLORS.length] ?? '#6366f1',
-    left: `${5 + (i * 4.5) % 90}%`,
+    left: `${5 + ((i * 4.5) % 90)}%`,
     delay: `${(i * 0.15) % 1.5}s`,
     size: 8 + (i % 3) * 4,
     duration: `${1.5 + (i % 4) * 0.3}s`,
@@ -705,15 +737,17 @@ function Confetti() {
           <div
             key={dot.id}
             className="confetti-dot"
-            style={{
-              left: dot.left,
-              bottom: 0,
-              width: dot.size,
-              height: dot.size,
-              backgroundColor: dot.color,
-              '--delay': dot.delay,
-              '--dur': dot.duration,
-            } as React.CSSProperties}
+            style={
+              {
+                left: dot.left,
+                bottom: 0,
+                width: dot.size,
+                height: dot.size,
+                backgroundColor: dot.color,
+                '--delay': dot.delay,
+                '--dur': dot.duration,
+              } as React.CSSProperties
+            }
           />
         ))}
       </div>
@@ -779,25 +813,35 @@ function Step5({ onBack }: { onBack: () => void }) {
 
       <div className="bg-gray-50 rounded-xl border border-gray-100 p-6 text-left space-y-3 mb-8">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 text-sm">🏢</div>
+          <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 text-sm">
+            🏢
+          </div>
           <div>
             <p className="text-xs text-gray-500">Company</p>
             <p className="text-sm font-medium text-gray-900">{companyName}</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 text-sm">📦</div>
+          <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 text-sm">
+            📦
+          </div>
           <div>
             <p className="text-xs text-gray-500">Modules enabled</p>
-            <p className="text-sm font-medium text-gray-900">{moduleCount} module{moduleCount !== 1 ? 's' : ''}</p>
+            <p className="text-sm font-medium text-gray-900">
+              {moduleCount} module{moduleCount !== 1 ? 's' : ''}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 text-sm">👥</div>
+          <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 text-sm">
+            👥
+          </div>
           <div>
             <p className="text-xs text-gray-500">Team members invited</p>
             <p className="text-sm font-medium text-gray-900">
-              {memberCount > 0 ? `${memberCount} invite${memberCount !== 1 ? 's' : ''} sent` : 'None — you can invite later'}
+              {memberCount > 0
+                ? `${memberCount} invite${memberCount !== 1 ? 's' : ''} sent`
+                : 'None — you can invite later'}
             </p>
           </div>
         </div>
@@ -819,10 +863,7 @@ function Step5({ onBack }: { onBack: () => void }) {
       </a>
 
       <div className="mt-4">
-        <button
-          onClick={onBack}
-          className="text-xs text-gray-400 hover:text-gray-600"
-        >
+        <button onClick={onBack} className="text-xs text-gray-400 hover:text-gray-600">
           ← Back
         </button>
       </div>
@@ -841,9 +882,15 @@ export function OnboardingWizard({ step }: { step: number }) {
     router.push(`/onboarding/step/${targetStep}` as any);
   }
 
-  function next() { goTo(step + 1); }
-  function back() { goTo(step - 1); }
-  function skip() { goTo(step + 1); }
+  function next() {
+    goTo(step + 1);
+  }
+  function back() {
+    goTo(step - 1);
+  }
+  function skip() {
+    goTo(step + 1);
+  }
 
   // Update the progress bar width via DOM (layout is a server component)
   useEffect(() => {
@@ -861,7 +908,10 @@ export function OnboardingWizard({ step }: { step: number }) {
           <p className="text-xs text-gray-400 mt-0.5">Setup wizard</p>
         </div>
 
-        <StepIndicator current={step} labels={[t('step1'), t('step2'), t('step3'), t('step4'), t('step5')]} />
+        <StepIndicator
+          current={step}
+          labels={[t('step1'), t('step2'), t('step3'), t('step4'), t('step5')]}
+        />
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 sm:p-8">
           {step === 1 && <Step1 onNext={next} />}
@@ -871,9 +921,7 @@ export function OnboardingWizard({ step }: { step: number }) {
           {step === 5 && <Step5 onBack={back} />}
         </div>
 
-        <p className="text-center text-xs text-gray-400 mt-6">
-          Step {step} of 5
-        </p>
+        <p className="text-center text-xs text-gray-400 mt-6">Step {step} of 5</p>
       </div>
     </div>
   );

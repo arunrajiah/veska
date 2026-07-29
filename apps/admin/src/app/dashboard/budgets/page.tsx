@@ -39,11 +39,8 @@ export interface BudgetSummary {
 
 async function fetchBudgets(tenantId: string): Promise<Budget[]> {
   try {
-    const res = await apiFetch<Budget[] | { data: Budget[] }>(
-      '/api/v1/budgets?limit=20',
-      tenantId,
-    );
-    return Array.isArray(res) ? res : (res as { data: Budget[] }).data ?? [];
+    const res = await apiFetch<Budget[] | { data: Budget[] }>('/api/v1/budgets?limit=20', tenantId);
+    return Array.isArray(res) ? res : ((res as { data: Budget[] }).data ?? []);
   } catch {
     return [];
   }
@@ -59,21 +56,22 @@ async function fetchSummary(tenantId: string): Promise<BudgetSummary> {
 
 export default async function BudgetsPage() {
   const tenantId = process.env.VESKA_TENANT_ID ?? 'demo-tenant';
-  const [budgets, summary] = await Promise.all([
-    fetchBudgets(tenantId),
-    fetchSummary(tenantId),
-  ]);
+  const [budgets, summary] = await Promise.all([fetchBudgets(tenantId), fetchSummary(tenantId)]);
 
   // Compute derived summary from budget data if API didn't provide it
   const derivedSummary: BudgetSummary = {
-    totalBudgeted: summary.totalBudgeted || budgets.reduce((s, b) => {
-      const v = b.data?.totalBudget ?? 0;
-      return s + (typeof v === 'number' ? v : parseFloat(String(v)) || 0);
-    }, 0),
-    totalActuals: summary.totalActuals || budgets.reduce((s, b) => {
-      const v = b.data?.spent ?? 0;
-      return s + (typeof v === 'number' ? v : parseFloat(String(v)) || 0);
-    }, 0),
+    totalBudgeted:
+      summary.totalBudgeted ||
+      budgets.reduce((s, b) => {
+        const v = b.data?.totalBudget ?? 0;
+        return s + (typeof v === 'number' ? v : parseFloat(String(v)) || 0);
+      }, 0),
+    totalActuals:
+      summary.totalActuals ||
+      budgets.reduce((s, b) => {
+        const v = b.data?.spent ?? 0;
+        return s + (typeof v === 'number' ? v : parseFloat(String(v)) || 0);
+      }, 0),
     utilizationPct: summary.utilizationPct ?? 0,
     activeBudgets: summary.activeBudgets ?? [],
   };

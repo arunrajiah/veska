@@ -7,7 +7,6 @@ import { Plus, X, CheckCircle, XCircle } from 'lucide-react';
 import { BulkActionBar } from '@/components/bulk-action-bar.js';
 import type { Expense } from './page.js';
 
-
 function authHeaders(tenantId: string): HeadersInit {
   return {
     'Content-Type': 'application/json',
@@ -73,15 +72,23 @@ function SubmitExpenseSlideover({ tenantId, onClose, onCreated }: SubmitExpenseS
     receiptUrl: '',
   });
 
-  const set = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const set = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
+  ) => {
     const { name, value } = e.target;
     setForm((p) => ({ ...p, [name]: value }));
   };
 
   const handleSubmit = async (ev: React.FormEvent) => {
     ev.preventDefault();
-    if (!form.title.trim()) { setError('Title is required'); return; }
-    if (!form.amount || isNaN(parseFloat(form.amount))) { setError('Valid amount is required'); return; }
+    if (!form.title.trim()) {
+      setError('Title is required');
+      return;
+    }
+    if (!form.amount || isNaN(parseFloat(form.amount))) {
+      setError('Valid amount is required');
+      return;
+    }
     setSaving(true);
     setError('');
     try {
@@ -101,7 +108,7 @@ function SubmitExpenseSlideover({ tenantId, onClose, onCreated }: SubmitExpenseS
         body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error(await res.text());
-      const created = await res.json() as Expense;
+      const created = (await res.json()) as Expense;
       onCreated(created);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to submit expense');
@@ -121,7 +128,11 @@ function SubmitExpenseSlideover({ tenantId, onClose, onCreated }: SubmitExpenseS
           </button>
         </div>
 
-        <form id="submit-expense-form" onSubmit={(e) => void handleSubmit(e)} className="flex-1 overflow-y-auto divide-y divide-gray-50">
+        <form
+          id="submit-expense-form"
+          onSubmit={(e) => void handleSubmit(e)}
+          className="flex-1 overflow-y-auto divide-y divide-gray-50"
+        >
           <div className="px-5 py-4 space-y-3">
             <div>
               <label className="block text-xs text-gray-500 mb-1">Title *</label>
@@ -158,7 +169,9 @@ function SubmitExpenseSlideover({ tenantId, onClose, onCreated }: SubmitExpenseS
                   className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 bg-white"
                 >
                   {['USD', 'EUR', 'GBP', 'INR'].map((c) => (
-                    <option key={c} value={c}>{c}</option>
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -173,7 +186,9 @@ function SubmitExpenseSlideover({ tenantId, onClose, onCreated }: SubmitExpenseS
                   className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 bg-white"
                 >
                   {['travel', 'meals', 'equipment', 'software', 'other'].map((c) => (
-                    <option key={c} value={c} className="capitalize">{c.charAt(0).toUpperCase() + c.slice(1)}</option>
+                    <option key={c} value={c} className="capitalize">
+                      {c.charAt(0).toUpperCase() + c.slice(1)}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -267,13 +282,14 @@ export function ExpensesClient({
     }
   }, [toast]);
 
-  const filtered = activeTab === 'all'
-    ? expenses
-    : expenses.filter((e) => {
-        const s = getStatus(e);
-        if (activeTab === 'pending') return s === 'pending' || s === 'submitted';
-        return s === activeTab;
-      });
+  const filtered =
+    activeTab === 'all'
+      ? expenses
+      : expenses.filter((e) => {
+          const s = getStatus(e);
+          if (activeTab === 'pending') return s === 'pending' || s === 'submitted';
+          return s === activeTab;
+        });
 
   const allVisibleSelected = filtered.length > 0 && filtered.every((e) => selected.has(e.id));
 
@@ -312,18 +328,25 @@ export function ExpensesClient({
         body: JSON.stringify({ ids: Array.from(selected), action }),
       });
       if (!res.ok) throw new Error(await res.text());
-      const result = await res.json() as { processed: number; failed: { id: string; error: string }[] };
+      const result = (await res.json()) as {
+        processed: number;
+        failed: { id: string; error: string }[];
+      };
       const failCount = result.failed.length;
       setToast({
-        message: failCount > 0
-          ? `${result.processed} processed, ${failCount} failed`
-          : `${result.processed} expense${result.processed !== 1 ? 's' : ''} ${action}d`,
+        message:
+          failCount > 0
+            ? `${result.processed} processed, ${failCount} failed`
+            : `${result.processed} expense${result.processed !== 1 ? 's' : ''} ${action}d`,
         type: failCount > 0 ? 'error' : 'success',
       });
       setSelected(new Set());
       router.refresh();
     } catch (err) {
-      setToast({ message: err instanceof Error ? err.message : 'Bulk action failed', type: 'error' });
+      setToast({
+        message: err instanceof Error ? err.message : 'Bulk action failed',
+        type: 'error',
+      });
     } finally {
       setBulkLoading(false);
     }
@@ -331,7 +354,9 @@ export function ExpensesClient({
 
   // Stats
   const totalSubmitted = expenses.reduce((s, e) => s + getAmount(e), 0);
-  const pendingApproval = expenses.filter((e) => ['pending', 'submitted'].includes(getStatus(e))).length;
+  const pendingApproval = expenses.filter((e) =>
+    ['pending', 'submitted'].includes(getStatus(e)),
+  ).length;
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const approvedThisMonth = expenses
@@ -352,7 +377,9 @@ export function ExpensesClient({
       });
       if (!res.ok) throw new Error(await res.text());
       setExpenses((prev) =>
-        prev.map((e) => e.id === expense.id ? { ...e, data: { ...e.data, status: 'approved' } } : e),
+        prev.map((e) =>
+          e.id === expense.id ? { ...e, data: { ...e.data, status: 'approved' } } : e,
+        ),
       );
       setToast({ message: 'Expense approved', type: 'success' });
     } catch {
@@ -372,7 +399,9 @@ export function ExpensesClient({
       });
       if (!res.ok) throw new Error(await res.text());
       setExpenses((prev) =>
-        prev.map((e) => e.id === expense.id ? { ...e, data: { ...e.data, status: 'rejected' } } : e),
+        prev.map((e) =>
+          e.id === expense.id ? { ...e, data: { ...e.data, status: 'rejected' } } : e,
+        ),
       );
       setToast({ message: 'Expense rejected', type: 'success' });
     } catch {
@@ -475,116 +504,129 @@ export function ExpensesClient({
         </div>
       ) : (
         <>
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-100 bg-gray-50">
-                <th className="px-4 py-3 w-8">
-                  <input
-                    type="checkbox"
-                    checked={allVisibleSelected}
-                    onChange={toggleAll}
-                    className="rounded border-gray-300 text-gray-900 focus:ring-gray-900"
-                  />
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Title</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Submitted By</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Category</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Amount</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Date</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
-                <th className="px-4 py-3 text-xs font-medium text-gray-500 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((expense) => {
-                const status = getStatus(expense);
-                const isPending = status === 'pending' || status === 'submitted';
-                const isChecked = selected.has(expense.id);
-                return (
-                  <tr
-                    key={expense.id}
-                    onClick={() => router.push(`/dashboard/expenses/${expense.id}`)}
-                    className={`border-b border-gray-50 last:border-0 hover:bg-gray-50/50 cursor-pointer ${isChecked ? 'bg-blue-50/30' : ''}`}
-                  >
-                    <td
-                      className="px-4 py-3 w-8"
-                      onClick={(e) => { e.stopPropagation(); toggleOne(expense.id); }}
+          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-100 bg-gray-50">
+                  <th className="px-4 py-3 w-8">
+                    <input
+                      type="checkbox"
+                      checked={allVisibleSelected}
+                      onChange={toggleAll}
+                      className="rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+                    />
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Title</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                    Submitted By
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                    Category
+                  </th>
+                  <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Amount</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Date</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
+                  <th className="px-4 py-3 text-xs font-medium text-gray-500 text-right">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((expense) => {
+                  const status = getStatus(expense);
+                  const isPending = status === 'pending' || status === 'submitted';
+                  const isChecked = selected.has(expense.id);
+                  return (
+                    <tr
+                      key={expense.id}
+                      onClick={() => router.push(`/dashboard/expenses/${expense.id}`)}
+                      className={`border-b border-gray-50 last:border-0 hover:bg-gray-50/50 cursor-pointer ${isChecked ? 'bg-blue-50/30' : ''}`}
                     >
-                      <input
-                        type="checkbox"
-                        checked={isChecked}
-                        onChange={() => toggleOne(expense.id)}
-                        className="rounded border-gray-300 text-gray-900 focus:ring-gray-900"
-                      />
-                    </td>
-                    <td className="px-4 py-3 font-medium text-gray-900">{getTitle(expense)}</td>
-                    <td className="px-4 py-3 text-gray-600">{getSubmittedBy(expense)}</td>
-                    <td className="px-4 py-3">
-                      <span className="capitalize text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
-                        {expense.data.category ?? '—'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right font-medium text-gray-900">
-                      {fmt(expense.data.amount, expense.data.currency)}
-                    </td>
-                    <td className="px-4 py-3 text-xs text-gray-500">
-                      {expense.data.date ? expense.data.date.slice(0, 10) : '—'}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-600'}`}
+                      <td
+                        className="px-4 py-3 w-8"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleOne(expense.id);
+                        }}
                       >
-                        {status}
-                      </span>
-                    </td>
-                    <td
-                      className="px-4 py-3 text-right"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {isPending ? (
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => void handleApprove(expense)}
-                            disabled={actionLoading !== null}
-                            className="inline-flex items-center gap-1 text-xs text-green-600 hover:text-green-800 border border-green-100 px-2 py-1 rounded-lg transition-colors disabled:opacity-50"
-                          >
-                            <CheckCircle size={11} />
-                            {actionLoading === expense.id + '-approve' ? '…' : 'Approve'}
-                          </button>
-                          <button
-                            onClick={() => void handleReject(expense)}
-                            disabled={actionLoading !== null}
-                            className="inline-flex items-center gap-1 text-xs text-red-500 hover:text-red-700 border border-red-100 px-2 py-1 rounded-lg transition-colors disabled:opacity-50"
-                          >
-                            <XCircle size={11} />
-                            {actionLoading === expense.id + '-reject' ? '…' : 'Reject'}
-                          </button>
-                        </div>
-                      ) : (
-                        <Link
-                          href={`/dashboard/expenses/${expense.id}`}
-                          className="text-xs text-gray-500 hover:text-gray-900"
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => toggleOne(expense.id)}
+                          className="rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+                        />
+                      </td>
+                      <td className="px-4 py-3 font-medium text-gray-900">{getTitle(expense)}</td>
+                      <td className="px-4 py-3 text-gray-600">{getSubmittedBy(expense)}</td>
+                      <td className="px-4 py-3">
+                        <span className="capitalize text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
+                          {expense.data.category ?? '—'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right font-medium text-gray-900">
+                        {fmt(expense.data.amount, expense.data.currency)}
+                      </td>
+                      <td className="px-4 py-3 text-xs text-gray-500">
+                        {expense.data.date ? expense.data.date.slice(0, 10) : '—'}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-600'}`}
                         >
-                          View →
-                        </Link>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                          {status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                        {isPending ? (
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => void handleApprove(expense)}
+                              disabled={actionLoading !== null}
+                              className="inline-flex items-center gap-1 text-xs text-green-600 hover:text-green-800 border border-green-100 px-2 py-1 rounded-lg transition-colors disabled:opacity-50"
+                            >
+                              <CheckCircle size={11} />
+                              {actionLoading === expense.id + '-approve' ? '…' : 'Approve'}
+                            </button>
+                            <button
+                              onClick={() => void handleReject(expense)}
+                              disabled={actionLoading !== null}
+                              className="inline-flex items-center gap-1 text-xs text-red-500 hover:text-red-700 border border-red-100 px-2 py-1 rounded-lg transition-colors disabled:opacity-50"
+                            >
+                              <XCircle size={11} />
+                              {actionLoading === expense.id + '-reject' ? '…' : 'Reject'}
+                            </button>
+                          </div>
+                        ) : (
+                          <Link
+                            href={`/dashboard/expenses/${expense.id}`}
+                            className="text-xs text-gray-500 hover:text-gray-900"
+                          >
+                            View →
+                          </Link>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
 
-        <BulkActionBar
-          selectedCount={selected.size}
-          onClear={() => setSelected(new Set())}
-          actions={[
-            { label: bulkLoading ? 'Processing…' : 'Approve All', onClick: () => void handleBulkAction('approve') },
-            { label: 'Reject All', onClick: () => void handleBulkAction('reject'), variant: 'danger' },
-          ]}
-        />
+          <BulkActionBar
+            selectedCount={selected.size}
+            onClear={() => setSelected(new Set())}
+            actions={[
+              {
+                label: bulkLoading ? 'Processing…' : 'Approve All',
+                onClick: () => void handleBulkAction('approve'),
+              },
+              {
+                label: 'Reject All',
+                onClick: () => void handleBulkAction('reject'),
+                variant: 'danger',
+              },
+            ]}
+          />
         </>
       )}
     </div>

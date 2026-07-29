@@ -23,22 +23,38 @@ type ChannelKey = 'slack' | 'email' | 'whatsapp' | 'telegram' | 'all';
 
 const CHANNEL_CONFIG: Record<
   Exclude<ChannelKey, 'all'>,
-  { icon: React.ComponentType<{ size?: number; className?: string }>; color: string; badge: string; label: string }
+  {
+    icon: React.ComponentType<{ size?: number; className?: string }>;
+    color: string;
+    badge: string;
+    label: string;
+  }
 > = {
-  slack:    { icon: Hash,           color: 'text-indigo-500', badge: 'bg-indigo-100 text-indigo-700', label: 'Slack' },
-  email:    { icon: Mail,           color: 'text-blue-500',   badge: 'bg-blue-100 text-blue-700',     label: 'Email' },
-  whatsapp: { icon: MessageCircle,  color: 'text-green-500',  badge: 'bg-green-100 text-green-700',   label: 'WhatsApp' },
-  telegram: { icon: Send,           color: 'text-sky-500',    badge: 'bg-sky-100 text-sky-700',       label: 'Telegram' },
+  slack: {
+    icon: Hash,
+    color: 'text-indigo-500',
+    badge: 'bg-indigo-100 text-indigo-700',
+    label: 'Slack',
+  },
+  email: { icon: Mail, color: 'text-blue-500', badge: 'bg-blue-100 text-blue-700', label: 'Email' },
+  whatsapp: {
+    icon: MessageCircle,
+    color: 'text-green-500',
+    badge: 'bg-green-100 text-green-700',
+    label: 'WhatsApp',
+  },
+  telegram: {
+    icon: Send,
+    color: 'text-sky-500',
+    badge: 'bg-sky-100 text-sky-700',
+    label: 'Telegram',
+  },
 };
 
 function detectChannel(event: AuditEvent): Exclude<ChannelKey, 'all'> {
-  const raw = (
-    event.metadata?.channelName ??
-    event.metadata?.channel ??
-    ''
-  ).toLowerCase();
-  if (raw.includes('slack'))    return 'slack';
-  if (raw.includes('email'))    return 'email';
+  const raw = (event.metadata?.channelName ?? event.metadata?.channel ?? '').toLowerCase();
+  if (raw.includes('slack')) return 'slack';
+  if (raw.includes('email')) return 'email';
   if (raw.includes('whatsapp')) return 'whatsapp';
   if (raw.includes('telegram')) return 'telegram';
   return 'slack';
@@ -47,11 +63,11 @@ function detectChannel(event: AuditEvent): Exclude<ChannelKey, 'all'> {
 function relativeTime(iso: string): string {
   const diffMs = Date.now() - new Date(iso).getTime();
   const diffSec = Math.floor(diffMs / 1000);
-  if (diffSec < 60)  return `${diffSec}s ago`;
+  if (diffSec < 60) return `${diffSec}s ago`;
   const diffMin = Math.floor(diffSec / 60);
-  if (diffMin < 60)  return `${diffMin}m ago`;
+  if (diffMin < 60) return `${diffMin}m ago`;
   const diffHr = Math.floor(diffMin / 60);
-  if (diffHr < 24)   return `${diffHr}h ago`;
+  if (diffHr < 24) return `${diffHr}h ago`;
   return `${Math.floor(diffHr / 24)}d ago`;
 }
 
@@ -87,7 +103,9 @@ function ConversationDetail({ event }: { event: AuditEvent }) {
         </div>
         <div>
           <p className="text-sm font-medium text-gray-900">{sender}</p>
-          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${cfg.badge}`}>
+          <span
+            className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${cfg.badge}`}
+          >
             {cfg.label}
           </span>
         </div>
@@ -97,7 +115,9 @@ function ConversationDetail({ event }: { event: AuditEvent }) {
       <div className="flex-1 px-6 py-5 space-y-5 overflow-y-auto">
         {/* Message metadata card */}
         <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-2">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Event Info</p>
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+            Event Info
+          </p>
           <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
             <div>
               <span className="text-gray-400">Action</span>
@@ -118,7 +138,9 @@ function ConversationDetail({ event }: { event: AuditEvent }) {
             {meta.identityId && (
               <div>
                 <span className="text-gray-400">Identity</span>
-                <p className="text-gray-700 font-medium mt-0.5 truncate">{String(meta.identityId)}</p>
+                <p className="text-gray-700 font-medium mt-0.5 truncate">
+                  {String(meta.identityId)}
+                </p>
               </div>
             )}
           </div>
@@ -127,9 +149,13 @@ function ConversationDetail({ event }: { event: AuditEvent }) {
         {/* AI Response */}
         {meta.response && (
           <div>
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">AI Response</p>
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+              AI Response
+            </p>
             <div className="bg-indigo-50 border border-indigo-100 rounded-xl rounded-tl-sm p-4">
-              <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">{String(meta.response)}</p>
+              <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">
+                {String(meta.response)}
+              </p>
             </div>
           </div>
         )}
@@ -137,14 +163,18 @@ function ConversationDetail({ event }: { event: AuditEvent }) {
         {/* Metadata key-value pairs */}
         {metaEntries.length > 0 && (
           <div>
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Metadata</p>
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+              Metadata
+            </p>
             <div className="bg-white border border-gray-200 rounded-xl divide-y divide-gray-100 overflow-hidden">
               {metaEntries.map(([key, val]) => {
                 const display = formatMetaValue(val);
                 if (!display) return null;
                 return (
                   <div key={key} className="flex items-start gap-4 px-4 py-2.5 text-xs">
-                    <span className="text-gray-400 font-mono min-w-[120px] flex-shrink-0">{key}</span>
+                    <span className="text-gray-400 font-mono min-w-[120px] flex-shrink-0">
+                      {key}
+                    </span>
                     <span className="text-gray-700 break-all">{display}</span>
                   </div>
                 );
@@ -211,9 +241,7 @@ export function InboxClient({ events }: { events: AuditEvent[] }) {
                 key={tab}
                 onClick={() => setChannelFilter(tab)}
                 className={`text-xs px-2.5 py-1 rounded-full whitespace-nowrap transition-colors flex-shrink-0 ${
-                  isActive
-                    ? 'bg-gray-900 text-white'
-                    : 'text-gray-500 hover:bg-gray-100'
+                  isActive ? 'bg-gray-900 text-white' : 'text-gray-500 hover:bg-gray-100'
                 }`}
               >
                 {label}
@@ -236,9 +264,7 @@ export function InboxClient({ events }: { events: AuditEvent[] }) {
               const Icon = cfg.icon;
               const meta = event.metadata ?? {};
               const sender = meta.senderChannelId ?? meta.identityId ?? event.action;
-              const preview = meta.response
-                ? truncate(String(meta.response), 70)
-                : event.action;
+              const preview = meta.response ? truncate(String(meta.response), 70) : event.action;
               const isSelected = selected?.id === event.id;
 
               return (
@@ -251,11 +277,17 @@ export function InboxClient({ events }: { events: AuditEvent[] }) {
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <Icon size={12} className={cfg.color + ' flex-shrink-0'} />
-                    <span className="text-xs font-medium text-gray-700 truncate flex-1">{truncate(String(sender), 28)}</span>
-                    <span className="text-xs text-gray-400 flex-shrink-0">{relativeTime(event.createdAt)}</span>
+                    <span className="text-xs font-medium text-gray-700 truncate flex-1">
+                      {truncate(String(sender), 28)}
+                    </span>
+                    <span className="text-xs text-gray-400 flex-shrink-0">
+                      {relativeTime(event.createdAt)}
+                    </span>
                   </div>
                   <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">{preview}</p>
-                  <span className={`inline-flex items-center mt-1.5 px-1.5 py-0.5 rounded text-[10px] font-medium ${cfg.badge}`}>
+                  <span
+                    className={`inline-flex items-center mt-1.5 px-1.5 py-0.5 rounded text-[10px] font-medium ${cfg.badge}`}
+                  >
                     {cfg.label}
                   </span>
                 </button>
@@ -273,7 +305,9 @@ export function InboxClient({ events }: { events: AuditEvent[] }) {
           <div className="flex flex-col items-center justify-center h-full text-center px-6">
             <MessageSquare size={40} className="text-gray-200 mb-3" />
             <p className="text-sm font-medium text-gray-400">Select a conversation</p>
-            <p className="text-xs text-gray-300 mt-1">Click any message in the list to view the thread</p>
+            <p className="text-xs text-gray-300 mt-1">
+              Click any message in the list to view the thread
+            </p>
           </div>
         )}
       </div>

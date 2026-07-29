@@ -22,7 +22,13 @@ interface CurrencyContextValue {
 
 const CurrencyContext = createContext<CurrencyContextValue>({
   currency: 'USD',
-  converted: { totalPaidThisMonth: 0, totalOutstandingInvoices: 0, totalExpensesPending: 0, openDealsValue: 0, totalInventoryValue: 0 },
+  converted: {
+    totalPaidThisMonth: 0,
+    totalOutstandingInvoices: 0,
+    totalExpensesPending: 0,
+    openDealsValue: 0,
+    totalInventoryValue: 0,
+  },
   currencySelector: null,
 });
 
@@ -54,14 +60,19 @@ export function DashboardClientCurrency({
   // Fetch live rates once
   useEffect(() => {
     fetch(`/api/veska/currencies/rates?base=USD`, {
-      headers: { 'X-Veska-Tenant-Id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant', 'X-Veska-Identity-Id': 'admin' },
+      headers: {
+        'X-Veska-Tenant-Id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
+        'X-Veska-Identity-Id': 'admin',
+      },
     })
       .then((r) => r.json())
       .then((data: { rates?: Record<string, number>; updatedAt?: string }) => {
         if (data.rates) setRates(data.rates);
         if (data.updatedAt) setRatesUpdatedAt(new Date(data.updatedAt).getTime());
       })
-      .catch(() => { /* ignore */ });
+      .catch(() => {
+        /* ignore */
+      });
   }, []);
 
   const setCurrency = (code: string) => {

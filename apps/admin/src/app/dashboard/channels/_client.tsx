@@ -25,9 +25,7 @@ export function ChannelsClient({ initialChannels, initialRoutes }: Props) {
     if (isNew) {
       setChannels((prev) => [channel, ...prev]);
     } else {
-      setChannels((prev) =>
-        prev.map((c) => (c.id === channel.id ? channel : c)),
-      );
+      setChannels((prev) => prev.map((c) => (c.id === channel.id ? channel : c)));
     }
   }
 
@@ -36,9 +34,7 @@ export function ChannelsClient({ initialChannels, initialRoutes }: Props) {
   }
 
   function handleToggle(id: string, enabled: boolean) {
-    setChannels((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, enabled } : c)),
-    );
+    setChannels((prev) => prev.map((c) => (c.id === id ? { ...c, enabled } : c)));
   }
 
   return (
@@ -109,11 +105,7 @@ export function ChannelsClient({ initialChannels, initialRoutes }: Props) {
 
       {/* Routing Tab */}
       {activeTab === 'routing' && (
-        <RoutingTab
-          channels={channels}
-          routes={routes}
-          onRoutesChange={setRoutes}
-        />
+        <RoutingTab channels={channels} routes={routes} onRoutesChange={setRoutes} />
       )}
 
       {/* Add channel modal */}

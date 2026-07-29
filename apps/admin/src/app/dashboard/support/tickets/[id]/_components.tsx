@@ -51,7 +51,10 @@ export function TicketDetailClient({ ticket: initial }: { ticket: TicketDetail }
         headers: apiHeaders(),
         body: JSON.stringify({ status: statusValue }),
       });
-      setTicket((prev) => ({ ...prev, data: { ...prev.data, ...(statusValue !== undefined ? { status: statusValue } : {}) } }));
+      setTicket((prev) => ({
+        ...prev,
+        data: { ...prev.data, ...(statusValue !== undefined ? { status: statusValue } : {}) },
+      }));
       startTransition(() => router.refresh());
     } catch {
       // ignore
@@ -68,7 +71,10 @@ export function TicketDetailClient({ ticket: initial }: { ticket: TicketDetail }
         headers: apiHeaders(),
         body: JSON.stringify({ resolution, status: 'resolved' }),
       });
-      setTicket((prev) => ({ ...prev, data: { ...prev.data, resolution, status: 'resolved' as const } }));
+      setTicket((prev) => ({
+        ...prev,
+        data: { ...prev.data, resolution, status: 'resolved' as const },
+      }));
       setStatusValue('resolved' as StatusValue);
       startTransition(() => router.refresh());
     } catch {
@@ -87,7 +93,7 @@ export function TicketDetailClient({ ticket: initial }: { ticket: TicketDetail }
         body: JSON.stringify({ type: 'summarize' }),
       });
       if (res.ok) {
-        const data = await res.json() as { summary?: string; result?: string };
+        const data = (await res.json()) as { summary?: string; result?: string };
         setAiSummary(data.summary ?? data.result ?? 'AI summary generated.');
       } else {
         setAiSummary('Unable to generate summary at this time.');
@@ -103,9 +109,13 @@ export function TicketDetailClient({ ticket: initial }: { ticket: TicketDetail }
     <div className="px-8 py-8 max-w-7xl">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-gray-400 mb-5">
-        <a href="/dashboard/support/tickets" className="hover:text-gray-600">Tickets</a>
+        <a href="/dashboard/support/tickets" className="hover:text-gray-600">
+          Tickets
+        </a>
         <span>/</span>
-        <span className="text-gray-600 font-mono">{d.ticketNumber ?? ticket.id.slice(0, 8).toUpperCase()}</span>
+        <span className="text-gray-600 font-mono">
+          {d.ticketNumber ?? ticket.id.slice(0, 8).toUpperCase()}
+        </span>
       </div>
 
       {/* Header */}
@@ -115,10 +125,14 @@ export function TicketDetailClient({ ticket: initial }: { ticket: TicketDetail }
             <span className="font-mono text-sm bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
               #{d.ticketNumber ?? ticket.id.slice(0, 8).toUpperCase()}
             </span>
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${PRIORITY_COLORS[d.priority ?? 'medium'] ?? 'bg-gray-100 text-gray-600'}`}>
+            <span
+              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${PRIORITY_COLORS[d.priority ?? 'medium'] ?? 'bg-gray-100 text-gray-600'}`}
+            >
               {d.priority ?? 'medium'}
             </span>
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[d.status ?? 'open'] ?? 'bg-gray-100 text-gray-600'}`}>
+            <span
+              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[d.status ?? 'open'] ?? 'bg-gray-100 text-gray-600'}`}
+            >
               {(d.status ?? 'open').replace(/_/g, ' ')}
             </span>
           </div>
@@ -151,7 +165,9 @@ export function TicketDetailClient({ ticket: initial }: { ticket: TicketDetail }
           {d.description && (
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
               <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
-                <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Description</h2>
+                <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  Description
+                </h2>
               </div>
               <p className="px-5 py-4 text-sm text-gray-700 whitespace-pre-wrap">{d.description}</p>
             </div>
@@ -160,7 +176,9 @@ export function TicketDetailClient({ ticket: initial }: { ticket: TicketDetail }
           {/* Resolution */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
             <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
-              <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Add Resolution</h2>
+              <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                Add Resolution
+              </h2>
             </div>
             <div className="px-5 py-4 space-y-3">
               <textarea
@@ -184,7 +202,9 @@ export function TicketDetailClient({ ticket: initial }: { ticket: TicketDetail }
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
             <div className="px-5 py-3 border-b border-gray-100 bg-gray-50 flex items-center gap-2">
               <MessageSquare size={13} className="text-gray-400" />
-              <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Replies</h2>
+              <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                Replies
+              </h2>
             </div>
             <div className="px-5 py-4">
               <p className="text-sm text-gray-400 italic text-center py-4">No replies yet.</p>
@@ -202,11 +222,19 @@ export function TicketDetailClient({ ticket: initial }: { ticket: TicketDetail }
               { label: 'Email', value: d.contactEmail ?? '—' },
               { label: 'Assigned To', value: d.assignedTo ?? 'Unassigned' },
               { label: 'Category', value: d.category ?? '—' },
-              { label: 'Created', value: d.createdAt ? new Date(d.createdAt).toLocaleString() : '—' },
-              { label: 'Updated', value: d.updatedAt ? new Date(d.updatedAt).toLocaleString() : '—' },
+              {
+                label: 'Created',
+                value: d.createdAt ? new Date(d.createdAt).toLocaleString() : '—',
+              },
+              {
+                label: 'Updated',
+                value: d.updatedAt ? new Date(d.updatedAt).toLocaleString() : '—',
+              },
             ].map(({ label, value }) => (
               <div key={label}>
-                <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-0.5">{label}</p>
+                <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-0.5">
+                  {label}
+                </p>
                 <p className="text-sm text-gray-900 break-words">{value}</p>
               </div>
             ))}

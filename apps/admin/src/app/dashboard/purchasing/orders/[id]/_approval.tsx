@@ -32,7 +32,11 @@ export default function ApprovalButtons({ orderId, currentStatus }: ApprovalButt
       if (!res.ok) {
         const text = await res.text();
         let msg = text;
-        try { msg = JSON.parse(text).error ?? text; } catch { /* ignore */ }
+        try {
+          msg = JSON.parse(text).error ?? text;
+        } catch {
+          /* ignore */
+        }
         throw new Error(msg);
       }
       router.refresh();

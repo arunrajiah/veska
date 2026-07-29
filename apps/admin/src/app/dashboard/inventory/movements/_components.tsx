@@ -38,10 +38,22 @@ function MovementTypeBadge({ type }: { type?: string | undefined }) {
     transfer: 'bg-blue-50 text-blue-700',
   };
   const t = type ?? 'in';
-  return <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${colors[t] ?? 'bg-gray-100 text-gray-600'}`}>{t}</span>;
+  return (
+    <span
+      className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${colors[t] ?? 'bg-gray-100 text-gray-600'}`}
+    >
+      {t}
+    </span>
+  );
 }
 
-function RecordMovementSlideOver({ onClose, onSaved }: { onClose: () => void; onSaved: () => void }) {
+function RecordMovementSlideOver({
+  onClose,
+  onSaved,
+}: {
+  onClose: () => void;
+  onSaved: () => void;
+}) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [type, setType] = useState<string>('in');
@@ -77,7 +89,8 @@ function RecordMovementSlideOver({ onClose, onSaved }: { onClose: () => void; on
     }
   }
 
-  const inputClass = 'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900';
+  const inputClass =
+    'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900';
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
@@ -85,16 +98,28 @@ function RecordMovementSlideOver({ onClose, onSaved }: { onClose: () => void; on
       <div className="relative bg-white w-full max-w-md h-full overflow-y-auto shadow-xl flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-base font-semibold text-gray-900">Record Movement</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <X size={18} />
+          </button>
         </div>
         <form onSubmit={(e) => void handleSubmit(e)} className="flex-1 px-6 py-5 space-y-4">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Product ID</label>
-            <input name="productId" className={inputClass} placeholder="Product ID or leave blank" />
+            <input
+              name="productId"
+              className={inputClass}
+              placeholder="Product ID or leave blank"
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Movement Type *</label>
-            <select name="type" required value={type} onChange={(e) => setType(e.target.value)} className={inputClass}>
+            <select
+              name="type"
+              required
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+              className={inputClass}
+            >
               <option value="in">In (stock received)</option>
               <option value="out">Out (stock shipped)</option>
               <option value="transfer">Transfer (between warehouses)</option>
@@ -118,18 +143,34 @@ function RecordMovementSlideOver({ onClose, onSaved }: { onClose: () => void; on
           )}
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Reference</label>
-            <input name="reference" className={inputClass} placeholder="PO number, shipment ID, etc." />
+            <input
+              name="reference"
+              className={inputClass}
+              placeholder="PO number, shipment ID, etc."
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
-            <textarea name="notes" rows={2} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none" />
+            <textarea
+              name="notes"
+              rows={2}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none"
+            />
           </div>
           {error && <p className="text-xs text-red-500">{error}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="submit" disabled={saving} className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
+            <button
+              type="submit"
+              disabled={saving}
+              className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors"
+            >
               {saving ? 'Saving…' : 'Record Movement'}
             </button>
-            <button type="button" onClick={onClose} className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+            <button
+              type="button"
+              onClick={onClose}
+              className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+            >
               Cancel
             </button>
           </div>
@@ -151,8 +192,10 @@ export function MovementsClient({ movements: initial }: { movements: MovementRec
           <h1 className="text-2xl font-semibold text-gray-900">Stock Movements</h1>
           <p className="text-sm text-gray-500 mt-0.5">{initial.length} movements</p>
         </div>
-        <button onClick={() => setShowAdd(true)}
-          className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+        <button
+          onClick={() => setShowAdd(true)}
+          className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+        >
           <Plus size={15} /> Record Movement
         </button>
       </div>
@@ -180,13 +223,22 @@ export function MovementsClient({ movements: initial }: { movements: MovementRec
                 const d = mv.data;
                 const date = d.date ?? mv.createdAt ?? '';
                 return (
-                  <tr key={mv.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
-                    <td className="px-4 py-3 text-xs text-gray-400">{date ? date.slice(0, 10) : '—'}</td>
+                  <tr
+                    key={mv.id}
+                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
+                  >
+                    <td className="px-4 py-3 text-xs text-gray-400">
+                      {date ? date.slice(0, 10) : '—'}
+                    </td>
                     <td className="px-4 py-3 text-gray-700">
                       {d.productName || d.productId || '—'}
                     </td>
-                    <td className="px-4 py-3"><MovementTypeBadge type={d.type} /></td>
-                    <td className="px-4 py-3 text-right font-semibold text-gray-900">{d.quantity ?? 0}</td>
+                    <td className="px-4 py-3">
+                      <MovementTypeBadge type={d.type} />
+                    </td>
+                    <td className="px-4 py-3 text-right font-semibold text-gray-900">
+                      {d.quantity ?? 0}
+                    </td>
                     <td className="px-4 py-3 text-gray-500 text-xs">{d.fromWarehouse || '—'}</td>
                     <td className="px-4 py-3 text-gray-500 text-xs">{d.toWarehouse || '—'}</td>
                     <td className="px-4 py-3 text-gray-500 text-xs">{d.reference || '—'}</td>

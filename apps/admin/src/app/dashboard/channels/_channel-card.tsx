@@ -129,7 +129,9 @@ export function ChannelCard({ channel, onEdit, onDeleted, onToggle }: Props) {
             <div
               className={`w-2 h-2 rounded-full ${channel.enabled ? 'bg-green-500' : 'bg-gray-300'}`}
             />
-            <span className="text-xs text-gray-500">{channel.enabled ? 'Enabled' : 'Disabled'}</span>
+            <span className="text-xs text-gray-500">
+              {channel.enabled ? 'Enabled' : 'Disabled'}
+            </span>
           </div>
 
           {/* Toggle */}

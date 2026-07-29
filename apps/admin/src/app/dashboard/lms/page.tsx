@@ -41,10 +41,7 @@ export interface LMSSummary {
   [key: string]: unknown;
 }
 
-const TENANT_ID =
-  process.env.VESKA_TENANT_ID ??
-  process.env.NEXT_PUBLIC_TENANT_ID ??
-  'demo-tenant';
+const TENANT_ID = process.env.VESKA_TENANT_ID ?? process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 export default async function LMSPage() {
   let courses: Course[] = [];
@@ -53,13 +50,19 @@ export default async function LMSPage() {
 
   await Promise.all([
     apiFetch<{ data: Course[] } | Course[]>('/api/v1/lms/courses?limit=50', TENANT_ID)
-      .then((res) => { courses = Array.isArray(res) ? res : (res?.data ?? []); })
+      .then((res) => {
+        courses = Array.isArray(res) ? res : (res?.data ?? []);
+      })
       .catch(() => {}),
     apiFetch<{ data: Enrollment[] } | Enrollment[]>('/api/v1/lms/enrollments?limit=20', TENANT_ID)
-      .then((res) => { enrollments = Array.isArray(res) ? res : (res?.data ?? []); })
+      .then((res) => {
+        enrollments = Array.isArray(res) ? res : (res?.data ?? []);
+      })
       .catch(() => {}),
     apiFetch<LMSSummary>('/api/v1/lms/summary', TENANT_ID)
-      .then((res) => { summary = res ?? {}; })
+      .then((res) => {
+        summary = res ?? {};
+      })
       .catch(() => {}),
   ]);
 

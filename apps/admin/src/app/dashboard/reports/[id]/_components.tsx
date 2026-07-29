@@ -79,7 +79,10 @@ function RunResultsPanel({ results }: { results: RunResult }) {
             <thead>
               <tr className="bg-gray-50 border-b border-gray-100">
                 {columns.map((col) => (
-                  <th key={col} className="text-left px-4 py-2.5 text-xs font-medium text-gray-500 whitespace-nowrap">
+                  <th
+                    key={col}
+                    className="text-left px-4 py-2.5 text-xs font-medium text-gray-500 whitespace-nowrap"
+                  >
                     {col}
                   </th>
                 ))}
@@ -89,7 +92,10 @@ function RunResultsPanel({ results }: { results: RunResult }) {
               {rows.map((row, i) => (
                 <tr key={i} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
                   {columns.map((col) => (
-                    <td key={col} className="px-4 py-2.5 text-gray-700 whitespace-nowrap font-mono text-xs">
+                    <td
+                      key={col}
+                      className="px-4 py-2.5 text-gray-700 whitespace-nowrap font-mono text-xs"
+                    >
                       {row[col] === null || row[col] === undefined ? (
                         <span className="text-gray-300">—</span>
                       ) : (
@@ -140,11 +146,11 @@ export function ReportDetailClient({ report, initialSchedules = [] }: ReportDeta
         body: JSON.stringify({}),
       });
       if (!res.ok) {
-        const d = await res.json() as { error?: string };
+        const d = (await res.json()) as { error?: string };
         setRunError(d.error ?? 'Run failed');
         return;
       }
-      const data = await res.json() as RunResult;
+      const data = (await res.json()) as RunResult;
       setRunResults(data);
     } catch {
       setRunError('Failed to run report');
@@ -172,11 +178,11 @@ export function ReportDetailClient({ report, initialSchedules = [] }: ReportDeta
         body: JSON.stringify({ cron, recipients: recipientList }),
       });
       if (!res.ok) {
-        const d = await res.json() as { error?: string };
+        const d = (await res.json()) as { error?: string };
         setScheduleError(d.error ?? 'Failed to add schedule');
         return;
       }
-      const created = await res.json() as Schedule;
+      const created = (await res.json()) as Schedule;
       setSchedules((prev) => [...prev, created]);
       setShowScheduleForm(false);
       setCron('0 9 * * 1');
@@ -212,9 +218,7 @@ export function ReportDetailClient({ report, initialSchedules = [] }: ReportDeta
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">{report.name}</h1>
-          {report.description && (
-            <p className="text-sm text-gray-500 mt-1">{report.description}</p>
-          )}
+          {report.description && <p className="text-sm text-gray-500 mt-1">{report.description}</p>}
         </div>
         <button
           onClick={() => void handleRun()}
@@ -241,7 +245,9 @@ export function ReportDetailClient({ report, initialSchedules = [] }: ReportDeta
               <p className="text-xs text-gray-500 mb-1">Created</p>
               <p className="text-gray-700">
                 {new Date(report.createdAt).toLocaleDateString('en-US', {
-                  month: 'long', day: 'numeric', year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  year: 'numeric',
                 })}
               </p>
             </div>
@@ -256,7 +262,8 @@ export function ReportDetailClient({ report, initialSchedules = [] }: ReportDeta
             <div>
               <p className="text-xs text-gray-500 mb-1">Date range</p>
               <p className="text-gray-700 text-xs font-mono">
-                {config.dateRange.field}: {config.dateRange.from || '—'} → {config.dateRange.to || '—'}
+                {config.dateRange.field}: {config.dateRange.from || '—'} →{' '}
+                {config.dateRange.to || '—'}
               </p>
             </div>
           )}
@@ -267,7 +274,10 @@ export function ReportDetailClient({ report, initialSchedules = [] }: ReportDeta
             <p className="text-xs text-gray-500 mb-2">Metrics</p>
             <div className="flex flex-wrap gap-2">
               {config.metrics.map((m, i) => (
-                <span key={i} className="px-2.5 py-1 rounded-lg bg-gray-100 text-xs text-gray-700 font-mono">
+                <span
+                  key={i}
+                  className="px-2.5 py-1 rounded-lg bg-gray-100 text-xs text-gray-700 font-mono"
+                >
                   {m.aggregation}({m.field}){m.label ? ` as ${m.label}` : ''}
                 </span>
               ))}
@@ -280,7 +290,10 @@ export function ReportDetailClient({ report, initialSchedules = [] }: ReportDeta
             <p className="text-xs text-gray-500 mb-2">Filters</p>
             <div className="flex flex-wrap gap-2">
               {config.filters.map((f, i) => (
-                <span key={i} className="px-2.5 py-1 rounded-lg bg-amber-50 text-xs text-amber-700 font-mono">
+                <span
+                  key={i}
+                  className="px-2.5 py-1 rounded-lg bg-amber-50 text-xs text-amber-700 font-mono"
+                >
                   {f.field} {f.operator} {f.value}
                 </span>
               ))}
@@ -324,7 +337,9 @@ export function ReportDetailClient({ report, initialSchedules = [] }: ReportDeta
             onSubmit={(e) => void handleAddSchedule(e)}
             className="mb-4 bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-3"
           >
-            <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">New schedule</h3>
+            <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+              New schedule
+            </h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs text-gray-500 mb-1">

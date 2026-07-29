@@ -52,8 +52,7 @@ function WebhookUrlRow({ url }: { url: string }) {
 
 export default function InboundChannelsPage() {
   const appUrl =
-    process.env['NEXT_PUBLIC_APP_URL'] ??
-    process.env['VERCEL_URL']
+    (process.env['NEXT_PUBLIC_APP_URL'] ?? process.env['VERCEL_URL'])
       ? `https://${process.env['VERCEL_URL']}`
       : 'https://your-domain.com';
 
@@ -103,9 +102,9 @@ export default function InboundChannelsPage() {
         <h1 className="text-2xl font-semibold text-gray-900">Inbound Channels</h1>
       </div>
       <p className="text-sm text-gray-500 mb-8">
-        Configure webhook endpoints so that replies sent to Veska bot accounts trigger ERP
-        actions such as approvals. These endpoints authenticate via channel signing secrets —
-        not Bearer tokens.
+        Configure webhook endpoints so that replies sent to Veska bot accounts trigger ERP actions
+        such as approvals. These endpoints authenticate via channel signing secrets — not Bearer
+        tokens.
       </p>
 
       <div className="space-y-6">
@@ -113,10 +112,7 @@ export default function InboundChannelsPage() {
           const webhookUrl = `${appUrl}${ch.webhookPath}`;
 
           return (
-            <div
-              key={ch.id}
-              className="bg-white border border-gray-200 rounded-xl p-6 space-y-4"
-            >
+            <div key={ch.id} className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
               {/* Title row */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -125,9 +121,7 @@ export default function InboundChannelsPage() {
                   </div>
                   <div>
                     <p className="font-medium text-gray-900">{ch.label}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      Inbound webhook handler
-                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5">Inbound webhook handler</p>
                   </div>
                 </div>
 
@@ -149,13 +143,13 @@ export default function InboundChannelsPage() {
               {/* Status detail */}
               {ch.configured ? (
                 <p className="text-xs text-green-700 bg-green-50 border border-green-100 rounded-lg px-3 py-2">
-                  <code className="font-mono">{ch.envVar}</code> is set. Signature
-                  verification is active.
+                  <code className="font-mono">{ch.envVar}</code> is set. Signature verification is
+                  active.
                 </p>
               ) : (
                 <p className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
-                  <code className="font-mono">{ch.envVar}</code> is not set. Signature
-                  verification is disabled — set this variable to secure the endpoint.
+                  <code className="font-mono">{ch.envVar}</code> is not set. Signature verification
+                  is disabled — set this variable to secure the endpoint.
                 </p>
               )}
 

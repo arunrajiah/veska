@@ -13,7 +13,7 @@ function apiHeaders() {
 }
 
 const ENTITY_TYPES = ['contacts', 'leads', 'deals', 'products', 'employees', 'invoices'] as const;
-type EntityType = typeof ENTITY_TYPES[number];
+type EntityType = (typeof ENTITY_TYPES)[number];
 
 interface JobRecord {
   id: string;
@@ -48,7 +48,11 @@ function ImportSection({ onJobAdded }: { onJobAdded: (job: JobRecord) => void })
         headers: apiHeaders(),
         body: form,
       });
-      const data = await res.json().catch(() => ({})) as { count?: number; imported?: number; message?: string };
+      const data = (await res.json().catch(() => ({}))) as {
+        count?: number;
+        imported?: number;
+        message?: string;
+      };
       const count = data.count ?? data.imported ?? 0;
       const msg = `Imported ${count} records successfully`;
       setSuccess(msg);
@@ -98,29 +102,42 @@ function ImportSection({ onJobAdded }: { onJobAdded: (job: JobRecord) => void })
             className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
           >
             {ENTITY_TYPES.map((t) => (
-              <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>
+              <option key={t} value={t}>
+                {t.charAt(0).toUpperCase() + t.slice(1)}
+              </option>
             ))}
           </select>
         </div>
         {/* Drag & Drop area */}
         <div
-          onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setIsDragging(true);
+          }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
           onClick={() => fileRef.current?.click()}
           className={`border-2 border-dashed rounded-xl px-8 py-10 text-center cursor-pointer transition-colors ${
-            isDragging ? 'border-indigo-400 bg-indigo-50' : 'border-gray-200 hover:border-gray-400 hover:bg-gray-50'
+            isDragging
+              ? 'border-indigo-400 bg-indigo-50'
+              : 'border-gray-200 hover:border-gray-400 hover:bg-gray-50'
           }`}
         >
           <FileText size={24} className="mx-auto mb-2 text-gray-300" />
-          <p className="text-sm text-gray-500">Drag &amp; drop a CSV file here, or <span className="text-indigo-600 font-medium">browse</span></p>
+          <p className="text-sm text-gray-500">
+            Drag &amp; drop a CSV file here, or{' '}
+            <span className="text-indigo-600 font-medium">browse</span>
+          </p>
           <p className="text-xs text-gray-400 mt-1">Accepts .csv files</p>
           <input
             ref={fileRef}
             type="file"
             accept=".csv"
             className="hidden"
-            onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleFile(f); }}
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) void handleFile(f);
+            }}
           />
         </div>
         {loading && <p className="text-sm text-gray-500">Importing…</p>}
@@ -213,7 +230,9 @@ function ExportSection({ onJobAdded }: { onJobAdded: (job: JobRecord) => void })
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
             >
               {ENTITY_TYPES.map((t) => (
-                <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>
+                <option key={t} value={t}>
+                  {t.charAt(0).toUpperCase() + t.slice(1)}
+                </option>
               ))}
             </select>
           </div>
@@ -232,13 +251,21 @@ function ExportSection({ onJobAdded }: { onJobAdded: (job: JobRecord) => void })
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Date From</label>
-            <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Date To</label>
-            <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              type="date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
         </div>
         {error && (
@@ -271,7 +298,9 @@ export function ImportExportClient() {
     <div className="px-8 py-8 max-w-7xl">
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-gray-900">Import &amp; Export</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Bulk import data or export records to CSV/JSON.</p>
+        <p className="text-sm text-gray-500 mt-0.5">
+          Bulk import data or export records to CSV/JSON.
+        </p>
       </div>
 
       {/* Two-column layout */}
@@ -288,7 +317,9 @@ export function ImportExportClient() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50">
-                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Direction</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                    Direction
+                  </th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Type</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Format</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Records</th>
@@ -300,21 +331,33 @@ export function ImportExportClient() {
                 {jobs.map((job) => (
                   <tr key={job.id} className="border-b border-gray-50 last:border-0">
                     <td className="px-4 py-3">
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium capitalize ${job.direction === 'import' ? 'bg-blue-50 text-blue-700' : 'bg-green-50 text-green-700'}`}>
+                      <span
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium capitalize ${job.direction === 'import' ? 'bg-blue-50 text-blue-700' : 'bg-green-50 text-green-700'}`}
+                      >
                         {job.direction === 'import' ? <Upload size={10} /> : <Download size={10} />}
                         {job.direction}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-700 capitalize">{job.type}</td>
                     <td className="px-4 py-3 text-xs text-gray-500">{job.format}</td>
-                    <td className="px-4 py-3 text-sm text-gray-700">{job.records != null ? job.records.toLocaleString() : '—'}</td>
+                    <td className="px-4 py-3 text-sm text-gray-700">
+                      {job.records != null ? job.records.toLocaleString() : '—'}
+                    </td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                        job.status === 'completed' ? 'bg-green-100 text-green-700' :
-                        job.status === 'failed' ? 'bg-red-100 text-red-700' :
-                        'bg-yellow-100 text-yellow-700'
-                      }`}>
-                        {job.status === 'completed' ? <CheckCircle size={10} /> : job.status === 'failed' ? <XCircle size={10} /> : null}
+                      <span
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                          job.status === 'completed'
+                            ? 'bg-green-100 text-green-700'
+                            : job.status === 'failed'
+                              ? 'bg-red-100 text-red-700'
+                              : 'bg-yellow-100 text-yellow-700'
+                        }`}
+                      >
+                        {job.status === 'completed' ? (
+                          <CheckCircle size={10} />
+                        ) : job.status === 'failed' ? (
+                          <XCircle size={10} />
+                        ) : null}
                         {job.status}
                       </span>
                     </td>

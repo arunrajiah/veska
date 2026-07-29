@@ -4,10 +4,7 @@ import { apiFetch } from '@/lib/api.js';
 import type { ApiKey } from './api-keys/page.js';
 import type { Webhook as WebhookType } from './webhooks/page.js';
 
-const TENANT_ID =
-  process.env.VESKA_TENANT_ID ??
-  process.env.NEXT_PUBLIC_TENANT_ID ??
-  'demo-tenant';
+const TENANT_ID = process.env.VESKA_TENANT_ID ?? process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 interface JobQueue {
   name?: string;
@@ -32,7 +29,10 @@ async function safeApiFetch<T>(path: string, fallback: T): Promise<T> {
 export default async function DeveloperOverviewPage() {
   const [keysRes, webhooksRes, jobsRes, auditRes] = await Promise.all([
     safeApiFetch<ApiKey[] | { data: ApiKey[] } | null>('/api/v1/api-keys?limit=100', null),
-    safeApiFetch<WebhookType[] | { data: WebhookType[] } | null>('/api/v1/webhooks?limit=100', null),
+    safeApiFetch<WebhookType[] | { data: WebhookType[] } | null>(
+      '/api/v1/webhooks?limit=100',
+      null,
+    ),
     safeApiFetch<JobQueue[] | { data: JobQueue[] } | null>('/api/v1/developer/job-queues', null),
     safeApiFetch<AuditEntry[] | { data: AuditEntry[] } | null>('/api/v1/audit?limit=100', null),
   ]);
@@ -41,7 +41,7 @@ export default async function DeveloperOverviewPage() {
   const allKeys: ApiKey[] = keysRes
     ? Array.isArray(keysRes)
       ? keysRes
-      : (keysRes as { data: ApiKey[] }).data ?? []
+      : ((keysRes as { data: ApiKey[] }).data ?? [])
     : [];
   const activeKeyCount =
     keysRes === null
@@ -52,7 +52,7 @@ export default async function DeveloperOverviewPage() {
   const allWebhooks: WebhookType[] = webhooksRes
     ? Array.isArray(webhooksRes)
       ? webhooksRes
-      : (webhooksRes as { data: WebhookType[] }).data ?? []
+      : ((webhooksRes as { data: WebhookType[] }).data ?? [])
     : [];
   const enabledWebhookCount =
     webhooksRes === null
@@ -63,7 +63,7 @@ export default async function DeveloperOverviewPage() {
   const allQueues: JobQueue[] = jobsRes
     ? Array.isArray(jobsRes)
       ? jobsRes
-      : (jobsRes as { data: JobQueue[] }).data ?? []
+      : ((jobsRes as { data: JobQueue[] }).data ?? [])
     : [];
   const jobCount =
     jobsRes === null
@@ -74,7 +74,7 @@ export default async function DeveloperOverviewPage() {
   const allAudit: AuditEntry[] = auditRes
     ? Array.isArray(auditRes)
       ? auditRes
-      : (auditRes as { data: AuditEntry[] }).data ?? []
+      : ((auditRes as { data: AuditEntry[] }).data ?? [])
     : [];
   const auditCount = auditRes === null ? null : allAudit.length;
 
@@ -200,18 +200,18 @@ export default async function DeveloperOverviewPage() {
                 const lastUsed = key.data?.lastUsedAt;
                 return (
                   <tr key={key.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-5 py-3 text-gray-800 font-medium">
-                      {key.data?.name ?? '—'}
-                    </td>
+                    <td className="px-5 py-3 text-gray-800 font-medium">{key.data?.name ?? '—'}</td>
                     <td className="px-5 py-3">
                       <code className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
                         {key.data?.keyPrefix ?? '—'}
                       </code>
                     </td>
                     <td className="px-5 py-3 text-gray-500">
-                      {lastUsed
-                        ? new Date(lastUsed).toLocaleDateString()
-                        : <span className="text-gray-300">Never</span>}
+                      {lastUsed ? (
+                        new Date(lastUsed).toLocaleDateString()
+                      ) : (
+                        <span className="text-gray-300">Never</span>
+                      )}
                     </td>
                     <td className="px-5 py-3">
                       <span
@@ -245,7 +245,10 @@ export default async function DeveloperOverviewPage() {
           >
             <div className="flex items-start justify-between mb-2">
               <p className="font-medium text-gray-900 text-sm">{title}</p>
-              <ExternalLink size={13} className="text-gray-400 group-hover:text-gray-600 flex-shrink-0 mt-0.5" />
+              <ExternalLink
+                size={13}
+                className="text-gray-400 group-hover:text-gray-600 flex-shrink-0 mt-0.5"
+              />
             </div>
             <p className="text-xs text-gray-500 mb-3 leading-relaxed">{description}</p>
             <span className="text-xs text-gray-900 font-medium underline group-hover:text-gray-600">

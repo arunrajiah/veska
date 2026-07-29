@@ -48,7 +48,10 @@ export default function RunForm() {
         <h1 className="text-2xl font-semibold text-gray-900">New pay run</h1>
       </div>
 
-      <form onSubmit={(e) => void handleSubmit(e)} className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
+      <form
+        onSubmit={(e) => void handleSubmit(e)}
+        className="bg-white border border-gray-200 rounded-xl p-6 space-y-4"
+      >
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Period start *</label>

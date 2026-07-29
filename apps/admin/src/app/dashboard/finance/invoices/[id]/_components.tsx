@@ -25,10 +25,18 @@ interface RecurringSchedule {
 function calculateNextRun(frequency: Frequency, from: Date): Date {
   const d = new Date(from);
   switch (frequency) {
-    case 'weekly': d.setDate(d.getDate() + 7); break;
-    case 'monthly': d.setMonth(d.getMonth() + 1); break;
-    case 'quarterly': d.setMonth(d.getMonth() + 3); break;
-    case 'yearly': d.setFullYear(d.getFullYear() + 1); break;
+    case 'weekly':
+      d.setDate(d.getDate() + 7);
+      break;
+    case 'monthly':
+      d.setMonth(d.getMonth() + 1);
+      break;
+    case 'quarterly':
+      d.setMonth(d.getMonth() + 3);
+      break;
+    case 'yearly':
+      d.setFullYear(d.getFullYear() + 1);
+      break;
   }
   return d;
 }
@@ -42,13 +50,7 @@ const FREQ_LABELS: Record<Frequency, string> = {
 
 // ── Recurring Schedule Section ─────────────────────────────────
 
-function RecurringSection({
-  invoiceId,
-  tenantId,
-}: {
-  invoiceId: string;
-  tenantId: string;
-}) {
+function RecurringSection({ invoiceId, tenantId }: { invoiceId: string; tenantId: string }) {
   const [schedule, setSchedule] = useState<RecurringSchedule | null | undefined>(undefined); // undefined = not loaded
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -74,7 +76,7 @@ function RecurringSection({
         headers: authHeaders(tenantId),
       });
       if (res.ok) {
-        const data = await res.json() as RecurringSchedule | null;
+        const data = (await res.json()) as RecurringSchedule | null;
         setSchedule(data);
       } else {
         setSchedule(null);
@@ -120,7 +122,7 @@ function RecurringSection({
         body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error(await res.text());
-      const updated = await res.json() as RecurringSchedule;
+      const updated = (await res.json()) as RecurringSchedule;
       setSchedule(updated);
       setModalOpen(false);
       showToast('Recurring schedule saved');
@@ -153,7 +155,7 @@ function RecurringSection({
             enabled: true,
           }),
         });
-        const updated = await res.json() as RecurringSchedule;
+        const updated = (await res.json()) as RecurringSchedule;
         setSchedule(updated);
       }
       showToast(newEnabled ? 'Schedule enabled' : 'Schedule disabled');
@@ -179,9 +181,7 @@ function RecurringSection({
           <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Recurring</h2>
         </div>
         <div className="px-5 py-4">
-          {loading && (
-            <p className="text-xs text-gray-400">Loading…</p>
-          )}
+          {loading && <p className="text-xs text-gray-400">Loading…</p>}
 
           {!loading && schedule === null && (
             <div className="space-y-3">
@@ -199,17 +199,27 @@ function RecurringSection({
           {!loading && schedule && (
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${schedule.enabled ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'}`}>
+                <span
+                  className={`text-xs px-2 py-0.5 rounded-full font-medium ${schedule.enabled ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'}`}
+                >
                   {FREQ_LABELS[schedule.frequency]}
                 </span>
-                {!schedule.enabled && (
-                  <span className="text-xs text-gray-400">(paused)</span>
-                )}
+                {!schedule.enabled && <span className="text-xs text-gray-400">(paused)</span>}
               </div>
               <div className="text-xs text-gray-500 space-y-1">
-                <p>Next run: <span className="font-medium text-gray-700">{schedule.nextRunAt.slice(0, 10)}</span></p>
+                <p>
+                  Next run:{' '}
+                  <span className="font-medium text-gray-700">
+                    {schedule.nextRunAt.slice(0, 10)}
+                  </span>
+                </p>
                 {schedule.lastRunAt && (
-                  <p>Last run: <span className="font-medium text-gray-700">{schedule.lastRunAt.slice(0, 10)}</span></p>
+                  <p>
+                    Last run:{' '}
+                    <span className="font-medium text-gray-700">
+                      {schedule.lastRunAt.slice(0, 10)}
+                    </span>
+                  </p>
                 )}
               </div>
               <div className="flex items-center gap-2 pt-1">
@@ -237,7 +247,10 @@ function RecurringSection({
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h3 className="text-base font-semibold text-gray-900">Set up recurring invoice</h3>
-              <button onClick={() => setModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+              <button
+                onClick={() => setModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
                 <X size={18} />
               </button>
             </div>
@@ -318,7 +331,6 @@ function RecurringSection({
   );
 }
 
-
 function authHeaders(tenantId: string): HeadersInit {
   return {
     'Content-Type': 'application/json',
@@ -389,7 +401,7 @@ function AIInsights({ invoiceId, tenantId }: { invoiceId: string; tenantId: stri
         body: JSON.stringify({ entityType: 'invoice' }),
       });
       if (!res.ok) throw new Error(await res.text());
-      const data = await res.json() as { insights?: string; summary?: string; result?: string };
+      const data = (await res.json()) as { insights?: string; summary?: string; result?: string };
       setResult(data.insights ?? data.summary ?? data.result ?? JSON.stringify(data, null, 2));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Analysis failed');
@@ -506,7 +518,10 @@ export function InvoiceDetailClient({
       )}
 
       <div className="mb-5">
-        <Link href="/dashboard/finance/invoices" className="text-xs text-gray-400 hover:text-gray-700">
+        <Link
+          href="/dashboard/finance/invoices"
+          className="text-xs text-gray-400 hover:text-gray-700"
+        >
           ← Invoices
         </Link>
       </div>
@@ -577,16 +592,15 @@ export function InvoiceDetailClient({
               <div className="text-right">
                 <p className="text-xs text-gray-400">To</p>
                 <p className="text-sm font-medium text-gray-900">{getClientName(record)}</p>
-                {d.clientEmail && (
-                  <p className="text-xs text-gray-500">{d.clientEmail}</p>
-                )}
+                {d.clientEmail && <p className="text-xs text-gray-500">{d.clientEmail}</p>}
               </div>
             </div>
 
             <div className="flex justify-between text-xs text-gray-500 mb-1">
               <span>Invoice #{getInvoiceNumber(record)}</span>
               <span>
-                Due: <span className="font-medium text-gray-700">
+                Due:{' '}
+                <span className="font-medium text-gray-700">
                   {(d.dueDate ?? d.due_date ?? '').slice(0, 10) || '—'}
                 </span>
               </span>
@@ -596,16 +610,24 @@ export function InvoiceDetailClient({
           {/* Line items */}
           <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
             <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
-              <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Line Items</h2>
+              <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                Line Items
+              </h2>
             </div>
             {lineItems.length > 0 ? (
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100">
-                    <th className="text-left px-5 py-2 text-xs font-medium text-gray-500">Description</th>
+                    <th className="text-left px-5 py-2 text-xs font-medium text-gray-500">
+                      Description
+                    </th>
                     <th className="text-right px-5 py-2 text-xs font-medium text-gray-500">Qty</th>
-                    <th className="text-right px-5 py-2 text-xs font-medium text-gray-500">Unit Price</th>
-                    <th className="text-right px-5 py-2 text-xs font-medium text-gray-500">Total</th>
+                    <th className="text-right px-5 py-2 text-xs font-medium text-gray-500">
+                      Unit Price
+                    </th>
+                    <th className="text-right px-5 py-2 text-xs font-medium text-gray-500">
+                      Total
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -613,8 +635,12 @@ export function InvoiceDetailClient({
                     <tr key={i} className="border-b border-gray-50 last:border-0">
                       <td className="px-5 py-3 text-gray-900">{item.description}</td>
                       <td className="px-5 py-3 text-right text-gray-600">{item.quantity}</td>
-                      <td className="px-5 py-3 text-right text-gray-600">{fmt(item.unitPrice, currency)}</td>
-                      <td className="px-5 py-3 text-right font-medium text-gray-900">{fmt(item.total, currency)}</td>
+                      <td className="px-5 py-3 text-right text-gray-600">
+                        {fmt(item.unitPrice, currency)}
+                      </td>
+                      <td className="px-5 py-3 text-right font-medium text-gray-900">
+                        {fmt(item.total, currency)}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -642,7 +668,9 @@ export function InvoiceDetailClient({
           {d.notes && (
             <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
               <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
-                <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Notes</h2>
+                <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  Notes
+                </h2>
               </div>
               <p className="px-5 py-4 text-sm text-gray-700 whitespace-pre-wrap">{d.notes}</p>
             </div>
@@ -654,7 +682,9 @@ export function InvoiceDetailClient({
           {/* Timeline */}
           <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
             <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
-              <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Timeline</h2>
+              <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                Timeline
+              </h2>
             </div>
             <div className="px-5 py-4 space-y-3">
               {timeline.map(({ label, date }) => (
@@ -681,7 +711,13 @@ export function InvoiceDetailClient({
 }
 
 // Keep existing exports for backward-compat
-export function SendInvoiceButton({ invoiceId, tenantId }: { invoiceId: string; tenantId: string }) {
+export function SendInvoiceButton({
+  invoiceId,
+  tenantId,
+}: {
+  invoiceId: string;
+  tenantId: string;
+}) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const handleSend = async () => {

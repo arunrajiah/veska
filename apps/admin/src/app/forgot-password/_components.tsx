@@ -53,7 +53,8 @@ export function ForgotPasswordClient() {
         {submitted ? (
           <div className="space-y-4">
             <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
-              Check your email — if that address is registered you&apos;ll receive a reset link shortly.
+              Check your email — if that address is registered you&apos;ll receive a reset link
+              shortly.
             </div>
             <Link
               href="/login"
@@ -65,14 +66,21 @@ export function ForgotPasswordClient() {
         ) : (
           <>
             {error && (
-              <div role="alert" aria-live="assertive" className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+              <div
+                role="alert"
+                aria-live="assertive"
+                className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700"
+              >
                 {error}
               </div>
             )}
 
             <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
               <div>
-                <label htmlFor="forgot-email" className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label
+                  htmlFor="forgot-email"
+                  className="block text-sm font-medium text-gray-700 mb-1.5"
+                >
                   Email address
                 </label>
                 <input

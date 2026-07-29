@@ -24,11 +24,16 @@ export const STATUS_COLORS: Record<string, string> = {
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
 
-interface ToastProps { message: string; type: 'success' | 'error' }
+interface ToastProps {
+  message: string;
+  type: 'success' | 'error';
+}
 
 function Toast({ message, type }: ToastProps) {
   return (
-    <div className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl shadow-lg text-sm font-medium ${type === 'success' ? 'bg-gray-900 text-white' : 'bg-red-600 text-white'}`}>
+    <div
+      className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl shadow-lg text-sm font-medium ${type === 'success' ? 'bg-gray-900 text-white' : 'bg-red-600 text-white'}`}
+    >
       {message}
     </div>
   );
@@ -104,7 +109,12 @@ export function EditLeadSlideOver({ leadId, initial, onClose, onSaved }: EditLea
         method: 'PATCH',
         headers: apiHeaders(),
         body: JSON.stringify({
-          name, email, phone, company, source, status,
+          name,
+          email,
+          phone,
+          company,
+          source,
+          status,
           score: score ? Number(score) : undefined,
           notes,
         }),
@@ -178,7 +188,10 @@ export function EditLeadSlideOver({ leadId, initial, onClose, onSaved }: EditLea
         </div>
 
         <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-2">
-          <button onClick={onClose} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors"
+          >
             Cancel
           </button>
           <button
@@ -245,7 +258,9 @@ export function LeadDetailClient({
       <div className="flex items-start justify-between mb-8">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">{String(d['name'] ?? 'Lead')}</h1>
-          <span className={`mt-1 inline-block text-xs px-2 py-0.5 rounded-full font-medium capitalize ${STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-600'}`}>
+          <span
+            className={`mt-1 inline-block text-xs px-2 py-0.5 rounded-full font-medium capitalize ${STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-600'}`}
+          >
             {status}
           </span>
         </div>
@@ -265,7 +280,9 @@ export function LeadDetailClient({
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
             <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
-              <h2 className="text-xs font-medium uppercase tracking-widest text-gray-400">Details</h2>
+              <h2 className="text-xs font-medium uppercase tracking-widest text-gray-400">
+                Details
+              </h2>
             </div>
             <dl className="divide-y divide-gray-50">
               {fields.map(({ label, value }) => (
@@ -285,7 +302,9 @@ export function LeadDetailClient({
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
             <div className="px-5 py-3 border-b border-gray-100 bg-gray-50 flex items-center gap-2">
               <Sparkles size={13} className="text-indigo-500" />
-              <h2 className="text-xs font-medium uppercase tracking-widest text-gray-400">AI Insights</h2>
+              <h2 className="text-xs font-medium uppercase tracking-widest text-gray-400">
+                AI Insights
+              </h2>
             </div>
             <div className="px-5 py-4">
               {aiSummary ? (
@@ -298,7 +317,9 @@ export function LeadDetailClient({
 
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
             <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
-              <h2 className="text-xs font-medium uppercase tracking-widest text-gray-400">Activity</h2>
+              <h2 className="text-xs font-medium uppercase tracking-widest text-gray-400">
+                Activity
+              </h2>
             </div>
             <div className="px-5 py-8 text-center">
               <p className="text-sm text-gray-400">No activity yet</p>

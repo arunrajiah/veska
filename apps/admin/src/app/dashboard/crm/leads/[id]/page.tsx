@@ -25,7 +25,10 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
     return (
       <div className="px-4 py-8 max-w-3xl">
         <p className="text-gray-500 text-sm">Lead not found.</p>
-        <Link href="/dashboard/crm/leads" className="mt-4 inline-block text-sm text-gray-600 hover:text-gray-900">
+        <Link
+          href="/dashboard/crm/leads"
+          className="mt-4 inline-block text-sm text-gray-600 hover:text-gray-900"
+        >
           ← Back to leads
         </Link>
       </div>
@@ -39,7 +42,10 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
   return (
     <div className="px-4 py-8 max-w-5xl">
       <div className="mb-6">
-        <Link href="/dashboard/crm/leads" className="text-xs text-gray-400 hover:text-gray-700 transition-colors">
+        <Link
+          href="/dashboard/crm/leads"
+          className="text-xs text-gray-400 hover:text-gray-700 transition-colors"
+        >
           ← Leads
         </Link>
       </div>

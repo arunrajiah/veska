@@ -42,9 +42,7 @@ export default function GRNForm() {
   }
 
   function updateItem(index: number, field: keyof LineItem, value: string) {
-    setItems((prev) =>
-      prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)),
-    );
+    setItems((prev) => prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -80,7 +78,11 @@ export default function GRNForm() {
       if (!res.ok) {
         const text = await res.text();
         let msg = text;
-        try { msg = JSON.parse(text).error ?? text; } catch { /* ignore */ }
+        try {
+          msg = JSON.parse(text).error ?? text;
+        } catch {
+          /* ignore */
+        }
         throw new Error(msg);
       }
 
@@ -96,11 +98,15 @@ export default function GRNForm() {
     <form onSubmit={(e) => void handleSubmit(e)} className="space-y-6">
       {/* Header fields */}
       <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
-        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">GRN Details</p>
+        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
+          GRN Details
+        </p>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">PO ID <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              PO ID <span className="text-red-500">*</span>
+            </label>
             <input
               type="text"
               value={poId}
@@ -111,7 +117,9 @@ export default function GRNForm() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">PO Number <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              PO Number <span className="text-red-500">*</span>
+            </label>
             <input
               type="text"
               value={poNumber}
@@ -125,7 +133,9 @@ export default function GRNForm() {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Received Date <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Received Date <span className="text-red-500">*</span>
+            </label>
             <input
               type="date"
               value={receivedDate}

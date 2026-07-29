@@ -14,11 +14,16 @@ function apiHeaders() {
   };
 }
 
-interface Toast { message: string; type: 'success' | 'error' }
+interface Toast {
+  message: string;
+  type: 'success' | 'error';
+}
 
 function ToastBubble({ toast }: { toast: Toast }) {
   return (
-    <div className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl shadow-lg text-sm font-medium ${toast.type === 'success' ? 'bg-gray-900 text-white' : 'bg-red-600 text-white'}`}>
+    <div
+      className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl shadow-lg text-sm font-medium ${toast.type === 'success' ? 'bg-gray-900 text-white' : 'bg-red-600 text-white'}`}
+    >
       {toast.message}
     </div>
   );
@@ -96,8 +101,16 @@ export function EditContactSlideOver({ contactId, initial, onClose, onSaved }: E
         method: 'PATCH',
         headers: apiHeaders(),
         body: JSON.stringify({
-          first_name: fName, last_name: lName, firstName: fName, lastName: lName,
-          email, phone, company, title, address, notes,
+          first_name: fName,
+          last_name: lName,
+          firstName: fName,
+          lastName: lName,
+          email,
+          phone,
+          company,
+          title,
+          address,
+          notes,
         }),
       });
       if (!res.ok) throw new Error('Failed');
@@ -115,20 +128,30 @@ export function EditContactSlideOver({ contactId, initial, onClose, onSaved }: E
       <div className="w-[420px] bg-white shadow-2xl flex flex-col overflow-y-auto">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <h2 className="text-sm font-semibold text-gray-900">Edit Contact</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors"><X size={16} /></button>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+            <X size={16} />
+          </button>
         </div>
 
         <div className="flex-1 px-6 py-4 space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">First Name</label>
-              <input type="text" value={fName} onChange={(e) => setFName(e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+              <input
+                type="text"
+                value={fName}
+                onChange={(e) => setFName(e.target.value)}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+              />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">Last Name</label>
-              <input type="text" value={lName} onChange={(e) => setLName(e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+              <input
+                type="text"
+                value={lName}
+                onChange={(e) => setLName(e.target.value)}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+              />
             </div>
           </div>
 
@@ -141,24 +164,40 @@ export function EditContactSlideOver({ contactId, initial, onClose, onSaved }: E
           ].map(({ label, value, setter, type }) => (
             <div key={label}>
               <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
-              <input type={type} value={value} onChange={(e) => setter(e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+              <input
+                type={type}
+                value={value}
+                onChange={(e) => setter(e.target.value)}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+              />
             </div>
           ))}
 
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1">Notes</label>
-            <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-none" />
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={3}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-none"
+            />
           </div>
 
           {error && <p className="text-xs text-red-600">{error}</p>}
         </div>
 
         <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-2">
-          <button onClick={onClose} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors">Cancel</button>
-          <button onClick={() => void handleSave()} disabled={saving}
-            className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-60">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => void handleSave()}
+            disabled={saving}
+            className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-60"
+          >
             {saving ? 'Saving…' : 'Save Changes'}
           </button>
         </div>
@@ -181,7 +220,12 @@ interface ContactDetailClientProps {
   deals: Deal[];
 }
 
-export function ContactDetailClient({ contactId, data: d, aiSummary, deals }: ContactDetailClientProps) {
+export function ContactDetailClient({
+  contactId,
+  data: d,
+  aiSummary,
+  deals,
+}: ContactDetailClientProps) {
   const router = useRouter();
   const [showEdit, setShowEdit] = useState(false);
   const [toast, setToast] = useState<Toast | null>(null);
@@ -221,9 +265,16 @@ export function ContactDetailClient({ contactId, data: d, aiSummary, deals }: Co
       <div className="flex items-start justify-between mb-8">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">
-            {[d['first_name'] ?? d['firstName'], d['last_name'] ?? d['lastName']].filter(Boolean).join(' ') || 'Contact'}
+            {[d['first_name'] ?? d['firstName'], d['last_name'] ?? d['lastName']]
+              .filter(Boolean)
+              .join(' ') || 'Contact'}
           </h1>
-          {Boolean(d['title']) && <p className="text-sm text-gray-500 mt-0.5">{String(d['title'])}{d['company'] ? ` · ${String(d['company'])}` : ''}</p>}
+          {Boolean(d['title']) && (
+            <p className="text-sm text-gray-500 mt-0.5">
+              {String(d['title'])}
+              {d['company'] ? ` · ${String(d['company'])}` : ''}
+            </p>
+          )}
         </div>
         <div className="flex gap-2">
           <AIEnrichButton entityId={contactId} onToast={showToast} />
@@ -241,7 +292,9 @@ export function ContactDetailClient({ contactId, data: d, aiSummary, deals }: Co
         <div className="lg:col-span-2">
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
             <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
-              <h2 className="text-xs font-medium uppercase tracking-widest text-gray-400">Details</h2>
+              <h2 className="text-xs font-medium uppercase tracking-widest text-gray-400">
+                Details
+              </h2>
             </div>
             <dl className="divide-y divide-gray-50">
               {fields.map(({ label, value }) => (
@@ -261,7 +314,9 @@ export function ContactDetailClient({ contactId, data: d, aiSummary, deals }: Co
           {/* Linked Deals */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
             <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
-              <h2 className="text-xs font-medium uppercase tracking-widest text-gray-400">Linked Deals</h2>
+              <h2 className="text-xs font-medium uppercase tracking-widest text-gray-400">
+                Linked Deals
+              </h2>
             </div>
             <div className="px-5 py-3">
               {deals.length === 0 ? (
@@ -271,14 +326,23 @@ export function ContactDetailClient({ contactId, data: d, aiSummary, deals }: Co
                   {deals.map((deal) => {
                     const dd = deal.data;
                     const stage = String(dd['stage'] ?? '');
-                    const value = dd['value'] != null
-                      ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Number(dd['value']))
-                      : '—';
+                    const value =
+                      dd['value'] != null
+                        ? new Intl.NumberFormat('en-US', {
+                            style: 'currency',
+                            currency: 'USD',
+                            maximumFractionDigits: 0,
+                          }).format(Number(dd['value']))
+                        : '—';
                     return (
                       <div key={deal.id} className="flex items-center justify-between py-1.5">
                         <div>
-                          <p className="text-sm font-medium text-gray-900">{String(dd['name'] ?? '(Unnamed)')}</p>
-                          <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${STAGE_COLORS[stage] ?? 'bg-gray-100 text-gray-600'}`}>
+                          <p className="text-sm font-medium text-gray-900">
+                            {String(dd['name'] ?? '(Unnamed)')}
+                          </p>
+                          <span
+                            className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${STAGE_COLORS[stage] ?? 'bg-gray-100 text-gray-600'}`}
+                          >
                             {stage || 'Unknown'}
                           </span>
                         </div>
@@ -295,7 +359,9 @@ export function ContactDetailClient({ contactId, data: d, aiSummary, deals }: Co
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
             <div className="px-5 py-3 border-b border-gray-100 bg-gray-50 flex items-center gap-2">
               <Sparkles size={13} className="text-indigo-500" />
-              <h2 className="text-xs font-medium uppercase tracking-widest text-gray-400">AI Insights</h2>
+              <h2 className="text-xs font-medium uppercase tracking-widest text-gray-400">
+                AI Insights
+              </h2>
             </div>
             <div className="px-5 py-4">
               {aiSummary ? (

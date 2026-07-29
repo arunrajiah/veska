@@ -21,28 +21,48 @@ function fmtHeaders() {
 function fmtCurrency(val: unknown) {
   const n = typeof val === 'number' ? val : parseFloat(String(val ?? '0'));
   if (isNaN(n)) return '—';
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(n);
 }
 
 export function StatusBadge({ status }: { status?: string | undefined }) {
   if (status === 'active')
-    return <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-green-50 text-green-700">Active</span>;
+    return (
+      <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-green-50 text-green-700">
+        Active
+      </span>
+    );
   if (status === 'onLeave' || status === 'on_leave')
-    return <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-yellow-50 text-yellow-700">On Leave</span>;
-  return <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-gray-100 text-gray-500">{status ?? 'Inactive'}</span>;
+    return (
+      <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-yellow-50 text-yellow-700">
+        On Leave
+      </span>
+    );
+  return (
+    <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-gray-100 text-gray-500">
+      {status ?? 'Inactive'}
+    </span>
+  );
 }
 
 export interface EmployeeRecord {
   id: string;
   data: {
-    firstName?: string; first_name?: string;
-    lastName?: string; last_name?: string;
+    firstName?: string;
+    first_name?: string;
+    lastName?: string;
+    last_name?: string;
     email?: string;
     phone?: string;
     department?: string;
-    position?: string; title?: string;
+    position?: string;
+    title?: string;
     status?: string;
-    startDate?: string; hire_date?: string;
+    startDate?: string;
+    hire_date?: string;
     salary?: number;
     managerId?: string;
   };
@@ -100,49 +120,99 @@ function AddEmployeeSlideOver({ onClose, onSaved }: { onClose: () => void; onSav
       <div className="relative bg-white w-full max-w-lg h-full overflow-y-auto shadow-xl flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-base font-semibold text-gray-900">Add Employee</h2>
-          <button onClick={onClose} aria-label="Close Add Employee panel" className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+          <button
+            onClick={onClose}
+            aria-label="Close Add Employee panel"
+            className="text-gray-400 hover:text-gray-600"
+          >
+            <X size={18} />
+          </button>
         </div>
         <form onSubmit={(e) => void handleSubmit(e)} className="flex-1 px-6 py-5 space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">First Name *</label>
-              <input name="firstName" required className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+              <input
+                name="firstName"
+                required
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Last Name *</label>
-              <input name="lastName" required className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+              <input
+                name="lastName"
+                required
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Email *</label>
-            <input name="email" type="email" required className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              name="email"
+              type="email"
+              required
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Phone</label>
-            <input name="phone" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              name="phone"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Department</label>
-            <input name="department" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              name="department"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Position</label>
-            <input name="position" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              name="position"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Start Date</label>
-            <input name="startDate" type="date" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              name="startDate"
+              type="date"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Salary (USD)</label>
-            <input name="salary" type="number" min="0" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              name="salary"
+              type="number"
+              min="0"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
-          {error && <p role="alert" className="text-xs text-red-500">{error}</p>}
+          {error && (
+            <p role="alert" className="text-xs text-red-500">
+              {error}
+            </p>
+          )}
           <div className="flex gap-3 pt-2">
-            <button type="submit" disabled={saving} aria-disabled={saving} className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
+            <button
+              type="submit"
+              disabled={saving}
+              aria-disabled={saving}
+              className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors"
+            >
               {saving ? 'Saving…' : 'Add Employee'}
             </button>
-            <button type="button" onClick={onClose} className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+            <button
+              type="button"
+              onClick={onClose}
+              className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+            >
               Cancel
             </button>
           </div>
@@ -169,8 +239,11 @@ export function EnrichRowButton({ employeeId }: { employeeId: string }) {
     }
   }
   return (
-    <button onClick={() => void handleEnrich()} disabled={state !== 'idle'}
-      className="text-xs px-2 py-1 rounded border border-indigo-200 text-indigo-600 hover:bg-indigo-50 disabled:opacity-50 transition-colors">
+    <button
+      onClick={() => void handleEnrich()}
+      disabled={state !== 'idle'}
+      className="text-xs px-2 py-1 rounded border border-indigo-200 text-indigo-600 hover:bg-indigo-50 disabled:opacity-50 transition-colors"
+    >
       {state === 'loading' ? '…' : state === 'done' ? 'Enriched' : 'AI Enrich'}
     </button>
   );
@@ -187,7 +260,9 @@ export function EmployeesClient({ employees: initial }: { employees: EmployeeRec
 
   const total = employees.length;
   const active = employees.filter((e) => e.data.status === 'active').length;
-  const onLeave = employees.filter((e) => e.data.status === 'onLeave' || e.data.status === 'on_leave').length;
+  const onLeave = employees.filter(
+    (e) => e.data.status === 'onLeave' || e.data.status === 'on_leave',
+  ).length;
   const thisMonth = employees.filter((e) => {
     const d = e.data.startDate ?? e.data.hire_date ?? e.createdAt ?? '';
     if (!d) return false;
@@ -224,8 +299,10 @@ export function EmployeesClient({ employees: initial }: { employees: EmployeeRec
           >
             <Upload size={15} /> Import CSV
           </button>
-          <button onClick={() => setShowAdd(true)}
-            className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+          <button
+            onClick={() => setShowAdd(true)}
+            className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+          >
             <Plus size={15} /> {t('newEmployee')}
           </button>
         </div>
@@ -236,7 +313,8 @@ export function EmployeesClient({ employees: initial }: { employees: EmployeeRec
           onComplete={({ imported, skipped }) => {
             setShowImport(false);
             startTransition(() => router.refresh());
-            void imported; void skipped;
+            void imported;
+            void skipped;
           }}
           onClose={() => setShowImport(false)}
         />
@@ -252,13 +330,27 @@ export function EmployeesClient({ employees: initial }: { employees: EmployeeRec
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
-                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">Name</th>
-                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">Position</th>
-                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">Department</th>
-                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">Email</th>
-                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
-                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">Start Date</th>
-                <th scope="col" className="px-4 py-3"><span className="sr-only">Actions</span></th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Name
+                </th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Position
+                </th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Department
+                </th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Email
+                </th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Status
+                </th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Start Date
+                </th>
+                <th scope="col" className="px-4 py-3">
+                  <span className="sr-only">Actions</span>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -266,7 +358,8 @@ export function EmployeesClient({ employees: initial }: { employees: EmployeeRec
                 const d = emp.data;
                 const firstName = getField(d, 'firstName', 'first_name');
                 const lastName = getField(d, 'lastName', 'last_name');
-                const name = [firstName, lastName].filter(Boolean).join(' ') || getField(d, 'name') || '—';
+                const name =
+                  [firstName, lastName].filter(Boolean).join(' ') || getField(d, 'name') || '—';
                 const position = getField(d, 'position', 'title', 'role') || '—';
                 const dept = getField(d, 'department') || '—';
                 const email = getField(d, 'email') || '—';
@@ -284,13 +377,19 @@ export function EmployeesClient({ employees: initial }: { employees: EmployeeRec
                     className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-inset"
                   >
                     <td className="px-4 py-3 font-medium text-gray-900">
-                      <Link href={`/dashboard/hr/employees/${emp.id}`} className="hover:underline">{name}</Link>
+                      <Link href={`/dashboard/hr/employees/${emp.id}`} className="hover:underline">
+                        {name}
+                      </Link>
                     </td>
                     <td className="px-4 py-3 text-gray-600">{position}</td>
                     <td className="px-4 py-3 text-gray-500">{dept}</td>
                     <td className="px-4 py-3 text-gray-500 text-xs">{email}</td>
-                    <td className="px-4 py-3"><StatusBadge status={d.status} /></td>
-                    <td className="px-4 py-3 text-gray-600 text-xs">{startDate ? startDate.slice(0, 10) : '—'}</td>
+                    <td className="px-4 py-3">
+                      <StatusBadge status={d.status} />
+                    </td>
+                    <td className="px-4 py-3 text-gray-600 text-xs">
+                      {startDate ? startDate.slice(0, 10) : '—'}
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
                         <EnrichRowButton employeeId={emp.id} />
@@ -298,7 +397,9 @@ export function EmployeesClient({ employees: initial }: { employees: EmployeeRec
                           href={`/dashboard/hr/employees/${emp.id}`}
                           aria-label={`View employee ${name}`}
                           className="text-xs text-gray-500 hover:text-gray-900 px-2 py-1 rounded hover:bg-gray-100"
-                        >View →</Link>
+                        >
+                          View →
+                        </Link>
                       </div>
                     </td>
                   </tr>

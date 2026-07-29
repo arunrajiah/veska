@@ -38,7 +38,7 @@ export default function ProjectForm() {
         body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error(await res.text());
-      const created = await res.json() as { id: string };
+      const created = (await res.json()) as { id: string };
       router.push(`/dashboard/projects/${created.id}`);
       router.refresh();
     } catch (err) {
@@ -54,7 +54,10 @@ export default function ProjectForm() {
         <h1 className="text-2xl font-semibold text-gray-900">New project</h1>
       </div>
 
-      <form onSubmit={(e) => void handleSubmit(e)} className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
+      <form
+        onSubmit={(e) => void handleSubmit(e)}
+        className="bg-white border border-gray-200 rounded-xl p-6 space-y-4"
+      >
         <div>
           <label className="block text-xs font-medium text-gray-700 mb-1">Name *</label>
           <input

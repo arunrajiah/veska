@@ -22,7 +22,10 @@ export default async function ServiceDeskPage() {
 
   let items: ServiceDeskItem[] = [];
   try {
-    const res = await apiFetch<{ data: ServiceDeskItem[] }>('/api/v1/service-desk?limit=50', tenantId);
+    const res = await apiFetch<{ data: ServiceDeskItem[] }>(
+      '/api/v1/service-desk?limit=50',
+      tenantId,
+    );
     items = Array.isArray(res) ? res : (res?.data ?? []);
   } catch {
     items = [];

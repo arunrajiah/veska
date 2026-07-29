@@ -22,7 +22,12 @@ export interface InvoiceRecord {
     issuedAt?: string;
     issue_date?: string;
     lineItems?: Array<{ description: string; quantity: number; unitPrice: number; total: number }>;
-    line_items?: Array<{ description: string; quantity: number; unit_price: number; amount: number }>;
+    line_items?: Array<{
+      description: string;
+      quantity: number;
+      unit_price: number;
+      amount: number;
+    }>;
     notes?: string;
     currency?: string;
   };

@@ -169,7 +169,9 @@ export function StagesClient() {
     }
   }, []);
 
-  useEffect(() => { fetchStages(); }, [fetchStages]);
+  useEffect(() => {
+    fetchStages();
+  }, [fetchStages]);
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this stage? Deals in this stage may be affected.')) return;
@@ -209,7 +211,10 @@ export function StagesClient() {
             {seeding ? 'Seeding…' : 'Seed defaults'}
           </button>
           <button
-            onClick={() => { setEditingStage(null); setShowAddForm(true); }}
+            onClick={() => {
+              setEditingStage(null);
+              setShowAddForm(true);
+            }}
             className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
           >
             <Plus size={14} />
@@ -221,7 +226,10 @@ export function StagesClient() {
       {showAddForm && !editingStage && (
         <div className="mb-4">
           <StageForm
-            onSaved={async () => { setShowAddForm(false); await fetchStages(); }}
+            onSaved={async () => {
+              setShowAddForm(false);
+              await fetchStages();
+            }}
             onCancel={() => setShowAddForm(false)}
           />
         </div>
@@ -246,7 +254,9 @@ export function StagesClient() {
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Stage</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Color</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Order</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Probability</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Probability
+                </th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -267,7 +277,9 @@ export function StagesClient() {
                             className="w-4 h-4 rounded-full border border-gray-200"
                             style={{ backgroundColor: stage.color ?? '#6366f1' }}
                           />
-                          <span className="text-xs text-gray-400 font-mono">{stage.color ?? '—'}</span>
+                          <span className="text-xs text-gray-400 font-mono">
+                            {stage.color ?? '—'}
+                          </span>
                         </div>
                       </td>
                       <td className="px-4 py-3 text-gray-500">{stage.order ?? '—'}</td>
@@ -277,7 +289,10 @@ export function StagesClient() {
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <button
-                            onClick={() => { setEditingStage(stage); setShowAddForm(false); }}
+                            onClick={() => {
+                              setEditingStage(stage);
+                              setShowAddForm(false);
+                            }}
                             className="text-gray-400 hover:text-indigo-500 transition-colors"
                           >
                             <Edit2 size={13} />
@@ -296,7 +311,10 @@ export function StagesClient() {
                         <td colSpan={5} className="px-4 py-3 bg-indigo-50/30">
                           <StageForm
                             initial={stage}
-                            onSaved={async () => { setEditingStage(null); await fetchStages(); }}
+                            onSaved={async () => {
+                              setEditingStage(null);
+                              await fetchStages();
+                            }}
                             onCancel={() => setEditingStage(null)}
                           />
                         </td>

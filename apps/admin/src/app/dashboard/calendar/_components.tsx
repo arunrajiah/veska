@@ -17,7 +17,10 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const CURRENT_USER = 'demo-user';
 
 function tenantHeaders(): HeadersInit {
-  return { 'Content-Type': 'application/json', 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' };
+  return {
+    'Content-Type': 'application/json',
+    'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
+  };
 }
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -59,22 +62,37 @@ interface CalendarResponse {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const EVENT_TYPE_COLORS: Record<string, { pill: string; dot: string }> = {
-  meeting:  { pill: 'bg-blue-100 text-blue-700',   dot: 'bg-blue-500' },
+  meeting: { pill: 'bg-blue-100 text-blue-700', dot: 'bg-blue-500' },
   training: { pill: 'bg-purple-100 text-purple-700', dot: 'bg-purple-500' },
-  social:   { pill: 'bg-green-100 text-green-700',  dot: 'bg-green-500' },
-  holiday:  { pill: 'bg-red-100 text-red-700',      dot: 'bg-red-500' },
-  general:  { pill: 'bg-gray-100 text-gray-600',    dot: 'bg-gray-400' },
+  social: { pill: 'bg-green-100 text-green-700', dot: 'bg-green-500' },
+  holiday: { pill: 'bg-red-100 text-red-700', dot: 'bg-red-500' },
+  general: { pill: 'bg-gray-100 text-gray-600', dot: 'bg-gray-400' },
 };
 
-const DEFAULT_TYPE_COLORS: { pill: string; dot: string } = { pill: 'bg-gray-100 text-gray-600', dot: 'bg-gray-400' };
+const DEFAULT_TYPE_COLORS: { pill: string; dot: string } = {
+  pill: 'bg-gray-100 text-gray-600',
+  dot: 'bg-gray-400',
+};
 
 function typeColors(type?: string): { pill: string; dot: string } {
-  return EVENT_TYPE_COLORS[type ?? 'general'] ?? EVENT_TYPE_COLORS['general'] ?? DEFAULT_TYPE_COLORS;
+  return (
+    EVENT_TYPE_COLORS[type ?? 'general'] ?? EVENT_TYPE_COLORS['general'] ?? DEFAULT_TYPE_COLORS
+  );
 }
 
 const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ];
 const DAYS_OF_WEEK = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -97,7 +115,10 @@ function formatTime(dateStr?: string): string {
 function formatDate(dateStr?: string): string {
   if (!dateStr) return '';
   return new Date(dateStr).toLocaleDateString('en-US', {
-    weekday: 'short', month: 'short', day: 'numeric', year: 'numeric',
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
   });
 }
 
@@ -137,7 +158,10 @@ function EventForm({ onClose, onSaved }: EventFormProps) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.title.trim()) { setError('Title is required'); return; }
+    if (!form.title.trim()) {
+      setError('Title is required');
+      return;
+    }
     setSaving(true);
     setError('');
     try {
@@ -169,11 +193,11 @@ function EventForm({ onClose, onSaved }: EventFormProps) {
         body: JSON.stringify(body),
       });
       if (!res.ok) {
-        const d = await res.json() as { error?: string };
+        const d = (await res.json()) as { error?: string };
         setError(d.error ?? 'Failed to save event');
         return;
       }
-      const saved = await res.json() as CalendarEvent;
+      const saved = (await res.json()) as CalendarEvent;
       onSaved(saved);
     } catch {
       setError('Failed to save event');
@@ -195,14 +219,21 @@ function EventForm({ onClose, onSaved }: EventFormProps) {
         <form onSubmit={(e) => void handleSubmit(e)} className="flex-1 p-6 space-y-4">
           <div>
             <label className="block text-xs text-gray-500 mb-1">Title *</label>
-            <input type="text" value={form.title} onChange={(e) => set('title', e.target.value)}
+            <input
+              type="text"
+              value={form.title}
+              onChange={(e) => set('title', e.target.value)}
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-              placeholder="Event title" />
+              placeholder="Event title"
+            />
           </div>
           <div>
             <label className="block text-xs text-gray-500 mb-1">Type</label>
-            <select value={form.type} onChange={(e) => set('type', e.target.value)}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+            <select
+              value={form.type}
+              onChange={(e) => set('type', e.target.value)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+            >
               <option value="meeting">Meeting</option>
               <option value="training">Training</option>
               <option value="social">Social</option>
@@ -211,71 +242,116 @@ function EventForm({ onClose, onSaved }: EventFormProps) {
             </select>
           </div>
           <div className="flex items-center gap-2">
-            <input type="checkbox" id="allDay" checked={form.allDay}
+            <input
+              type="checkbox"
+              id="allDay"
+              checked={form.allDay}
               onChange={(e) => set('allDay', e.target.checked)}
-              className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
-            <label htmlFor="allDay" className="text-sm text-gray-700">All day</label>
+              className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+            />
+            <label htmlFor="allDay" className="text-sm text-gray-700">
+              All day
+            </label>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs text-gray-500 mb-1">Start date</label>
-              <input type="date" value={form.startDate} onChange={(e) => set('startDate', e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input
+                type="date"
+                value={form.startDate}
+                onChange={(e) => set('startDate', e.target.value)}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
             {!form.allDay && (
               <div>
                 <label className="block text-xs text-gray-500 mb-1">Start time</label>
-                <input type="time" value={form.startTime} onChange={(e) => set('startTime', e.target.value)}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" />
+                <input
+                  type="time"
+                  value={form.startTime}
+                  onChange={(e) => set('startTime', e.target.value)}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                />
               </div>
             )}
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs text-gray-500 mb-1">End date</label>
-              <input type="date" value={form.endDate} onChange={(e) => set('endDate', e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input
+                type="date"
+                value={form.endDate}
+                onChange={(e) => set('endDate', e.target.value)}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
             {!form.allDay && (
               <div>
                 <label className="block text-xs text-gray-500 mb-1">End time</label>
-                <input type="time" value={form.endTime} onChange={(e) => set('endTime', e.target.value)}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" />
+                <input
+                  type="time"
+                  value={form.endTime}
+                  onChange={(e) => set('endTime', e.target.value)}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                />
               </div>
             )}
           </div>
           <div>
             <label className="block text-xs text-gray-500 mb-1">Location</label>
-            <input type="text" value={form.location} onChange={(e) => set('location', e.target.value)}
+            <input
+              type="text"
+              value={form.location}
+              onChange={(e) => set('location', e.target.value)}
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-              placeholder="Conference room, office, etc." />
+              placeholder="Conference room, office, etc."
+            />
           </div>
           <div>
             <label className="block text-xs text-gray-500 mb-1">Meeting URL</label>
-            <input type="url" value={form.meetingUrl} onChange={(e) => set('meetingUrl', e.target.value)}
+            <input
+              type="url"
+              value={form.meetingUrl}
+              onChange={(e) => set('meetingUrl', e.target.value)}
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-              placeholder="https://meet.example.com/..." />
+              placeholder="https://meet.example.com/..."
+            />
           </div>
           <div>
             <label className="block text-xs text-gray-500 mb-1">Max attendees</label>
-            <input type="number" value={form.maxAttendees} onChange={(e) => set('maxAttendees', e.target.value)}
+            <input
+              type="number"
+              value={form.maxAttendees}
+              onChange={(e) => set('maxAttendees', e.target.value)}
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-              placeholder="Leave blank for unlimited" min="1" />
+              placeholder="Leave blank for unlimited"
+              min="1"
+            />
           </div>
           <div>
             <label className="block text-xs text-gray-500 mb-1">Description</label>
-            <textarea value={form.description} onChange={(e) => set('description', e.target.value)}
+            <textarea
+              value={form.description}
+              onChange={(e) => set('description', e.target.value)}
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 resize-none"
-              rows={3} placeholder="Event description…" />
+              rows={3}
+              placeholder="Event description…"
+            />
           </div>
           {error && <p className="text-sm text-red-500">{error}</p>}
           <div className="flex gap-2 pt-2">
-            <button type="submit" disabled={saving}
-              className="px-5 py-2.5 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-700 transition-colors disabled:opacity-50">
+            <button
+              type="submit"
+              disabled={saving}
+              className="px-5 py-2.5 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-700 transition-colors disabled:opacity-50"
+            >
               {saving ? 'Creating…' : 'Create event'}
             </button>
-            <button type="button" onClick={onClose}
-              className="px-5 py-2.5 rounded-lg border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-5 py-2.5 rounded-lg border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            >
               Cancel
             </button>
           </div>
@@ -287,7 +363,11 @@ function EventForm({ onClose, onSaved }: EventFormProps) {
 
 // ─── Event Detail Modal ───────────────────────────────────────────────────────
 
-function EventDetailModal({ event, onClose, onRsvpChange }: {
+function EventDetailModal({
+  event,
+  onClose,
+  onRsvpChange,
+}: {
   event: CalendarEvent;
   onClose: () => void;
   onRsvpChange: (eventId: string, rsvp: string) => void;
@@ -315,10 +395,10 @@ function EventDetailModal({ event, onClose, onRsvpChange }: {
   }
 
   const RSVP_BADGE: Record<string, string> = {
-    accepted:  'bg-green-100 text-green-700',
-    declined:  'bg-red-100 text-red-700',
+    accepted: 'bg-green-100 text-green-700',
+    declined: 'bg-red-100 text-red-700',
     tentative: 'bg-amber-100 text-amber-700',
-    pending:   'bg-gray-100 text-gray-500',
+    pending: 'bg-gray-100 text-gray-500',
   };
 
   return (
@@ -327,13 +407,18 @@ function EventDetailModal({ event, onClose, onRsvpChange }: {
         <div className="px-6 py-4 border-b border-gray-100 flex items-start justify-between">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${colors.pill}`}>
+              <span
+                className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${colors.pill}`}
+              >
                 {event.type ?? 'general'}
               </span>
             </div>
             <h2 className="text-base font-semibold text-gray-900">{event.title}</h2>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-700 transition-colors mt-1">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-700 transition-colors mt-1"
+          >
             <X size={18} />
           </button>
         </div>
@@ -348,7 +433,8 @@ function EventDetailModal({ event, onClose, onRsvpChange }: {
                 )}
                 {!event.allDay && event.startDate && (
                   <p className="text-xs text-gray-400 mt-0.5">
-                    {formatTime(event.startDate)}{event.endDate ? ` – ${formatTime(event.endDate)}` : ''}
+                    {formatTime(event.startDate)}
+                    {event.endDate ? ` – ${formatTime(event.endDate)}` : ''}
                   </p>
                 )}
               </div>
@@ -363,18 +449,28 @@ function EventDetailModal({ event, onClose, onRsvpChange }: {
           {event.meetingUrl && (
             <div className="flex items-start gap-3">
               <CalendarDays size={15} className="text-gray-400 mt-0.5 flex-shrink-0" />
-              <a href={event.meetingUrl} target="_blank" rel="noreferrer"
-                className="text-sm text-indigo-600 hover:underline truncate">{event.meetingUrl}</a>
+              <a
+                href={event.meetingUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-sm text-indigo-600 hover:underline truncate"
+              >
+                {event.meetingUrl}
+              </a>
             </div>
           )}
           {event.organizer && (
             <div className="flex items-start gap-3">
               <Users size={15} className="text-gray-400 mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-gray-700">Organized by <span className="font-medium">{event.organizer}</span></p>
+              <p className="text-sm text-gray-700">
+                Organized by <span className="font-medium">{event.organizer}</span>
+              </p>
             </div>
           )}
           {event.description && (
-            <p className="text-sm text-gray-600 bg-gray-50 rounded-lg px-3 py-2">{event.description}</p>
+            <p className="text-sm text-gray-600 bg-gray-50 rounded-lg px-3 py-2">
+              {event.description}
+            </p>
           )}
 
           {/* Attendees */}
@@ -385,14 +481,19 @@ function EventDetailModal({ event, onClose, onRsvpChange }: {
               </p>
               <div className="space-y-1">
                 {event.attendees.map((a, i) => (
-                  <div key={a.userId ?? i} className="flex items-center justify-between py-1.5 px-3 rounded-lg hover:bg-gray-50">
+                  <div
+                    key={a.userId ?? i}
+                    className="flex items-center justify-between py-1.5 px-3 rounded-lg hover:bg-gray-50"
+                  >
                     <div className="flex items-center gap-2">
                       <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 text-xs font-medium flex items-center justify-center">
                         {(a.name ?? a.email ?? '?')[0]?.toUpperCase()}
                       </div>
                       <span className="text-sm text-gray-700">{a.name ?? a.email ?? a.userId}</span>
                     </div>
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${RSVP_BADGE[a.rsvp ?? 'pending'] ?? RSVP_BADGE.pending}`}>
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${RSVP_BADGE[a.rsvp ?? 'pending'] ?? RSVP_BADGE.pending}`}
+                    >
                       {a.rsvp ?? 'pending'}
                     </span>
                   </div>
@@ -403,7 +504,9 @@ function EventDetailModal({ event, onClose, onRsvpChange }: {
 
           {/* RSVP buttons */}
           <div>
-            <p className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wider">Your RSVP</p>
+            <p className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wider">
+              Your RSVP
+            </p>
             <div className="flex gap-2">
               {(['accepted', 'declined', 'tentative'] as const).map((status) => (
                 <button
@@ -448,7 +551,7 @@ function EventsList() {
         headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
       });
       if (res.ok) {
-        const d = await res.json() as CalendarEvent[] | { events?: CalendarEvent[] };
+        const d = (await res.json()) as CalendarEvent[] | { events?: CalendarEvent[] };
         setEvents(Array.isArray(d) ? d : (d.events ?? []));
       }
     } catch {
@@ -458,12 +561,14 @@ function EventsList() {
     }
   }, [fromDate, toDate, typeFilter]);
 
-  useEffect(() => { void fetchEvents(); }, [fetchEvents]);
+  useEffect(() => {
+    void fetchEvents();
+  }, [fetchEvents]);
 
   const STATUS_BADGE: Record<string, string> = {
-    active:    'bg-green-100 text-green-700',
+    active: 'bg-green-100 text-green-700',
     cancelled: 'bg-red-100 text-red-700',
-    draft:     'bg-gray-100 text-gray-500',
+    draft: 'bg-gray-100 text-gray-500',
   };
 
   return (
@@ -472,18 +577,29 @@ function EventsList() {
       <div className="flex flex-wrap gap-3 bg-white border border-gray-200 rounded-xl px-4 py-3">
         <div>
           <label className="block text-xs text-gray-500 mb-1">From</label>
-          <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)}
-            className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" />
+          <input
+            type="date"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+            className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+          />
         </div>
         <div>
           <label className="block text-xs text-gray-500 mb-1">To</label>
-          <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)}
-            className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" />
+          <input
+            type="date"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+            className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+          />
         </div>
         <div>
           <label className="block text-xs text-gray-500 mb-1">Type</label>
-          <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}
-            className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+          <select
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+          >
             <option value="all">All types</option>
             <option value="meeting">Meeting</option>
             <option value="training">Training</option>
@@ -512,38 +628,67 @@ function EventsList() {
                 <tr className="bg-gray-50 border-b border-gray-100">
                   <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Title</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Type</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Date / Time</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Location</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Organizer</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Attendees</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                    Date / Time
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                    Location
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                    Organizer
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                    Attendees
+                  </th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
-                  <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Actions</th>
+                  <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {events.map((ev) => {
                   const colors = typeColors(ev.type);
                   return (
-                    <tr key={ev.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                    <tr
+                      key={ev.id}
+                      className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
+                    >
                       <td className="px-4 py-3 font-medium text-gray-900">{ev.title}</td>
                       <td className="px-4 py-3">
-                        <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium capitalize ${colors.pill}`}>
+                        <span
+                          className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium capitalize ${colors.pill}`}
+                        >
                           {ev.type ?? 'general'}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-xs text-gray-600">
                         {ev.startDate ? (
                           <div>
-                            <div>{new Date(ev.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
-                            {!ev.allDay && <div className="text-gray-400">{formatTime(ev.startDate)}</div>}
+                            <div>
+                              {new Date(ev.startDate).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric',
+                              })}
+                            </div>
+                            {!ev.allDay && (
+                              <div className="text-gray-400">{formatTime(ev.startDate)}</div>
+                            )}
                           </div>
-                        ) : '—'}
+                        ) : (
+                          '—'
+                        )}
                       </td>
                       <td className="px-4 py-3 text-xs text-gray-500">{ev.location ?? '—'}</td>
                       <td className="px-4 py-3 text-xs text-gray-500">{ev.organizer ?? '—'}</td>
-                      <td className="px-4 py-3 text-xs text-gray-500">{ev.attendees?.length ?? 0}</td>
+                      <td className="px-4 py-3 text-xs text-gray-500">
+                        {ev.attendees?.length ?? 0}
+                      </td>
                       <td className="px-4 py-3">
-                        <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_BADGE[ev.status ?? 'active'] ?? STATUS_BADGE.active}`}>
+                        <span
+                          className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_BADGE[ev.status ?? 'active'] ?? STATUS_BADGE.active}`}
+                        >
                           {ev.status ?? 'active'}
                         </span>
                       </td>
@@ -602,10 +747,12 @@ function CalendarGrid() {
         headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
       });
       if (res.ok) {
-        const d = await res.json() as CalendarResponse;
+        const d = (await res.json()) as CalendarResponse;
         const map = new Map<string, CalendarEvent[]>();
         const days = d.days ?? [];
-        days.forEach((day) => { map.set(day.date, day.events ?? []); });
+        days.forEach((day) => {
+          map.set(day.date, day.events ?? []);
+        });
         // Also handle flat events array
         if (d.events) {
           d.events.forEach((ev) => {
@@ -627,17 +774,26 @@ function CalendarGrid() {
     }
   }, []);
 
-  useEffect(() => { void fetchCalendar(year, month); }, [year, month, fetchCalendar]);
+  useEffect(() => {
+    void fetchCalendar(year, month);
+  }, [year, month, fetchCalendar]);
 
   function prevMonth() {
-    if (month === 0) { setYear((y) => y - 1); setMonth(11); }
-    else setMonth((m) => m - 1);
+    if (month === 0) {
+      setYear((y) => y - 1);
+      setMonth(11);
+    } else setMonth((m) => m - 1);
   }
   function nextMonth() {
-    if (month === 11) { setYear((y) => y + 1); setMonth(0); }
-    else setMonth((m) => m + 1);
+    if (month === 11) {
+      setYear((y) => y + 1);
+      setMonth(0);
+    } else setMonth((m) => m + 1);
   }
-  function goToday() { setYear(today.getFullYear()); setMonth(today.getMonth()); }
+  function goToday() {
+    setYear(today.getFullYear());
+    setMonth(today.getMonth());
+  }
 
   const totalDays = daysInMonth(year, month);
   const startOffset = firstDayOfWeek(year, month);
@@ -649,7 +805,7 @@ function CalendarGrid() {
       setSelectedEvent((prev) => {
         if (!prev) return prev;
         const attendees = (prev.attendees ?? []).map((a) =>
-          a.userId === CURRENT_USER ? { ...a, rsvp } : a
+          a.userId === CURRENT_USER ? { ...a, rsvp } : a,
         );
         return { ...prev, attendees };
       });
@@ -662,19 +818,25 @@ function CalendarGrid() {
       <div className="flex-1">
         {/* Header row */}
         <div className="flex items-center gap-3 mb-4">
-          <button onClick={prevMonth}
-            className="p-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-100 transition-colors">
+          <button
+            onClick={prevMonth}
+            className="p-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-100 transition-colors"
+          >
             <ChevronLeft size={16} />
           </button>
           <span className="font-semibold text-gray-900 min-w-[140px] text-center">
             {MONTHS[month]} {year}
           </span>
-          <button onClick={nextMonth}
-            className="p-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-100 transition-colors">
+          <button
+            onClick={nextMonth}
+            className="p-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-100 transition-colors"
+          >
             <ChevronRight size={16} />
           </button>
-          <button onClick={goToday}
-            className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+          <button
+            onClick={goToday}
+            className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+          >
             Today
           </button>
           {loading && (
@@ -685,7 +847,9 @@ function CalendarGrid() {
         {/* Day of week header */}
         <div className="grid grid-cols-7 gap-px mb-1">
           {DAYS_OF_WEEK.map((d) => (
-            <div key={d} className="text-center text-xs font-medium text-gray-400 py-1">{d}</div>
+            <div key={d} className="text-center text-xs font-medium text-gray-400 py-1">
+              {d}
+            </div>
           ))}
         </div>
 
@@ -712,9 +876,11 @@ function CalendarGrid() {
                 }`}
               >
                 <div className="flex items-center justify-end mb-1">
-                  <span className={`text-xs font-medium w-6 h-6 flex items-center justify-center rounded-full ${
-                    isToday ? 'bg-indigo-600 text-white' : 'text-gray-700'
-                  }`}>
+                  <span
+                    className={`text-xs font-medium w-6 h-6 flex items-center justify-center rounded-full ${
+                      isToday ? 'bg-indigo-600 text-white' : 'text-gray-700'
+                    }`}
+                  >
                     {day}
                   </span>
                 </div>
@@ -724,7 +890,10 @@ function CalendarGrid() {
                     return (
                       <div
                         key={ev.id}
-                        onClick={(e) => { e.stopPropagation(); setSelectedEvent(ev); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedEvent(ev);
+                        }}
                         className={`px-1.5 py-0.5 rounded text-xs truncate cursor-pointer ${colors.pill} hover:opacity-80`}
                       >
                         {ev.title}
@@ -747,10 +916,15 @@ function CalendarGrid() {
           <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
             <p className="text-sm font-semibold text-gray-900">
               {new Date(selectedDay + 'T12:00:00').toLocaleDateString('en-US', {
-                weekday: 'long', month: 'long', day: 'numeric',
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric',
               })}
             </p>
-            <button onClick={() => setSelectedDay(null)} className="text-gray-400 hover:text-gray-700 transition-colors">
+            <button
+              onClick={() => setSelectedDay(null)}
+              className="text-gray-400 hover:text-gray-700 transition-colors"
+            >
               <X size={14} />
             </button>
           </div>
@@ -771,12 +945,20 @@ function CalendarGrid() {
                       className="p-3 rounded-lg border border-gray-100 hover:border-indigo-200 cursor-pointer transition-colors group"
                     >
                       <div className="flex items-start gap-2">
-                        <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${colors.dot}`} />
+                        <div
+                          className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${colors.dot}`}
+                        />
                         <div className="min-w-0 flex-1">
-                          <p className="text-sm font-medium text-gray-900 truncate group-hover:text-indigo-700">{ev.title}</p>
-                          <p className={`text-xs mt-0.5 capitalize ${colors.pill.split(' ')[1]}`}>{ev.type ?? 'general'}</p>
+                          <p className="text-sm font-medium text-gray-900 truncate group-hover:text-indigo-700">
+                            {ev.title}
+                          </p>
+                          <p className={`text-xs mt-0.5 capitalize ${colors.pill.split(' ')[1]}`}>
+                            {ev.type ?? 'general'}
+                          </p>
                           {!ev.allDay && ev.startDate && (
-                            <p className="text-xs text-gray-400 mt-0.5">{formatTime(ev.startDate)}</p>
+                            <p className="text-xs text-gray-400 mt-0.5">
+                              {formatTime(ev.startDate)}
+                            </p>
                           )}
                           {ev.location && (
                             <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
@@ -837,7 +1019,9 @@ export function CalendarClient() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">Calendar</h1>
-          <p className="text-sm text-gray-500 mt-1">Manage events, meetings, and company calendar.</p>
+          <p className="text-sm text-gray-500 mt-1">
+            Manage events, meetings, and company calendar.
+          </p>
         </div>
         <button
           onClick={() => setShowNewEvent(true)}
@@ -849,7 +1033,12 @@ export function CalendarClient() {
 
       {/* Tabs */}
       <div className="flex gap-1 mb-6 border-b border-gray-200">
-        {([['calendar', 'Calendar'], ['events', 'Events List']] as const).map(([key, label]) => (
+        {(
+          [
+            ['calendar', 'Calendar'],
+            ['events', 'Events List'],
+          ] as const
+        ).map(([key, label]) => (
           <button
             key={key}
             onClick={() => setTab(key)}
@@ -868,10 +1057,7 @@ export function CalendarClient() {
       {tab === 'events' && <EventsList />}
 
       {showNewEvent && (
-        <EventForm
-          onClose={() => setShowNewEvent(false)}
-          onSaved={() => setShowNewEvent(false)}
-        />
+        <EventForm onClose={() => setShowNewEvent(false)} onSaved={() => setShowNewEvent(false)} />
       )}
     </div>
   );

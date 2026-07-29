@@ -1,3 +1,4 @@
+import { apiFetch } from '@/lib/api.js';
 import Link from 'next/link';
 import { Plus, Pencil, Trash2, Sliders } from 'lucide-react';
 import type { CustomFieldDef } from '@/components/custom-field-form.js';
@@ -23,13 +24,7 @@ const ENTITY_LABELS: Record<string, string> = {
 
 async function fetchDefs(): Promise<CustomFieldDef[]> {
   try {
-    const res = await fetch(
-      (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') +
-        '/api/v1/custom-fields/defs?tenantId=demo',
-      { cache: 'no-store' },
-    );
-    if (!res.ok) return [];
-    const data = await res.json();
+    const data = await apiFetch<CustomFieldDef[] | { data?: CustomFieldDef[] }>('/api/v1/custom-fields/defs', '');
     return Array.isArray(data) ? data : (data.data ?? []);
   } catch {
     return [];

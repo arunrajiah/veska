@@ -64,7 +64,9 @@ function OverallBanner({ health }: { health: HealthData }) {
     <div className={`border rounded-xl px-6 py-5 flex items-center gap-4 mb-6 ${config.bg}`}>
       {config.icon}
       <div>
-        <p className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${config.badge}`}>
+        <p
+          className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${config.badge}`}
+        >
           {config.text}
         </p>
         <p className="text-sm text-gray-600 mt-1">{config.sub}</p>
@@ -95,12 +97,8 @@ function ServiceCard({
         />
       </div>
       <p className={`text-lg font-semibold ${ok ? 'text-green-700' : 'text-red-600'}`}>{label}</p>
-      {latency != null && (
-        <p className="text-xs text-gray-400 mt-0.5">{latency} ms latency</p>
-      )}
-      {latency == null && (
-        <p className="text-xs text-gray-400 mt-0.5">Latency unavailable</p>
-      )}
+      {latency != null && <p className="text-xs text-gray-400 mt-0.5">{latency} ms latency</p>}
+      {latency == null && <p className="text-xs text-gray-400 mt-0.5">Latency unavailable</p>}
     </div>
   );
 }
@@ -110,14 +108,18 @@ function EntityMetricsTable({ entities }: { entities: Record<string, number> }) 
   return (
     <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mb-6">
       <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
-        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Entity Metrics</h2>
+        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+          Entity Metrics
+        </h2>
       </div>
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-gray-100">
             <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Entity Type</th>
             <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Count</th>
-            <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 w-40">Distribution</th>
+            <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 w-40">
+              Distribution
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -125,12 +127,20 @@ function EntityMetricsTable({ entities }: { entities: Record<string, number> }) 
             const maxVal = sorted[0]?.[1] ?? 1;
             const pct = maxVal > 0 ? (count / maxVal) * 100 : 0;
             return (
-              <tr key={entity} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
-                <td className="px-4 py-3 font-medium text-gray-900 capitalize">{entity.replace(/_/g, ' ')}</td>
+              <tr
+                key={entity}
+                className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
+              >
+                <td className="px-4 py-3 font-medium text-gray-900 capitalize">
+                  {entity.replace(/_/g, ' ')}
+                </td>
                 <td className="px-4 py-3 text-right text-gray-700">{count.toLocaleString()}</td>
                 <td className="px-4 py-3">
                   <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-indigo-400 rounded-full" style={{ width: `${pct}%` }} />
+                    <div
+                      className="h-full bg-indigo-400 rounded-full"
+                      style={{ width: `${pct}%` }}
+                    />
                   </div>
                 </td>
               </tr>
@@ -171,7 +181,9 @@ export function StatusClient({
   };
 
   useEffect(() => {
-    const id = setInterval(() => { void refresh(); }, 30_000);
+    const id = setInterval(() => {
+      void refresh();
+    }, 30_000);
     return () => clearInterval(id);
   }, []);
 
@@ -203,10 +215,7 @@ export function StatusClient({
       <div className="grid grid-cols-3 gap-4 mb-6">
         <ServiceCard name="Database" svc={svcs.database} />
         <ServiceCard name="Redis" svc={svcs.redis} />
-        <ServiceCard
-          name="API"
-          svc={svcs.api ?? { status: health.status ?? 'ok' }}
-        />
+        <ServiceCard name="API" svc={svcs.api ?? { status: health.status ?? 'ok' }} />
       </div>
 
       {/* Tenant & Uptime */}
@@ -228,7 +237,9 @@ export function StatusClient({
       {/* Activity stats */}
       {(activity.last24h != null || activity.last7d != null || activity.last30d != null) && (
         <div className="mb-6">
-          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Activity — Entity Creation</h2>
+          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+            Activity — Entity Creation
+          </h2>
           <div className="grid grid-cols-3 gap-4">
             {[
               { label: 'Last 24 hours', value: activity.last24h },
@@ -241,7 +252,7 @@ export function StatusClient({
                   <p className="text-2xl font-semibold text-gray-900">{value.toLocaleString()}</p>
                   <p className="text-xs text-gray-400 mt-0.5">entities created</p>
                 </div>
-              ) : null
+              ) : null,
             )}
           </div>
         </div>

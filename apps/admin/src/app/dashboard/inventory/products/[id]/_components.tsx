@@ -30,8 +30,11 @@ export function EnrichButton({ productId }: { productId: string }) {
     }
   }
   return (
-    <button onClick={() => void handleEnrich()} disabled={state !== 'idle'}
-      className="text-sm px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors disabled:opacity-50">
+    <button
+      onClick={() => void handleEnrich()}
+      disabled={state !== 'idle'}
+      className="text-sm px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors disabled:opacity-50"
+    >
       {state === 'loading' ? 'Enriching…' : state === 'done' ? 'Enriched!' : 'Enrich with AI'}
     </button>
   );
@@ -42,8 +45,10 @@ interface ProductData {
   sku?: string;
   category?: string;
   description?: string;
-  price?: number; unit_price?: number;
-  cost?: number; cost_price?: number;
+  price?: number;
+  unit_price?: number;
+  cost?: number;
+  cost_price?: number;
   stockQuantity?: number;
   reorderLevel?: number;
   warehouseId?: string;
@@ -92,14 +97,17 @@ export function EditProductToggle({ productId, data }: { productId: string; data
 
   if (!editing) {
     return (
-      <button onClick={() => setEditing(true)}
-        className="text-sm px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors">
+      <button
+        onClick={() => setEditing(true)}
+        className="text-sm px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
+      >
         Edit
       </button>
     );
   }
 
-  const inputClass = 'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900';
+  const inputClass =
+    'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900';
 
   return (
     <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
@@ -120,21 +128,47 @@ export function EditProductToggle({ productId, data }: { productId: string; data
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Price</label>
-            <input name="price" type="number" min="0" step="0.01" defaultValue={price} className={inputClass} />
+            <input
+              name="price"
+              type="number"
+              min="0"
+              step="0.01"
+              defaultValue={price}
+              className={inputClass}
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Cost</label>
-            <input name="cost" type="number" min="0" step="0.01" defaultValue={cost} className={inputClass} />
+            <input
+              name="cost"
+              type="number"
+              min="0"
+              step="0.01"
+              defaultValue={cost}
+              className={inputClass}
+            />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Stock Qty</label>
-            <input name="stockQuantity" type="number" min="0" defaultValue={data.stockQuantity ?? 0} className={inputClass} />
+            <input
+              name="stockQuantity"
+              type="number"
+              min="0"
+              defaultValue={data.stockQuantity ?? 0}
+              className={inputClass}
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Reorder Level</label>
-            <input name="reorderLevel" type="number" min="0" defaultValue={data.reorderLevel ?? ''} className={inputClass} />
+            <input
+              name="reorderLevel"
+              type="number"
+              min="0"
+              defaultValue={data.reorderLevel ?? ''}
+              className={inputClass}
+            />
           </div>
         </div>
         <div>
@@ -146,12 +180,18 @@ export function EditProductToggle({ productId, data }: { productId: string; data
         </div>
         {error && <p className="text-xs text-red-500">{error}</p>}
         <div className="flex gap-3">
-          <button type="submit" disabled={saving}
-            className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
+          <button
+            type="submit"
+            disabled={saving}
+            className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors"
+          >
             {saving ? 'Saving…' : 'Save Changes'}
           </button>
-          <button type="button" onClick={() => setEditing(false)}
-            className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+          <button
+            type="button"
+            onClick={() => setEditing(false)}
+            className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+          >
             Cancel
           </button>
         </div>

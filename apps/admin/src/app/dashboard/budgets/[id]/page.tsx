@@ -46,7 +46,9 @@ function StatusBadge({ status }: { status?: string }) {
   };
   const cls = map[status ?? ''] ?? 'bg-gray-100 text-gray-600';
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${cls}`}>
+    <span
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${cls}`}
+    >
       {status ?? 'draft'}
     </span>
   );
@@ -68,7 +70,10 @@ export default async function BudgetDetailPage({ params }: { params: Promise<{ i
     return (
       <div className="px-8 py-8 max-w-3xl">
         <p className="text-gray-500 text-sm">Budget not found.</p>
-        <Link href="/dashboard/budgets" className="mt-4 inline-block text-sm text-gray-600 hover:text-gray-900">
+        <Link
+          href="/dashboard/budgets"
+          className="mt-4 inline-block text-sm text-gray-600 hover:text-gray-900"
+        >
           ← Back to budgets
         </Link>
       </div>
@@ -99,9 +104,7 @@ export default async function BudgetDetailPage({ params }: { params: Promise<{ i
             <span className="text-gray-300">·</span>
             <p className="text-sm text-gray-500">{currency}</p>
           </div>
-          {description && (
-            <p className="text-sm text-gray-400 mt-1">{description}</p>
-          )}
+          {description && <p className="text-sm text-gray-400 mt-1">{description}</p>}
         </div>
         <DeleteButton budgetId={id} tenantId={tenantId} />
       </div>
@@ -120,13 +123,17 @@ export default async function BudgetDetailPage({ params }: { params: Promise<{ i
             {
               label: 'Created',
               value: new Date(budget.createdAt).toLocaleDateString('en-US', {
-                year: 'numeric', month: 'short', day: 'numeric',
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
               }),
             },
           ].map(({ label, value }) => (
             <div key={label} className="px-5 py-3 flex items-center gap-4">
               <dt className="text-xs text-gray-500 w-28 shrink-0">{label}</dt>
-              <dd className="text-sm text-gray-900">{value || <span className="text-gray-300">—</span>}</dd>
+              <dd className="text-sm text-gray-900">
+                {value || <span className="text-gray-300">—</span>}
+              </dd>
             </div>
           ))}
         </dl>

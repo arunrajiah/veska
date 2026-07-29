@@ -11,13 +11,7 @@ interface KBArticle {
   viewCount?: number;
 }
 
-export function PortalKBList({
-  articles,
-  token,
-}: {
-  articles: KBArticle[];
-  token: string;
-}) {
+export function PortalKBList({ articles, token }: { articles: KBArticle[]; token: string }) {
   const router = useRouter();
   const [query, setQuery] = useState('');
 
@@ -33,7 +27,9 @@ export function PortalKBList({
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-semibold text-gray-900">Knowledge Base</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{articles.length} article{articles.length !== 1 ? 's' : ''}</p>
+          <p className="text-sm text-gray-500 mt-0.5">
+            {articles.length} article{articles.length !== 1 ? 's' : ''}
+          </p>
         </div>
         <button
           onClick={() => router.push(`/portal/${token}`)}

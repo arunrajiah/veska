@@ -1,6 +1,6 @@
 import { TemplateDetailClient } from './_components.js';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+const API_BASE = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 interface DocumentTemplate {
   id: string;
@@ -21,11 +21,7 @@ interface RenderedDocument {
   variables?: Record<string, string>;
 }
 
-export default async function TemplateDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function TemplateDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
   let template: DocumentTemplate | null = null;
@@ -37,7 +33,7 @@ export default async function TemplateDetailPage({
       headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
     });
     if (res.ok) {
-      template = await res.json() as DocumentTemplate;
+      template = (await res.json()) as DocumentTemplate;
     }
   } catch {
     // fall through
@@ -49,10 +45,14 @@ export default async function TemplateDetailPage({
       headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
     });
     if (res.ok) {
-      const json = await res.json() as RenderedDocument[] | { results?: RenderedDocument[]; data?: RenderedDocument[] };
+      const json = (await res.json()) as
+        | RenderedDocument[]
+        | { results?: RenderedDocument[]; data?: RenderedDocument[] };
       documents = Array.isArray(json)
         ? json
-        : ((json as { results?: RenderedDocument[] }).results ?? (json as { data?: RenderedDocument[] }).data ?? []);
+        : ((json as { results?: RenderedDocument[] }).results ??
+          (json as { data?: RenderedDocument[] }).data ??
+          []);
     }
   } catch {
     // fall through

@@ -18,11 +18,14 @@ export default function InviteForm() {
     setError('');
     setLoading(true);
     try {
-      const res = await fetch((process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tenantId: 'demo', name, email }),
-      });
+      const res = await fetch(
+        (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/users',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tenantId: 'demo', name, email }),
+        },
+      );
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.message ?? 'Failed to invite user');
@@ -75,7 +78,10 @@ export default function InviteForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+    <form
+      onSubmit={handleSubmit}
+      className="bg-white rounded-xl border border-gray-200 p-6 space-y-4"
+    >
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
           {error}

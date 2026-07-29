@@ -128,9 +128,7 @@ function NewTicketModal({ open, onClose }: { open: boolean; onClose: () => void 
               </select>
             </div>
           </div>
-          {error && (
-            <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>
-          )}
+          {error && <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>}
           <div className="flex justify-end gap-2 pt-1">
             <button
               type="button"
@@ -188,9 +186,7 @@ function TicketDetailPanel({ ticket }: { ticket: Ticket }) {
             <h2 className="text-base font-semibold text-gray-900">
               {d.subject ?? d.ticketNumber ?? ticket.id.slice(0, 8)}
             </h2>
-            {d.ticketNumber && (
-              <p className="text-xs text-gray-400 mt-0.5">{d.ticketNumber}</p>
-            )}
+            {d.ticketNumber && <p className="text-xs text-gray-400 mt-0.5">{d.ticketNumber}</p>}
           </div>
         </div>
         {/* Metadata chips */}
@@ -220,8 +216,7 @@ function TicketDetailPanel({ ticket }: { ticket: Ticket }) {
           )}
           {d.createdAt && (
             <span>
-              <span className="font-medium text-gray-700">Opened:</span>{' '}
-              {timeAgo(d.createdAt)}
+              <span className="font-medium text-gray-700">Opened:</span> {timeAgo(d.createdAt)}
             </span>
           )}
         </div>
@@ -291,11 +286,9 @@ export function SupportClient({ tickets }: SupportClientProps) {
   const [showNewModal, setShowNewModal] = useState(false);
 
   const filtered =
-    activeTab === 'all'
-      ? tickets
-      : tickets.filter((t) => (t.data.status ?? 'open') === activeTab);
+    activeTab === 'all' ? tickets : tickets.filter((t) => (t.data.status ?? 'open') === activeTab);
 
-  const selectedTicket = selectedId ? tickets.find((t) => t.id === selectedId) ?? null : null;
+  const selectedTicket = selectedId ? (tickets.find((t) => t.id === selectedId) ?? null) : null;
 
   return (
     <>
@@ -339,9 +332,7 @@ export function SupportClient({ tickets }: SupportClientProps) {
                     }`}
                   >
                     {tab.label}
-                    {count > 0 && (
-                      <span className="ml-1 opacity-70">({count})</span>
-                    )}
+                    {count > 0 && <span className="ml-1 opacity-70">({count})</span>}
                   </button>
                 );
               })}
@@ -378,9 +369,7 @@ export function SupportClient({ tickets }: SupportClientProps) {
               <p className="text-base font-medium text-gray-500">
                 Select a ticket to view the thread
               </p>
-              <p className="text-sm mt-1">
-                Choose a conversation from the list on the left
-              </p>
+              <p className="text-sm mt-1">Choose a conversation from the list on the left</p>
             </div>
           )}
         </div>

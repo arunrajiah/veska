@@ -36,7 +36,9 @@ function StarRating({ rating }: { rating: number | undefined }) {
   return (
     <span className="flex items-center gap-0.5">
       {Array.from({ length: 5 }, (_, i) => (
-        <span key={i} className={i < r ? 'text-yellow-400' : 'text-gray-200'}>★</span>
+        <span key={i} className={i < r ? 'text-yellow-400' : 'text-gray-200'}>
+          ★
+        </span>
       ))}
     </span>
   );
@@ -93,61 +95,92 @@ function AddVendorSlideOver({ onClose, onSaved }: { onClose: () => void; onSaved
       <div className="relative bg-white w-full max-w-lg h-full overflow-y-auto shadow-xl flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-base font-semibold text-gray-900">Add Vendor</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <X size={18} />
+          </button>
         </div>
         <form onSubmit={(e) => void handleSubmit(e)} className="flex-1 px-6 py-5 space-y-4">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Name *</label>
-            <input name="name" required
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              name="name"
+              required
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Email</label>
-              <input name="email" type="email"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+              <input
+                name="email"
+                type="email"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Phone</label>
-              <input name="phone"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+              <input
+                name="phone"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Website</label>
-            <input name="website" type="url"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              name="website"
+              type="url"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Address</label>
-            <textarea name="address" rows={2}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none" />
+            <textarea
+              name="address"
+              rows={2}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none"
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Category</label>
-              <input name="category" placeholder="e.g. supplier"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+              <input
+                name="category"
+                placeholder="e.g. supplier"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Payment Terms</label>
-              <input name="paymentTerms" placeholder="e.g. Net 30"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+              <input
+                name="paymentTerms"
+                placeholder="e.g. Net 30"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
-            <textarea name="notes" rows={3}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none" />
+            <textarea
+              name="notes"
+              rows={3}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none"
+            />
           </div>
           {error && <p className="text-xs text-red-500">{error}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="submit" disabled={saving}
-              className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
+            <button
+              type="submit"
+              disabled={saving}
+              className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors"
+            >
               {saving ? 'Saving…' : 'Add Vendor'}
             </button>
-            <button type="button" onClick={onClose}
-              className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+            <button
+              type="button"
+              onClick={onClose}
+              className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+            >
               Cancel
             </button>
           </div>
@@ -157,7 +190,11 @@ function AddVendorSlideOver({ onClose, onSaved }: { onClose: () => void; onSaved
   );
 }
 
-export function PurchasingVendorsClient({ vendors: initialVendors }: { vendors: PurchasingVendor[] }) {
+export function PurchasingVendorsClient({
+  vendors: initialVendors,
+}: {
+  vendors: PurchasingVendor[];
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
@@ -189,14 +226,20 @@ export function PurchasingVendorsClient({ vendors: initialVendors }: { vendors: 
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Vendor Name</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Vendor Name
+                </th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Category</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Email</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Rating</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Payment Terms</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Payment Terms
+                </th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
                 <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Orders</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Total Spend</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">
+                  Total Spend
+                </th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -205,21 +248,37 @@ export function PurchasingVendorsClient({ vendors: initialVendors }: { vendors: 
                 const d = v.data;
                 const status = d.status ?? 'active';
                 return (
-                  <tr key={v.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                  <tr
+                    key={v.id}
+                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
+                  >
                     <td className="px-4 py-3 font-medium text-gray-900">{d.name ?? '—'}</td>
-                    <td className="px-4 py-3 text-gray-500 text-xs capitalize">{d.category ?? '—'}</td>
+                    <td className="px-4 py-3 text-gray-500 text-xs capitalize">
+                      {d.category ?? '—'}
+                    </td>
                     <td className="px-4 py-3 text-gray-600 text-xs">{d.email ?? '—'}</td>
-                    <td className="px-4 py-3"><StarRating rating={d.rating} /></td>
+                    <td className="px-4 py-3">
+                      <StarRating rating={d.rating} />
+                    </td>
                     <td className="px-4 py-3 text-gray-500 text-xs">{d.paymentTerms ?? '—'}</td>
                     <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-600'}`}>
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-600'}`}
+                      >
                         {status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right text-gray-600 text-xs">{d.totalOrders ?? 0}</td>
-                    <td className="px-4 py-3 text-right text-gray-700 text-xs font-medium">{fmtMoney(d.totalSpend)}</td>
+                    <td className="px-4 py-3 text-right text-gray-600 text-xs">
+                      {d.totalOrders ?? 0}
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-700 text-xs font-medium">
+                      {fmtMoney(d.totalSpend)}
+                    </td>
                     <td className="px-4 py-3 text-right">
-                      <Link href={`/dashboard/purchasing/vendors/${v.id}`} className="text-xs text-gray-500 hover:text-gray-900">
+                      <Link
+                        href={`/dashboard/purchasing/vendors/${v.id}`}
+                        className="text-xs text-gray-500 hover:text-gray-900"
+                      >
                         View →
                       </Link>
                     </td>
@@ -234,7 +293,11 @@ export function PurchasingVendorsClient({ vendors: initialVendors }: { vendors: 
       {showAdd && (
         <AddVendorSlideOver
           onClose={() => setShowAdd(false)}
-          onSaved={() => startTransition(() => { router.refresh(); })}
+          onSaved={() =>
+            startTransition(() => {
+              router.refresh();
+            })
+          }
         />
       )}
     </div>

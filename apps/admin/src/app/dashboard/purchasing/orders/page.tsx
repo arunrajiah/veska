@@ -7,7 +7,10 @@ export default async function PurchaseOrdersPage() {
 
   let orders: PurchaseOrder[] = [];
   try {
-    const res = await apiFetch<{ data: PurchaseOrder[] } | PurchaseOrder[]>('/api/v1/purchasing/orders?limit=50', tenantId);
+    const res = await apiFetch<{ data: PurchaseOrder[] } | PurchaseOrder[]>(
+      '/api/v1/purchasing/orders?limit=50',
+      tenantId,
+    );
     orders = Array.isArray(res) ? res : (res.data ?? []);
   } catch {
     orders = [];

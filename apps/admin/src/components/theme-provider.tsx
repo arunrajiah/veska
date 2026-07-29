@@ -26,8 +26,7 @@ function applyTheme(theme: Theme): 'light' | 'dark' {
       ? window.matchMedia('(prefers-color-scheme: dark)').matches
       : false;
 
-  const resolved: 'light' | 'dark' =
-    theme === 'system' ? (prefersDark ? 'dark' : 'light') : theme;
+  const resolved: 'light' | 'dark' = theme === 'system' ? (prefersDark ? 'dark' : 'light') : theme;
 
   if (typeof document !== 'undefined') {
     if (resolved === 'dark') {

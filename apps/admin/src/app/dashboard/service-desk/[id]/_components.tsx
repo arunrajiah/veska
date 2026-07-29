@@ -80,7 +80,10 @@ export function ServiceDeskDetailClient({ item: initial }: { item: ServiceDeskDe
         headers: apiHeaders(),
         body: JSON.stringify({ status: statusValue }),
       });
-      setItem((prev) => ({ ...prev, data: { ...prev.data, ...(statusValue !== undefined ? { status: statusValue } : {}) } }));
+      setItem((prev) => ({
+        ...prev,
+        data: { ...prev.data, ...(statusValue !== undefined ? { status: statusValue } : {}) },
+      }));
       startTransition(() => router.refresh());
     } catch {
       // ignore
@@ -97,7 +100,10 @@ export function ServiceDeskDetailClient({ item: initial }: { item: ServiceDeskDe
         headers: apiHeaders(),
         body: JSON.stringify({ resolution, status: 'resolved' }),
       });
-      setItem((prev) => ({ ...prev, data: { ...prev.data, resolution, status: 'resolved' as const } }));
+      setItem((prev) => ({
+        ...prev,
+        data: { ...prev.data, resolution, status: 'resolved' as const },
+      }));
       setStatusValue('resolved' as StatusValue);
       startTransition(() => router.refresh());
     } catch {
@@ -111,25 +117,36 @@ export function ServiceDeskDetailClient({ item: initial }: { item: ServiceDeskDe
     <div className="px-8 py-8 max-w-7xl">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-gray-400 mb-5">
-        <a href="/dashboard/service-desk" className="hover:text-gray-600">Service Desk</a>
+        <a href="/dashboard/service-desk" className="hover:text-gray-600">
+          Service Desk
+        </a>
         <span>/</span>
-        <span className="text-gray-600 font-mono">{d.requestNumber ?? item.id.slice(0, 8).toUpperCase()}</span>
+        <span className="text-gray-600 font-mono">
+          {d.requestNumber ?? item.id.slice(0, 8).toUpperCase()}
+        </span>
       </div>
 
       {/* Header */}
       <div className="flex items-start justify-between gap-4 mb-6">
         <div>
           <div className="flex items-center gap-2 mb-2 flex-wrap">
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${TYPE_COLORS[d.type ?? ''] ?? 'bg-gray-100 text-gray-600'}`}>
+            <span
+              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${TYPE_COLORS[d.type ?? ''] ?? 'bg-gray-100 text-gray-600'}`}
+            >
               {(d.type ?? '—').replace(/_/g, ' ')}
             </span>
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[d.status ?? 'new'] ?? 'bg-gray-100 text-gray-600'}`}>
+            <span
+              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[d.status ?? 'new'] ?? 'bg-gray-100 text-gray-600'}`}
+            >
               {(d.status ?? 'new').replace(/_/g, ' ')}
             </span>
           </div>
           <h1 className="text-xl font-semibold text-gray-900">{d.title ?? '—'}</h1>
         </div>
-        <SlaCountdown {...(d.dueBy !== undefined ? { dueBy: d.dueBy } : {})} {...(d.status !== undefined ? { status: d.status } : {})} />
+        <SlaCountdown
+          {...(d.dueBy !== undefined ? { dueBy: d.dueBy } : {})}
+          {...(d.status !== undefined ? { status: d.status } : {})}
+        />
       </div>
 
       <div className="grid grid-cols-3 gap-6">
@@ -138,7 +155,9 @@ export function ServiceDeskDetailClient({ item: initial }: { item: ServiceDeskDe
           {d.description && (
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
               <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
-                <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Description</h2>
+                <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  Description
+                </h2>
               </div>
               <p className="px-5 py-4 text-sm text-gray-700 whitespace-pre-wrap">{d.description}</p>
             </div>
@@ -147,7 +166,9 @@ export function ServiceDeskDetailClient({ item: initial }: { item: ServiceDeskDe
           {/* Resolution */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
             <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
-              <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Resolution</h2>
+              <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                Resolution
+              </h2>
             </div>
             <div className="px-5 py-4 space-y-3">
               <textarea
@@ -180,10 +201,15 @@ export function ServiceDeskDetailClient({ item: initial }: { item: ServiceDeskDe
               { label: 'Assigned To', value: d.assignedTo ?? 'Unassigned' },
               { label: 'SLA', value: d.sla ?? '—' },
               { label: 'Due By', value: d.dueBy ? new Date(d.dueBy).toLocaleString() : '—' },
-              { label: 'Created', value: d.createdAt ? new Date(d.createdAt).toLocaleString() : '—' },
+              {
+                label: 'Created',
+                value: d.createdAt ? new Date(d.createdAt).toLocaleString() : '—',
+              },
             ].map(({ label, value }) => (
               <div key={label}>
-                <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-0.5">{label}</p>
+                <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-0.5">
+                  {label}
+                </p>
                 <p className="text-sm text-gray-900 capitalize">{value}</p>
               </div>
             ))}

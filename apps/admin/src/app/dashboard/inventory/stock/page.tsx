@@ -22,9 +22,23 @@ interface StockLevel {
 }
 
 function StockStatusBadge({ qty, reorder }: { qty: number; reorder: number }) {
-  if (qty === 0) return <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-red-100 text-red-700">Critical</span>;
-  if (qty <= reorder) return <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-yellow-50 text-yellow-700">Low</span>;
-  return <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-green-50 text-green-700">OK</span>;
+  if (qty === 0)
+    return (
+      <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-red-100 text-red-700">
+        Critical
+      </span>
+    );
+  if (qty <= reorder)
+    return (
+      <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-yellow-50 text-yellow-700">
+        Low
+      </span>
+    );
+  return (
+    <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-green-50 text-green-700">
+      OK
+    </span>
+  );
 }
 
 function getStock(level: StockLevel) {
@@ -47,7 +61,7 @@ export default async function StockPage() {
       '/api/v1/inventory/stock?limit=50',
       process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
     );
-    levels = Array.isArray(res) ? res : (res as { data: StockLevel[] }).data ?? [];
+    levels = Array.isArray(res) ? res : ((res as { data: StockLevel[] }).data ?? []);
   } catch {
     levels = [];
   }
@@ -63,7 +77,9 @@ export default async function StockPage() {
 
       {levels.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-8 py-16 text-center">
-          <p className="text-gray-400 text-sm">No stock data yet. Record movements to see stock levels.</p>
+          <p className="text-gray-400 text-sm">
+            No stock data yet. Record movements to see stock levels.
+          </p>
         </div>
       ) : (
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
@@ -73,9 +89,13 @@ export default async function StockPage() {
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Product</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Warehouse</th>
                 <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Quantity</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Reorder Level</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">
+                  Reorder Level
+                </th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Last Updated</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Last Updated
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -83,9 +103,14 @@ export default async function StockPage() {
                 const s = getStock(level);
                 const key = level.id ?? `${s.productId}::${s.warehouseId}::${i}`;
                 return (
-                  <tr key={key} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                  <tr
+                    key={key}
+                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
+                  >
                     <td className="px-4 py-3">
-                      <p className="font-medium text-gray-900">{s.productName || s.productId || '—'}</p>
+                      <p className="font-medium text-gray-900">
+                        {s.productName || s.productId || '—'}
+                      </p>
                       {s.productName && s.productId && (
                         <p className="text-xs text-gray-400 font-mono">{s.productId}</p>
                       )}
@@ -93,12 +118,18 @@ export default async function StockPage() {
                     <td className="px-4 py-3 text-gray-600">
                       {s.warehouseName || s.warehouseId || '—'}
                     </td>
-                    <td className={`px-4 py-3 text-right font-semibold ${s.quantity <= s.reorderLevel ? 'text-red-600' : 'text-gray-900'}`}>
+                    <td
+                      className={`px-4 py-3 text-right font-semibold ${s.quantity <= s.reorderLevel ? 'text-red-600' : 'text-gray-900'}`}
+                    >
                       {s.quantity}
                     </td>
                     <td className="px-4 py-3 text-right text-gray-400">{s.reorderLevel}</td>
-                    <td className="px-4 py-3"><StockStatusBadge qty={s.quantity} reorder={s.reorderLevel} /></td>
-                    <td className="px-4 py-3 text-xs text-gray-400">{s.lastUpdated ? s.lastUpdated.slice(0, 10) : '—'}</td>
+                    <td className="px-4 py-3">
+                      <StockStatusBadge qty={s.quantity} reorder={s.reorderLevel} />
+                    </td>
+                    <td className="px-4 py-3 text-xs text-gray-400">
+                      {s.lastUpdated ? s.lastUpdated.slice(0, 10) : '—'}
+                    </td>
                   </tr>
                 );
               })}

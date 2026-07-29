@@ -14,13 +14,20 @@ function apiHeaders() {
   };
 }
 
-interface Toast { id: number; message: string; type: 'success' | 'error' }
+interface Toast {
+  id: number;
+  message: string;
+  type: 'success' | 'error';
+}
 
 function ToastList({ toasts }: { toasts: Toast[] }) {
   return (
     <div className="fixed bottom-6 right-6 z-50 space-y-2">
       {toasts.map((t) => (
-        <div key={t.id} className={`px-4 py-3 rounded-xl shadow-lg text-sm font-medium ${t.type === 'success' ? 'bg-gray-900 text-white' : 'bg-red-600 text-white'}`}>
+        <div
+          key={t.id}
+          className={`px-4 py-3 rounded-xl shadow-lg text-sm font-medium ${t.type === 'success' ? 'bg-gray-900 text-white' : 'bg-red-600 text-white'}`}
+        >
           {t.message}
         </div>
       ))}
@@ -30,7 +37,10 @@ function ToastList({ toasts }: { toasts: Toast[] }) {
 
 // ─── New Company Slide-Over ───────────────────────────────────────────────────
 
-interface NewCompanyProps { onClose: () => void; onSaved: () => void }
+interface NewCompanyProps {
+  onClose: () => void;
+  onSaved: () => void;
+}
 
 function NewCompanySlideOver({ onClose, onSaved }: NewCompanyProps) {
   const [name, setName] = useState('');
@@ -46,7 +56,10 @@ function NewCompanySlideOver({ onClose, onSaved }: NewCompanyProps) {
   const [error, setError] = useState('');
 
   const handleSave = async () => {
-    if (!name.trim()) { setError('Name is required'); return; }
+    if (!name.trim()) {
+      setError('Name is required');
+      return;
+    }
     setSaving(true);
     setError('');
     try {
@@ -54,7 +67,12 @@ function NewCompanySlideOver({ onClose, onSaved }: NewCompanyProps) {
         method: 'POST',
         headers: apiHeaders(),
         body: JSON.stringify({
-          name, industry, website, phone, city, address,
+          name,
+          industry,
+          website,
+          phone,
+          city,
+          address,
           employee_count: employeeCount ? Number(employeeCount) : undefined,
           revenue: revenue ? Number(revenue) : undefined,
           notes,
@@ -75,7 +93,9 @@ function NewCompanySlideOver({ onClose, onSaved }: NewCompanyProps) {
       <div className="w-[420px] bg-white shadow-2xl flex flex-col overflow-y-auto">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <h2 className="text-sm font-semibold text-gray-900">New Company</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors"><X size={16} /></button>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+            <X size={16} />
+          </button>
         </div>
 
         <div className="flex-1 px-6 py-4 space-y-4">
@@ -86,29 +106,50 @@ function NewCompanySlideOver({ onClose, onSaved }: NewCompanyProps) {
             { label: 'Phone', value: phone, setter: setPhone, type: 'tel' },
             { label: 'City', value: city, setter: setCity, type: 'text' },
             { label: 'Address', value: address, setter: setAddress, type: 'text' },
-            { label: 'Employee Count', value: employeeCount, setter: setEmployeeCount, type: 'number' },
+            {
+              label: 'Employee Count',
+              value: employeeCount,
+              setter: setEmployeeCount,
+              type: 'number',
+            },
             { label: 'Annual Revenue ($)', value: revenue, setter: setRevenue, type: 'number' },
           ].map(({ label, value, setter, type }) => (
             <div key={label}>
               <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
-              <input type={type} value={value} onChange={(e) => setter(e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+              <input
+                type={type}
+                value={value}
+                onChange={(e) => setter(e.target.value)}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+              />
             </div>
           ))}
 
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1">Notes</label>
-            <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-none" />
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={3}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-none"
+            />
           </div>
 
           {error && <p className="text-xs text-red-600">{error}</p>}
         </div>
 
         <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-2">
-          <button onClick={onClose} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors">Cancel</button>
-          <button onClick={() => void handleSave()} disabled={saving}
-            className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-60">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => void handleSave()}
+            disabled={saving}
+            className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-60"
+          >
             {saving ? 'Saving…' : 'Create Company'}
           </button>
         </div>
@@ -119,9 +160,15 @@ function NewCompanySlideOver({ onClose, onSaved }: NewCompanyProps) {
 
 // ─── Companies Table ──────────────────────────────────────────────────────────
 
-interface CompanyRecord { id: string; data: Record<string, unknown>; createdAt: string }
+interface CompanyRecord {
+  id: string;
+  data: Record<string, unknown>;
+  createdAt: string;
+}
 
-interface CompaniesTableProps { initialCompanies: CompanyRecord[] }
+interface CompaniesTableProps {
+  initialCompanies: CompanyRecord[];
+}
 
 export function CompaniesTable({ initialCompanies }: CompaniesTableProps) {
   const router = useRouter();
@@ -160,7 +207,10 @@ export function CompaniesTable({ initialCompanies }: CompaniesTableProps) {
       {initialCompanies.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-8 py-16 text-center">
           <p className="text-gray-400 text-sm">No companies yet.</p>
-          <button onClick={() => setShowForm(true)} className="mt-4 inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900">
+          <button
+            onClick={() => setShowForm(true)}
+            className="mt-4 inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900"
+          >
             <Plus size={14} /> Add your first company
           </button>
         </div>
@@ -169,16 +219,24 @@ export function CompaniesTable({ initialCompanies }: CompaniesTableProps) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
-                {['Company Name', 'Industry', 'Website', 'Employees', 'City', 'Created'].map((h) => (
-                  <th key={h} className="text-left px-4 py-3 text-xs font-medium uppercase tracking-widest text-gray-400">{h}</th>
-                ))}
+                {['Company Name', 'Industry', 'Website', 'Employees', 'City', 'Created'].map(
+                  (h) => (
+                    <th
+                      key={h}
+                      className="text-left px-4 py-3 text-xs font-medium uppercase tracking-widest text-gray-400"
+                    >
+                      {h}
+                    </th>
+                  ),
+                )}
                 <th className="px-4 py-3" />
               </tr>
             </thead>
             <tbody>
               {initialCompanies.map((record) => {
                 const d = record.data;
-                const created = typeof record.createdAt === 'string' ? record.createdAt.slice(0, 10) : '';
+                const created =
+                  typeof record.createdAt === 'string' ? record.createdAt.slice(0, 10) : '';
                 return (
                   <tr
                     key={record.id}
@@ -191,14 +249,23 @@ export function CompaniesTable({ initialCompanies }: CompaniesTableProps) {
                     <td className="px-4 py-3 text-gray-600">{String(d['industry'] ?? '—')}</td>
                     <td className="px-4 py-3 text-gray-600 text-xs">
                       {d['website'] ? (
-                        <a href={String(d['website'])} target="_blank" rel="noopener noreferrer"
-                          className="text-indigo-600 hover:underline" onClick={(e) => e.stopPropagation()}>
+                        <a
+                          href={String(d['website'])}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-indigo-600 hover:underline"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           {String(d['website']).replace(/^https?:\/\//, '')}
                         </a>
-                      ) : '—'}
+                      ) : (
+                        '—'
+                      )}
                     </td>
                     <td className="px-4 py-3 text-gray-500">
-                      {d['employee_count'] != null ? Number(d['employee_count']).toLocaleString() : '—'}
+                      {d['employee_count'] != null
+                        ? Number(d['employee_count']).toLocaleString()
+                        : '—'}
                     </td>
                     <td className="px-4 py-3 text-gray-500">{String(d['city'] ?? '—')}</td>
                     <td className="px-4 py-3 text-gray-400 text-xs">{created}</td>
@@ -211,9 +278,7 @@ export function CompaniesTable({ initialCompanies }: CompaniesTableProps) {
         </div>
       )}
 
-      {showForm && (
-        <NewCompanySlideOver onClose={() => setShowForm(false)} onSaved={handleSaved} />
-      )}
+      {showForm && <NewCompanySlideOver onClose={() => setShowForm(false)} onSaved={handleSaved} />}
 
       <ToastList toasts={toasts} />
     </>

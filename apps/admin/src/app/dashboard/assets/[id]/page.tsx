@@ -18,7 +18,10 @@ export default async function AssetDetailPage({ params }: { params: Promise<{ id
     return (
       <div className="px-8 py-8">
         <p className="text-gray-500 text-sm">Asset not found.</p>
-        <Link href="/dashboard/assets" className="mt-4 inline-block text-sm text-gray-600 hover:text-gray-900">
+        <Link
+          href="/dashboard/assets"
+          className="mt-4 inline-block text-sm text-gray-600 hover:text-gray-900"
+        >
           ← Back to assets
         </Link>
       </div>

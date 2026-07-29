@@ -31,7 +31,11 @@ const STATUS_COLORS: Record<string, string> = {
 
 function fmtDate(d?: string) {
   if (!d) return '—';
-  return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(d).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 }
 
 function fmtMoney(n?: number) {
@@ -46,7 +50,10 @@ export default async function PurchasingDashboardPage() {
   let grns: GRN[] = [];
 
   try {
-    const res = await apiFetch<{ data: PurchaseOrder[] }>('/api/v1/purchasing/orders?limit=50', tenantId);
+    const res = await apiFetch<{ data: PurchaseOrder[] }>(
+      '/api/v1/purchasing/orders?limit=50',
+      tenantId,
+    );
     orders = Array.isArray(res) ? res : (res.data ?? []);
   } catch {
     orders = [];
@@ -59,14 +66,18 @@ export default async function PurchasingDashboardPage() {
     grns = [];
   }
 
-  const openOrders = orders.filter((o) => !['received', 'cancelled'].includes(o.data.status ?? 'draft'));
+  const openOrders = orders.filter(
+    (o) => !['received', 'cancelled'].includes(o.data.status ?? 'draft'),
+  );
   const pendingGRNs = grns.filter((g) => g.data.status === 'pending');
 
   // Total spend this month
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
   const monthSpend = orders
-    .filter((o) => o.data.orderDate && o.data.orderDate >= monthStart && o.data.status !== 'cancelled')
+    .filter(
+      (o) => o.data.orderDate && o.data.orderDate >= monthStart && o.data.status !== 'cancelled',
+    )
     .reduce((s, o) => s + (o.data.total ?? 0), 0);
 
   const recentOrders = orders.slice(0, 5);
@@ -75,7 +86,9 @@ export default async function PurchasingDashboardPage() {
     <div className="px-8 py-8 max-w-7xl">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-gray-900">Purchasing</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Overview of purchase orders, GRNs, and vendors</p>
+        <p className="text-sm text-gray-500 mt-0.5">
+          Overview of purchase orders, GRNs, and vendors
+        </p>
       </div>
 
       {/* Stat cards */}
@@ -97,9 +110,21 @@ export default async function PurchasingDashboardPage() {
       <div className="grid grid-cols-3 gap-4 mb-8">
         {(
           [
-            { href: '/dashboard/purchasing/orders', label: 'Purchase Orders', desc: 'Create and manage POs' },
-            { href: '/dashboard/purchasing/grn', label: 'Goods Received Notes', desc: 'Track received inventory' },
-            { href: '/dashboard/purchasing/vendors', label: 'Vendors', desc: 'Manage purchasing vendors' },
+            {
+              href: '/dashboard/purchasing/orders',
+              label: 'Purchase Orders',
+              desc: 'Create and manage POs',
+            },
+            {
+              href: '/dashboard/purchasing/grn',
+              label: 'Goods Received Notes',
+              desc: 'Track received inventory',
+            },
+            {
+              href: '/dashboard/purchasing/vendors',
+              label: 'Vendors',
+              desc: 'Manage purchasing vendors',
+            },
           ] as const
         ).map((link) => (
           <Link
@@ -117,19 +142,26 @@ export default async function PurchasingDashboardPage() {
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <h2 className="text-sm font-semibold text-gray-900">Recent Purchase Orders</h2>
-          <Link href="/dashboard/purchasing/orders" className="text-xs text-gray-500 hover:text-gray-900">
+          <Link
+            href="/dashboard/purchasing/orders"
+            className="text-xs text-gray-500 hover:text-gray-900"
+          >
             View all →
           </Link>
         </div>
         {recentOrders.length === 0 ? (
-          <div className="px-5 py-10 text-center text-sm text-gray-400">No purchase orders yet.</div>
+          <div className="px-5 py-10 text-center text-sm text-gray-400">
+            No purchase orders yet.
+          </div>
         ) : (
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-100">
                 <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">PO #</th>
                 <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Vendor</th>
-                <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Order Date</th>
+                <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">
+                  Order Date
+                </th>
                 <th className="text-right px-5 py-3 text-xs font-medium text-gray-500">Total</th>
                 <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Status</th>
               </tr>
@@ -138,17 +170,27 @@ export default async function PurchasingDashboardPage() {
               {recentOrders.map((o) => {
                 const status = o.data.status ?? 'draft';
                 return (
-                  <tr key={o.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                  <tr
+                    key={o.id}
+                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
+                  >
                     <td className="px-5 py-3">
-                      <Link href={`/dashboard/purchasing/orders/${o.id}`} className="font-mono text-xs text-gray-700 hover:text-gray-900">
+                      <Link
+                        href={`/dashboard/purchasing/orders/${o.id}`}
+                        className="font-mono text-xs text-gray-700 hover:text-gray-900"
+                      >
                         {o.data.poNumber ?? o.id.slice(0, 8).toUpperCase()}
                       </Link>
                     </td>
                     <td className="px-5 py-3 text-gray-600">{o.data.vendorName ?? '—'}</td>
                     <td className="px-5 py-3 text-xs text-gray-500">{fmtDate(o.data.orderDate)}</td>
-                    <td className="px-5 py-3 text-right text-gray-800 font-medium">{fmtMoney(o.data.total)}</td>
+                    <td className="px-5 py-3 text-right text-gray-800 font-medium">
+                      {fmtMoney(o.data.total)}
+                    </td>
                     <td className="px-5 py-3">
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-600'}`}>
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-600'}`}
+                      >
                         {status}
                       </span>
                     </td>

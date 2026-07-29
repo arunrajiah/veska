@@ -51,9 +51,8 @@ export default async function DashboardOverviewPage() {
   const tenantId = cookieStore.get('veska_tenant')?.value ?? 'demo';
   const sessionToken = cookieStore.get('veska_session')?.value;
 
-  const identityId = cookieStore.get('veska_identity')?.value
-    ?? cookieStore.get('veska_user')?.value
-    ?? 'system';
+  const identityId =
+    cookieStore.get('veska_identity')?.value ?? cookieStore.get('veska_user')?.value ?? 'system';
 
   const authHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
   if (sessionToken) authHeaders['Authorization'] = `Bearer ${sessionToken}`;
@@ -65,24 +64,34 @@ export default async function DashboardOverviewPage() {
   let activity: ActivityItem[] = [];
 
   const [statsResult, activityResult] = await Promise.allSettled([
-    fetch((process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + `/api/v1/dashboard/stats?tenantId=${tenantId}`, {
-      cache: 'no-store',
-      headers: authHeaders,
-    }).then((r) => {
+    fetch(
+      (process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') +
+        `/api/v1/dashboard/stats?tenantId=${tenantId}`,
+      {
+        cache: 'no-store',
+        headers: authHeaders,
+      },
+    ).then((r) => {
       if (!r.ok) throw new Error(`stats ${r.status}`);
       return r.json() as Promise<DashboardStats>;
     }),
-    fetch((process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + `/api/v1/dashboard/activity?tenantId=${tenantId}&limit=15`, {
-      cache: 'no-store',
-      headers: authHeaders,
-    }).then((r) => {
-      if (!r.ok) throw new Error(`activity ${r.status}`);
-      return r.json() as Promise<{ activities?: ActivityItem[] } | ActivityItem[]>;
-    }).then((data) => {
-      // API wraps activity in { activities: [...] }
-      if (Array.isArray(data)) return data;
-      return (data as { activities?: ActivityItem[] }).activities ?? [];
-    }),
+    fetch(
+      (process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') +
+        `/api/v1/dashboard/activity?tenantId=${tenantId}&limit=15`,
+      {
+        cache: 'no-store',
+        headers: authHeaders,
+      },
+    )
+      .then((r) => {
+        if (!r.ok) throw new Error(`activity ${r.status}`);
+        return r.json() as Promise<{ activities?: ActivityItem[] } | ActivityItem[]>;
+      })
+      .then((data) => {
+        // API wraps activity in { activities: [...] }
+        if (Array.isArray(data)) return data;
+        return (data as { activities?: ActivityItem[] }).activities ?? [];
+      }),
   ]);
 
   if (statsResult.status === 'fulfilled') {
@@ -110,7 +119,12 @@ export default async function DashboardOverviewPage() {
         stats={stats}
         statsError={statsError}
         activity={activity}
-        todayLabel={new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+        todayLabel={new Date().toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })}
         welcomeText={t('welcome')}
         activeEmployeesLabel={t('activeEmployees')}
       />

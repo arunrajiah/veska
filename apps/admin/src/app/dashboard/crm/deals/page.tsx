@@ -16,7 +16,7 @@ export default async function DealsPage() {
       '/api/v1/crm/deals?limit=50',
       TENANT_ID,
     );
-    deals = Array.isArray(res) ? res : (res as { data: DealRecord[] }).data ?? [];
+    deals = Array.isArray(res) ? res : ((res as { data: DealRecord[] }).data ?? []);
   } catch {
     deals = [];
   }

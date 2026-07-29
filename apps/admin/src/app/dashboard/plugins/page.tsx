@@ -36,13 +36,11 @@ export default async function PluginsPage() {
           <Puzzle size={20} className="text-gray-600" />
           <div>
             <h1 className="text-2xl font-semibold text-gray-900">Plugins</h1>
-            <p className="text-sm text-gray-500 mt-0.5">
-              {plugins.length} installed
-            </p>
+            <p className="text-sm text-gray-500 mt-0.5">{plugins.length} installed</p>
           </div>
         </div>
         <Link
-          href={"/dashboard/plugins/marketplace" as any}
+          href={'/dashboard/plugins/marketplace' as any}
           className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
         >
           Browse marketplace
@@ -56,7 +54,7 @@ export default async function PluginsPage() {
           <p className="text-gray-400 text-sm">
             Browse the{' '}
             <Link
-              href={"/dashboard/plugins/marketplace" as any}
+              href={'/dashboard/plugins/marketplace' as any}
               className="text-gray-600 underline hover:text-gray-900"
             >
               marketplace
@@ -67,10 +65,7 @@ export default async function PluginsPage() {
       ) : (
         <div className="space-y-3">
           {plugins.map((plugin) => (
-            <div
-              key={plugin.id}
-              className="bg-white border border-gray-200 rounded-xl p-5"
-            >
+            <div key={plugin.id} className="bg-white border border-gray-200 rounded-xl p-5">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
@@ -78,9 +73,7 @@ export default async function PluginsPage() {
                     <span className="text-xs text-gray-400">v{plugin.version}</span>
                     <span
                       className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                        plugin.enabled
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-gray-100 text-gray-500'
+                        plugin.enabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
                       }`}
                     >
                       {plugin.enabled ? 'Enabled' : 'Disabled'}

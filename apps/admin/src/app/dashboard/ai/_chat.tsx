@@ -91,16 +91,19 @@ export default function AIChatShell({ initialConversations }: AIChatShellProps) 
 
   async function createConversation(firstMessage?: string): Promise<Conversation | null> {
     try {
-      const res = await fetch((process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/ai/conversations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tenantId: 'demo',
-          title: firstMessage
-            ? firstMessage.slice(0, 60) + (firstMessage.length > 60 ? '…' : '')
-            : 'New conversation',
-        }),
-      });
+      const res = await fetch(
+        (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/ai/conversations',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tenantId: 'demo',
+            title: firstMessage
+              ? firstMessage.slice(0, 60) + (firstMessage.length > 60 ? '…' : '')
+              : 'New conversation',
+          }),
+        },
+      );
       if (!res.ok) return null;
       const data = await res.json();
       const conv: Conversation = data.conversation ?? data;
@@ -114,7 +117,7 @@ export default function AIChatShell({ initialConversations }: AIChatShellProps) 
   async function loadMessages(convId: string) {
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/ai/conversations/${convId}/messages`
+        `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/ai/conversations/${convId}/messages`,
       );
       if (!res.ok) return;
       const data = await res.json();
@@ -161,7 +164,7 @@ export default function AIChatShell({ initialConversations }: AIChatShellProps) 
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: trimmed }),
-        }
+        },
       );
       if (!res.ok) throw new Error('Failed to send message');
       const data = await res.json();
@@ -241,9 +244,7 @@ export default function AIChatShell({ initialConversations }: AIChatShellProps) 
                   <div className="min-w-0">
                     <p
                       className={`text-sm truncate ${
-                        activeConvId === conv.id
-                          ? 'text-indigo-700 font-medium'
-                          : 'text-gray-700'
+                        activeConvId === conv.id ? 'text-indigo-700 font-medium' : 'text-gray-700'
                       }`}
                     >
                       {conv.title}
@@ -298,7 +299,9 @@ export default function AIChatShell({ initialConversations }: AIChatShellProps) 
                     <Sparkles size={14} className="text-indigo-600" />
                   </div>
                 )}
-                <div className={`max-w-[70%] ${msg.role === 'user' ? 'items-end' : 'items-start'} flex flex-col gap-1`}>
+                <div
+                  className={`max-w-[70%] ${msg.role === 'user' ? 'items-end' : 'items-start'} flex flex-col gap-1`}
+                >
                   <div
                     className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
                       msg.role === 'user'
@@ -308,13 +311,11 @@ export default function AIChatShell({ initialConversations }: AIChatShellProps) 
                   >
                     {msg.content}
                   </div>
-                  {msg.role === 'assistant' &&
-                    msg.toolsUsed &&
-                    msg.toolsUsed.length > 0 && (
-                      <p className="text-xs text-gray-400 px-1">
-                        Tools used: {msg.toolsUsed.join(', ')}
-                      </p>
-                    )}
+                  {msg.role === 'assistant' && msg.toolsUsed && msg.toolsUsed.length > 0 && (
+                    <p className="text-xs text-gray-400 px-1">
+                      Tools used: {msg.toolsUsed.join(', ')}
+                    </p>
+                  )}
                 </div>
               </div>
             ))}

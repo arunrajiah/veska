@@ -44,11 +44,14 @@ export default function NewRecurringForm() {
     };
 
     try {
-      const res = await fetch((process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/recurring-invoices', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
+      const res = await fetch(
+        (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/recurring-invoices',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        },
+      );
       if (!res.ok) throw new Error(await res.text());
       router.push('/dashboard/finance/recurring');
       router.refresh();
@@ -122,9 +125,7 @@ export default function NewRecurringForm() {
 
         {/* Due in days */}
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">
-            Due in days
-          </label>
+          <label className="block text-xs font-medium text-gray-700 mb-1">Due in days</label>
           <input
             name="dueInDays"
             type="number"

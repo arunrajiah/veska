@@ -36,7 +36,11 @@ function usd(v?: number) {
 
 function fmtDate(d?: string) {
   if (!d) return '—';
-  return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(d).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 }
 
 export function StatusBadge({ status }: { status?: string }) {
@@ -48,13 +52,23 @@ export function StatusBadge({ status }: { status?: string }) {
   };
   const label = status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Draft';
   return (
-    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${map[status ?? 'draft'] ?? 'bg-gray-100 text-gray-600'}`}>
+    <span
+      className={`text-xs px-2 py-0.5 rounded-full font-medium ${map[status ?? 'draft'] ?? 'bg-gray-100 text-gray-600'}`}
+    >
       {label}
     </span>
   );
 }
 
-function NewRunSlideOver({ open, onClose, onCreated }: { open: boolean; onClose: () => void; onCreated: () => void }) {
+function NewRunSlideOver({
+  open,
+  onClose,
+  onCreated,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onCreated: () => void;
+}) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -175,7 +189,9 @@ export function PayrollRunsClient({ initialRuns }: { initialRuns: PayrollRun[] }
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">Payroll Runs</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{totalRuns} run{totalRuns !== 1 ? 's' : ''}</p>
+          <p className="text-sm text-gray-500 mt-0.5">
+            {totalRuns} run{totalRuns !== 1 ? 's' : ''}
+          </p>
         </div>
         <button
           onClick={() => setShowNew(true)}
@@ -188,19 +204,27 @@ export function PayrollRunsClient({ initialRuns }: { initialRuns: PayrollRun[] }
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4 mb-8">
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-5 py-4">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Total Runs</p>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+            Total Runs
+          </p>
           <p className="text-2xl font-semibold text-gray-900">{totalRuns}</p>
         </div>
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-5 py-4">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Completed</p>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+            Completed
+          </p>
           <p className="text-2xl font-semibold text-green-700">{completed}</p>
         </div>
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-5 py-4">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Processing</p>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+            Processing
+          </p>
           <p className="text-2xl font-semibold text-blue-700">{processing}</p>
         </div>
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-5 py-4">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Total Paid</p>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+            Total Paid
+          </p>
           <p className="text-2xl font-semibold text-gray-900">{usd(totalPaid)}</p>
         </div>
       </div>
@@ -237,12 +261,16 @@ export function PayrollRunsClient({ initialRuns }: { initialRuns: PayrollRun[] }
                     #{run.data?.runNumber ?? run.id.slice(0, 6)}
                   </td>
                   <td className="px-5 py-3 text-gray-600">{run.data?.period ?? '—'}</td>
-                  <td className="px-5 py-3"><StatusBadge {...(run.data?.status ? { status: run.data.status } : {})} /></td>
+                  <td className="px-5 py-3">
+                    <StatusBadge {...(run.data?.status ? { status: run.data.status } : {})} />
+                  </td>
                   <td className="px-5 py-3 text-gray-600">{run.data?.employeeCount ?? '—'}</td>
                   <td className="px-5 py-3 text-gray-600">{usd(run.data?.totalGross)}</td>
                   <td className="px-5 py-3 text-gray-600">{usd(run.data?.totalNet)}</td>
                   <td className="px-5 py-3 text-gray-600">{usd(run.data?.totalTax)}</td>
-                  <td className="px-5 py-3 text-gray-500 text-xs">{fmtDate(run.data?.processedAt)}</td>
+                  <td className="px-5 py-3 text-gray-500 text-xs">
+                    {fmtDate(run.data?.processedAt)}
+                  </td>
                   <td className="px-5 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center justify-end gap-2">
                       {run.data?.status === 'draft' && (

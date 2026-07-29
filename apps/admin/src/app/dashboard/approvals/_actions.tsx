@@ -68,11 +68,14 @@ export function InboxActions({ requests: initialRequests }: InboxActionsProps) {
   async function handleApprove(id: string) {
     setLoadingId(id);
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/approval-requests/${id}/approve`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ approverName: 'Admin' }),
-      });
+      await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/approval-requests/${id}/approve`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ approverName: 'Admin' }),
+        },
+      );
       setRequests((prev) => prev.filter((r) => r.id !== id));
     } finally {
       setLoadingId(null);
@@ -82,11 +85,14 @@ export function InboxActions({ requests: initialRequests }: InboxActionsProps) {
   async function handleRejectSubmit(id: string) {
     setLoadingId(id);
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/approval-requests/${id}/reject`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ approverName: 'Admin', comment: rejectComment }),
-      });
+      await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/approval-requests/${id}/reject`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ approverName: 'Admin', comment: rejectComment }),
+        },
+      );
       setRequests((prev) => prev.filter((r) => r.id !== id));
       setRejectingId(null);
       setRejectComment('');
@@ -148,7 +154,9 @@ export function InboxActions({ requests: initialRequests }: InboxActionsProps) {
                     Reject
                   </button>
                   <button
-                    onClick={() => { void handleApprove(req.id); }}
+                    onClick={() => {
+                      void handleApprove(req.id);
+                    }}
                     disabled={loadingId === req.id}
                     aria-disabled={loadingId === req.id}
                     aria-label={`Approve ${req.entityTitle}`}
@@ -225,11 +233,14 @@ export function DetailActions({ requestId, status }: DetailActionsProps) {
   async function handleApprove() {
     setLoadingAction('approve');
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/approval-requests/${requestId}/approve`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ approverName: 'Admin' }),
-      });
+      await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/approval-requests/${requestId}/approve`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ approverName: 'Admin' }),
+        },
+      );
       setDone(true);
     } finally {
       setLoadingAction(null);
@@ -239,11 +250,14 @@ export function DetailActions({ requestId, status }: DetailActionsProps) {
   async function handleReject() {
     setLoadingAction('reject');
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/approval-requests/${requestId}/reject`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ approverName: 'Admin', comment }),
-      });
+      await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/approval-requests/${requestId}/reject`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ approverName: 'Admin', comment }),
+        },
+      );
       setDone(true);
     } finally {
       setLoadingAction(null);

@@ -32,10 +32,22 @@ interface TimeEntry {
 
 function fmtDate(d?: string) {
   if (!d) return '—';
-  return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(d).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 }
 
-function LogTimeSlideOver({ open, onClose, onCreated }: { open: boolean; onClose: () => void; onCreated: () => void }) {
+function LogTimeSlideOver({
+  open,
+  onClose,
+  onCreated,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onCreated: () => void;
+}) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [billable, setBillable] = useState(false);
@@ -78,28 +90,50 @@ function LogTimeSlideOver({ open, onClose, onCreated }: { open: boolean; onClose
       <div className="relative bg-white w-full max-w-md h-full overflow-y-auto shadow-xl flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-base font-semibold text-gray-900">Log Time</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <X size={18} />
+          </button>
         </div>
         <form onSubmit={(e) => void handleSubmit(e)} className="flex-1 px-6 py-5 space-y-4">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Project</label>
-            <input name="projectName" placeholder="Project name"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              name="projectName"
+              placeholder="Project name"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Date *</label>
-            <input name="date" type="date" required defaultValue={todayStr}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              name="date"
+              type="date"
+              required
+              defaultValue={todayStr}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Hours *</label>
-            <input name="hours" type="number" required min="0.25" max="24" step="0.25" placeholder="0"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              name="hours"
+              type="number"
+              required
+              min="0.25"
+              max="24"
+              step="0.25"
+              placeholder="0"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
-            <textarea name="description" rows={3} placeholder="What did you work on?"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none" />
+            <textarea
+              name="description"
+              rows={3}
+              placeholder="What did you work on?"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none"
+            />
           </div>
           <div className="flex items-center gap-3">
             <input
@@ -109,16 +143,24 @@ function LogTimeSlideOver({ open, onClose, onCreated }: { open: boolean; onClose
               onChange={(e) => setBillable(e.target.checked)}
               className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
             />
-            <label htmlFor="billable-e" className="text-sm text-gray-700">Billable</label>
+            <label htmlFor="billable-e" className="text-sm text-gray-700">
+              Billable
+            </label>
           </div>
           {error && <p className="text-xs text-red-500">{error}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="submit" disabled={saving}
-              className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
+            <button
+              type="submit"
+              disabled={saving}
+              className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors"
+            >
               {saving ? 'Saving…' : 'Log Time'}
             </button>
-            <button type="button" onClick={onClose}
-              className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+            <button
+              type="button"
+              onClick={onClose}
+              className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+            >
               Cancel
             </button>
           </div>
@@ -142,7 +184,8 @@ export function TimeEntriesClient({ entries }: { entries: TimeEntry[] }) {
   const filtered = useMemo(() => {
     return entries.filter((e) => {
       const d = e.data;
-      if (projectFilter && !d?.projectName?.toLowerCase().includes(projectFilter.toLowerCase())) return false;
+      if (projectFilter && !d?.projectName?.toLowerCase().includes(projectFilter.toLowerCase()))
+        return false;
       if (dateStart && (d?.date ?? '') < dateStart) return false;
       if (dateEnd && (d?.date ?? '') > dateEnd) return false;
       return true;
@@ -183,7 +226,9 @@ export function TimeEntriesClient({ entries }: { entries: TimeEntry[] }) {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">Time Entries</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{filtered.length} entr{filtered.length !== 1 ? 'ies' : 'y'}</p>
+          <p className="text-sm text-gray-500 mt-0.5">
+            {filtered.length} entr{filtered.length !== 1 ? 'ies' : 'y'}
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -207,7 +252,10 @@ export function TimeEntriesClient({ entries }: { entries: TimeEntry[] }) {
           type="text"
           placeholder="Filter by project…"
           value={projectFilter}
-          onChange={(e) => { setProjectFilter(e.target.value); setPage(1); }}
+          onChange={(e) => {
+            setProjectFilter(e.target.value);
+            setPage(1);
+          }}
           className="border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 w-52"
         />
         <div className="flex items-center gap-2">
@@ -215,7 +263,10 @@ export function TimeEntriesClient({ entries }: { entries: TimeEntry[] }) {
           <input
             type="date"
             value={dateStart}
-            onChange={(e) => { setDateStart(e.target.value); setPage(1); }}
+            onChange={(e) => {
+              setDateStart(e.target.value);
+              setPage(1);
+            }}
             className="border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
           />
         </div>
@@ -224,13 +275,21 @@ export function TimeEntriesClient({ entries }: { entries: TimeEntry[] }) {
           <input
             type="date"
             value={dateEnd}
-            onChange={(e) => { setDateEnd(e.target.value); setPage(1); }}
+            onChange={(e) => {
+              setDateEnd(e.target.value);
+              setPage(1);
+            }}
             className="border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
           />
         </div>
         {(projectFilter || dateStart || dateEnd) && (
           <button
-            onClick={() => { setProjectFilter(''); setDateStart(''); setDateEnd(''); setPage(1); }}
+            onClick={() => {
+              setProjectFilter('');
+              setDateStart('');
+              setDateEnd('');
+              setPage(1);
+            }}
             className="text-xs text-gray-500 hover:text-gray-900 border border-gray-200 px-2 py-1.5 rounded-lg"
           >
             Clear
@@ -250,11 +309,17 @@ export function TimeEntriesClient({ entries }: { entries: TimeEntry[] }) {
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50">
                   <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Date</th>
-                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Employee</th>
+                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">
+                    Employee
+                  </th>
                   <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Project</th>
                   <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Hours</th>
-                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Description</th>
-                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Billable</th>
+                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">
+                    Description
+                  </th>
+                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">
+                    Billable
+                  </th>
                   <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Status</th>
                 </tr>
               </thead>
@@ -262,24 +327,41 @@ export function TimeEntriesClient({ entries }: { entries: TimeEntry[] }) {
                 {paginated.map((entry) => {
                   const d = entry.data;
                   return (
-                    <tr key={entry.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                    <tr
+                      key={entry.id}
+                      className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
+                    >
                       <td className="px-5 py-3 text-xs text-gray-500">{fmtDate(d?.date)}</td>
-                      <td className="px-5 py-3 font-medium text-gray-900">{d?.employeeName ?? '—'}</td>
+                      <td className="px-5 py-3 font-medium text-gray-900">
+                        {d?.employeeName ?? '—'}
+                      </td>
                       <td className="px-5 py-3 text-gray-600">{d?.projectName ?? '—'}</td>
-                      <td className="px-5 py-3 font-medium text-gray-900">{d?.hours != null ? `${d.hours}h` : '—'}</td>
-                      <td className="px-5 py-3 text-gray-500 max-w-48 truncate">{d?.description ?? '—'}</td>
+                      <td className="px-5 py-3 font-medium text-gray-900">
+                        {d?.hours != null ? `${d.hours}h` : '—'}
+                      </td>
+                      <td className="px-5 py-3 text-gray-500 max-w-48 truncate">
+                        {d?.description ?? '—'}
+                      </td>
                       <td className="px-5 py-3">
                         {d?.billable ? (
-                          <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-blue-50 text-blue-700">Billable</span>
+                          <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-blue-50 text-blue-700">
+                            Billable
+                          </span>
                         ) : (
-                          <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-gray-100 text-gray-500">Non-billable</span>
+                          <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-gray-100 text-gray-500">
+                            Non-billable
+                          </span>
                         )}
                       </td>
                       <td className="px-5 py-3">
                         {d?.status === 'approved' ? (
-                          <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-green-50 text-green-700">Approved</span>
+                          <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-green-50 text-green-700">
+                            Approved
+                          </span>
                         ) : (
-                          <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-yellow-50 text-yellow-700">Pending</span>
+                          <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-yellow-50 text-yellow-700">
+                            Pending
+                          </span>
                         )}
                       </td>
                     </tr>
@@ -293,7 +375,8 @@ export function TimeEntriesClient({ entries }: { entries: TimeEntry[] }) {
           {totalPages > 1 && (
             <div className="flex items-center justify-between">
               <p className="text-xs text-gray-500">
-                Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} of {filtered.length}
+                Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)}{' '}
+                of {filtered.length}
               </p>
               <div className="flex gap-2">
                 <button

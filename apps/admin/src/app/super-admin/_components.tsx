@@ -44,16 +44,106 @@ interface SystemEvent {
 // Mock data
 // ---------------------------------------------------------------------------
 const MOCK_TENANTS: Tenant[] = [
-  { id: 'acme-corp', company: 'Acme Corp', plan: 'business', seatsUsed: 48, seatsMax: 200, mrr: 399, status: 'active', created: '2024-03-12' },
-  { id: 'globex', company: 'Globex Industries', plan: 'growth', seatsUsed: 22, seatsMax: 50, mrr: 149, status: 'active', created: '2024-05-01' },
-  { id: 'initech', company: 'Initech LLC', plan: 'starter', seatsUsed: 7, seatsMax: 10, mrr: 49, status: 'active', created: '2024-06-15' },
-  { id: 'umbrella', company: 'Umbrella Ltd', plan: 'enterprise', seatsUsed: 310, seatsMax: 'unlimited', mrr: 2500, status: 'active', created: '2023-11-20' },
-  { id: 'wayne-ent', company: 'Wayne Enterprises', plan: 'business', seatsUsed: 95, seatsMax: 200, mrr: 399, status: 'trialing', created: '2025-04-28' },
-  { id: 'stark-ind', company: 'Stark Industries', plan: 'enterprise', seatsUsed: 512, seatsMax: 'unlimited', mrr: 4800, status: 'active', created: '2023-09-03' },
-  { id: 'oscorp', company: 'Oscorp', plan: 'growth', seatsUsed: 31, seatsMax: 50, mrr: 149, status: 'suspended', created: '2024-02-14' },
-  { id: 'dunder-mifflin', company: 'Dunder Mifflin', plan: 'starter', seatsUsed: 9, seatsMax: 10, mrr: 49, status: 'active', created: '2024-08-22' },
-  { id: 'pied-piper', company: 'Pied Piper', plan: 'growth', seatsUsed: 18, seatsMax: 50, mrr: 149, status: 'trialing', created: '2025-03-10' },
-  { id: 'hooli', company: 'Hooli', plan: 'free', seatsUsed: 3, seatsMax: 3, mrr: 0, status: 'active', created: '2025-05-01' },
+  {
+    id: 'acme-corp',
+    company: 'Acme Corp',
+    plan: 'business',
+    seatsUsed: 48,
+    seatsMax: 200,
+    mrr: 399,
+    status: 'active',
+    created: '2024-03-12',
+  },
+  {
+    id: 'globex',
+    company: 'Globex Industries',
+    plan: 'growth',
+    seatsUsed: 22,
+    seatsMax: 50,
+    mrr: 149,
+    status: 'active',
+    created: '2024-05-01',
+  },
+  {
+    id: 'initech',
+    company: 'Initech LLC',
+    plan: 'starter',
+    seatsUsed: 7,
+    seatsMax: 10,
+    mrr: 49,
+    status: 'active',
+    created: '2024-06-15',
+  },
+  {
+    id: 'umbrella',
+    company: 'Umbrella Ltd',
+    plan: 'enterprise',
+    seatsUsed: 310,
+    seatsMax: 'unlimited',
+    mrr: 2500,
+    status: 'active',
+    created: '2023-11-20',
+  },
+  {
+    id: 'wayne-ent',
+    company: 'Wayne Enterprises',
+    plan: 'business',
+    seatsUsed: 95,
+    seatsMax: 200,
+    mrr: 399,
+    status: 'trialing',
+    created: '2025-04-28',
+  },
+  {
+    id: 'stark-ind',
+    company: 'Stark Industries',
+    plan: 'enterprise',
+    seatsUsed: 512,
+    seatsMax: 'unlimited',
+    mrr: 4800,
+    status: 'active',
+    created: '2023-09-03',
+  },
+  {
+    id: 'oscorp',
+    company: 'Oscorp',
+    plan: 'growth',
+    seatsUsed: 31,
+    seatsMax: 50,
+    mrr: 149,
+    status: 'suspended',
+    created: '2024-02-14',
+  },
+  {
+    id: 'dunder-mifflin',
+    company: 'Dunder Mifflin',
+    plan: 'starter',
+    seatsUsed: 9,
+    seatsMax: 10,
+    mrr: 49,
+    status: 'active',
+    created: '2024-08-22',
+  },
+  {
+    id: 'pied-piper',
+    company: 'Pied Piper',
+    plan: 'growth',
+    seatsUsed: 18,
+    seatsMax: 50,
+    mrr: 149,
+    status: 'trialing',
+    created: '2025-03-10',
+  },
+  {
+    id: 'hooli',
+    company: 'Hooli',
+    plan: 'free',
+    seatsUsed: 3,
+    seatsMax: 3,
+    mrr: 0,
+    status: 'active',
+    created: '2025-05-01',
+  },
 ];
 
 const MRR_BY_PLAN = [
@@ -82,11 +172,36 @@ const TOP_CUSTOMERS = [
 ];
 
 const SYSTEM_EVENTS: SystemEvent[] = [
-  { id: '1', message: 'Acme Corp upgraded from Growth → Business', type: 'success', timestamp: '2026-05-15T09:42:00Z' },
-  { id: '2', message: 'New signup: Hooli (Free plan)', type: 'info', timestamp: '2026-05-15T08:17:00Z' },
-  { id: '3', message: 'Payment failed for Oscorp — card declined', type: 'error', timestamp: '2026-05-14T23:55:00Z' },
-  { id: '4', message: 'Pied Piper trial started (Growth, 14-day)', type: 'info', timestamp: '2026-05-14T15:30:00Z' },
-  { id: '5', message: 'Stark Industries API usage nearing rate limit', type: 'warning', timestamp: '2026-05-14T12:00:00Z' },
+  {
+    id: '1',
+    message: 'Acme Corp upgraded from Growth → Business',
+    type: 'success',
+    timestamp: '2026-05-15T09:42:00Z',
+  },
+  {
+    id: '2',
+    message: 'New signup: Hooli (Free plan)',
+    type: 'info',
+    timestamp: '2026-05-15T08:17:00Z',
+  },
+  {
+    id: '3',
+    message: 'Payment failed for Oscorp — card declined',
+    type: 'error',
+    timestamp: '2026-05-14T23:55:00Z',
+  },
+  {
+    id: '4',
+    message: 'Pied Piper trial started (Growth, 14-day)',
+    type: 'info',
+    timestamp: '2026-05-14T15:30:00Z',
+  },
+  {
+    id: '5',
+    message: 'Stark Industries API usage nearing rate limit',
+    type: 'warning',
+    timestamp: '2026-05-14T12:00:00Z',
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -100,11 +215,20 @@ const PLAN_COLORS: Record<PlanId, string> = {
   enterprise: 'bg-amber-900/60 text-amber-300',
 };
 
-const STATUS_CONFIG: Record<TenantStatus, { label: string; class: string; icon: React.ReactNode }> = {
-  active: { label: 'Active', class: 'bg-green-900/40 text-green-300', icon: <CheckCircle2 size={12} /> },
-  trialing: { label: 'Trial', class: 'bg-blue-900/40 text-blue-300', icon: <Clock size={12} /> },
-  suspended: { label: 'Suspended', class: 'bg-red-900/40 text-red-300', icon: <XCircle size={12} /> },
-};
+const STATUS_CONFIG: Record<TenantStatus, { label: string; class: string; icon: React.ReactNode }> =
+  {
+    active: {
+      label: 'Active',
+      class: 'bg-green-900/40 text-green-300',
+      icon: <CheckCircle2 size={12} />,
+    },
+    trialing: { label: 'Trial', class: 'bg-blue-900/40 text-blue-300', icon: <Clock size={12} /> },
+    suspended: {
+      label: 'Suspended',
+      class: 'bg-red-900/40 text-red-300',
+      icon: <XCircle size={12} />,
+    },
+  };
 
 const EVENT_CONFIG = {
   success: { class: 'bg-green-900/40 text-green-300', icon: <CheckCircle2 size={12} /> },
@@ -141,7 +265,9 @@ function StatCard({
     <div className="bg-slate-800 border border-slate-700 rounded-xl px-5 py-4">
       <div className="flex items-center justify-between mb-3">
         <p className="text-xs font-medium text-slate-400 uppercase tracking-wide">{label}</p>
-        <div className={`flex items-center justify-center w-8 h-8 rounded-lg ${accent}`}>{icon}</div>
+        <div className={`flex items-center justify-center w-8 h-8 rounded-lg ${accent}`}>
+          {icon}
+        </div>
       </div>
       <p className="text-2xl font-semibold text-white">{value}</p>
       {sub && <p className="text-xs text-slate-500 mt-0.5">{sub}</p>}
@@ -152,13 +278,7 @@ function StatCard({
 // ---------------------------------------------------------------------------
 // Change Plan Modal
 // ---------------------------------------------------------------------------
-function ChangePlanModal({
-  tenant,
-  onClose,
-}: {
-  tenant: Tenant;
-  onClose: () => void;
-}) {
+function ChangePlanModal({ tenant, onClose }: { tenant: Tenant; onClose: () => void }) {
   const [selected, setSelected] = useState<PlanId>(tenant.plan);
   const plans: PlanId[] = ['free', 'starter', 'growth', 'business', 'enterprise'];
 
@@ -215,13 +335,7 @@ function ChangePlanModal({
 // ---------------------------------------------------------------------------
 // Suspend Modal
 // ---------------------------------------------------------------------------
-function SuspendModal({
-  tenant,
-  onClose,
-}: {
-  tenant: Tenant;
-  onClose: () => void;
-}) {
+function SuspendModal({ tenant, onClose }: { tenant: Tenant; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <div className="bg-slate-800 border border-red-700/40 rounded-2xl w-full max-w-md mx-4 p-6">
@@ -233,7 +347,10 @@ function SuspendModal({
             <h3 className="text-base font-semibold text-white">Suspend Tenant</h3>
             <p className="text-xs text-slate-400">{tenant.company}</p>
           </div>
-          <button onClick={onClose} className="ml-auto text-slate-400 hover:text-white transition-colors">
+          <button
+            onClick={onClose}
+            className="ml-auto text-slate-400 hover:text-white transition-colors"
+          >
             <X size={18} />
           </button>
         </div>
@@ -318,7 +435,10 @@ function TenantsTab() {
               </option>
             ))}
           </select>
-          <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+          <ChevronDown
+            size={12}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+          />
         </div>
 
         <div className="relative">
@@ -332,7 +452,10 @@ function TenantsTab() {
             <option value="trialing">Trialing</option>
             <option value="suspended">Suspended</option>
           </select>
-          <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+          <ChevronDown
+            size={12}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+          />
         </div>
       </div>
 
@@ -341,13 +464,27 @@ function TenantsTab() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-700 bg-slate-800/80">
-              <th className="text-left px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">Tenant</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">Plan</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">Seats</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">MRR</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">Status</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">Created</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">Actions</th>
+              <th className="text-left px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">
+                Tenant
+              </th>
+              <th className="text-left px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">
+                Plan
+              </th>
+              <th className="text-left px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">
+                Seats
+              </th>
+              <th className="text-left px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">
+                MRR
+              </th>
+              <th className="text-left px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">
+                Status
+              </th>
+              <th className="text-left px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">
+                Created
+              </th>
+              <th className="text-left px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -365,7 +502,9 @@ function TenantsTab() {
                     <p className="text-xs text-slate-500 mt-0.5">{tenant.id}</p>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium capitalize ${PLAN_COLORS[tenant.plan]}`}>
+                    <span
+                      className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium capitalize ${PLAN_COLORS[tenant.plan]}`}
+                    >
                       {tenant.plan}
                     </span>
                   </td>
@@ -373,10 +512,16 @@ function TenantsTab() {
                     {tenant.seatsUsed} / {tenant.seatsMax === 'unlimited' ? '∞' : tenant.seatsMax}
                   </td>
                   <td className="px-4 py-3 font-medium text-white">
-                    {tenant.mrr === 0 ? <span className="text-slate-500">—</span> : fmtMrr(tenant.mrr)}
+                    {tenant.mrr === 0 ? (
+                      <span className="text-slate-500">—</span>
+                    ) : (
+                      fmtMrr(tenant.mrr)
+                    )}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${statusCfg.class}`}>
+                    <span
+                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${statusCfg.class}`}
+                    >
                       {statusCfg.icon}
                       {statusCfg.label}
                     </span>
@@ -415,10 +560,18 @@ function TenantsTab() {
           <button className="px-3 py-1.5 rounded border border-slate-700 text-slate-400 hover:bg-slate-700 transition-colors disabled:opacity-40">
             Previous
           </button>
-          <button className="px-3 py-1.5 rounded border border-slate-700 bg-indigo-600/30 text-indigo-300">1</button>
-          <button className="px-3 py-1.5 rounded border border-slate-700 text-slate-400 hover:bg-slate-700 transition-colors">2</button>
-          <button className="px-3 py-1.5 rounded border border-slate-700 text-slate-400 hover:bg-slate-700 transition-colors">3</button>
-          <button className="px-3 py-1.5 rounded border border-slate-700 text-slate-400 hover:bg-slate-700 transition-colors">Next</button>
+          <button className="px-3 py-1.5 rounded border border-slate-700 bg-indigo-600/30 text-indigo-300">
+            1
+          </button>
+          <button className="px-3 py-1.5 rounded border border-slate-700 text-slate-400 hover:bg-slate-700 transition-colors">
+            2
+          </button>
+          <button className="px-3 py-1.5 rounded border border-slate-700 text-slate-400 hover:bg-slate-700 transition-colors">
+            3
+          </button>
+          <button className="px-3 py-1.5 rounded border border-slate-700 text-slate-400 hover:bg-slate-700 transition-colors">
+            Next
+          </button>
         </div>
       </div>
     </>
@@ -441,20 +594,35 @@ function RevenueTab() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-700/60">
-              <th className="text-left px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">Plan</th>
-              <th className="text-right px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">Customers</th>
-              <th className="text-right px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">MRR</th>
-              <th className="text-right px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">% of Total</th>
+              <th className="text-left px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">
+                Plan
+              </th>
+              <th className="text-right px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">
+                Customers
+              </th>
+              <th className="text-right px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">
+                MRR
+              </th>
+              <th className="text-right px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">
+                % of Total
+              </th>
               <th className="px-4 py-3 w-40"></th>
             </tr>
           </thead>
           <tbody>
             {MRR_BY_PLAN.map((row) => (
-              <tr key={row.plan} className="border-b border-slate-700/30 last:border-0 hover:bg-slate-700/20">
+              <tr
+                key={row.plan}
+                className="border-b border-slate-700/30 last:border-0 hover:bg-slate-700/20"
+              >
                 <td className="px-4 py-3 font-medium text-white">{row.plan}</td>
                 <td className="px-4 py-3 text-right text-slate-300">{row.customers}</td>
-                <td className="px-4 py-3 text-right font-medium text-white">{row.mrr === 0 ? '—' : fmtMrr(row.mrr)}</td>
-                <td className="px-4 py-3 text-right text-slate-400">{row.pct > 0 ? `${row.pct}%` : '—'}</td>
+                <td className="px-4 py-3 text-right font-medium text-white">
+                  {row.mrr === 0 ? '—' : fmtMrr(row.mrr)}
+                </td>
+                <td className="px-4 py-3 text-right text-slate-400">
+                  {row.pct > 0 ? `${row.pct}%` : '—'}
+                </td>
                 <td className="px-4 py-3">
                   {row.mrr > 0 && (
                     <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
@@ -479,14 +647,23 @@ function RevenueTab() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-700/60">
-              <th className="text-left px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">Month</th>
-              <th className="text-right px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">MRR</th>
-              <th className="text-right px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">Growth</th>
+              <th className="text-left px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">
+                Month
+              </th>
+              <th className="text-right px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">
+                MRR
+              </th>
+              <th className="text-right px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">
+                Growth
+              </th>
             </tr>
           </thead>
           <tbody>
             {REVENUE_TREND.map((row) => (
-              <tr key={row.month} className="border-b border-slate-700/30 last:border-0 hover:bg-slate-700/20">
+              <tr
+                key={row.month}
+                className="border-b border-slate-700/30 last:border-0 hover:bg-slate-700/20"
+              >
                 <td className="px-4 py-3 text-slate-300">{row.month}</td>
                 <td className="px-4 py-3 text-right font-medium text-white">{fmtMrr(row.mrr)}</td>
                 <td className="px-4 py-3 text-right">
@@ -512,16 +689,29 @@ function RevenueTab() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-700/60">
-              <th className="text-left px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">#</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">Company</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">Plan</th>
-              <th className="text-right px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">MRR</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">Since</th>
+              <th className="text-left px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">
+                #
+              </th>
+              <th className="text-left px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">
+                Company
+              </th>
+              <th className="text-left px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">
+                Plan
+              </th>
+              <th className="text-right px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">
+                MRR
+              </th>
+              <th className="text-left px-4 py-3 text-xs font-medium text-slate-400 uppercase tracking-wide">
+                Since
+              </th>
             </tr>
           </thead>
           <tbody>
             {TOP_CUSTOMERS.map((c, i) => (
-              <tr key={c.company} className="border-b border-slate-700/30 last:border-0 hover:bg-slate-700/20">
+              <tr
+                key={c.company}
+                className="border-b border-slate-700/30 last:border-0 hover:bg-slate-700/20"
+              >
                 <td className="px-4 py-3 text-slate-500 font-mono text-xs">{i + 1}</td>
                 <td className="px-4 py-3 font-medium text-white">{c.company}</td>
                 <td className="px-4 py-3 text-slate-400 text-xs">{c.plan}</td>
@@ -554,12 +744,19 @@ function SystemTab() {
         <h3 className="text-sm font-semibold text-white mb-3">Platform Health</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {health.map((svc) => (
-            <div key={svc.name} className="bg-slate-800 border border-slate-700 rounded-xl px-4 py-4">
+            <div
+              key={svc.name}
+              className="bg-slate-800 border border-slate-700 rounded-xl px-4 py-4"
+            >
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs font-medium text-slate-400">{svc.name}</p>
-                <span className={`w-2 h-2 rounded-full ${svc.uptime >= 99.5 ? 'bg-green-400' : 'bg-amber-400'}`} />
+                <span
+                  className={`w-2 h-2 rounded-full ${svc.uptime >= 99.5 ? 'bg-green-400' : 'bg-amber-400'}`}
+                />
               </div>
-              <p className={`text-xl font-semibold ${svc.uptime >= 99.5 ? 'text-green-400' : 'text-amber-400'}`}>
+              <p
+                className={`text-xl font-semibold ${svc.uptime >= 99.5 ? 'text-green-400' : 'text-amber-400'}`}
+              >
                 {svc.uptime}%
               </p>
               <p className="text-xs text-slate-500 mt-0.5">uptime (30d)</p>
@@ -577,14 +774,24 @@ function SystemTab() {
           {SYSTEM_EVENTS.map((ev) => {
             const cfg = EVENT_CONFIG[ev.type];
             return (
-              <div key={ev.id} className="flex items-center gap-4 px-5 py-3 hover:bg-slate-700/20 transition-colors">
-                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0 ${cfg.class}`}>
+              <div
+                key={ev.id}
+                className="flex items-center gap-4 px-5 py-3 hover:bg-slate-700/20 transition-colors"
+              >
+                <span
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0 ${cfg.class}`}
+                >
                   {cfg.icon}
                   {ev.type}
                 </span>
                 <p className="text-sm text-slate-300 flex-1">{ev.message}</p>
                 <p className="text-xs text-slate-500 flex-shrink-0">
-                  {new Date(ev.timestamp).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                  {new Date(ev.timestamp).toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
                 </p>
               </div>
             );

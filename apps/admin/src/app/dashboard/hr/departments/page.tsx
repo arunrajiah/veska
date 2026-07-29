@@ -9,7 +9,7 @@ export default async function DepartmentsPage() {
       '/api/v1/hr/departments?limit=50',
       process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
     );
-    departments = Array.isArray(res) ? res : (res as { data: DepartmentRecord[] }).data ?? [];
+    departments = Array.isArray(res) ? res : ((res as { data: DepartmentRecord[] }).data ?? []);
   } catch {
     departments = [];
   }

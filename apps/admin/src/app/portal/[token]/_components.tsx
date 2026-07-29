@@ -80,9 +80,7 @@ export function PortalHome({ contact, token }: { contact: PortalContact; token: 
 
       {/* Nav cards */}
       {cards.length === 0 ? (
-        <div className="text-center py-16 text-gray-400 text-sm">
-          Nothing to show here yet.
-        </div>
+        <div className="text-center py-16 text-gray-400 text-sm">Nothing to show here yet.</div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {cards.map((card) => (
@@ -91,7 +89,9 @@ export function PortalHome({ contact, token }: { contact: PortalContact; token: 
               onClick={() => router.push(card.href as any)}
               className={`text-left p-6 rounded-xl border bg-white transition-all ${card.colorClasses}`}
             >
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-4 ${card.iconClasses}`}>
+              <div
+                className={`w-10 h-10 rounded-lg flex items-center justify-center mb-4 ${card.iconClasses}`}
+              >
                 <card.icon size={20} />
               </div>
               <h2 className="text-base font-semibold text-gray-900 mb-1">{card.title}</h2>

@@ -27,9 +27,7 @@ export default function WebhookForm() {
   const [copied, setCopied] = useState(false);
 
   function toggleEvent(ev: string) {
-    setEvents((prev) =>
-      prev.includes(ev) ? prev.filter((e) => e !== ev) : [...prev, ev]
-    );
+    setEvents((prev) => (prev.includes(ev) ? prev.filter((e) => e !== ev) : [...prev, ev]));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -52,22 +50,21 @@ export default function WebhookForm() {
       };
       if (description.trim()) body.description = description.trim();
 
-      const res = await fetch((process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/webhooks/endpoints', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
+      const res = await fetch(
+        (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/webhooks/endpoints',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        },
+      );
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.message ?? `HTTP ${res.status}`);
       }
       const data = await res.json();
       const secret =
-        data.signingSecret ??
-        data.secret ??
-        data.signing_secret ??
-        data.webhookSecret ??
-        null;
+        data.signingSecret ?? data.secret ?? data.signing_secret ?? data.webhookSecret ?? null;
       setSigningSecret(secret ?? '(no secret returned)');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create webhook endpoint');
@@ -114,7 +111,10 @@ export default function WebhookForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 bg-white rounded-xl border border-gray-200 p-6">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-6 bg-white rounded-xl border border-gray-200 p-6"
+    >
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
@@ -153,7 +153,10 @@ export default function WebhookForm() {
         </label>
         <div className="grid grid-cols-2 gap-2">
           {ALL_EVENTS.map((ev) => (
-            <label key={ev} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+            <label
+              key={ev}
+              className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"
+            >
               <input
                 type="checkbox"
                 checked={events.includes(ev)}

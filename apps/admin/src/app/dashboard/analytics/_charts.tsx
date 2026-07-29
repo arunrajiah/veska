@@ -41,7 +41,8 @@ export function LineChart({
   title?: string;
 }) {
   const { labels, datasets } = data;
-  if (!datasets.length || !labels.length) return title ? <EmptyChart title={title} /> : <EmptyChart />;
+  if (!datasets.length || !labels.length)
+    return title ? <EmptyChart title={title} /> : <EmptyChart />;
 
   const PAD = { top: 20, right: 20, bottom: 48, left: 52 };
   const W = 600;
@@ -161,7 +162,8 @@ export function BarChart({
   horizontal?: boolean;
 }) {
   const { labels, datasets } = data;
-  if (!datasets.length || !labels.length) return title ? <EmptyChart title={title} /> : <EmptyChart />;
+  if (!datasets.length || !labels.length)
+    return title ? <EmptyChart title={title} /> : <EmptyChart />;
 
   const PAD = { top: 20, right: 20, bottom: 48, left: 52 };
   const W = 600;
@@ -205,7 +207,13 @@ export function BarChart({
               const rowY = gi * rowH;
               return (
                 <g key={gi}>
-                  <text x={-8} y={rowY + rowH / 2 + 4} textAnchor="end" fontSize={10} fill="#9ca3af">
+                  <text
+                    x={-8}
+                    y={rowY + rowH / 2 + 4}
+                    textAnchor="end"
+                    fontSize={10}
+                    fill="#9ca3af"
+                  >
                     {label}
                   </text>
                   {datasets.map((ds, di) => {
@@ -426,8 +434,8 @@ export function KPICard({
     changeDir === 'up'
       ? 'bg-emerald-50 text-emerald-700'
       : changeDir === 'down'
-      ? 'bg-red-50 text-red-600'
-      : 'bg-gray-100 text-gray-500';
+        ? 'bg-red-50 text-red-600'
+        : 'bg-gray-100 text-gray-500';
 
   const arrow = changeDir === 'up' ? '↑' : changeDir === 'down' ? '↓' : '';
 

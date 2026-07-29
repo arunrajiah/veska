@@ -1,12 +1,9 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+const API_BASE = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get('veska_session')?.value;
   if (!sessionToken) {
@@ -14,7 +11,7 @@ export async function POST(
   }
 
   const { id } = await params;
-  const body = await req.json() as Record<string, unknown>;
+  const body = (await req.json()) as Record<string, unknown>;
 
   const res = await fetch(`${API_BASE}/api/v1/support/tickets/${id}/reply`, {
     method: 'POST',
@@ -25,6 +22,6 @@ export async function POST(
     body: JSON.stringify(body),
   });
 
-  const data = await res.json() as unknown;
+  const data = (await res.json()) as unknown;
   return NextResponse.json(data, { status: res.status });
 }

@@ -6,7 +6,8 @@ interface Props {
 
 export default async function RoomDetailPage({ params }: Props) {
   const { id } = await params;
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+  const API_BASE =
+    process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
   const headers = { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' };
   const today = new Date().toISOString().slice(0, 10);
 
@@ -25,5 +26,12 @@ export default async function RoomDetailPage({ params }: Props) {
       ? await bookingsRes.value.json()
       : [];
 
-  return <RoomDetailClient roomId={id} initialRoom={room} initialBookings={Array.isArray(bookings) ? bookings : (bookings.bookings ?? [])} initialDate={today} />;
+  return (
+    <RoomDetailClient
+      roomId={id}
+      initialRoom={room}
+      initialBookings={Array.isArray(bookings) ? bookings : (bookings.bookings ?? [])}
+      initialDate={today}
+    />
+  );
 }

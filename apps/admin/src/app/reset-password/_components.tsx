@@ -34,7 +34,7 @@ export function ResetPasswordClient() {
             Invalid or missing reset link.
           </div>
           <Link
-            href={"/forgot-password" as any}
+            href={'/forgot-password' as any}
             className="block w-full text-center text-sm text-indigo-600 hover:text-indigo-700 font-medium py-2"
           >
             Request a new reset link
@@ -121,12 +121,16 @@ export function ResetPasswordClient() {
         </div>
 
         {(error || validationError) && (
-          <div role="alert" aria-live="assertive" className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+          <div
+            role="alert"
+            aria-live="assertive"
+            className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700"
+          >
             {error || validationError}
             {error === 'This reset link has expired or already been used. Request a new one.' && (
               <>
                 {' '}
-                <Link href={"/forgot-password" as any} className="underline font-medium">
+                <Link href={'/forgot-password' as any} className="underline font-medium">
                   Request a new one.
                 </Link>
               </>
@@ -136,7 +140,10 @@ export function ResetPasswordClient() {
 
         <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
           <div>
-            <label htmlFor="reset-password" className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label
+              htmlFor="reset-password"
+              className="block text-sm font-medium text-gray-700 mb-1.5"
+            >
               New password
             </label>
             <div className="relative">
@@ -165,7 +172,10 @@ export function ResetPasswordClient() {
           </div>
 
           <div>
-            <label htmlFor="reset-confirm-password" className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label
+              htmlFor="reset-confirm-password"
+              className="block text-sm font-medium text-gray-700 mb-1.5"
+            >
               Confirm password
             </label>
             <div className="relative">

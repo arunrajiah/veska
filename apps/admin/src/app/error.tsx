@@ -28,7 +28,9 @@ export default function Error({
           >
             {t('tryAgain')}
           </button>
-          <a href="/dashboard" className="text-indigo-600 text-sm">{t('goHome')}</a>
+          <a href="/dashboard" className="text-indigo-600 text-sm">
+            {t('goHome')}
+          </a>
         </div>
       </div>
     </div>

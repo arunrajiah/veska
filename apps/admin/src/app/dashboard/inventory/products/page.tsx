@@ -9,7 +9,7 @@ export default async function ProductsPage() {
       '/api/v1/inventory/products?limit=50',
       process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
     );
-    products = Array.isArray(res) ? res : (res as { data: ProductRecord[] }).data ?? [];
+    products = Array.isArray(res) ? res : ((res as { data: ProductRecord[] }).data ?? []);
   } catch {
     products = [];
   }

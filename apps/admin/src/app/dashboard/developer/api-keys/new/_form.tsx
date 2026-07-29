@@ -29,7 +29,7 @@ export default function ApiKeyForm() {
 
   function toggleScope(scope: string) {
     setScopes((prev) =>
-      prev.includes(scope) ? prev.filter((s) => s !== scope) : [...prev, scope]
+      prev.includes(scope) ? prev.filter((s) => s !== scope) : [...prev, scope],
     );
   }
 
@@ -48,11 +48,14 @@ export default function ApiKeyForm() {
     try {
       const body: Record<string, unknown> = { tenantId: 'demo', name: name.trim(), scopes };
       if (expiresAt) body.expiresAt = new Date(expiresAt).toISOString();
-      const res = await fetch((process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/api-keys', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
+      const res = await fetch(
+        (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/api-keys',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        },
+      );
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.message ?? `HTTP ${res.status}`);
@@ -105,7 +108,10 @@ export default function ApiKeyForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 bg-white rounded-xl border border-gray-200 p-6">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-6 bg-white rounded-xl border border-gray-200 p-6"
+    >
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
@@ -131,7 +137,10 @@ export default function ApiKeyForm() {
         </label>
         <div className="grid grid-cols-2 gap-2">
           {ALL_SCOPES.map((scope) => (
-            <label key={scope} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+            <label
+              key={scope}
+              className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"
+            >
               <input
                 type="checkbox"
                 checked={scopes.includes(scope)}

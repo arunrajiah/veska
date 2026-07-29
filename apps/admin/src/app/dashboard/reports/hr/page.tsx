@@ -88,13 +88,18 @@ export default async function HrReportPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100">
-                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Department</th>
+                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">
+                    Department
+                  </th>
                   <th className="text-right px-5 py-3 text-xs font-medium text-gray-500">Count</th>
                 </tr>
               </thead>
               <tbody>
                 {report.byDepartment.map((d) => (
-                  <tr key={d.department} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                  <tr
+                    key={d.department}
+                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
+                  >
                     <td className="px-5 py-3 text-gray-700">{d.department}</td>
                     <td className="px-5 py-3 text-right font-semibold text-gray-900">{d.count}</td>
                   </tr>
@@ -129,13 +134,18 @@ export default async function HrReportPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100">
-                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Leave type</th>
+                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">
+                    Leave type
+                  </th>
                   <th className="text-right px-5 py-3 text-xs font-medium text-gray-500">Count</th>
                 </tr>
               </thead>
               <tbody>
                 {report.leaveStats.byType.map((t) => (
-                  <tr key={t.type} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                  <tr
+                    key={t.type}
+                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
+                  >
                     <td className="px-5 py-3 capitalize text-gray-700">{t.type}</td>
                     <td className="px-5 py-3 text-right font-semibold text-gray-900">{t.count}</td>
                   </tr>
@@ -152,13 +162,17 @@ export default async function HrReportPage() {
           <h2 className="text-sm font-medium text-gray-900">Recent hires (last 30 days)</h2>
         </div>
         {report.recentHires.length === 0 ? (
-          <p className="px-5 py-8 text-sm text-gray-400 text-center">No new hires in the last 30 days.</p>
+          <p className="px-5 py-8 text-sm text-gray-400 text-center">
+            No new hires in the last 30 days.
+          </p>
         ) : (
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-100">
                 <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Name</th>
-                <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Department</th>
+                <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">
+                  Department
+                </th>
                 <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Title</th>
                 <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Joined</th>
               </tr>
@@ -172,9 +186,14 @@ export default async function HrReportPage() {
                     ? emp.createdAt.slice(0, 10)
                     : new Date(emp.createdAt).toISOString().slice(0, 10);
                 return (
-                  <tr key={emp.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                  <tr
+                    key={emp.id}
+                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
+                  >
                     <td className="px-5 py-3 font-medium text-gray-900">{name}</td>
-                    <td className="px-5 py-3 text-gray-600">{(d['department'] as string) ?? '—'}</td>
+                    <td className="px-5 py-3 text-gray-600">
+                      {(d['department'] as string) ?? '—'}
+                    </td>
                     <td className="px-5 py-3 text-gray-600">{(d['title'] as string) ?? '—'}</td>
                     <td className="px-5 py-3 text-xs text-gray-500">{joinedAt}</td>
                   </tr>

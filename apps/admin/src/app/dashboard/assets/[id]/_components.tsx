@@ -43,7 +43,11 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 function fmtDate(d?: string) {
   if (!d) return '—';
-  return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(d).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 }
 
 function fmtMoney(n?: number) {
@@ -59,7 +63,15 @@ function reqHeaders() {
   };
 }
 
-function EditAssetSlideOver({ asset, onClose, onSaved }: { asset: Asset; onClose: () => void; onSaved: () => void }) {
+function EditAssetSlideOver({
+  asset,
+  onClose,
+  onSaved,
+}: {
+  asset: Asset;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const d = asset.data;
@@ -105,26 +117,40 @@ function EditAssetSlideOver({ asset, onClose, onSaved }: { asset: Asset; onClose
       <div className="relative bg-white w-full max-w-lg h-full overflow-y-auto shadow-xl flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-base font-semibold text-gray-900">Edit Asset</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <X size={18} />
+          </button>
         </div>
         <form onSubmit={(e) => void handleSubmit(e)} className="flex-1 px-6 py-5 space-y-4">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Name *</label>
-            <input name="name" required defaultValue={d.name}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              name="name"
+              required
+              defaultValue={d.name}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Asset Tag</label>
-              <input name="assetTag" defaultValue={d.assetTag}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+              <input
+                name="assetTag"
+                defaultValue={d.assetTag}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Category</label>
-              <select name="category" defaultValue={d.category ?? 'hardware'}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900">
+              <select
+                name="category"
+                defaultValue={d.category ?? 'hardware'}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              >
                 {['hardware', 'software', 'vehicle', 'furniture', 'equipment', 'other'].map((c) => (
-                  <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
+                  <option key={c} value={c}>
+                    {c.charAt(0).toUpperCase() + c.slice(1)}
+                  </option>
                 ))}
               </select>
             </div>
@@ -132,66 +158,110 @@ function EditAssetSlideOver({ asset, onClose, onSaved }: { asset: Asset; onClose
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Status</label>
-              <select name="status" defaultValue={d.status ?? 'active'}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900">
+              <select
+                name="status"
+                defaultValue={d.status ?? 'active'}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              >
                 {['active', 'maintenance', 'retired', 'lost'].map((s) => (
-                  <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+                  <option key={s} value={s}>
+                    {s.charAt(0).toUpperCase() + s.slice(1)}
+                  </option>
                 ))}
               </select>
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Assigned To</label>
-              <input name="assignedTo" defaultValue={d.assignedTo}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+              <input
+                name="assignedTo"
+                defaultValue={d.assignedTo}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Location</label>
-            <input name="location" defaultValue={d.location}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              name="location"
+              defaultValue={d.location}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Purchase Date</label>
-              <input name="purchaseDate" type="date" defaultValue={d.purchaseDate?.slice(0, 10)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+              <input
+                name="purchaseDate"
+                type="date"
+                defaultValue={d.purchaseDate?.slice(0, 10)}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Purchase Price</label>
-              <input name="purchasePrice" type="number" step="0.01" min="0" defaultValue={d.purchasePrice}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+              <input
+                name="purchasePrice"
+                type="number"
+                step="0.01"
+                min="0"
+                defaultValue={d.purchasePrice}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Current Value</label>
-              <input name="currentValue" type="number" step="0.01" min="0" defaultValue={d.currentValue}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+              <input
+                name="currentValue"
+                type="number"
+                step="0.01"
+                min="0"
+                defaultValue={d.currentValue}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Serial Number</label>
-              <input name="serialNumber" defaultValue={d.serialNumber}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm font-mono outline-none focus:ring-2 focus:ring-gray-900" />
+              <input
+                name="serialNumber"
+                defaultValue={d.serialNumber}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm font-mono outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Warranty Expiry</label>
-            <input name="warranty" type="date" defaultValue={d.warranty?.slice(0, 10)}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              name="warranty"
+              type="date"
+              defaultValue={d.warranty?.slice(0, 10)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
-            <textarea name="notes" rows={3} defaultValue={d.notes}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none" />
+            <textarea
+              name="notes"
+              rows={3}
+              defaultValue={d.notes}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none"
+            />
           </div>
           {error && <p className="text-xs text-red-500">{error}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="submit" disabled={saving}
-              className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
+            <button
+              type="submit"
+              disabled={saving}
+              className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors"
+            >
               {saving ? 'Saving…' : 'Update'}
             </button>
-            <button type="button" onClick={onClose}
-              className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+            <button
+              type="button"
+              onClick={onClose}
+              className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+            >
               Cancel
             </button>
           </div>
@@ -234,7 +304,10 @@ export function AssetDetailClient({ asset }: { asset: Asset }) {
 
   return (
     <div className="px-8 py-8 max-w-7xl">
-      <Link href="/dashboard/assets" className="text-sm text-gray-500 hover:text-gray-900 mb-6 inline-block">
+      <Link
+        href="/dashboard/assets"
+        className="text-sm text-gray-500 hover:text-gray-900 mb-6 inline-block"
+      >
         ← Assets
       </Link>
 
@@ -244,14 +317,20 @@ export function AssetDetailClient({ asset }: { asset: Asset }) {
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-semibold text-gray-900">{d.name ?? 'Unnamed Asset'}</h1>
             {d.assetTag && (
-              <span className="font-mono text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">{d.assetTag}</span>
+              <span className="font-mono text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
+                {d.assetTag}
+              </span>
             )}
-            <span className={`text-xs px-2.5 py-1 rounded-full font-medium capitalize ${STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-600'}`}>
+            <span
+              className={`text-xs px-2.5 py-1 rounded-full font-medium capitalize ${STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-600'}`}
+            >
               {status}
             </span>
           </div>
           {d.category && (
-            <span className={`mt-2 inline-block text-xs px-2 py-0.5 rounded-full font-medium capitalize ${CATEGORY_COLORS[cat] ?? 'bg-gray-100 text-gray-600'}`}>
+            <span
+              className={`mt-2 inline-block text-xs px-2 py-0.5 rounded-full font-medium capitalize ${CATEGORY_COLORS[cat] ?? 'bg-gray-100 text-gray-600'}`}
+            >
               {cat}
             </span>
           )}
@@ -284,8 +363,16 @@ export function AssetDetailClient({ asset }: { asset: Asset }) {
               {[
                 { label: 'Asset Tag', value: d.assetTag ?? '—' },
                 { label: 'Serial Number', value: d.serialNumber ?? '—' },
-                { label: 'Category', value: d.category ? (d.category.charAt(0).toUpperCase() + d.category.slice(1)) : '—' },
-                { label: 'Status', value: d.status ? (d.status.charAt(0).toUpperCase() + d.status.slice(1)) : '—' },
+                {
+                  label: 'Category',
+                  value: d.category
+                    ? d.category.charAt(0).toUpperCase() + d.category.slice(1)
+                    : '—',
+                },
+                {
+                  label: 'Status',
+                  value: d.status ? d.status.charAt(0).toUpperCase() + d.status.slice(1) : '—',
+                },
                 { label: 'Assigned To', value: d.assignedTo ?? '—' },
                 { label: 'Location', value: d.location ?? '—' },
                 { label: 'Purchase Date', value: fmtDate(d.purchaseDate) },
@@ -294,13 +381,17 @@ export function AssetDetailClient({ asset }: { asset: Asset }) {
                 { label: 'Warranty Expiry', value: fmtDate(d.warranty) },
               ].map(({ label, value }) => (
                 <div key={label}>
-                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">{label}</p>
+                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">
+                    {label}
+                  </p>
                   <p className="text-gray-800">{value}</p>
                 </div>
               ))}
               {d.notes && (
                 <div className="col-span-2">
-                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Notes</p>
+                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">
+                    Notes
+                  </p>
                   <p className="text-gray-600">{d.notes}</p>
                 </div>
               )}
@@ -312,7 +403,9 @@ export function AssetDetailClient({ asset }: { asset: Asset }) {
         <div className="space-y-4">
           {/* Depreciation card */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4">Depreciation</p>
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4">
+              Depreciation
+            </p>
             {purchasePrice > 0 ? (
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
@@ -348,7 +441,9 @@ export function AssetDetailClient({ asset }: { asset: Asset }) {
 
           {/* AI Insights placeholder */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">AI Insights</p>
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+              AI Insights
+            </p>
             <p className="text-xs text-gray-400 text-center py-4">
               AI analysis not configured for this asset.
             </p>
@@ -360,7 +455,11 @@ export function AssetDetailClient({ asset }: { asset: Asset }) {
         <EditAssetSlideOver
           asset={asset}
           onClose={() => setShowEdit(false)}
-          onSaved={() => startTransition(() => { router.refresh(); })}
+          onSaved={() =>
+            startTransition(() => {
+              router.refresh();
+            })
+          }
         />
       )}
     </div>

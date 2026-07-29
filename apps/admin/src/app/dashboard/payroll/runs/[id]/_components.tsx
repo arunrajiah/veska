@@ -44,7 +44,19 @@ export function ProcessRunButton({ runId, status }: { runId: string; status: str
   );
 }
 
-export function DownloadCSVButton({ runId, payslips }: { runId: string; payslips: Array<{ employeeName?: string; grossPay?: number; tax?: number; netPay?: number; status?: string }> }) {
+export function DownloadCSVButton({
+  runId,
+  payslips,
+}: {
+  runId: string;
+  payslips: Array<{
+    employeeName?: string;
+    grossPay?: number;
+    tax?: number;
+    netPay?: number;
+    status?: string;
+  }>;
+}) {
   function handleDownload() {
     const rows = [
       ['Employee', 'Gross Pay', 'Tax', 'Net Pay', 'Status'],

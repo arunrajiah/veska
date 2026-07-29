@@ -34,9 +34,12 @@ interface ApprovalRequest {
 
 async function fetchRequest(id: string): Promise<ApprovalRequest | null> {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/approval-requests/${id}`, {
-      cache: 'no-store',
-    });
+    const res = await fetch(
+      `${process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/approval-requests/${id}`,
+      {
+        cache: 'no-store',
+      },
+    );
     if (!res.ok) return null;
     return await res.json();
   } catch {
@@ -181,7 +184,9 @@ export default async function ApprovalDetailPage({ params }: PageProps) {
                       </p>
                     )}
                     {step.comment && (
-                      <p className="text-xs text-gray-500 mt-0.5 italic">&ldquo;{step.comment}&rdquo;</p>
+                      <p className="text-xs text-gray-500 mt-0.5 italic">
+                        &ldquo;{step.comment}&rdquo;
+                      </p>
                     )}
                     {isPending && isCurrent && (
                       <span className="inline-block mt-0.5 text-xs text-yellow-600 font-medium">
@@ -215,19 +220,13 @@ export default async function ApprovalDetailPage({ params }: PageProps) {
                 <div className="flex-1">
                   <p className="text-sm text-gray-800">
                     <span className="font-medium">{d.approverName}</span>{' '}
-                    <span
-                      className={
-                        d.action === 'approved' ? 'text-green-600' : 'text-red-600'
-                      }
-                    >
+                    <span className={d.action === 'approved' ? 'text-green-600' : 'text-red-600'}>
                       {d.action}
                     </span>{' '}
                     step {d.step}
                   </p>
                   {d.comment && (
-                    <p className="text-xs text-gray-500 mt-0.5 italic">
-                      &ldquo;{d.comment}&rdquo;
-                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5 italic">&ldquo;{d.comment}&rdquo;</p>
                   )}
                   <p className="text-xs text-gray-400 mt-0.5">{formatDateTime(d.decidedAt)}</p>
                 </div>

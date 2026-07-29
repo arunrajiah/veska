@@ -11,7 +11,9 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
           </div>
           <div>
             <h1 className="text-sm font-semibold text-white tracking-tight">Veska Super Admin</h1>
-            <p className="text-xs text-slate-400">Internal platform management — restricted access</p>
+            <p className="text-xs text-slate-400">
+              Internal platform management — restricted access
+            </p>
           </div>
           <div className="ml-auto">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-900/40 text-red-300 border border-red-700/40">

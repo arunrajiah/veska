@@ -1,6 +1,10 @@
 import TaskForm from './task-form.js';
 
-export default async function NewTaskPage({ searchParams }: { searchParams: Promise<{ projectId?: string; returnTo?: string }> }) {
+export default async function NewTaskPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ projectId?: string; returnTo?: string }>;
+}) {
   const { projectId, returnTo } = await searchParams;
   return (
     <TaskForm

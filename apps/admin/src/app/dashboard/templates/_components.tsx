@@ -2,16 +2,7 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  FileText,
-  Plus,
-  Eye,
-  Printer,
-  Edit2,
-  Trash2,
-  ChevronRight,
-  X,
-} from 'lucide-react';
+import { FileText, Plus, Eye, Printer, Edit2, Trash2, ChevronRight, X } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
@@ -46,7 +37,9 @@ function typeBadge(type: string) {
   const t = type as TemplateType;
   const style = TYPE_BADGE[t] ?? TYPE_BADGE.custom;
   return (
-    <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${style.bg} ${style.text}`}>
+    <span
+      className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${style.bg} ${style.text}`}
+    >
       {type}
     </span>
   );
@@ -95,23 +88,29 @@ function TemplateEditor({ initial, onBack, onSaved }: EditorProps) {
 
   const detectedVars = extractVariables(htmlBody);
 
-  const insertVariable = useCallback((varName: string) => {
-    const ta = textareaRef.current;
-    if (!ta) return;
-    const start = ta.selectionStart;
-    const end = ta.selectionEnd;
-    const next = htmlBody.slice(0, start) + `{{${varName}}}` + htmlBody.slice(end);
-    setHtmlBody(next);
-    setTimeout(() => {
-      ta.focus();
-      const pos = start + varName.length + 4;
-      ta.setSelectionRange(pos, pos);
-    }, 0);
-  }, [htmlBody]);
+  const insertVariable = useCallback(
+    (varName: string) => {
+      const ta = textareaRef.current;
+      if (!ta) return;
+      const start = ta.selectionStart;
+      const end = ta.selectionEnd;
+      const next = htmlBody.slice(0, start) + `{{${varName}}}` + htmlBody.slice(end);
+      setHtmlBody(next);
+      setTimeout(() => {
+        ta.focus();
+        const pos = start + varName.length + 4;
+        ta.setSelectionRange(pos, pos);
+      }, 0);
+    },
+    [htmlBody],
+  );
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim()) { setError('Name is required'); return; }
+    if (!name.trim()) {
+      setError('Name is required');
+      return;
+    }
     setSaving(true);
     setError('');
     try {
@@ -125,7 +124,7 @@ function TemplateEditor({ initial, onBack, onSaved }: EditorProps) {
         body: JSON.stringify({ name, type, description, htmlBody, variables: detectedVars }),
       });
       if (!res.ok) {
-        const d = await res.json() as { error?: string };
+        const d = (await res.json()) as { error?: string };
         setError(d.error ?? 'Failed to save');
         return;
       }
@@ -148,7 +147,7 @@ function TemplateEditor({ initial, onBack, onSaved }: EditorProps) {
           body: JSON.stringify({ variables: varValues }),
         });
         if (res.ok) {
-          const d = await res.json() as { html?: string; content?: string };
+          const d = (await res.json()) as { html?: string; content?: string };
           setPreviewHtml(d.html ?? d.content ?? '');
           return;
         }
@@ -218,7 +217,9 @@ function TemplateEditor({ initial, onBack, onSaved }: EditorProps) {
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
                   >
                     {TEMPLATE_TYPES.map((t) => (
-                      <option key={t} value={t}>{t}</option>
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -253,7 +254,9 @@ function TemplateEditor({ initial, onBack, onSaved }: EditorProps) {
               {/* Variable palette */}
               {detectedVars.length > 0 && (
                 <div>
-                  <p className="text-xs text-gray-400 mb-2">Detected variables — click to insert at cursor:</p>
+                  <p className="text-xs text-gray-400 mb-2">
+                    Detected variables — click to insert at cursor:
+                  </p>
                   <div className="flex flex-wrap gap-1.5">
                     {detectedVars.map((v) => (
                       <button
@@ -262,7 +265,9 @@ function TemplateEditor({ initial, onBack, onSaved }: EditorProps) {
                         onClick={() => insertVariable(v)}
                         className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-mono bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors border border-indigo-100"
                       >
-                        {'{{'}{v}{'}}'}
+                        {'{{'}
+                        {v}
+                        {'}}'}
                       </button>
                     ))}
                   </div>
@@ -341,7 +346,10 @@ function TemplateEditor({ initial, onBack, onSaved }: EditorProps) {
               />
             </div>
           ) : (
-            <div className="bg-white border border-dashed border-gray-200 rounded-xl flex items-center justify-center" style={{ height: 600 }}>
+            <div
+              className="bg-white border border-dashed border-gray-200 rounded-xl flex items-center justify-center"
+              style={{ height: 600 }}
+            >
               <div className="text-center">
                 <Eye size={32} className="text-gray-200 mx-auto mb-3" />
                 <p className="text-sm text-gray-400">Preview will appear here</p>
@@ -374,8 +382,15 @@ export function TemplatesClient({ templates: initialTemplates }: TemplatesClient
     return (
       <TemplateEditor
         initial={editing}
-        onBack={() => { setView('list'); setEditing(null); }}
-        onSaved={() => { router.refresh(); setView('list'); setEditing(null); }}
+        onBack={() => {
+          setView('list');
+          setEditing(null);
+        }}
+        onSaved={() => {
+          router.refresh();
+          setView('list');
+          setEditing(null);
+        }}
       />
     );
   }
@@ -406,7 +421,7 @@ export function TemplatesClient({ templates: initialTemplates }: TemplatesClient
         headers: tenantHeaders(),
       });
       if (!res.ok) {
-        const d = await res.json() as { error?: string };
+        const d = (await res.json()) as { error?: string };
         setError(d.error ?? 'Seed failed');
         return;
       }
@@ -441,7 +456,10 @@ export function TemplatesClient({ templates: initialTemplates }: TemplatesClient
             {seeding ? 'Seeding…' : 'Seed defaults'}
           </button>
           <button
-            onClick={() => { setEditing(null); setView('editor'); }}
+            onClick={() => {
+              setEditing(null);
+              setView('editor');
+            }}
             className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-700 transition-colors"
           >
             <Plus size={15} /> New template
@@ -452,7 +470,9 @@ export function TemplatesClient({ templates: initialTemplates }: TemplatesClient
       {error && (
         <div className="mb-4 flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
           <span className="flex-1">{error}</span>
-          <button onClick={() => setError('')}><X size={14} /></button>
+          <button onClick={() => setError('')}>
+            <X size={14} />
+          </button>
         </div>
       )}
 
@@ -460,7 +480,9 @@ export function TemplatesClient({ templates: initialTemplates }: TemplatesClient
         <div className="flex flex-col items-center py-20 text-center">
           <FileText size={40} className="text-gray-300 mb-4" />
           <p className="text-sm font-medium text-gray-500">No templates yet</p>
-          <p className="text-xs text-gray-400 mt-1">Create a template or seed the defaults to get started.</p>
+          <p className="text-xs text-gray-400 mt-1">
+            Create a template or seed the defaults to get started.
+          </p>
           <div className="flex gap-2 mt-4">
             <button
               onClick={() => void handleSeed()}
@@ -470,7 +492,10 @@ export function TemplatesClient({ templates: initialTemplates }: TemplatesClient
               {seeding ? 'Seeding…' : 'Seed defaults'}
             </button>
             <button
-              onClick={() => { setEditing(null); setView('editor'); }}
+              onClick={() => {
+                setEditing(null);
+                setView('editor');
+              }}
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-700 transition-colors"
             >
               <Plus size={15} /> New template
@@ -497,11 +522,15 @@ export function TemplatesClient({ templates: initialTemplates }: TemplatesClient
                 </div>
 
                 <div className="flex items-center gap-4 text-xs text-gray-400">
-                  <span>{vars.length} variable{vars.length !== 1 ? 's' : ''}</span>
+                  <span>
+                    {vars.length} variable{vars.length !== 1 ? 's' : ''}
+                  </span>
                   {t.createdAt && (
                     <span>
                       {new Date(t.createdAt).toLocaleDateString('en-US', {
-                        month: 'short', day: 'numeric', year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
                       })}
                     </span>
                   )}
@@ -509,7 +538,10 @@ export function TemplatesClient({ templates: initialTemplates }: TemplatesClient
 
                 <div className="flex items-center gap-1 pt-1 border-t border-gray-100">
                   <button
-                    onClick={() => { setEditing(t); setView('editor'); }}
+                    onClick={() => {
+                      setEditing(t);
+                      setView('editor');
+                    }}
                     className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
                   >
                     <Edit2 size={12} /> Edit

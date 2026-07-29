@@ -36,7 +36,13 @@ function getTotal(inv: Invoice): number {
 }
 
 function getClientName(inv: Invoice): string {
-  return inv.data.clientName ?? inv.data.customer ?? inv.data.customer_name ?? inv.data.customerName ?? '—';
+  return (
+    inv.data.clientName ??
+    inv.data.customer ??
+    inv.data.customer_name ??
+    inv.data.customerName ??
+    '—'
+  );
 }
 
 function getInvoiceNumber(inv: Invoice): string {
@@ -116,7 +122,9 @@ function RecurringTab({ tenantId }: { tenantId: string }) {
       <div className="bg-white border border-gray-200 rounded-xl px-8 py-16 text-center">
         <RefreshCw size={32} className="mx-auto mb-3 text-gray-300" />
         <p className="text-gray-400 text-sm">No recurring invoice schedules.</p>
-        <p className="text-gray-400 text-xs mt-1">Open an invoice and set up a recurring schedule from the invoice detail page.</p>
+        <p className="text-gray-400 text-xs mt-1">
+          Open an invoice and set up a recurring schedule from the invoice detail page.
+        </p>
       </div>
     );
   }
@@ -153,7 +161,9 @@ function RecurringTab({ tenantId }: { tenantId: string }) {
                   {s.lastRunAt ? s.lastRunAt.slice(0, 10) : 'Never'}
                 </td>
                 <td className="px-4 py-3">
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${s.enabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded-full font-medium ${s.enabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}
+                  >
                     {s.enabled ? 'Active' : 'Paused'}
                   </span>
                 </td>
@@ -227,7 +237,9 @@ function NewInvoiceSlideover({ onClose, onCreated, tenantId }: NewInvoiceSlideov
     { description: '', quantity: 1, unitPrice: 0 },
   ]);
 
-  const set = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const set = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+  ) => {
     const { name, value } = e.target;
     setForm((p) => ({ ...p, [name]: value }));
   };
@@ -235,13 +247,10 @@ function NewInvoiceSlideover({ onClose, onCreated, tenantId }: NewInvoiceSlideov
   const addLine = () =>
     setLineItems((prev) => [...prev, { description: '', quantity: 1, unitPrice: 0 }]);
 
-  const removeLine = (i: number) =>
-    setLineItems((prev) => prev.filter((_, idx) => idx !== i));
+  const removeLine = (i: number) => setLineItems((prev) => prev.filter((_, idx) => idx !== i));
 
   const updateLine = (i: number, field: keyof LineItem, value: string | number) =>
-    setLineItems((prev) =>
-      prev.map((li, idx) => (idx === i ? { ...li, [field]: value } : li)),
-    );
+    setLineItems((prev) => prev.map((li, idx) => (idx === i ? { ...li, [field]: value } : li)));
 
   const subtotal = lineItems.reduce((s, li) => s + li.quantity * li.unitPrice, 0);
   const taxPct = parseFloat(form.taxPct) || 0;
@@ -256,25 +265,30 @@ function NewInvoiceSlideover({ onClose, onCreated, tenantId }: NewInvoiceSlideov
     }
     const controller = new AbortController();
     setConversionLoading(true);
-    fetch(
-      `/api/veska/currencies/convert?from=${form.currency}&to=USD&amount=${total}`,
-      {
-        headers: { 'X-Veska-Tenant-Id': tenantId, 'X-Veska-Identity-Id': process.env.NEXT_PUBLIC_ADMIN_IDENTITY_ID ?? 'admin' },
-        signal: controller.signal,
+    fetch(`/api/veska/currencies/convert?from=${form.currency}&to=USD&amount=${total}`, {
+      headers: {
+        'X-Veska-Tenant-Id': tenantId,
+        'X-Veska-Identity-Id': process.env.NEXT_PUBLIC_ADMIN_IDENTITY_ID ?? 'admin',
       },
-    )
+      signal: controller.signal,
+    })
       .then((r) => r.json())
       .then((data: { converted?: number }) => {
         if (typeof data.converted === 'number') setConvertedTotal(data.converted);
       })
-      .catch(() => { /* ignore */ })
+      .catch(() => {
+        /* ignore */
+      })
       .finally(() => setConversionLoading(false));
     return () => controller.abort();
   }, [form.currency, total, tenantId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.clientName.trim()) { setError('Client name is required'); return; }
+    if (!form.clientName.trim()) {
+      setError('Client name is required');
+      return;
+    }
     setSaving(true);
     setError('');
     try {
@@ -302,7 +316,7 @@ function NewInvoiceSlideover({ onClose, onCreated, tenantId }: NewInvoiceSlideov
         body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error(await res.text());
-      const created = await res.json() as Invoice;
+      const created = (await res.json()) as Invoice;
       onCreated(created);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create invoice');
@@ -317,12 +331,20 @@ function NewInvoiceSlideover({ onClose, onCreated, tenantId }: NewInvoiceSlideov
       <div className="relative ml-auto w-full max-w-lg bg-white h-full overflow-y-auto shadow-2xl flex flex-col">
         <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
           <h2 className="text-sm font-semibold text-gray-900">New Invoice</h2>
-          <button onClick={onClose} aria-label="Close new invoice panel" className="text-gray-400 hover:text-gray-700">
+          <button
+            onClick={onClose}
+            aria-label="Close new invoice panel"
+            className="text-gray-400 hover:text-gray-700"
+          >
             <X size={18} />
           </button>
         </div>
 
-        <form id="new-invoice-form" onSubmit={(e) => void handleSubmit(e)} className="flex-1 overflow-y-auto divide-y divide-gray-50">
+        <form
+          id="new-invoice-form"
+          onSubmit={(e) => void handleSubmit(e)}
+          className="flex-1 overflow-y-auto divide-y divide-gray-50"
+        >
           {/* Client info */}
           <div className="px-5 py-4 space-y-3">
             <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Client</h3>
@@ -383,7 +405,9 @@ function NewInvoiceSlideover({ onClose, onCreated, tenantId }: NewInvoiceSlideov
                   className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 bg-white"
                 >
                   {SUPPORTED_CURRENCIES.map((c) => (
-                    <option key={c.code} value={c.code}>{c.code} — {c.name}</option>
+                    <option key={c.code} value={c.code}>
+                      {c.code} — {c.name}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -392,7 +416,9 @@ function NewInvoiceSlideover({ onClose, onCreated, tenantId }: NewInvoiceSlideov
 
           {/* Line items */}
           <div className="px-5 py-4">
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Line Items</h3>
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+              Line Items
+            </h3>
             <div className="space-y-2">
               {lineItems.map((li, i) => (
                 <div key={i} className="flex items-center gap-2">
@@ -475,8 +501,8 @@ function NewInvoiceSlideover({ onClose, onCreated, tenantId }: NewInvoiceSlideov
                   {conversionLoading
                     ? 'Converting…'
                     : convertedTotal !== null
-                    ? `≈ ${formatCurrency(convertedTotal, 'USD')} USD at current rates`
-                    : null}
+                      ? `≈ ${formatCurrency(convertedTotal, 'USD')} USD at current rates`
+                      : null}
                 </div>
               )}
             </div>
@@ -565,15 +591,10 @@ export function InvoicesClient({
     setTimeout(() => setIsUpdating(false), 1_500);
   }, [router]);
 
-  useRealtimeEvents(
-    ['invoice.created', 'invoice.sent', 'invoice.paid'],
-    handleRealtimeUpdate,
-  );
+  useRealtimeEvents(['invoice.created', 'invoice.sent', 'invoice.paid'], handleRealtimeUpdate);
 
   const filtered =
-    activeTab === 'all'
-      ? invoices
-      : invoices.filter((inv) => getStatus(inv) === activeTab);
+    activeTab === 'all' ? invoices : invoices.filter((inv) => getStatus(inv) === activeTab);
 
   const allVisibleSelected = filtered.length > 0 && filtered.every((inv) => selected.has(inv.id));
 
@@ -612,18 +633,25 @@ export function InvoicesClient({
         body: JSON.stringify({ ids: Array.from(selected), action }),
       });
       if (!res.ok) throw new Error(await res.text());
-      const result = await res.json() as { processed: number; failed: { id: string; error: string }[] };
+      const result = (await res.json()) as {
+        processed: number;
+        failed: { id: string; error: string }[];
+      };
       const failCount = result.failed.length;
       setToast({
-        message: failCount > 0
-          ? `${result.processed} processed, ${failCount} failed`
-          : `${result.processed} invoice${result.processed !== 1 ? 's' : ''} ${action === 'delete' ? 'deleted' : action === 'void' ? 'voided' : 'sent'}`,
+        message:
+          failCount > 0
+            ? `${result.processed} processed, ${failCount} failed`
+            : `${result.processed} invoice${result.processed !== 1 ? 's' : ''} ${action === 'delete' ? 'deleted' : action === 'void' ? 'voided' : 'sent'}`,
         type: failCount > 0 ? 'error' : 'success',
       });
       setSelected(new Set());
       startTransition(() => router.refresh());
     } catch (err) {
-      setToast({ message: err instanceof Error ? err.message : 'Bulk action failed', type: 'error' });
+      setToast({
+        message: err instanceof Error ? err.message : 'Bulk action failed',
+        type: 'error',
+      });
     } finally {
       setBulkLoading(false);
     }
@@ -657,9 +685,7 @@ export function InvoicesClient({
       });
       if (!res.ok) throw new Error(await res.text());
       setInvoices((prev) =>
-        prev.map((i) =>
-          i.id === inv.id ? { ...i, data: { ...i.data, status: 'sent' } } : i,
-        ),
+        prev.map((i) => (i.id === inv.id ? { ...i, data: { ...i.data, status: 'sent' } } : i)),
       );
       setToast({ message: 'Invoice sent successfully', type: 'success' });
     } catch {
@@ -695,9 +721,7 @@ export function InvoicesClient({
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-semibold text-gray-900">{t('title')}</h1>
-          {isUpdating && (
-            <span className="text-xs text-gray-400 animate-pulse">Updating…</span>
-          )}
+          {isUpdating && <span className="text-xs text-gray-400 animate-pulse">Updating…</span>}
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -750,135 +774,186 @@ export function InvoicesClient({
       </div>
 
       {/* Recurring tab */}
-      {activeTab === 'recurring' && (
-        <RecurringTab tenantId={tenantId} />
-      )}
+      {activeTab === 'recurring' && <RecurringTab tenantId={tenantId} />}
 
       {/* Invoice table (hidden when recurring tab is active) */}
-      {activeTab !== 'recurring' && (filtered.length === 0 ? (
-        <div className="bg-white border border-gray-200 rounded-xl px-8 py-16 text-center">
-          <p className="text-gray-400 text-sm">No invoices found.</p>
-          <button
-            onClick={() => setShowNew(true)}
-            className="mt-4 inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900"
-          >
-            <Plus size={14} /> Create first invoice
-          </button>
-        </div>
-      ) : (
-        <>
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-100 bg-gray-50">
-                <th scope="col" className="px-4 py-3 w-8">
-                  <input
-                    type="checkbox"
-                    checked={allVisibleSelected}
-                    onChange={toggleAll}
-                    aria-label="Select all invoices"
-                    className="rounded border-gray-300 text-gray-900 focus:ring-gray-900"
-                  />
-                </th>
-                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">{t('invoiceNumber')}</th>
-                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">{t('customer')}</th>
-                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500">{tCommon('status')}</th>
-                <th scope="col" className="text-right px-4 py-3 text-xs font-medium text-gray-500">{tCommon('amount')}</th>
-                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500 hidden sm:table-cell">{t('dueDate')}</th>
-                <th scope="col" className="text-left px-4 py-3 text-xs font-medium text-gray-500 hidden sm:table-cell">{t('issuedDate')}</th>
-                <th scope="col" className="px-4 py-3 text-xs font-medium text-gray-500 text-right">{tCommon('actions')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((inv) => {
-                const status = getStatus(inv);
-                const currency = inv.data.currency ?? 'USD';
-                const isChecked = selected.has(inv.id);
-                return (
-                  <tr
-                    key={inv.id}
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        router.push(`/dashboard/finance/invoices/${inv.id}`);
-                      }
-                    }}
-                    onClick={() => router.push(`/dashboard/finance/invoices/${inv.id}`)}
-                    className={`border-b border-gray-50 last:border-0 hover:bg-gray-50/50 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-inset ${isChecked ? 'bg-blue-50/30' : ''}`}
-                  >
-                    <td
-                      className="px-4 py-3 w-8"
-                      onClick={(e) => { e.stopPropagation(); toggleOne(inv.id); }}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={isChecked}
-                        onChange={() => toggleOne(inv.id)}
-                        aria-label={`Select invoice ${getInvoiceNumber(inv)}`}
-                        className="rounded border-gray-300 text-gray-900 focus:ring-gray-900"
-                      />
-                    </td>
-                    <td className="px-4 py-3 font-mono text-xs text-gray-600">
-                      {getInvoiceNumber(inv)}
-                    </td>
-                    <td className="px-4 py-3 font-medium text-gray-900">{getClientName(inv)}</td>
-                    <td className="px-4 py-3">
-                      <span
-                        aria-label={`Status: ${status}`}
-                        className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-600'}`}
-                      >
-                        {status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right font-semibold text-gray-900">
-                      {fmt(getTotal(inv), currency)}
-                    </td>
-                    <td className="px-4 py-3 text-xs text-gray-500 hidden sm:table-cell">{getDueDate(inv)}</td>
-                    <td className="px-4 py-3 text-xs text-gray-500 hidden sm:table-cell">{getIssuedAt(inv)}</td>
-                    <td
-                      className="px-4 py-3 text-right"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <div className="flex items-center justify-end gap-2">
-                        {status === 'draft' && (
-                          <button
-                            onClick={() => void handleSend(inv)}
-                            disabled={sendingId === inv.id}
-                            className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 border border-blue-100 px-2 py-1 rounded-lg transition-colors disabled:opacity-50"
-                          >
-                            <Send size={11} />
-                            {sendingId === inv.id ? 'Sending…' : 'Send'}
-                          </button>
-                        )}
-                        <Link
-                          href={`/dashboard/finance/invoices/${inv.id}`}
-                          className="text-xs text-gray-500 hover:text-gray-900"
-                        >
-                          View →
-                        </Link>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+      {activeTab !== 'recurring' &&
+        (filtered.length === 0 ? (
+          <div className="bg-white border border-gray-200 rounded-xl px-8 py-16 text-center">
+            <p className="text-gray-400 text-sm">No invoices found.</p>
+            <button
+              onClick={() => setShowNew(true)}
+              className="mt-4 inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900"
+            >
+              <Plus size={14} /> Create first invoice
+            </button>
           </div>
-        </div>
+        ) : (
+          <>
+            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-100 bg-gray-50">
+                      <th scope="col" className="px-4 py-3 w-8">
+                        <input
+                          type="checkbox"
+                          checked={allVisibleSelected}
+                          onChange={toggleAll}
+                          aria-label="Select all invoices"
+                          className="rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+                        />
+                      </th>
+                      <th
+                        scope="col"
+                        className="text-left px-4 py-3 text-xs font-medium text-gray-500"
+                      >
+                        {t('invoiceNumber')}
+                      </th>
+                      <th
+                        scope="col"
+                        className="text-left px-4 py-3 text-xs font-medium text-gray-500"
+                      >
+                        {t('customer')}
+                      </th>
+                      <th
+                        scope="col"
+                        className="text-left px-4 py-3 text-xs font-medium text-gray-500"
+                      >
+                        {tCommon('status')}
+                      </th>
+                      <th
+                        scope="col"
+                        className="text-right px-4 py-3 text-xs font-medium text-gray-500"
+                      >
+                        {tCommon('amount')}
+                      </th>
+                      <th
+                        scope="col"
+                        className="text-left px-4 py-3 text-xs font-medium text-gray-500 hidden sm:table-cell"
+                      >
+                        {t('dueDate')}
+                      </th>
+                      <th
+                        scope="col"
+                        className="text-left px-4 py-3 text-xs font-medium text-gray-500 hidden sm:table-cell"
+                      >
+                        {t('issuedDate')}
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-4 py-3 text-xs font-medium text-gray-500 text-right"
+                      >
+                        {tCommon('actions')}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filtered.map((inv) => {
+                      const status = getStatus(inv);
+                      const currency = inv.data.currency ?? 'USD';
+                      const isChecked = selected.has(inv.id);
+                      return (
+                        <tr
+                          key={inv.id}
+                          tabIndex={0}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              router.push(`/dashboard/finance/invoices/${inv.id}`);
+                            }
+                          }}
+                          onClick={() => router.push(`/dashboard/finance/invoices/${inv.id}`)}
+                          className={`border-b border-gray-50 last:border-0 hover:bg-gray-50/50 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-inset ${isChecked ? 'bg-blue-50/30' : ''}`}
+                        >
+                          <td
+                            className="px-4 py-3 w-8"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleOne(inv.id);
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => toggleOne(inv.id)}
+                              aria-label={`Select invoice ${getInvoiceNumber(inv)}`}
+                              className="rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+                            />
+                          </td>
+                          <td className="px-4 py-3 font-mono text-xs text-gray-600">
+                            {getInvoiceNumber(inv)}
+                          </td>
+                          <td className="px-4 py-3 font-medium text-gray-900">
+                            {getClientName(inv)}
+                          </td>
+                          <td className="px-4 py-3">
+                            <span
+                              aria-label={`Status: ${status}`}
+                              className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-600'}`}
+                            >
+                              {status}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-right font-semibold text-gray-900">
+                            {fmt(getTotal(inv), currency)}
+                          </td>
+                          <td className="px-4 py-3 text-xs text-gray-500 hidden sm:table-cell">
+                            {getDueDate(inv)}
+                          </td>
+                          <td className="px-4 py-3 text-xs text-gray-500 hidden sm:table-cell">
+                            {getIssuedAt(inv)}
+                          </td>
+                          <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-end gap-2">
+                              {status === 'draft' && (
+                                <button
+                                  onClick={() => void handleSend(inv)}
+                                  disabled={sendingId === inv.id}
+                                  className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 border border-blue-100 px-2 py-1 rounded-lg transition-colors disabled:opacity-50"
+                                >
+                                  <Send size={11} />
+                                  {sendingId === inv.id ? 'Sending…' : 'Send'}
+                                </button>
+                              )}
+                              <Link
+                                href={`/dashboard/finance/invoices/${inv.id}`}
+                                className="text-xs text-gray-500 hover:text-gray-900"
+                              >
+                                View →
+                              </Link>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
-        <BulkActionBar
-          selectedCount={selected.size}
-          onClear={() => setSelected(new Set())}
-          actions={[
-            { label: bulkLoading ? 'Processing…' : 'Send All', onClick: () => void handleBulkAction('send') },
-            { label: 'Void All', onClick: () => void handleBulkAction('void'), variant: 'danger' },
-            { label: 'Delete All', onClick: () => void handleBulkAction('delete'), variant: 'danger' },
-          ]}
-        />
-        </>
-      ))}
+            <BulkActionBar
+              selectedCount={selected.size}
+              onClear={() => setSelected(new Set())}
+              actions={[
+                {
+                  label: bulkLoading ? 'Processing…' : 'Send All',
+                  onClick: () => void handleBulkAction('send'),
+                },
+                {
+                  label: 'Void All',
+                  onClick: () => void handleBulkAction('void'),
+                  variant: 'danger',
+                },
+                {
+                  label: 'Delete All',
+                  onClick: () => void handleBulkAction('delete'),
+                  variant: 'danger',
+                },
+              ]}
+            />
+          </>
+        ))}
     </div>
   );
 }

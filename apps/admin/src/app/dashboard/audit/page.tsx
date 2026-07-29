@@ -48,8 +48,7 @@ export default async function AuditLogPage() {
       ) : (
         <div className="space-y-0">
           {events.map((event, i) => {
-            const IconComponent =
-              ACTOR_ICONS[event.actorType as keyof typeof ACTOR_ICONS] ?? User;
+            const IconComponent = ACTOR_ICONS[event.actorType as keyof typeof ACTOR_ICONS] ?? User;
             return (
               <div key={event.id} className="flex gap-4">
                 {/* Timeline */}
@@ -59,15 +58,13 @@ export default async function AuditLogPage() {
                       event.actorType === 'ai'
                         ? 'bg-indigo-100 text-indigo-600'
                         : event.actorType === 'system' || event.actorType === 'plugin'
-                        ? 'bg-gray-100 text-gray-500'
-                        : 'bg-blue-100 text-blue-600'
+                          ? 'bg-gray-100 text-gray-500'
+                          : 'bg-blue-100 text-blue-600'
                     }`}
                   >
                     <IconComponent size={14} />
                   </div>
-                  {i < events.length - 1 && (
-                    <div className="w-px flex-1 bg-gray-200 my-1" />
-                  )}
+                  {i < events.length - 1 && <div className="w-px flex-1 bg-gray-200 my-1" />}
                 </div>
 
                 {/* Content */}

@@ -62,9 +62,9 @@ function parsePreviewCSV(text: string): { headers: string[]; rows: string[][] } 
   const lines = text.trim().split('\n').filter(Boolean);
   if (lines.length === 0) return { headers: [], rows: [] };
   const headers = (lines[0] ?? '').split(',').map((h) => h.trim().replace(/^"|"$/g, ''));
-  const rows = lines.slice(1, 4).map((line) =>
-    line.split(',').map((v) => v.trim().replace(/^"|"$/g, '')),
-  );
+  const rows = lines
+    .slice(1, 4)
+    .map((line) => line.split(',').map((v) => v.trim().replace(/^"|"$/g, '')));
   return { headers, rows };
 }
 
@@ -76,7 +76,11 @@ export function ImportModal({ entityType, onComplete, onClose }: ImportModalProp
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<{ headers: string[]; rows: string[][] } | null>(null);
   const [state, setState] = useState<ImportState>('idle');
-  const [result, setResult] = useState<{ imported: number; skipped: number; errors: string[] } | null>(null);
+  const [result, setResult] = useState<{
+    imported: number;
+    skipped: number;
+    errors: string[];
+  } | null>(null);
   const [dragOver, setDragOver] = useState(false);
 
   function handleFileSelect(file: File) {
@@ -152,7 +156,10 @@ export function ImportModal({ entityType, onComplete, onClose }: ImportModalProp
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      onClick={onClose}
+    >
       <div
         className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
@@ -163,7 +170,11 @@ export function ImportModal({ entityType, onComplete, onClose }: ImportModalProp
             <Upload size={18} className="text-indigo-600" />
             <h2 className="text-sm font-semibold text-gray-900">Import {config.label}</h2>
           </div>
-          <button onClick={onClose} aria-label="Close import modal" className="text-gray-400 hover:text-gray-600 transition-colors">
+          <button
+            onClick={onClose}
+            aria-label="Close import modal"
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+          >
             <X size={16} />
           </button>
         </div>
@@ -173,7 +184,9 @@ export function ImportModal({ entityType, onComplete, onClose }: ImportModalProp
           <div className="flex items-center justify-between bg-indigo-50 rounded-xl px-4 py-3">
             <div>
               <p className="text-xs font-medium text-indigo-900">Download template</p>
-              <p className="text-xs text-indigo-600 mt-0.5">Required columns: {config.headers.join(', ')}</p>
+              <p className="text-xs text-indigo-600 mt-0.5">
+                Required columns: {config.headers.join(', ')}
+              </p>
             </div>
             <button
               onClick={handleDownloadTemplate}
@@ -187,11 +200,16 @@ export function ImportModal({ entityType, onComplete, onClose }: ImportModalProp
           {/* Drop zone */}
           <div
             onDrop={handleDrop}
-            onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragOver(true);
+            }}
             onDragLeave={() => setDragOver(false)}
             onClick={() => fileInputRef.current?.click()}
             className={`border-2 border-dashed rounded-xl px-6 py-8 text-center cursor-pointer transition-colors ${
-              dragOver ? 'border-indigo-400 bg-indigo-50' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+              dragOver
+                ? 'border-indigo-400 bg-indigo-50'
+                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
             }`}
           >
             <input
@@ -205,12 +223,17 @@ export function ImportModal({ entityType, onComplete, onClose }: ImportModalProp
               <div className="flex items-center justify-center gap-2">
                 <FileText size={18} className="text-indigo-600" />
                 <p className="text-sm font-medium text-gray-900">{selectedFile.name}</p>
-                <p className="text-xs text-gray-400">({(selectedFile.size / 1024).toFixed(1)} KB)</p>
+                <p className="text-xs text-gray-400">
+                  ({(selectedFile.size / 1024).toFixed(1)} KB)
+                </p>
               </div>
             ) : (
               <>
                 <Upload size={22} className="mx-auto mb-2 text-gray-300" />
-                <p className="text-sm text-gray-600">Drop a CSV file here, or <span className="text-indigo-600 font-medium">browse</span></p>
+                <p className="text-sm text-gray-600">
+                  Drop a CSV file here, or{' '}
+                  <span className="text-indigo-600 font-medium">browse</span>
+                </p>
                 <p className="text-xs text-gray-400 mt-1">Only .csv files accepted</p>
               </>
             )}
@@ -225,7 +248,12 @@ export function ImportModal({ entityType, onComplete, onClose }: ImportModalProp
                   <thead className="bg-gray-50">
                     <tr>
                       {preview.headers.map((h) => (
-                        <th key={h} className="text-left px-3 py-2 font-medium text-gray-500 whitespace-nowrap">{h}</th>
+                        <th
+                          key={h}
+                          className="text-left px-3 py-2 font-medium text-gray-500 whitespace-nowrap"
+                        >
+                          {h}
+                        </th>
                       ))}
                     </tr>
                   </thead>
@@ -233,7 +261,10 @@ export function ImportModal({ entityType, onComplete, onClose }: ImportModalProp
                     {preview.rows.map((row, i) => (
                       <tr key={i} className="border-t border-gray-50">
                         {preview.headers.map((_, j) => (
-                          <td key={j} className="px-3 py-2 text-gray-700 whitespace-nowrap max-w-[120px] truncate">
+                          <td
+                            key={j}
+                            className="px-3 py-2 text-gray-700 whitespace-nowrap max-w-[120px] truncate"
+                          >
                             {row[j] ?? ''}
                           </td>
                         ))}
@@ -255,7 +286,9 @@ export function ImportModal({ entityType, onComplete, onClose }: ImportModalProp
               {result.errors.length > 0 && (
                 <ul className="mt-1.5 space-y-0.5">
                   {result.errors.slice(0, 5).map((e, i) => (
-                    <li key={i} className="text-xs text-red-600">{e}</li>
+                    <li key={i} className="text-xs text-red-600">
+                      {e}
+                    </li>
                   ))}
                 </ul>
               )}
@@ -266,7 +299,9 @@ export function ImportModal({ entityType, onComplete, onClose }: ImportModalProp
             <div role="alert" className="bg-red-50 border border-red-100 rounded-xl px-4 py-3">
               <p className="text-sm font-medium text-red-800">Import failed</p>
               {result.errors.slice(0, 3).map((e, i) => (
-                <p key={i} className="text-xs text-red-600 mt-0.5">{e}</p>
+                <p key={i} className="text-xs text-red-600 mt-0.5">
+                  {e}
+                </p>
               ))}
             </div>
           )}

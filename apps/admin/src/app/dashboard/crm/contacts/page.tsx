@@ -16,7 +16,7 @@ export default async function ContactsPage() {
       '/api/v1/crm/contacts?limit=50',
       TENANT_ID,
     );
-    contacts = Array.isArray(res) ? res : (res as { data: ContactRecord[] }).data ?? [];
+    contacts = Array.isArray(res) ? res : ((res as { data: ContactRecord[] }).data ?? []);
   } catch {
     contacts = [];
   }

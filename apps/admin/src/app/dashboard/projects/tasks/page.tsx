@@ -37,9 +37,9 @@ export default async function TasksPage() {
 
   // Fetch tasks across all projects
   const taskResults = await Promise.allSettled(
-    projects.slice(0, 10).map((p) =>
-      apiFetch<{ data: Task[] }>(`/api/v1/projects/${p.id}/tasks?limit=100`, tenantId)
-    )
+    projects
+      .slice(0, 10)
+      .map((p) => apiFetch<{ data: Task[] }>(`/api/v1/projects/${p.id}/tasks?limit=100`, tenantId)),
   );
 
   for (const result of taskResults) {

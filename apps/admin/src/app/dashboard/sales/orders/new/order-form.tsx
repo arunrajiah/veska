@@ -16,9 +16,7 @@ export default function OrderForm() {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [items, setItems] = useState<LineItem[]>([
-    { description: '', quantity: 1, unit_price: 0 },
-  ]);
+  const [items, setItems] = useState<LineItem[]>([{ description: '', quantity: 1, unit_price: 0 }]);
 
   function addItem() {
     setItems((prev) => [...prev, { description: '', quantity: 1, unit_price: 0 }]);
@@ -29,11 +27,7 @@ export default function OrderForm() {
   }
 
   function updateItem(index: number, field: keyof LineItem, value: string | number) {
-    setItems((prev) =>
-      prev.map((item, i) =>
-        i === index ? { ...item, [field]: value } : item,
-      ),
-    );
+    setItems((prev) => prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)));
   }
 
   const total = items.reduce((sum, item) => sum + item.quantity * item.unit_price, 0);
@@ -102,7 +96,9 @@ export default function OrderForm() {
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Expected delivery date</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">
+                Expected delivery date
+              </label>
               <input
                 name="delivery_date"
                 type="date"
@@ -178,7 +174,11 @@ export default function OrderForm() {
 
           <div className="mt-4 pt-4 border-t border-gray-100 flex justify-end">
             <p className="text-sm font-semibold text-gray-900">
-              Total: ${total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              Total: $
+              {total.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
             </p>
           </div>
         </div>

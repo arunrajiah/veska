@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       headers: authHeaders,
     });
     return NextResponse.json({
-      reply: "Your workspace is ready. Taking you to the dashboard...",
+      reply: 'Your workspace is ready. Taking you to the dashboard...',
       done: true,
     });
   }

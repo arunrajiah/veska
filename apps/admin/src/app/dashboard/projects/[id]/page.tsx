@@ -51,7 +51,10 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
   if (project) {
     try {
-      const res = await apiFetch<{ data: Task[] }>(`/api/v1/projects/${id}/tasks?limit=100`, tenantId);
+      const res = await apiFetch<{ data: Task[] }>(
+        `/api/v1/projects/${id}/tasks?limit=100`,
+        tenantId,
+      );
       tasks = Array.isArray(res?.data) ? res.data : [];
     } catch {
       tasks = [];
@@ -62,7 +65,10 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
     return (
       <div className="px-8 py-8">
         <p className="text-gray-500 text-sm">Project not found.</p>
-        <Link href="/dashboard/projects" className="mt-4 inline-block text-sm text-gray-600 hover:text-gray-900">
+        <Link
+          href="/dashboard/projects"
+          className="mt-4 inline-block text-sm text-gray-600 hover:text-gray-900"
+        >
           ← Back to projects
         </Link>
       </div>
@@ -86,10 +92,14 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         <div>
           <div className="flex items-center gap-3 mb-1">
             <h1 className="text-2xl font-semibold text-gray-900">{d?.name ?? 'Unnamed project'}</h1>
-            <span className={`text-xs px-2.5 py-1 rounded-full font-medium capitalize ${STATUS_STYLES[status] ?? 'bg-gray-100 text-gray-600'}`}>
+            <span
+              className={`text-xs px-2.5 py-1 rounded-full font-medium capitalize ${STATUS_STYLES[status] ?? 'bg-gray-100 text-gray-600'}`}
+            >
               {status.replace(/_/g, ' ')}
             </span>
-            <span className={`text-xs px-2.5 py-1 rounded-full font-medium capitalize ${PRIORITY_STYLES[priority] ?? 'bg-gray-100 text-gray-500'}`}>
+            <span
+              className={`text-xs px-2.5 py-1 rounded-full font-medium capitalize ${PRIORITY_STYLES[priority] ?? 'bg-gray-100 text-gray-500'}`}
+            >
               {priority}
             </span>
           </div>
@@ -98,33 +108,35 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
       <ProjectDetailClient
         projectId={id}
-        project={Object.fromEntries(
-          Object.entries({
-            name: d?.name,
-            description: d?.description,
-            status: d?.status,
-            priority: d?.priority,
-            startDate: d?.startDate,
-            dueDate: d?.dueDate,
-            budget: d?.budget,
-            spent: d?.spent,
-            managerName: d?.managerName,
-            progress: d?.progress,
-            tags: d?.tags,
-          }).filter(([, v]) => v !== undefined)
-        ) as {
-          name?: string;
-          description?: string;
-          status?: string;
-          priority?: string;
-          startDate?: string;
-          dueDate?: string;
-          budget?: number;
-          spent?: number;
-          managerName?: string;
-          progress?: number;
-          tags?: string[];
-        }}
+        project={
+          Object.fromEntries(
+            Object.entries({
+              name: d?.name,
+              description: d?.description,
+              status: d?.status,
+              priority: d?.priority,
+              startDate: d?.startDate,
+              dueDate: d?.dueDate,
+              budget: d?.budget,
+              spent: d?.spent,
+              managerName: d?.managerName,
+              progress: d?.progress,
+              tags: d?.tags,
+            }).filter(([, v]) => v !== undefined),
+          ) as {
+            name?: string;
+            description?: string;
+            status?: string;
+            priority?: string;
+            startDate?: string;
+            dueDate?: string;
+            budget?: number;
+            spent?: number;
+            managerName?: string;
+            progress?: number;
+            tags?: string[];
+          }
+        }
         tasks={tasks}
       />
     </div>

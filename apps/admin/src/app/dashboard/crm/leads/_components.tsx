@@ -108,7 +108,10 @@ export function NewLeadSlideOver({ onClose, onSaved }: LeadFormProps) {
   const [error, setError] = useState('');
 
   const handleSave = async () => {
-    if (!name.trim()) { setError('Name is required'); return; }
+    if (!name.trim()) {
+      setError('Name is required');
+      return;
+    }
     setSaving(true);
     setError('');
     try {
@@ -286,11 +289,21 @@ export function LeadsTable({ initialLeads }: LeadsTableProps) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
-                <th className="text-left px-4 py-3 text-xs font-medium uppercase tracking-widest text-gray-400">Name</th>
-                <th className="text-left px-4 py-3 text-xs font-medium uppercase tracking-widest text-gray-400">Company</th>
-                <th className="text-left px-4 py-3 text-xs font-medium uppercase tracking-widest text-gray-400">Status</th>
-                <th className="text-left px-4 py-3 text-xs font-medium uppercase tracking-widest text-gray-400">Score</th>
-                <th className="text-left px-4 py-3 text-xs font-medium uppercase tracking-widest text-gray-400">Created</th>
+                <th className="text-left px-4 py-3 text-xs font-medium uppercase tracking-widest text-gray-400">
+                  Name
+                </th>
+                <th className="text-left px-4 py-3 text-xs font-medium uppercase tracking-widest text-gray-400">
+                  Company
+                </th>
+                <th className="text-left px-4 py-3 text-xs font-medium uppercase tracking-widest text-gray-400">
+                  Status
+                </th>
+                <th className="text-left px-4 py-3 text-xs font-medium uppercase tracking-widest text-gray-400">
+                  Score
+                </th>
+                <th className="text-left px-4 py-3 text-xs font-medium uppercase tracking-widest text-gray-400">
+                  Created
+                </th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -298,7 +311,8 @@ export function LeadsTable({ initialLeads }: LeadsTableProps) {
               {initialLeads.map((record) => {
                 const d = record.data;
                 const status = (d['status'] as string) ?? 'new';
-                const created = typeof record.createdAt === 'string' ? record.createdAt.slice(0, 10) : '';
+                const created =
+                  typeof record.createdAt === 'string' ? record.createdAt.slice(0, 10) : '';
                 return (
                   <tr
                     key={record.id}
@@ -311,11 +325,15 @@ export function LeadsTable({ initialLeads }: LeadsTableProps) {
                     </td>
                     <td className="px-4 py-3 text-gray-600">{String(d['company'] ?? '—')}</td>
                     <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-600'}`}>
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-600'}`}
+                      >
                         {status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-gray-600 text-xs">{d['score'] != null ? String(d['score']) : '—'}</td>
+                    <td className="px-4 py-3 text-gray-600 text-xs">
+                      {d['score'] != null ? String(d['score']) : '—'}
+                    </td>
                     <td className="px-4 py-3 text-gray-400 text-xs">{created}</td>
                     <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                       <AIEnrichButton entityId={record.id} onToast={addToast} />
@@ -328,12 +346,7 @@ export function LeadsTable({ initialLeads }: LeadsTableProps) {
         </div>
       )}
 
-      {showForm && (
-        <NewLeadSlideOver
-          onClose={() => setShowForm(false)}
-          onSaved={handleSaved}
-        />
-      )}
+      {showForm && <NewLeadSlideOver onClose={() => setShowForm(false)} onSaved={handleSaved} />}
 
       <ToastList toasts={toasts} />
     </>

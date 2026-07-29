@@ -57,7 +57,11 @@ function fmt(amount?: number, currency = 'USD') {
 
 function fmtDate(d?: string) {
   if (!d) return '—';
-  return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(d).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -70,7 +74,9 @@ function StatusBadge({ status }: { status: string }) {
   };
   const label = status.charAt(0).toUpperCase() + status.slice(1);
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${map[status] ?? 'bg-gray-100 text-gray-600'}`}>
+    <span
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${map[status] ?? 'bg-gray-100 text-gray-600'}`}
+    >
       {label}
     </span>
   );
@@ -79,36 +85,42 @@ function StatusBadge({ status }: { status: string }) {
 function normalizeItems(run: PayrollRunDetail): PayrollRunItem[] {
   if (run.items && run.items.length > 0) return run.items;
   if (run.payslips && run.payslips.length > 0) {
-    return run.payslips.map((ps): PayrollRunItem => ({
-      id: ps.id,
-      ...(ps.data?.employee_name !== undefined && { employeeName: ps.data.employee_name }),
-      ...(ps.data?.employee_email !== undefined && { employeeEmail: ps.data.employee_email }),
-      ...(ps.data?.hours_worked !== undefined && { hoursWorked: ps.data.hours_worked }),
-      ...(ps.data?.gross_pay !== undefined && { grossPay: ps.data.gross_pay }),
-      ...(ps.data?.tax !== undefined && { tax: ps.data.tax }),
-      ...(ps.data?.social_security !== undefined && { socialSecurity: ps.data.social_security }),
-      ...(ps.data?.medicare !== undefined && { medicare: ps.data.medicare }),
-      ...(ps.data?.total_deductions !== undefined && { totalDeductions: ps.data.total_deductions }),
-      ...(ps.data?.net_pay !== undefined && { netPay: ps.data.net_pay }),
-    }));
+    return run.payslips.map(
+      (ps): PayrollRunItem => ({
+        id: ps.id,
+        ...(ps.data?.employee_name !== undefined && { employeeName: ps.data.employee_name }),
+        ...(ps.data?.employee_email !== undefined && { employeeEmail: ps.data.employee_email }),
+        ...(ps.data?.hours_worked !== undefined && { hoursWorked: ps.data.hours_worked }),
+        ...(ps.data?.gross_pay !== undefined && { grossPay: ps.data.gross_pay }),
+        ...(ps.data?.tax !== undefined && { tax: ps.data.tax }),
+        ...(ps.data?.social_security !== undefined && { socialSecurity: ps.data.social_security }),
+        ...(ps.data?.medicare !== undefined && { medicare: ps.data.medicare }),
+        ...(ps.data?.total_deductions !== undefined && {
+          totalDeductions: ps.data.total_deductions,
+        }),
+        ...(ps.data?.net_pay !== undefined && { netPay: ps.data.net_pay }),
+      }),
+    );
   }
   return [];
 }
 
 function normalizeRun(run: PayrollRunDetail) {
   const d = run.data ?? {};
-  const str = (k: string) => run[k as keyof typeof run] ?? d[k] ?? d[k.replace(/([A-Z])/g, '_$1').toLowerCase()];
+  const str = (k: string) =>
+    run[k as keyof typeof run] ?? d[k] ?? d[k.replace(/([A-Z])/g, '_$1').toLowerCase()];
   return {
-    name: (run.name ?? d['name'] as string) || '',
-    period: (run.period ?? d['period'] as string) || 'monthly',
-    periodStart: (run.periodStart ?? d['periodStart'] as string ?? d['period_start'] as string) || '',
-    periodEnd: (run.periodEnd ?? d['periodEnd'] as string ?? d['period_end'] as string) || '',
-    currency: (run.currency ?? d['currency'] as string) || 'USD',
+    name: (run.name ?? (d['name'] as string)) || '',
+    period: (run.period ?? (d['period'] as string)) || 'monthly',
+    periodStart:
+      (run.periodStart ?? (d['periodStart'] as string) ?? (d['period_start'] as string)) || '',
+    periodEnd: (run.periodEnd ?? (d['periodEnd'] as string) ?? (d['period_end'] as string)) || '',
+    currency: (run.currency ?? (d['currency'] as string)) || 'USD',
     employeeCount: Number(run.employeeCount ?? d['employeeCount'] ?? d['employee_count'] ?? 0),
     totalGross: Number(run.totalGross ?? d['totalGross'] ?? d['total_gross'] ?? 0) || undefined,
     totalNet: Number(run.totalNet ?? d['totalNet'] ?? d['total_net'] ?? 0) || undefined,
-    status: (run.status ?? d['status'] as string) || 'draft',
-    notes: (run.notes ?? d['notes'] as string) || '',
+    status: (run.status ?? (d['status'] as string)) || 'draft',
+    notes: (run.notes ?? (d['notes'] as string)) || '',
   };
 }
 
@@ -200,7 +212,7 @@ export function PayrollRunDetailClient({
       deductions: acc.deductions + (item.totalDeductions ?? 0),
       net: acc.net + (item.netPay ?? 0),
     }),
-    { hours: 0, gross: 0, tax: 0, ss: 0, medicare: 0, deductions: 0, net: 0 }
+    { hours: 0, gross: 0, tax: 0, ss: 0, medicare: 0, deductions: 0, net: 0 },
   );
 
   return (
@@ -235,7 +247,8 @@ export function PayrollRunDetailClient({
         <button
           onClick={() => void recalculate()}
           disabled={actionLoading !== null}
-          className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors">
+          className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+        >
           <RefreshCw size={14} className={actionLoading === 'recalculate' ? 'animate-spin' : ''} />
           Recalculate
         </button>
@@ -243,7 +256,8 @@ export function PayrollRunDetailClient({
           <button
             onClick={() => void transition('approved')}
             disabled={actionLoading !== null}
-            className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors">
+            className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+          >
             <CheckCircle size={14} />
             {actionLoading === 'approved' ? 'Approving…' : 'Approve'}
           </button>
@@ -252,7 +266,8 @@ export function PayrollRunDetailClient({
           <button
             onClick={() => void transition('paid')}
             disabled={actionLoading !== null}
-            className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 transition-colors">
+            className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 transition-colors"
+          >
             <DollarSign size={14} />
             {actionLoading === 'paid' ? 'Processing…' : 'Mark as Paid'}
           </button>
@@ -261,7 +276,8 @@ export function PayrollRunDetailClient({
           <button
             onClick={() => void transition('cancelled')}
             disabled={actionLoading !== null}
-            className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50 transition-colors">
+            className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50 transition-colors"
+          >
             <AlertTriangle size={14} />
             {actionLoading === 'cancelled' ? 'Cancelling…' : 'Cancel'}
           </button>
@@ -276,40 +292,72 @@ export function PayrollRunDetailClient({
           </h2>
         </div>
         {items.length === 0 ? (
-          <p className="px-5 py-8 text-sm text-gray-400 text-center">No employee records for this run.</p>
+          <p className="px-5 py-8 text-sm text-gray-400 text-center">
+            No employee records for this run.
+          </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100">
-                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Employee</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                    Employee
+                  </th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Email</th>
                   <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Hours</th>
-                  <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Gross Pay</th>
+                  <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">
+                    Gross Pay
+                  </th>
                   <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Tax</th>
                   <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">SS</th>
-                  <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Medicare</th>
-                  <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Deductions</th>
-                  <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Net Pay</th>
+                  <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">
+                    Medicare
+                  </th>
+                  <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">
+                    Deductions
+                  </th>
+                  <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">
+                    Net Pay
+                  </th>
                   <th className="px-4 py-3" />
                 </tr>
               </thead>
               <tbody>
                 {items.map((item) => (
-                  <tr key={item.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
-                    <td className="px-4 py-3 font-medium text-gray-900">{item.employeeName ?? '—'}</td>
+                  <tr
+                    key={item.id}
+                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
+                  >
+                    <td className="px-4 py-3 font-medium text-gray-900">
+                      {item.employeeName ?? '—'}
+                    </td>
                     <td className="px-4 py-3 text-gray-500 text-xs">{item.employeeEmail ?? '—'}</td>
-                    <td className="px-4 py-3 text-right text-gray-600">{item.hoursWorked ?? '—'}</td>
-                    <td className="px-4 py-3 text-right text-gray-900">{fmt(item.grossPay, r.currency)}</td>
-                    <td className="px-4 py-3 text-right text-gray-600">{fmt(item.tax, r.currency)}</td>
-                    <td className="px-4 py-3 text-right text-gray-600">{fmt(item.socialSecurity, r.currency)}</td>
-                    <td className="px-4 py-3 text-right text-gray-600">{fmt(item.medicare, r.currency)}</td>
-                    <td className="px-4 py-3 text-right text-red-600">{fmt(item.totalDeductions, r.currency)}</td>
-                    <td className="px-4 py-3 text-right font-medium text-green-700">{fmt(item.netPay, r.currency)}</td>
+                    <td className="px-4 py-3 text-right text-gray-600">
+                      {item.hoursWorked ?? '—'}
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-900">
+                      {fmt(item.grossPay, r.currency)}
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-600">
+                      {fmt(item.tax, r.currency)}
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-600">
+                      {fmt(item.socialSecurity, r.currency)}
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-600">
+                      {fmt(item.medicare, r.currency)}
+                    </td>
+                    <td className="px-4 py-3 text-right text-red-600">
+                      {fmt(item.totalDeductions, r.currency)}
+                    </td>
+                    <td className="px-4 py-3 text-right font-medium text-green-700">
+                      {fmt(item.netPay, r.currency)}
+                    </td>
                     <td className="px-4 py-3">
                       <button
                         onClick={() => void viewPayslip(item.id)}
-                        className="text-xs text-indigo-600 hover:text-indigo-800 px-2 py-1 rounded hover:bg-indigo-50 whitespace-nowrap">
+                        className="text-xs text-indigo-600 hover:text-indigo-800 px-2 py-1 rounded hover:bg-indigo-50 whitespace-nowrap"
+                      >
                         View payslip
                       </button>
                     </td>
@@ -318,14 +366,30 @@ export function PayrollRunDetailClient({
               </tbody>
               <tfoot>
                 <tr className="bg-gray-50 font-semibold">
-                  <td className="px-4 py-3 text-sm text-gray-700" colSpan={2}>Totals</td>
-                  <td className="px-4 py-3 text-right text-sm text-gray-700">{totals.hours.toFixed(1)}</td>
-                  <td className="px-4 py-3 text-right text-sm text-gray-900">{fmt(totals.gross, r.currency)}</td>
-                  <td className="px-4 py-3 text-right text-sm text-gray-700">{fmt(totals.tax, r.currency)}</td>
-                  <td className="px-4 py-3 text-right text-sm text-gray-700">{fmt(totals.ss, r.currency)}</td>
-                  <td className="px-4 py-3 text-right text-sm text-gray-700">{fmt(totals.medicare, r.currency)}</td>
-                  <td className="px-4 py-3 text-right text-sm text-red-600">{fmt(totals.deductions, r.currency)}</td>
-                  <td className="px-4 py-3 text-right text-sm text-green-700">{fmt(totals.net, r.currency)}</td>
+                  <td className="px-4 py-3 text-sm text-gray-700" colSpan={2}>
+                    Totals
+                  </td>
+                  <td className="px-4 py-3 text-right text-sm text-gray-700">
+                    {totals.hours.toFixed(1)}
+                  </td>
+                  <td className="px-4 py-3 text-right text-sm text-gray-900">
+                    {fmt(totals.gross, r.currency)}
+                  </td>
+                  <td className="px-4 py-3 text-right text-sm text-gray-700">
+                    {fmt(totals.tax, r.currency)}
+                  </td>
+                  <td className="px-4 py-3 text-right text-sm text-gray-700">
+                    {fmt(totals.ss, r.currency)}
+                  </td>
+                  <td className="px-4 py-3 text-right text-sm text-gray-700">
+                    {fmt(totals.medicare, r.currency)}
+                  </td>
+                  <td className="px-4 py-3 text-right text-sm text-red-600">
+                    {fmt(totals.deductions, r.currency)}
+                  </td>
+                  <td className="px-4 py-3 text-right text-sm text-green-700">
+                    {fmt(totals.net, r.currency)}
+                  </td>
                   <td />
                 </tr>
               </tfoot>
@@ -341,7 +405,8 @@ export function PayrollRunDetailClient({
           <button
             onClick={() => void saveNotes()}
             disabled={notesSaving}
-            className="text-xs text-gray-500 hover:text-gray-900 px-3 py-1 rounded hover:bg-gray-100 disabled:opacity-50 transition-colors">
+            className="text-xs text-gray-500 hover:text-gray-900 px-3 py-1 rounded hover:bg-gray-100 disabled:opacity-50 transition-colors"
+          >
             {notesSaving ? 'Saving…' : 'Save'}
           </button>
         </div>

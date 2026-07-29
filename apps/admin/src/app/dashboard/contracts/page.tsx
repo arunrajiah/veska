@@ -24,7 +24,10 @@ export default async function ContractsPage() {
   let contracts: Contract[] = [];
 
   try {
-    const res = await apiFetch<{ data: Contract[] } | Contract[]>('/api/v1/contracts?limit=50', tenantId);
+    const res = await apiFetch<{ data: Contract[] } | Contract[]>(
+      '/api/v1/contracts?limit=50',
+      tenantId,
+    );
     contracts = Array.isArray(res) ? res : (res.data ?? []);
   } catch {
     contracts = [];

@@ -37,7 +37,11 @@ const TABS = ['all', 'draft', 'sent', 'acknowledged', 'partial', 'received', 'ca
 
 function fmtDate(d?: string) {
   if (!d) return '—';
-  return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(d).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 }
 
 function fmtMoney(n?: number) {
@@ -69,8 +73,8 @@ function NewPOSlideOver({ onClose, onSaved }: { onClose: () => void; onSaved: ()
       prev.map((item, idx) =>
         idx === i
           ? { ...item, [field]: field === 'description' ? value : parseFloat(value) || 0 }
-          : item
-      )
+          : item,
+      ),
     );
   }
 
@@ -123,29 +127,46 @@ function NewPOSlideOver({ onClose, onSaved }: { onClose: () => void; onSaved: ()
       <div className="relative bg-white w-full max-w-xl h-full overflow-y-auto shadow-xl flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-base font-semibold text-gray-900">New Purchase Order</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <X size={18} />
+          </button>
         </div>
         <form onSubmit={(e) => void handleSubmit(e)} className="flex-1 px-6 py-5 space-y-4">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Vendor Name *</label>
-            <input name="vendorName" required
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              name="vendorName"
+              required
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Expected Delivery Date</label>
-            <input name="expectedDate" type="date"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <label className="block text-xs font-medium text-gray-700 mb-1">
+              Expected Delivery Date
+            </label>
+            <input
+              name="expectedDate"
+              type="date"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
-            <textarea name="notes" rows={2}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none" />
+            <textarea
+              name="notes"
+              rows={2}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none"
+            />
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="block text-xs font-medium text-gray-700">Line Items</label>
-              <button type="button" onClick={addItem} className="text-xs text-gray-600 hover:text-gray-900 flex items-center gap-1">
+              <button
+                type="button"
+                onClick={addItem}
+                className="text-xs text-gray-600 hover:text-gray-900 flex items-center gap-1"
+              >
                 <Plus size={12} /> Add line
               </button>
             </div>
@@ -184,12 +205,18 @@ function NewPOSlideOver({ onClose, onSaved }: { onClose: () => void; onSaved: ()
                   </div>
                   <div className="col-span-1 flex items-end justify-center pb-1.5">
                     {i === 0 && <p className="text-xs text-gray-400 mb-1 invisible">×</p>}
-                    <p className="text-xs text-gray-500 font-mono">${(item.quantity * item.unitPrice).toFixed(2)}</p>
+                    <p className="text-xs text-gray-500 font-mono">
+                      ${(item.quantity * item.unitPrice).toFixed(2)}
+                    </p>
                   </div>
                   <div className="col-span-1 flex items-end pb-1.5">
                     {i === 0 && <div className="invisible text-xs mb-1">×</div>}
                     {items.length > 1 && (
-                      <button type="button" onClick={() => removeItem(i)} className="text-gray-300 hover:text-red-400">
+                      <button
+                        type="button"
+                        onClick={() => removeItem(i)}
+                        className="text-gray-300 hover:text-red-400"
+                      >
                         <X size={14} />
                       </button>
                     )}
@@ -204,12 +231,18 @@ function NewPOSlideOver({ onClose, onSaved }: { onClose: () => void; onSaved: ()
 
           {error && <p className="text-xs text-red-500">{error}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="submit" disabled={saving}
-              className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
+            <button
+              type="submit"
+              disabled={saving}
+              className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors"
+            >
               {saving ? 'Creating…' : 'Create PO'}
             </button>
-            <button type="button" onClick={onClose}
-              className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+            <button
+              type="button"
+              onClick={onClose}
+              className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+            >
               Cancel
             </button>
           </div>
@@ -223,7 +256,7 @@ export function OrdersClient({ orders: initialOrders }: { orders: PurchaseOrder[
   const router = useRouter();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
-  const [tab, setTab] = useState<typeof TABS[number]>('all');
+  const [tab, setTab] = useState<(typeof TABS)[number]>('all');
   const [showNew, setShowNew] = useState(searchParams.get('new') === 'true');
   const [orders, setOrders] = useState(initialOrders);
 
@@ -276,7 +309,9 @@ export function OrdersClient({ orders: initialOrders }: { orders: PurchaseOrder[
             key={t}
             onClick={() => setTab(t)}
             className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px capitalize ${
-              tab === t ? 'border-gray-900 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700'
+              tab === t
+                ? 'border-gray-900 text-gray-900'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
           >
             {t}
@@ -298,7 +333,9 @@ export function OrdersClient({ orders: initialOrders }: { orders: PurchaseOrder[
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Items</th>
                 <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Total</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Order Date</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Order Date
+                </th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Expected</th>
                 <th className="px-4 py-3" />
               </tr>
@@ -307,24 +344,41 @@ export function OrdersClient({ orders: initialOrders }: { orders: PurchaseOrder[
               {filtered.map((o) => {
                 const status = o.data.status ?? 'draft';
                 return (
-                  <tr key={o.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                  <tr
+                    key={o.id}
+                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
+                  >
                     <td className="px-4 py-3">
-                      <Link href={`/dashboard/purchasing/orders/${o.id}`} className="font-mono text-xs text-gray-700 hover:text-gray-900">
+                      <Link
+                        href={`/dashboard/purchasing/orders/${o.id}`}
+                        className="font-mono text-xs text-gray-700 hover:text-gray-900"
+                      >
                         {o.data.poNumber ?? o.id.slice(0, 8).toUpperCase()}
                       </Link>
                     </td>
                     <td className="px-4 py-3 text-gray-700">{o.data.vendorName ?? '—'}</td>
-                    <td className="px-4 py-3 text-gray-500 text-xs">{o.data.items?.length ?? 0} item(s)</td>
-                    <td className="px-4 py-3 text-right font-medium text-gray-800">{fmtMoney(o.data.total)}</td>
+                    <td className="px-4 py-3 text-gray-500 text-xs">
+                      {o.data.items?.length ?? 0} item(s)
+                    </td>
+                    <td className="px-4 py-3 text-right font-medium text-gray-800">
+                      {fmtMoney(o.data.total)}
+                    </td>
                     <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-600'}`}>
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-600'}`}
+                      >
                         {status}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-xs text-gray-500">{fmtDate(o.data.orderDate)}</td>
-                    <td className="px-4 py-3 text-xs text-gray-500">{fmtDate(o.data.expectedDate)}</td>
+                    <td className="px-4 py-3 text-xs text-gray-500">
+                      {fmtDate(o.data.expectedDate)}
+                    </td>
                     <td className="px-4 py-3 text-right">
-                      <Link href={`/dashboard/purchasing/orders/${o.id}`} className="text-xs text-gray-500 hover:text-gray-900">
+                      <Link
+                        href={`/dashboard/purchasing/orders/${o.id}`}
+                        className="text-xs text-gray-500 hover:text-gray-900"
+                      >
                         View →
                       </Link>
                     </td>
@@ -339,7 +393,11 @@ export function OrdersClient({ orders: initialOrders }: { orders: PurchaseOrder[
       {showNew && (
         <NewPOSlideOver
           onClose={() => setShowNew(false)}
-          onSaved={() => startTransition(() => { router.refresh(); })}
+          onSaved={() =>
+            startTransition(() => {
+              router.refresh();
+            })
+          }
         />
       )}
     </div>

@@ -62,24 +62,130 @@ const PLAN_LIMITS = {
 const CURRENT_PLAN = 'Growth';
 
 const FEATURE_ROWS = [
-  { feature: 'AI Conversations / mo', free: '10', starter: '100', growth: '500', business: '2,000', enterprise: 'Unlimited' },
-  { feature: 'AI Insights / day', free: '1', starter: '5', growth: '20', business: '100', enterprise: 'Unlimited' },
-  { feature: 'Entity Enrichments / mo', free: '0', starter: '25', growth: '200', business: 'Unlimited', enterprise: 'Unlimited' },
-  { feature: 'Write Actions', free: '✗', starter: '✗', growth: '✓', business: '✓', enterprise: '✓' },
-  { feature: 'Anomaly Detection', free: '✗', starter: '✗', growth: '✗', business: '✓', enterprise: '✓' },
-  { feature: 'Analytics Retention', free: '30d', starter: '90d', growth: '1yr', business: 'Unlimited', enterprise: 'Unlimited' },
-  { feature: 'AI Reports / month', free: '0', starter: '10', growth: '50', business: '200', enterprise: 'Unlimited' },
-  { feature: 'Saved Reports', free: '3', starter: '10', growth: '50', business: 'Unlimited', enterprise: 'Unlimited' },
-  { feature: 'Data Exports / month', free: '5', starter: '50', growth: '500', business: 'Unlimited', enterprise: 'Unlimited' },
-  { feature: 'Portal Users', free: '0', starter: '10', growth: '100', business: '500', enterprise: 'Unlimited' },
-  { feature: 'Notification Retention', free: '7d', starter: '30d', growth: '90d', business: '1yr', enterprise: 'Unlimited' },
-  { feature: 'Portal Custom Branding', free: '✗', starter: '✗', growth: '✗', business: '✓', enterprise: '✓' },
-  { feature: 'Tax Rates', free: '1', starter: '5', growth: '20', business: 'Unlimited', enterprise: 'Unlimited' },
+  {
+    feature: 'AI Conversations / mo',
+    free: '10',
+    starter: '100',
+    growth: '500',
+    business: '2,000',
+    enterprise: 'Unlimited',
+  },
+  {
+    feature: 'AI Insights / day',
+    free: '1',
+    starter: '5',
+    growth: '20',
+    business: '100',
+    enterprise: 'Unlimited',
+  },
+  {
+    feature: 'Entity Enrichments / mo',
+    free: '0',
+    starter: '25',
+    growth: '200',
+    business: 'Unlimited',
+    enterprise: 'Unlimited',
+  },
+  {
+    feature: 'Write Actions',
+    free: '✗',
+    starter: '✗',
+    growth: '✓',
+    business: '✓',
+    enterprise: '✓',
+  },
+  {
+    feature: 'Anomaly Detection',
+    free: '✗',
+    starter: '✗',
+    growth: '✗',
+    business: '✓',
+    enterprise: '✓',
+  },
+  {
+    feature: 'Analytics Retention',
+    free: '30d',
+    starter: '90d',
+    growth: '1yr',
+    business: 'Unlimited',
+    enterprise: 'Unlimited',
+  },
+  {
+    feature: 'AI Reports / month',
+    free: '0',
+    starter: '10',
+    growth: '50',
+    business: '200',
+    enterprise: 'Unlimited',
+  },
+  {
+    feature: 'Saved Reports',
+    free: '3',
+    starter: '10',
+    growth: '50',
+    business: 'Unlimited',
+    enterprise: 'Unlimited',
+  },
+  {
+    feature: 'Data Exports / month',
+    free: '5',
+    starter: '50',
+    growth: '500',
+    business: 'Unlimited',
+    enterprise: 'Unlimited',
+  },
+  {
+    feature: 'Portal Users',
+    free: '0',
+    starter: '10',
+    growth: '100',
+    business: '500',
+    enterprise: 'Unlimited',
+  },
+  {
+    feature: 'Notification Retention',
+    free: '7d',
+    starter: '30d',
+    growth: '90d',
+    business: '1yr',
+    enterprise: 'Unlimited',
+  },
+  {
+    feature: 'Portal Custom Branding',
+    free: '✗',
+    starter: '✗',
+    growth: '✗',
+    business: '✓',
+    enterprise: '✓',
+  },
+  {
+    feature: 'Tax Rates',
+    free: '1',
+    starter: '5',
+    growth: '20',
+    business: 'Unlimited',
+    enterprise: 'Unlimited',
+  },
   { feature: 'Custom SMTP', free: '✗', starter: '✗', growth: '✓', business: '✓', enterprise: '✓' },
-  { feature: 'Module Management', free: '✗', starter: '✓', growth: '✓', business: '✓', enterprise: '✓' },
+  {
+    feature: 'Module Management',
+    free: '✗',
+    starter: '✓',
+    growth: '✓',
+    business: '✓',
+    enterprise: '✓',
+  },
 ];
 
-function ProgressBar({ used, limit, color }: { used: number; limit: number | 'unlimited'; color: string }) {
+function ProgressBar({
+  used,
+  limit,
+  color,
+}: {
+  used: number;
+  limit: number | 'unlimited';
+  color: string;
+}) {
   if (limit === 'unlimited') {
     return (
       <div className="h-1.5 bg-gray-100 rounded-full">
@@ -106,7 +212,7 @@ function DailyTokenChart({ daily }: { daily: DailyUsage[] }) {
   }
 
   const sorted = [...daily].sort((a, b) => a.date.localeCompare(b.date)).slice(-14);
-  const values = sorted.map(d => Number(d.tokens));
+  const values = sorted.map((d) => Number(d.tokens));
   const maxVal = Math.max(...values, 1);
   const chartH = 80;
   const barW = 24;
@@ -127,7 +233,13 @@ function DailyTokenChart({ daily }: { daily: DailyUsage[] }) {
               <rect x={x} y={y} width={barW} height={barH} rx={3} fill="#818cf8" />
               <title>{`${d.date}: ${Number(d.tokens).toLocaleString()} tokens, ${d.calls} calls`}</title>
               {i % 2 === 0 && (
-                <text x={x + barW / 2} y={chartH + 14} textAnchor="middle" fontSize={9} fill="#9ca3af">
+                <text
+                  x={x + barW / 2}
+                  y={chartH + 14}
+                  textAnchor="middle"
+                  fontSize={9}
+                  fill="#9ca3af"
+                >
                   {label}
                 </text>
               )}
@@ -184,24 +296,38 @@ function RealUsagePanel({ data }: { data: UsageData }) {
       {data.summary.length > 0 && (
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
           <div className="px-5 py-3 border-b border-gray-100">
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Usage by Feature</h3>
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              Usage by Feature
+            </h3>
           </div>
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-100">
                 <th className="text-left px-4 py-2.5 text-xs font-medium text-gray-500">Feature</th>
                 <th className="text-right px-4 py-2.5 text-xs font-medium text-gray-500">Calls</th>
-                <th className="text-right px-4 py-2.5 text-xs font-medium text-gray-500">Total Tokens</th>
-                <th className="text-right px-4 py-2.5 text-xs font-medium text-gray-500">Avg Duration</th>
-                <th className="text-right px-4 py-2.5 text-xs font-medium text-gray-500">Last Used</th>
+                <th className="text-right px-4 py-2.5 text-xs font-medium text-gray-500">
+                  Total Tokens
+                </th>
+                <th className="text-right px-4 py-2.5 text-xs font-medium text-gray-500">
+                  Avg Duration
+                </th>
+                <th className="text-right px-4 py-2.5 text-xs font-medium text-gray-500">
+                  Last Used
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {data.summary.map((row) => (
                 <tr key={row.feature} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-medium text-gray-800">{featureLabel(row.feature)}</td>
-                  <td className="px-4 py-3 text-right text-gray-600">{Number(row.calls).toLocaleString()}</td>
-                  <td className="px-4 py-3 text-right text-gray-600">{Number(row.tokens).toLocaleString()}</td>
+                  <td className="px-4 py-3 font-medium text-gray-800">
+                    {featureLabel(row.feature)}
+                  </td>
+                  <td className="px-4 py-3 text-right text-gray-600">
+                    {Number(row.calls).toLocaleString()}
+                  </td>
+                  <td className="px-4 py-3 text-right text-gray-600">
+                    {Number(row.tokens).toLocaleString()}
+                  </td>
                   <td className="px-4 py-3 text-right text-gray-500">
                     {row.avgDurationMs ? `${Math.round(Number(row.avgDurationMs))}ms` : '—'}
                   </td>
@@ -246,31 +372,39 @@ export function AIUsageClient() {
     const fetchAll = async () => {
       try {
         const [aiUsage, portalTokens, savedReports] = await Promise.allSettled([
-          fetch(`/api/veska/ai/usage/summary?days=30`, { headers: apiHeaders() })
-            .then(r => r.ok ? r.json() as Promise<UsageData> : Promise.reject(r.status)),
-          fetch(`/api/veska/portal-mgmt/tokens`, { headers: apiHeaders() })
-            .then(r => r.ok ? r.json() as Promise<unknown[]> : Promise.reject(r.status)),
-          fetch(`/api/veska/reports/saved`, { headers: apiHeaders() })
-            .then(r => r.ok ? r.json() as Promise<unknown[]> : Promise.reject(r.status)),
+          fetch(`/api/veska/ai/usage/summary?days=30`, { headers: apiHeaders() }).then((r) =>
+            r.ok ? (r.json() as Promise<UsageData>) : Promise.reject(r.status),
+          ),
+          fetch(`/api/veska/portal-mgmt/tokens`, { headers: apiHeaders() }).then((r) =>
+            r.ok ? (r.json() as Promise<unknown[]>) : Promise.reject(r.status),
+          ),
+          fetch(`/api/veska/reports/saved`, { headers: apiHeaders() }).then((r) =>
+            r.ok ? (r.json() as Promise<unknown[]>) : Promise.reject(r.status),
+          ),
         ]);
 
-        const data: UsageData = aiUsage.status === 'fulfilled'
-          ? aiUsage.value
-          : { summary: [], daily: [] };
+        const data: UsageData =
+          aiUsage.status === 'fulfilled' ? aiUsage.value : { summary: [], daily: [] };
         setUsageData(data);
 
         // Derive quota counts from real data
-        const convFeature = data.summary.find(s => s.feature === 'action_agent');
-        const insightsFeature = data.summary.find(s => s.feature === 'insights');
-        const enrichFeature = data.summary.find(s => s.feature === 'enrich_entity');
-        const reportFeature = data.summary.find(s => s.feature === 'report_generate');
+        const convFeature = data.summary.find((s) => s.feature === 'action_agent');
+        const insightsFeature = data.summary.find((s) => s.feature === 'insights');
+        const enrichFeature = data.summary.find((s) => s.feature === 'enrich_entity');
+        const reportFeature = data.summary.find((s) => s.feature === 'report_generate');
 
-        const portalCount = portalTokens.status === 'fulfilled'
-          ? (Array.isArray(portalTokens.value) ? portalTokens.value.length : 0)
-          : 0;
-        const savedCount = savedReports.status === 'fulfilled'
-          ? (Array.isArray(savedReports.value) ? savedReports.value.length : 0)
-          : 0;
+        const portalCount =
+          portalTokens.status === 'fulfilled'
+            ? Array.isArray(portalTokens.value)
+              ? portalTokens.value.length
+              : 0
+            : 0;
+        const savedCount =
+          savedReports.status === 'fulfilled'
+            ? Array.isArray(savedReports.value)
+              ? savedReports.value.length
+              : 0
+            : 0;
 
         setQuota({
           conversationsUsed: Number(convFeature?.calls ?? 0),
@@ -304,9 +438,7 @@ export function AIUsageClient() {
         </div>
         <div>
           <h1 className="text-xl font-semibold text-gray-900">AI Usage</h1>
-          <p className="text-sm text-gray-500">
-            Monitor AI feature consumption across your plan
-          </p>
+          <p className="text-sm text-gray-500">Monitor AI feature consumption across your plan</p>
         </div>
       </div>
 
@@ -316,12 +448,10 @@ export function AIUsageClient() {
           <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-indigo-100 text-indigo-800">
             {CURRENT_PLAN}
           </span>
-          <span className="text-sm text-gray-600">
-            Upgrade to Business for anomaly detection
-          </span>
+          <span className="text-sm text-gray-600">Upgrade to Business for anomaly detection</span>
         </div>
         <Link
-          href={"/dashboard/billing" as any}
+          href={'/dashboard/billing' as any}
           className="flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
         >
           Upgrade plan
@@ -438,9 +568,7 @@ export function AIUsageClient() {
                 </>
               )}
             </div>
-            <p className="text-xs text-gray-400">
-              Create expenses, update tickets &amp; more
-            </p>
+            <p className="text-xs text-gray-400">Create expenses, update tickets &amp; more</p>
           </div>
         </div>
       </div>
@@ -454,7 +582,7 @@ export function AIUsageClient() {
           </div>
           {!(quota?.anomalyDetection ?? false) && (
             <Link
-              href={"/dashboard/billing" as any}
+              href={'/dashboard/billing' as any}
               className="text-xs font-medium text-indigo-600 hover:text-indigo-800 transition-colors border border-indigo-200 rounded-lg px-3 py-1.5 hover:bg-indigo-50"
             >
               Upgrade to Business
@@ -507,7 +635,9 @@ export function AIUsageClient() {
             <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
               <div
                 className="h-full bg-indigo-500 rounded-full"
-                style={{ width: `${Math.min(((quota?.aiReportsUsed ?? 0) / PLAN_LIMITS.aiReports) * 100, 100)}%` }}
+                style={{
+                  width: `${Math.min(((quota?.aiReportsUsed ?? 0) / PLAN_LIMITS.aiReports) * 100, 100)}%`,
+                }}
               />
             </div>
             <p className="text-xs text-gray-400">this month</p>
@@ -525,7 +655,9 @@ export function AIUsageClient() {
             <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
               <div
                 className="h-full bg-indigo-500 rounded-full"
-                style={{ width: `${Math.min(((quota?.dataExportsUsed ?? 0) / PLAN_LIMITS.dataExports) * 100, 100)}%` }}
+                style={{
+                  width: `${Math.min(((quota?.dataExportsUsed ?? 0) / PLAN_LIMITS.dataExports) * 100, 100)}%`,
+                }}
               />
             </div>
             <p className="text-xs text-gray-400">this month</p>
@@ -534,16 +666,16 @@ export function AIUsageClient() {
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Saved Reports</span>
               <span className="text-gray-400">
-                <span className="font-semibold text-gray-900">
-                  {quota?.savedReportsUsed ?? 0}
-                </span>{' '}
+                <span className="font-semibold text-gray-900">{quota?.savedReportsUsed ?? 0}</span>{' '}
                 / {PLAN_LIMITS.savedReports}
               </span>
             </div>
             <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
               <div
                 className="h-full bg-indigo-500 rounded-full"
-                style={{ width: `${Math.min(((quota?.savedReportsUsed ?? 0) / PLAN_LIMITS.savedReports) * 100, 100)}%` }}
+                style={{
+                  width: `${Math.min(((quota?.savedReportsUsed ?? 0) / PLAN_LIMITS.savedReports) * 100, 100)}%`,
+                }}
               />
             </div>
             <p className="text-xs text-gray-400">slots used</p>
@@ -580,16 +712,16 @@ export function AIUsageClient() {
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Portal Users</span>
               <span className="text-gray-400">
-                <span className="font-semibold text-gray-900">
-                  {quota?.portalUsersUsed ?? 0}
-                </span>{' '}
-                / {PLAN_LIMITS.portalUsers}
+                <span className="font-semibold text-gray-900">{quota?.portalUsersUsed ?? 0}</span> /{' '}
+                {PLAN_LIMITS.portalUsers}
               </span>
             </div>
             <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
               <div
                 className="h-full bg-blue-500 rounded-full"
-                style={{ width: `${Math.min(((quota?.portalUsersUsed ?? 0) / PLAN_LIMITS.portalUsers) * 100, 100)}%` }}
+                style={{
+                  width: `${Math.min(((quota?.portalUsersUsed ?? 0) / PLAN_LIMITS.portalUsers) * 100, 100)}%`,
+                }}
               />
             </div>
             <p className="text-xs text-gray-400">active token slots</p>
@@ -606,7 +738,8 @@ export function AIUsageClient() {
           <div className="col-span-2 flex items-center gap-2 pt-1">
             <Lock size={14} className="text-gray-400 flex-shrink-0" />
             <p className="text-sm text-gray-500">
-              Not available on Growth plan. Upgrade to Business to add your logo and brand colors to the customer portal.
+              Not available on Growth plan. Upgrade to Business to add your logo and brand colors to
+              the customer portal.
             </p>
           </div>
         </div>
@@ -628,9 +761,7 @@ export function AIUsageClient() {
                   <th
                     key={plan}
                     className={`text-center px-4 py-3 text-xs font-medium uppercase tracking-wider ${
-                      plan === CURRENT_PLAN
-                        ? 'text-indigo-700 bg-indigo-50'
-                        : 'text-gray-500'
+                      plan === CURRENT_PLAN ? 'text-indigo-700 bg-indigo-50' : 'text-gray-500'
                     }`}
                   >
                     {plan}
@@ -654,14 +785,12 @@ export function AIUsageClient() {
                       return (
                         <td
                           key={idx}
-                          className={`px-4 py-3 text-center ${
-                            isCurrent ? 'bg-indigo-50' : ''
-                          } ${
+                          className={`px-4 py-3 text-center ${isCurrent ? 'bg-indigo-50' : ''} ${
                             val === '✓'
                               ? 'text-emerald-600 font-semibold'
                               : val === '✗'
-                              ? 'text-gray-300'
-                              : 'text-gray-600'
+                                ? 'text-gray-300'
+                                : 'text-gray-600'
                           }`}
                         >
                           {val}

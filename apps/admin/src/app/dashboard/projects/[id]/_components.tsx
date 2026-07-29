@@ -46,7 +46,11 @@ const PRIORITY_BADGE: Record<string, string> = {
 
 function fmtDate(d?: string) {
   if (!d) return '—';
-  return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(d).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 }
 
 const KANBAN_COLS = [
@@ -56,7 +60,17 @@ const KANBAN_COLS = [
   { key: 'done', label: 'Done' },
 ] as const;
 
-function AddTaskSlideOver({ projectId, open, onClose, onCreated }: { projectId: string; open: boolean; onClose: () => void; onCreated: () => void }) {
+function AddTaskSlideOver({
+  projectId,
+  open,
+  onClose,
+  onCreated,
+}: {
+  projectId: string;
+  open: boolean;
+  onClose: () => void;
+  onCreated: () => void;
+}) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -99,24 +113,37 @@ function AddTaskSlideOver({ projectId, open, onClose, onCreated }: { projectId: 
       <div className="relative bg-white w-full max-w-md h-full overflow-y-auto shadow-xl flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-base font-semibold text-gray-900">Add Task</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <X size={18} />
+          </button>
         </div>
         <form onSubmit={(e) => void handleSubmit(e)} className="flex-1 px-6 py-5 space-y-4">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Title *</label>
-            <input name="title" required placeholder="Task title"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              name="title"
+              required
+              placeholder="Task title"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
-            <textarea name="description" rows={3} placeholder="Task description…"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none" />
+            <textarea
+              name="description"
+              rows={3}
+              placeholder="Task description…"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none"
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Status</label>
-              <select name="status" defaultValue="todo"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900">
+              <select
+                name="status"
+                defaultValue="todo"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              >
                 <option value="todo">Todo</option>
                 <option value="in_progress">In Progress</option>
                 <option value="review">Review</option>
@@ -125,8 +152,11 @@ function AddTaskSlideOver({ projectId, open, onClose, onCreated }: { projectId: 
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Priority</label>
-              <select name="priority" defaultValue="medium"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900">
+              <select
+                name="priority"
+                defaultValue="medium"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              >
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
@@ -136,29 +166,47 @@ function AddTaskSlideOver({ projectId, open, onClose, onCreated }: { projectId: 
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Assignee Name</label>
-            <input name="assigneeName" placeholder="Assignee name"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              name="assigneeName"
+              placeholder="Assignee name"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Due Date</label>
-              <input name="dueDate" type="date"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+              <input
+                name="dueDate"
+                type="date"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Est. Hours</label>
-              <input name="estimatedHours" type="number" min="0" step="0.5" placeholder="0"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+              <input
+                name="estimatedHours"
+                type="number"
+                min="0"
+                step="0.5"
+                placeholder="0"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
           </div>
           {error && <p className="text-xs text-red-500">{error}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="submit" disabled={saving}
-              className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
+            <button
+              type="submit"
+              disabled={saving}
+              className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors"
+            >
               {saving ? 'Creating…' : 'Add Task'}
             </button>
-            <button type="button" onClick={onClose}
-              className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+            <button
+              type="button"
+              onClick={onClose}
+              className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+            >
               Cancel
             </button>
           </div>
@@ -193,13 +241,18 @@ function TaskCard({ task, projectId }: { task: Task; projectId: string }) {
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-3">
-      <div
-        className="flex items-start gap-2 cursor-pointer"
-        onClick={() => setExpanded(!expanded)}
-      >
-        <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${PRIORITY_DOT[priority] ?? 'bg-gray-300'}`} />
-        <p className="text-xs font-medium text-gray-800 leading-snug flex-1">{d?.title ?? 'Untitled task'}</p>
-        {expanded ? <ChevronDown size={12} className="text-gray-400 flex-shrink-0 mt-0.5" /> : <ChevronRight size={12} className="text-gray-400 flex-shrink-0 mt-0.5" />}
+      <div className="flex items-start gap-2 cursor-pointer" onClick={() => setExpanded(!expanded)}>
+        <div
+          className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${PRIORITY_DOT[priority] ?? 'bg-gray-300'}`}
+        />
+        <p className="text-xs font-medium text-gray-800 leading-snug flex-1">
+          {d?.title ?? 'Untitled task'}
+        </p>
+        {expanded ? (
+          <ChevronDown size={12} className="text-gray-400 flex-shrink-0 mt-0.5" />
+        ) : (
+          <ChevronRight size={12} className="text-gray-400 flex-shrink-0 mt-0.5" />
+        )}
       </div>
 
       <div className="mt-1.5 ml-4 flex items-center gap-2 text-xs text-gray-400">
@@ -216,7 +269,10 @@ function TaskCard({ task, projectId }: { task: Task; projectId: string }) {
           </div>
           {d?.status !== 'done' && (
             <button
-              onClick={(e) => { e.stopPropagation(); void markDone(); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                void markDone();
+              }}
               disabled={marking}
               className="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 disabled:opacity-50 transition-colors"
             >
@@ -280,7 +336,11 @@ export function ProjectDetailClient({
 
   function usd(v?: number) {
     if (v == null) return '—';
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(v);
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 0,
+    }).format(v);
   }
 
   return (
@@ -292,7 +352,10 @@ export function ProjectDetailClient({
           <span className="text-sm font-semibold text-gray-900">{progress}%</span>
         </div>
         <div className="w-full bg-gray-100 rounded-full h-3">
-          <div className="bg-indigo-500 h-3 rounded-full transition-all" style={{ width: `${Math.min(100, progress)}%` }} />
+          <div
+            className="bg-indigo-500 h-3 rounded-full transition-all"
+            style={{ width: `${Math.min(100, progress)}%` }}
+          />
         </div>
       </div>
 
@@ -301,7 +364,9 @@ export function ProjectDetailClient({
         {/* Left: Project details */}
         <div className="space-y-4">
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
-            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Project Details</h2>
+            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+              Project Details
+            </h2>
             {project.description && (
               <p className="text-sm text-gray-600 mb-4">{project.description}</p>
             )}
@@ -321,7 +386,9 @@ export function ProjectDetailClient({
               {project.budget != null && (
                 <div className="flex justify-between">
                   <dt className="text-gray-400 text-xs">Budget</dt>
-                  <dd className="text-gray-700 text-xs">{usd(project.spent ?? 0)} / {usd(project.budget)}</dd>
+                  <dd className="text-gray-700 text-xs">
+                    {usd(project.spent ?? 0)} / {usd(project.budget)}
+                  </dd>
                 </div>
               )}
               {project.managerName && (
@@ -334,7 +401,12 @@ export function ProjectDetailClient({
             {project.tags && project.tags.length > 0 && (
               <div className="mt-4 flex flex-wrap gap-1">
                 {project.tags.map((tag) => (
-                  <span key={tag} className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full">{tag}</span>
+                  <span
+                    key={tag}
+                    className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full"
+                  >
+                    {tag}
+                  </span>
                 ))}
               </div>
             )}
@@ -359,7 +431,9 @@ export function ProjectDetailClient({
                 <div key={col.key} className="bg-gray-50 rounded-xl p-3 min-h-32">
                   <div className="flex items-center justify-between mb-2">
                     <p className="text-xs font-semibold text-gray-600">{col.label}</p>
-                    <span className="text-xs text-gray-400 bg-white rounded-full px-1.5 py-0.5 border border-gray-200">{colTasks.length}</span>
+                    <span className="text-xs text-gray-400 bg-white rounded-full px-1.5 py-0.5 border border-gray-200">
+                      {colTasks.length}
+                    </span>
                   </div>
                   <div className="space-y-2">
                     {colTasks.map((task) => (

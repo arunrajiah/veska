@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { RefreshCw, Plus, Pause, Play, X } from 'lucide-react';
 import type { RecurringInvoice } from './page.js';
 
-
 function authHeaders(tenantId: string): HeadersInit {
   return {
     'Content-Type': 'application/json',
@@ -82,15 +81,23 @@ function NewRecurringSlideover({ tenantId, onClose, onCreated }: NewRecurringSli
     notes: '',
   });
 
-  const set = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const set = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
+  ) => {
     const { name, value } = e.target;
     setForm((p) => ({ ...p, [name]: value }));
   };
 
   const handleSubmit = async (ev: React.FormEvent) => {
     ev.preventDefault();
-    if (!form.clientName.trim()) { setError('Client name is required'); return; }
-    if (!form.amount || isNaN(parseFloat(form.amount))) { setError('Valid amount is required'); return; }
+    if (!form.clientName.trim()) {
+      setError('Client name is required');
+      return;
+    }
+    if (!form.amount || isNaN(parseFloat(form.amount))) {
+      setError('Valid amount is required');
+      return;
+    }
     setSaving(true);
     setError('');
     try {
@@ -110,7 +117,7 @@ function NewRecurringSlideover({ tenantId, onClose, onCreated }: NewRecurringSli
         body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error(await res.text());
-      const created = await res.json() as RecurringInvoice;
+      const created = (await res.json()) as RecurringInvoice;
       onCreated(created);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create recurring invoice');
@@ -130,7 +137,11 @@ function NewRecurringSlideover({ tenantId, onClose, onCreated }: NewRecurringSli
           </button>
         </div>
 
-        <form id="new-recurring-form" onSubmit={(e) => void handleSubmit(e)} className="flex-1 overflow-y-auto divide-y divide-gray-50">
+        <form
+          id="new-recurring-form"
+          onSubmit={(e) => void handleSubmit(e)}
+          className="flex-1 overflow-y-auto divide-y divide-gray-50"
+        >
           <div className="px-5 py-4 space-y-3">
             <div>
               <label className="block text-xs text-gray-500 mb-1">Client Name *</label>
@@ -178,7 +189,9 @@ function NewRecurringSlideover({ tenantId, onClose, onCreated }: NewRecurringSli
                   className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 bg-white"
                 >
                   {['USD', 'EUR', 'GBP', 'INR'].map((c) => (
-                    <option key={c} value={c}>{c}</option>
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -323,7 +336,9 @@ export function RecurringClient({
           <RefreshCw size={22} className="text-indigo-600" />
           <div>
             <h1 className="text-2xl font-semibold text-gray-900">Recurring Invoices</h1>
-            <p className="text-sm text-gray-500 mt-0.5">Automatically generate invoices on a schedule.</p>
+            <p className="text-sm text-gray-500 mt-0.5">
+              Automatically generate invoices on a schedule.
+            </p>
           </div>
         </div>
         <button
@@ -369,7 +384,10 @@ export function RecurringClient({
                 const currency = getCurrency(rec);
                 const isPaused = status === 'paused';
                 return (
-                  <tr key={rec.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                  <tr
+                    key={rec.id}
+                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
+                  >
                     <td className="px-4 py-3 font-medium text-gray-900">{getClientName(rec)}</td>
                     <td className="px-4 py-3 text-gray-600 capitalize">
                       {FREQUENCY_LABELS[getFrequency(rec)] ?? getFrequency(rec)}

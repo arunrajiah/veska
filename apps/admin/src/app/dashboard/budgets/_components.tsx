@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { Plus, X, PieChart, TrendingUp, TrendingDown } from 'lucide-react';
 import type { Budget, BudgetSummary } from './page.js';
 
-
 function authHeaders(tenantId: string): HeadersInit {
   return {
     'Content-Type': 'application/json',
@@ -92,15 +91,23 @@ function NewBudgetSlideover({ tenantId, onClose, onCreated }: NewBudgetSlideover
     notes: '',
   });
 
-  const set = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const set = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
+  ) => {
     const { name, value } = e.target;
     setForm((p) => ({ ...p, [name]: value }));
   };
 
   const handleSubmit = async (ev: React.FormEvent) => {
     ev.preventDefault();
-    if (!form.name.trim()) { setError('Name is required'); return; }
-    if (!form.totalBudget || isNaN(parseFloat(form.totalBudget))) { setError('Valid budget amount is required'); return; }
+    if (!form.name.trim()) {
+      setError('Name is required');
+      return;
+    }
+    if (!form.totalBudget || isNaN(parseFloat(form.totalBudget))) {
+      setError('Valid budget amount is required');
+      return;
+    }
     setSaving(true);
     setError('');
     try {
@@ -119,7 +126,7 @@ function NewBudgetSlideover({ tenantId, onClose, onCreated }: NewBudgetSlideover
         body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error(await res.text());
-      const created = await res.json() as Budget;
+      const created = (await res.json()) as Budget;
       onCreated(created);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create budget');
@@ -139,7 +146,11 @@ function NewBudgetSlideover({ tenantId, onClose, onCreated }: NewBudgetSlideover
           </button>
         </div>
 
-        <form id="new-budget-form" onSubmit={(e) => void handleSubmit(e)} className="flex-1 overflow-y-auto divide-y divide-gray-50">
+        <form
+          id="new-budget-form"
+          onSubmit={(e) => void handleSubmit(e)}
+          className="flex-1 overflow-y-auto divide-y divide-gray-50"
+        >
           <div className="px-5 py-4 space-y-3">
             <div>
               <label className="block text-xs text-gray-500 mb-1">Name *</label>
@@ -247,10 +258,12 @@ export function BudgetsClient({
   const [showNew, setShowNew] = useState(false);
 
   // Compute stats
-  const totalAllocated = budgets.reduce((s, b) => s + getBudgetAllocated(b), 0) || summary.totalBudgeted;
+  const totalAllocated =
+    budgets.reduce((s, b) => s + getBudgetAllocated(b), 0) || summary.totalBudgeted;
   const totalSpent = budgets.reduce((s, b) => s + getBudgetSpent(b), 0) || summary.totalActuals;
   const utilPct = totalAllocated > 0 ? (totalSpent / totalAllocated) * 100 : summary.utilizationPct;
-  const utilColor = utilPct >= 90 ? 'text-red-600' : utilPct >= 70 ? 'text-yellow-600' : 'text-green-700';
+  const utilColor =
+    utilPct >= 90 ? 'text-red-600' : utilPct >= 70 ? 'text-yellow-600' : 'text-green-700';
 
   return (
     <div className="px-8 py-8 max-w-6xl">
@@ -328,13 +341,21 @@ export function BudgetsClient({
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Budget Name</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Budget Name
+                </th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Category</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Period</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Allocated</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">
+                  Allocated
+                </th>
                 <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Spent</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Remaining</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 w-36">Progress</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">
+                  Remaining
+                </th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 w-36">
+                  Progress
+                </th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
                 <th className="px-4 py-3" />
               </tr>
@@ -348,7 +369,10 @@ export function BudgetsClient({
                 const currency = getBudgetCurrency(b);
                 const status = getBudgetStatus(b);
                 return (
-                  <tr key={b.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                  <tr
+                    key={b.id}
+                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
+                  >
                     <td className="px-4 py-3">
                       <p className="font-medium text-gray-900">{getBudgetName(b)}</p>
                     </td>
@@ -357,10 +381,16 @@ export function BudgetsClient({
                         {getBudgetCategory(b)}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-xs text-gray-500 capitalize">{getBudgetPeriod(b)}</td>
-                    <td className="px-4 py-3 text-right text-gray-900">{fmt(allocated, currency)}</td>
+                    <td className="px-4 py-3 text-xs text-gray-500 capitalize">
+                      {getBudgetPeriod(b)}
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-900">
+                      {fmt(allocated, currency)}
+                    </td>
                     <td className="px-4 py-3 text-right text-gray-900">{fmt(spent, currency)}</td>
-                    <td className={`px-4 py-3 text-right font-medium ${remaining < 0 ? 'text-red-600' : 'text-gray-900'}`}>
+                    <td
+                      className={`px-4 py-3 text-right font-medium ${remaining < 0 ? 'text-red-600' : 'text-gray-900'}`}
+                    >
                       {fmt(remaining, currency)}
                     </td>
                     <td className="px-4 py-3 w-36">

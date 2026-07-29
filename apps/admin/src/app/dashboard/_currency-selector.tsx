@@ -22,13 +22,18 @@ export function useDashboardCurrency() {
   // Fetch rates timestamp
   useEffect(() => {
     fetch(`/api/veska/currencies/rates?base=USD`, {
-      headers: { 'X-Veska-Tenant-Id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant', 'X-Veska-Identity-Id': 'admin' },
+      headers: {
+        'X-Veska-Tenant-Id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
+        'X-Veska-Identity-Id': 'admin',
+      },
     })
       .then((r) => r.json())
       .then((data: { updatedAt?: string }) => {
         if (data.updatedAt) setRatesUpdatedAt(new Date(data.updatedAt).getTime());
       })
-      .catch(() => { /* ignore */ });
+      .catch(() => {
+        /* ignore */
+      });
   }, []);
 
   return { currency, setCurrency, ratesUpdatedAt };
@@ -45,9 +50,7 @@ export function DashboardCurrencySelector({
   onChangeCurrency,
   ratesUpdatedAt,
 }: DashboardCurrencySelectorProps) {
-  const minsAgo = ratesUpdatedAt
-    ? Math.floor((Date.now() - ratesUpdatedAt) / 60000)
-    : null;
+  const minsAgo = ratesUpdatedAt ? Math.floor((Date.now() - ratesUpdatedAt) / 60000) : null;
 
   return (
     <div className="flex flex-col items-end gap-0.5">

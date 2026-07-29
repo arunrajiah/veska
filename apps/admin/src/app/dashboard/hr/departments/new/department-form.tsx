@@ -50,7 +50,10 @@ export default function DepartmentForm() {
         <h1 className="text-2xl font-semibold text-gray-900">New department</h1>
       </div>
 
-      <form onSubmit={(e) => void handleSubmit(e)} className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
+      <form
+        onSubmit={(e) => void handleSubmit(e)}
+        className="bg-white border border-gray-200 rounded-xl p-6 space-y-4"
+      >
         <div>
           <label className="block text-xs font-medium text-gray-700 mb-1">Name *</label>
           <input
@@ -61,7 +64,9 @@ export default function DepartmentForm() {
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Head (employee name / ID)</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">
+              Head (employee name / ID)
+            </label>
             <input
               name="head_id"
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"

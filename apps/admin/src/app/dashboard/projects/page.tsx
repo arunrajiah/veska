@@ -3,14 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import {
-  Folder,
-  FolderOpen,
-  CheckCircle2,
-  AlertCircle,
-  Plus,
-  ChevronRight,
-} from 'lucide-react';
+import { Folder, FolderOpen, CheckCircle2, AlertCircle, Plus, ChevronRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 interface Project {
@@ -55,7 +48,11 @@ const TAB_STATUS_MAP: Record<Tab, string | null> = {
 
 function fmtDate(d?: string) {
   if (!d) return '—';
-  return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(d).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 }
 
 function ProgressBar({ pct }: { pct: number }) {
@@ -96,7 +93,7 @@ export default function ProjectsPage() {
       try {
         const res = await fetch('/api/veska/projects?limit=50');
         if (res.ok) {
-          const json = await res.json() as { data?: Project[] } | Project[];
+          const json = (await res.json()) as { data?: Project[] } | Project[];
           const data = Array.isArray(json) ? json : (json.data ?? []);
           setProjects(data);
         }
@@ -117,13 +114,17 @@ export default function ProjectsPage() {
   const overdueCount = projects.filter((p) => {
     const due = p.data.dueDate;
     const status = p.data.status;
-    return due && due < today && status !== 'completed' && status !== 'cancelled' && status !== 'archived';
+    return (
+      due &&
+      due < today &&
+      status !== 'completed' &&
+      status !== 'cancelled' &&
+      status !== 'archived'
+    );
   }).length;
 
   const filterStatus = TAB_STATUS_MAP[activeTab];
-  const filtered = filterStatus
-    ? projects.filter((p) => p.data.status === filterStatus)
-    : projects;
+  const filtered = filterStatus ? projects.filter((p) => p.data.status === filterStatus) : projects;
 
   return (
     <div className="p-6 space-y-6">
@@ -183,7 +184,11 @@ export default function ProjectsPage() {
       </div>
 
       {/* Tabs */}
-      <div role="tablist" aria-label="Project filter tabs" className="flex gap-1 border-b border-gray-200 overflow-x-auto">
+      <div
+        role="tablist"
+        aria-label="Project filter tabs"
+        className="flex gap-1 border-b border-gray-200 overflow-x-auto"
+      >
         {TABS.map((tab) => (
           <button
             key={tab}

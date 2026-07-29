@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-
 interface UninstallButtonProps {
   pluginId: string;
   pluginName: string;

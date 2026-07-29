@@ -55,7 +55,8 @@ export function TemplateDetailClient({ template, documents: initialDocs }: Props
   const [viewHtml, setViewHtml] = useState('');
 
   const vars = template.variables ?? [];
-  const badge = TYPE_BADGE[template.type] ?? TYPE_BADGE['custom'] ?? { bg: 'bg-gray-100', text: 'text-gray-600' };
+  const badge = TYPE_BADGE[template.type] ??
+    TYPE_BADGE['custom'] ?? { bg: 'bg-gray-100', text: 'text-gray-600' };
 
   async function handleRender(e: React.FormEvent) {
     e.preventDefault();
@@ -68,11 +69,11 @@ export function TemplateDetailClient({ template, documents: initialDocs }: Props
         body: JSON.stringify({ variables: varValues }),
       });
       if (!res.ok) {
-        const d = await res.json() as { error?: string };
+        const d = (await res.json()) as { error?: string };
         setError(d.error ?? 'Render failed');
         return;
       }
-      const d = await res.json() as { html?: string; content?: string; id?: string };
+      const d = (await res.json()) as { html?: string; content?: string; id?: string };
       const html = d.html ?? d.content ?? '';
       setRenderedHtml(html);
       if (d.id) {
@@ -113,7 +114,9 @@ export function TemplateDetailClient({ template, documents: initialDocs }: Props
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <h1 className="text-xl font-semibold text-gray-900">{template.name}</h1>
-              <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${badge.bg} ${badge.text}`}>
+              <span
+                className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${badge.bg} ${badge.text}`}
+              >
                 {template.type}
               </span>
             </div>
@@ -129,7 +132,9 @@ export function TemplateDetailClient({ template, documents: initialDocs }: Props
                       key={v}
                       className="inline-block px-2 py-0.5 rounded-full text-xs font-mono bg-indigo-50 text-indigo-700 border border-indigo-100"
                     >
-                      {'{{'}{v}{'}}'}
+                      {'{{'}
+                      {v}
+                      {'}}'}
                     </span>
                   ))}
                 </div>
@@ -149,7 +154,10 @@ export function TemplateDetailClient({ template, documents: initialDocs }: Props
         {/* Render form */}
         <div className="space-y-4">
           <h2 className="text-sm font-semibold text-gray-900">Render document</h2>
-          <form onSubmit={(e) => void handleRender(e)} className="bg-white border border-gray-200 rounded-xl p-5 space-y-4">
+          <form
+            onSubmit={(e) => void handleRender(e)}
+            className="bg-white border border-gray-200 rounded-xl p-5 space-y-4"
+          >
             {vars.length === 0 ? (
               <p className="text-xs text-gray-400">This template has no variables.</p>
             ) : (
@@ -212,20 +220,29 @@ export function TemplateDetailClient({ template, documents: initialDocs }: Props
                   <tr className="bg-gray-50 border-b border-gray-100">
                     <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Date</th>
                     <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Name</th>
-                    <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Actions</th>
+                    <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {docs.map((doc) => (
-                    <tr key={doc.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                    <tr
+                      key={doc.id}
+                      className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
+                    >
                       <td className="px-4 py-3 text-xs text-gray-500">
                         {doc.createdAt
                           ? new Date(doc.createdAt).toLocaleDateString('en-US', {
-                              month: 'short', day: 'numeric', year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
                             })
                           : '—'}
                       </td>
-                      <td className="px-4 py-3 text-gray-700">{doc.name ?? `Document ${doc.id.slice(0, 8)}`}</td>
+                      <td className="px-4 py-3 text-gray-700">
+                        {doc.name ?? `Document ${doc.id.slice(0, 8)}`}
+                      </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-2">
                           {doc.html && (

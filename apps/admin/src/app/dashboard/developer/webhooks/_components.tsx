@@ -30,7 +30,10 @@ const ALL_EVENTS = [
 
 function generateSecret(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  return 'whsec_' + Array.from({ length: 32 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  return (
+    'whsec_' +
+    Array.from({ length: 32 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
+  );
 }
 
 // ─── Webhook Slide-Over ───────────────────────────────────────────────────────
@@ -45,15 +48,15 @@ function WebhookSlideOver({
 }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [selectedEvents, setSelectedEvents] = useState<string[]>(webhook?.data.events ?? ['entity.created']);
+  const [selectedEvents, setSelectedEvents] = useState<string[]>(
+    webhook?.data.events ?? ['entity.created'],
+  );
   const [secret] = useState(webhook?.data.secret ?? generateSecret());
   const router = useRouter();
   const [, startTransition] = useTransition();
 
   function toggleEvent(ev: string) {
-    setSelectedEvents((prev) =>
-      prev.includes(ev) ? prev.filter((e) => e !== ev) : [...prev, ev]
-    );
+    setSelectedEvents((prev) => (prev.includes(ev) ? prev.filter((e) => e !== ev) : [...prev, ev]));
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -69,9 +72,7 @@ function WebhookSlideOver({
       status: 'active',
     };
     try {
-      const url = webhook
-        ? `/api/veska/webhooks/${webhook.id}`
-        : `/api/veska/webhooks`;
+      const url = webhook ? `/api/veska/webhooks/${webhook.id}` : `/api/veska/webhooks`;
       const method = webhook ? 'PATCH' : 'POST';
       const res = await fetch(url, {
         method,
@@ -95,19 +96,33 @@ function WebhookSlideOver({
       <div className="fixed inset-0 bg-black/30" onClick={onClose} />
       <div className="relative bg-white w-full max-w-lg h-full overflow-y-auto shadow-xl flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-          <h2 className="text-base font-semibold text-gray-900">{webhook ? 'Edit Webhook' : 'Add Webhook'}</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+          <h2 className="text-base font-semibold text-gray-900">
+            {webhook ? 'Edit Webhook' : 'Add Webhook'}
+          </h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <X size={18} />
+          </button>
         </div>
         <form onSubmit={(e) => void handleSubmit(e)} className="flex-1 px-6 py-5 space-y-4">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Name *</label>
-            <input name="name" required defaultValue={webhook?.data.name ?? ''}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              name="name"
+              required
+              defaultValue={webhook?.data.name ?? ''}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Endpoint URL *</label>
-            <input name="url" required type="url" defaultValue={webhook?.data.url ?? ''} placeholder="https://"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              name="url"
+              required
+              type="url"
+              defaultValue={webhook?.data.url ?? ''}
+              placeholder="https://"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-2">Events</label>
@@ -127,17 +142,26 @@ function WebhookSlideOver({
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Signing Secret</label>
-            <input value={secret} readOnly
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs font-mono outline-none bg-gray-50 text-gray-600" />
+            <input
+              value={secret}
+              readOnly
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs font-mono outline-none bg-gray-50 text-gray-600"
+            />
           </div>
           {error && <p className="text-xs text-red-500">{error}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="submit" disabled={saving || selectedEvents.length === 0}
-              className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
+            <button
+              type="submit"
+              disabled={saving || selectedEvents.length === 0}
+              className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors"
+            >
               {saving ? 'Saving…' : webhook ? 'Save Changes' : 'Add Webhook'}
             </button>
-            <button type="button" onClick={onClose}
-              className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+            <button
+              type="button"
+              onClick={onClose}
+              className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+            >
               Cancel
             </button>
           </div>
@@ -167,7 +191,11 @@ export function WebhooksClient({ webhooks: initial }: { webhooks: WebhookType[] 
         body: JSON.stringify({ status: newStatus }),
       });
       setWebhooks((prev) =>
-        prev.map((w) => w.id === id ? { ...w, data: { ...w.data, status: newStatus as 'active' | 'inactive' } } : w)
+        prev.map((w) =>
+          w.id === id
+            ? { ...w, data: { ...w.data, status: newStatus as 'active' | 'inactive' } }
+            : w,
+        ),
       );
       startTransition(() => router.refresh());
     } catch {
@@ -224,8 +252,12 @@ export function WebhooksClient({ webhooks: initial }: { webhooks: WebhookType[] 
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">URL</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Events</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Success / Fail</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Last Triggered</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Success / Fail
+                </th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Last Triggered
+                </th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -235,7 +267,10 @@ export function WebhooksClient({ webhooks: initial }: { webhooks: WebhookType[] 
                 const events = d.events ?? [];
                 const MAX_EVENTS = 3;
                 return (
-                  <tr key={wh.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                  <tr
+                    key={wh.id}
+                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
+                  >
                     <td className="px-4 py-3 font-medium text-gray-900">{d.name ?? '—'}</td>
                     <td className="px-4 py-3 max-w-xs">
                       <code className="font-mono text-xs text-gray-600 truncate block">
@@ -245,7 +280,10 @@ export function WebhooksClient({ webhooks: initial }: { webhooks: WebhookType[] 
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-1">
                         {events.slice(0, MAX_EVENTS).map((ev) => (
-                          <span key={ev} className="inline-block text-xs font-medium bg-purple-50 text-purple-700 border border-purple-100 rounded px-1.5 py-0.5">
+                          <span
+                            key={ev}
+                            className="inline-block text-xs font-medium bg-purple-50 text-purple-700 border border-purple-100 rounded px-1.5 py-0.5"
+                          >
                             {ev}
                           </span>
                         ))}
@@ -266,10 +304,15 @@ export function WebhooksClient({ webhooks: initial }: { webhooks: WebhookType[] 
                             : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                         } disabled:opacity-50`}
                       >
-                        {d.status === 'active'
-                          ? <><CheckCircle2 size={10} /> Active</>
-                          : <><XCircle size={10} /> Inactive</>
-                        }
+                        {d.status === 'active' ? (
+                          <>
+                            <CheckCircle2 size={10} /> Active
+                          </>
+                        ) : (
+                          <>
+                            <XCircle size={10} /> Inactive
+                          </>
+                        )}
                       </button>
                     </td>
                     <td className="px-4 py-3 text-xs text-gray-400">

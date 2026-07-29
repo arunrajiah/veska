@@ -74,7 +74,15 @@ function CreatedKeyModal({ apiKey, onClose }: { apiKey: string; onClose: () => v
 }
 
 // ─── New API Key Slide-Over ───────────────────────────────────────────────────
-function NewApiKeySlideOver({ open, onClose, onCreated }: { open: boolean; onClose: () => void; onCreated: (key: string) => void }) {
+function NewApiKeySlideOver({
+  open,
+  onClose,
+  onCreated,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onCreated: (key: string) => void;
+}) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [selectedScopes, setSelectedScopes] = useState<string[]>(['read:all']);
@@ -83,7 +91,7 @@ function NewApiKeySlideOver({ open, onClose, onCreated }: { open: boolean; onClo
 
   function toggleScope(scope: string) {
     setSelectedScopes((prev) =>
-      prev.includes(scope) ? prev.filter((s) => s !== scope) : [...prev, scope]
+      prev.includes(scope) ? prev.filter((s) => s !== scope) : [...prev, scope],
     );
   }
 
@@ -104,7 +112,7 @@ function NewApiKeySlideOver({ open, onClose, onCreated }: { open: boolean; onClo
         body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error(await res.text());
-      const data = await res.json() as { key?: string; apiKey?: string; data?: { key?: string } };
+      const data = (await res.json()) as { key?: string; apiKey?: string; data?: { key?: string } };
       const createdKey = data.key ?? data.apiKey ?? data.data?.key ?? 'vsk_generated_key';
       onCreated(createdKey);
       onClose();
@@ -124,13 +132,19 @@ function NewApiKeySlideOver({ open, onClose, onCreated }: { open: boolean; onClo
       <div className="relative bg-white w-full max-w-lg h-full overflow-y-auto shadow-xl flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-base font-semibold text-gray-900">Create API Key</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <X size={18} />
+          </button>
         </div>
         <form onSubmit={(e) => void handleSubmit(e)} className="flex-1 px-6 py-5 space-y-4">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Name *</label>
-            <input name="name" required placeholder="e.g. Production Integration"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              name="name"
+              required
+              placeholder="e.g. Production Integration"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-2">Scopes</label>
@@ -149,18 +163,29 @@ function NewApiKeySlideOver({ open, onClose, onCreated }: { open: boolean; onClo
             </div>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Expires At (optional)</label>
-            <input name="expiresAt" type="date"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <label className="block text-xs font-medium text-gray-700 mb-1">
+              Expires At (optional)
+            </label>
+            <input
+              name="expiresAt"
+              type="date"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           {error && <p className="text-xs text-red-500">{error}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="submit" disabled={saving || selectedScopes.length === 0}
-              className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
+            <button
+              type="submit"
+              disabled={saving || selectedScopes.length === 0}
+              className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors"
+            >
               {saving ? 'Creating…' : 'Create Key'}
             </button>
-            <button type="button" onClick={onClose}
-              className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+            <button
+              type="button"
+              onClick={onClose}
+              className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+            >
               Cancel
             </button>
           </div>
@@ -216,7 +241,8 @@ export function ApiKeysClient({ apiKeys: initial }: { apiKeys: ApiKey[] }) {
       <div className="bg-amber-50 border border-amber-200 rounded-xl px-5 py-3 mb-6 flex items-start gap-2">
         <AlertTriangle size={16} className="text-amber-600 flex-shrink-0 mt-0.5" />
         <p className="text-sm text-amber-800">
-          <strong>Security notice:</strong> API keys grant full API access. Never share or commit them to source control. Rotate keys regularly.
+          <strong>Security notice:</strong> API keys grant full API access. Never share or commit
+          them to source control. Rotate keys regularly.
         </p>
       </div>
 
@@ -231,7 +257,9 @@ export function ApiKeysClient({ apiKeys: initial }: { apiKeys: ApiKey[] }) {
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Name</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Key Prefix</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Key Prefix
+                </th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Scopes</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Last Used</th>
@@ -244,7 +272,10 @@ export function ApiKeysClient({ apiKeys: initial }: { apiKeys: ApiKey[] }) {
               {keys.map((k) => {
                 const d = k.data;
                 return (
-                  <tr key={k.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                  <tr
+                    key={k.id}
+                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
+                  >
                     <td className="px-4 py-3 font-medium text-gray-900">{d.name ?? '—'}</td>
                     <td className="px-4 py-3">
                       <code className="font-mono text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
@@ -254,14 +285,19 @@ export function ApiKeysClient({ apiKeys: initial }: { apiKeys: ApiKey[] }) {
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-1">
                         {(d.scopes ?? []).map((scope) => (
-                          <span key={scope} className="inline-block text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100 rounded px-1.5 py-0.5">
+                          <span
+                            key={scope}
+                            className="inline-block text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100 rounded px-1.5 py-0.5"
+                          >
                             {scope}
                           </span>
                         ))}
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${d.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${d.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}
+                      >
                         {d.status ?? 'active'}
                       </span>
                     </td>
@@ -299,9 +335,7 @@ export function ApiKeysClient({ apiKeys: initial }: { apiKeys: ApiKey[] }) {
         onCreated={(key) => setCreatedKey(key)}
       />
 
-      {createdKey && (
-        <CreatedKeyModal apiKey={createdKey} onClose={() => setCreatedKey(null)} />
-      )}
+      {createdKey && <CreatedKeyModal apiKey={createdKey} onClose={() => setCreatedKey(null)} />}
     </div>
   );
 }

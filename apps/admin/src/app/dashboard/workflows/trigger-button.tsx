@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { Play } from 'lucide-react';
 
-
 interface TriggerButtonProps {
   workflowId: string;
   tenantId: string;
@@ -49,12 +48,18 @@ export function TriggerButton({ workflowId, tenantId }: TriggerButtonProps) {
         status === 'success'
           ? 'border-green-300 bg-green-50 text-green-700'
           : status === 'error'
-          ? 'border-red-300 bg-red-50 text-red-700'
-          : 'border-gray-200 text-gray-600 hover:bg-gray-100'
+            ? 'border-red-300 bg-red-50 text-red-700'
+            : 'border-gray-200 text-gray-600 hover:bg-gray-100'
       } disabled:opacity-50`}
     >
       <Play size={12} />
-      {loading ? 'Running…' : status === 'success' ? 'Triggered!' : status === 'error' ? 'Failed' : 'Trigger'}
+      {loading
+        ? 'Running…'
+        : status === 'success'
+          ? 'Triggered!'
+          : status === 'error'
+            ? 'Failed'
+            : 'Trigger'}
     </button>
   );
 }

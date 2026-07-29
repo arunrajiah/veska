@@ -28,7 +28,11 @@ const STATUS_COLORS: Record<string, string> = {
 
 function fmtDate(d?: string) {
   if (!d) return '—';
-  return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(d).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 }
 
 interface GRNItem {
@@ -40,7 +44,9 @@ interface GRNItem {
 function RecordGRNSlideOver({ onClose, onSaved }: { onClose: () => void; onSaved: () => void }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [items, setItems] = useState<GRNItem[]>([{ description: '', orderedQty: 1, receivedQty: 0 }]);
+  const [items, setItems] = useState<GRNItem[]>([
+    { description: '', orderedQty: 1, receivedQty: 0 },
+  ]);
 
   function addItem() {
     setItems((prev) => [...prev, { description: '', orderedQty: 1, receivedQty: 0 }]);
@@ -55,8 +61,8 @@ function RecordGRNSlideOver({ onClose, onSaved }: { onClose: () => void; onSaved
       prev.map((item, idx) =>
         idx === i
           ? { ...item, [field]: field === 'description' ? value : parseInt(value) || 0 }
-          : item
-      )
+          : item,
+      ),
     );
   }
 
@@ -99,31 +105,47 @@ function RecordGRNSlideOver({ onClose, onSaved }: { onClose: () => void; onSaved
       <div className="relative bg-white w-full max-w-xl h-full overflow-y-auto shadow-xl flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-base font-semibold text-gray-900">Record GRN</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <X size={18} />
+          </button>
         </div>
         <form onSubmit={(e) => void handleSubmit(e)} className="flex-1 px-6 py-5 space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">PO Number</label>
-              <input name="poNumber" placeholder="Optional"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+              <input
+                name="poNumber"
+                placeholder="Optional"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Received Date</label>
-              <input name="receivedDate" type="date" defaultValue={new Date().toISOString().slice(0, 10)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+              <input
+                name="receivedDate"
+                type="date"
+                defaultValue={new Date().toISOString().slice(0, 10)}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Vendor Name *</label>
-            <input name="vendorName" required
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              name="vendorName"
+              required
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="block text-xs font-medium text-gray-700">Items</label>
-              <button type="button" onClick={addItem} className="text-xs text-gray-600 hover:text-gray-900 flex items-center gap-1">
+              <button
+                type="button"
+                onClick={addItem}
+                className="text-xs text-gray-600 hover:text-gray-900 flex items-center gap-1"
+              >
                 <Plus size={12} /> Add item
               </button>
             </div>
@@ -142,7 +164,8 @@ function RecordGRNSlideOver({ onClose, onSaved }: { onClose: () => void; onSaved
                   <div className="col-span-2">
                     {i === 0 && <p className="text-xs text-gray-400 mb-1">Ordered</p>}
                     <input
-                      type="number" min="0"
+                      type="number"
+                      min="0"
                       value={item.orderedQty}
                       onChange={(e) => updateItem(i, 'orderedQty', e.target.value)}
                       className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-gray-900"
@@ -151,7 +174,8 @@ function RecordGRNSlideOver({ onClose, onSaved }: { onClose: () => void; onSaved
                   <div className="col-span-2">
                     {i === 0 && <p className="text-xs text-gray-400 mb-1">Received</p>}
                     <input
-                      type="number" min="0"
+                      type="number"
+                      min="0"
                       value={item.receivedQty}
                       onChange={(e) => updateItem(i, 'receivedQty', e.target.value)}
                       className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-gray-900"
@@ -160,7 +184,11 @@ function RecordGRNSlideOver({ onClose, onSaved }: { onClose: () => void; onSaved
                   <div className="col-span-3 flex items-end pb-1.5">
                     {i === 0 && <div className="invisible text-xs mb-1">×</div>}
                     {items.length > 1 && (
-                      <button type="button" onClick={() => removeItem(i)} className="text-gray-300 hover:text-red-400 ml-1">
+                      <button
+                        type="button"
+                        onClick={() => removeItem(i)}
+                        className="text-gray-300 hover:text-red-400 ml-1"
+                      >
                         <X size={14} />
                       </button>
                     )}
@@ -172,18 +200,27 @@ function RecordGRNSlideOver({ onClose, onSaved }: { onClose: () => void; onSaved
 
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
-            <textarea name="notes" rows={2}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none" />
+            <textarea
+              name="notes"
+              rows={2}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none"
+            />
           </div>
 
           {error && <p className="text-xs text-red-500">{error}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="submit" disabled={saving}
-              className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
+            <button
+              type="submit"
+              disabled={saving}
+              className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors"
+            >
               {saving ? 'Saving…' : 'Record GRN'}
             </button>
-            <button type="button" onClick={onClose}
-              className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+            <button
+              type="button"
+              onClick={onClose}
+              className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+            >
               Cancel
             </button>
           </div>
@@ -203,7 +240,10 @@ function GRNRow({ grn }: { grn: GRN }) {
     <>
       <tr className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
         <td className="px-4 py-3">
-          <button onClick={() => setExpanded(!expanded)} className="flex items-center gap-1 text-gray-400 hover:text-gray-700">
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="flex items-center gap-1 text-gray-400 hover:text-gray-700"
+          >
             {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
           </button>
         </td>
@@ -213,7 +253,9 @@ function GRNRow({ grn }: { grn: GRN }) {
         <td className="px-4 py-3 font-mono text-xs text-gray-500">{d.poNumber ?? '—'}</td>
         <td className="px-4 py-3 text-gray-700">{d.vendorName ?? '—'}</td>
         <td className="px-4 py-3">
-          <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-600'}`}>
+          <span
+            className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-600'}`}
+          >
             {status}
           </span>
         </td>
@@ -240,7 +282,9 @@ function GRNRow({ grn }: { grn: GRN }) {
                       <td className="py-1.5 text-gray-700">{item.description}</td>
                       <td className="py-1.5 text-right text-gray-600">{item.orderedQty}</td>
                       <td className="py-1.5 text-right text-gray-600">{item.receivedQty}</td>
-                      <td className={`py-1.5 text-right font-medium ${variance < 0 ? 'text-red-500' : variance > 0 ? 'text-green-600' : 'text-gray-400'}`}>
+                      <td
+                        className={`py-1.5 text-right font-medium ${variance < 0 ? 'text-red-500' : variance > 0 ? 'text-green-600' : 'text-gray-400'}`}
+                      >
                         {variance > 0 ? `+${variance}` : variance}
                       </td>
                     </tr>
@@ -274,7 +318,9 @@ export function GRNClient({ grns: initialGRNs }: { grns: GRN[] }) {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">Goods Received Notes</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Track goods received against purchase orders</p>
+          <p className="text-sm text-gray-500 mt-0.5">
+            Track goods received against purchase orders
+          </p>
         </div>
         <button
           onClick={() => setShowNew(true)}
@@ -314,7 +360,9 @@ export function GRNClient({ grns: initialGRNs }: { grns: GRN[] }) {
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">PO #</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Vendor</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Received Date</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Received Date
+                </th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Items</th>
               </tr>
             </thead>
@@ -330,7 +378,11 @@ export function GRNClient({ grns: initialGRNs }: { grns: GRN[] }) {
       {showNew && (
         <RecordGRNSlideOver
           onClose={() => setShowNew(false)}
-          onSaved={() => startTransition(() => { router.refresh(); })}
+          onSaved={() =>
+            startTransition(() => {
+              router.refresh();
+            })
+          }
         />
       )}
     </div>

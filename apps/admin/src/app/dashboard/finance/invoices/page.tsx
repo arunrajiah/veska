@@ -25,7 +25,12 @@ export interface Invoice {
     issue_date?: string;
     issueDate?: string;
     lineItems?: Array<{ description: string; quantity: number; unitPrice: number; total: number }>;
-    line_items?: Array<{ description: string; quantity: number; unit_price: number; amount: number }>;
+    line_items?: Array<{
+      description: string;
+      quantity: number;
+      unit_price: number;
+      amount: number;
+    }>;
     notes?: string;
     currency?: string;
   };
@@ -39,7 +44,7 @@ async function fetchInvoices(tenantId: string): Promise<Invoice[]> {
       '/api/v1/finance/invoices?limit=50',
       tenantId,
     );
-    return Array.isArray(res) ? res : (res as { invoices: Invoice[] }).invoices ?? [];
+    return Array.isArray(res) ? res : ((res as { invoices: Invoice[] }).invoices ?? []);
   } catch {
     return [];
   }
@@ -52,15 +57,10 @@ export default async function InvoicesPage({
 }) {
   const params = await searchParams;
   const cookieStore = await cookies();
-  const tenantId = cookieStore.get('veska_tenant')?.value ?? process.env.VESKA_TENANT_ID ?? 'demo-tenant';
+  const tenantId =
+    cookieStore.get('veska_tenant')?.value ?? process.env.VESKA_TENANT_ID ?? 'demo-tenant';
   const invoices = await fetchInvoices(tenantId);
   const openNew = params.new === 'true';
 
-  return (
-    <InvoicesClient
-      invoices={invoices}
-      tenantId={tenantId}
-      openNew={openNew}
-    />
-  );
+  return <InvoicesClient invoices={invoices} tenantId={tenantId} openNew={openNew} />;
 }

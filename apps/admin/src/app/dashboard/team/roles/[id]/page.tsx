@@ -20,7 +20,10 @@ interface Role {
 
 async function getRole(id: string): Promise<Role | null> {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/roles/${id}`, { cache: 'no-store' });
+    const res = await fetch(
+      `${process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/roles/${id}`,
+      { cache: 'no-store' },
+    );
     if (!res.ok) return null;
     const data = await res.json();
     return data.role ?? data;
@@ -100,9 +103,7 @@ export default async function RoleDetailPage({ params }: { params: Promise<{ id:
               </span>
             )}
           </div>
-          {role.description && (
-            <p className="text-sm text-gray-500 mt-1">{role.description}</p>
-          )}
+          {role.description && <p className="text-sm text-gray-500 mt-1">{role.description}</p>}
         </div>
       </div>
 
@@ -172,9 +173,7 @@ export default async function RoleDetailPage({ params }: { params: Promise<{ id:
                       <td className="py-2.5 text-sm text-gray-900">{member.name}</td>
                       <td className="py-2.5 text-sm text-gray-500">{member.email}</td>
                       <td className="py-2.5 text-sm text-gray-500">
-                        {member.assignedAt
-                          ? new Date(member.assignedAt).toLocaleDateString()
-                          : '—'}
+                        {member.assignedAt ? new Date(member.assignedAt).toLocaleDateString() : '—'}
                       </td>
                     </tr>
                   ))}

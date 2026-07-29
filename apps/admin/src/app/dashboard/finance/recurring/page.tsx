@@ -36,7 +36,7 @@ async function fetchRecurring(tenantId: string): Promise<RecurringInvoice[]> {
       '/api/v1/finance/recurring?limit=20',
       tenantId,
     );
-    return Array.isArray(res) ? res : (res as { data: RecurringInvoice[] }).data ?? [];
+    return Array.isArray(res) ? res : ((res as { data: RecurringInvoice[] }).data ?? []);
   } catch {
     return [];
   }

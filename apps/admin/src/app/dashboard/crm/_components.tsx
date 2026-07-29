@@ -1,7 +1,20 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Plus, Trash2, Edit2, Trophy, X, ChevronLeft, ChevronRight, Wand2, Loader2, Link2, Copy, Mail } from 'lucide-react';
+import {
+  Plus,
+  Trash2,
+  Edit2,
+  Trophy,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  Wand2,
+  Loader2,
+  Link2,
+  Copy,
+  Mail,
+} from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_VESKA_TENANT_ID ?? 'demo';
@@ -226,7 +239,8 @@ function DealCard({ deal, stages, onMove, onStatusChange }: DealCardProps) {
   const value = deal.value ?? deal.data?.value;
   const closeDate = deal.closeDate ?? deal.data?.close_date;
   const owner = deal.owner ?? deal.data?.owner;
-  const status = deal.status ?? (deal.data?.status as 'open' | 'won' | 'lost' | undefined) ?? 'open';
+  const status =
+    deal.status ?? (deal.data?.status as 'open' | 'won' | 'lost' | undefined) ?? 'open';
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -244,8 +258,8 @@ function DealCard({ deal, stages, onMove, onStatusChange }: DealCardProps) {
         status === 'won'
           ? 'border-green-200 bg-green-50/50'
           : status === 'lost'
-          ? 'border-gray-200 bg-gray-50/50 opacity-60'
-          : 'border-gray-200 hover:border-gray-300'
+            ? 'border-gray-200 bg-gray-50/50 opacity-60'
+            : 'border-gray-200 hover:border-gray-300'
       }`}
     >
       <p
@@ -256,9 +270,7 @@ function DealCard({ deal, stages, onMove, onStatusChange }: DealCardProps) {
         {title}
       </p>
 
-      {contactName && (
-        <p className="text-xs text-gray-500 mb-1.5">{contactName}</p>
-      )}
+      {contactName && <p className="text-xs text-gray-500 mb-1.5">{contactName}</p>}
 
       <div className="flex items-center justify-between mb-2">
         <span className="text-xs font-semibold text-gray-900">{formatCurrency(value)}</span>
@@ -342,8 +354,13 @@ function PipelineTab() {
         apiFetch<Stage[]>('/crm-tables/stages'),
       ]);
       if (pipelineRes.status === 'fulfilled') setPipeline(pipelineRes.value);
-      if (dealsRes.status === 'fulfilled') setDeals(Array.isArray(dealsRes.value) ? dealsRes.value : []);
-      if (stagesRes.status === 'fulfilled' && Array.isArray(stagesRes.value) && stagesRes.value.length > 0) {
+      if (dealsRes.status === 'fulfilled')
+        setDeals(Array.isArray(dealsRes.value) ? dealsRes.value : []);
+      if (
+        stagesRes.status === 'fulfilled' &&
+        Array.isArray(stagesRes.value) &&
+        stagesRes.value.length > 0
+      ) {
         setStages(stagesRes.value);
       }
     } catch {
@@ -351,7 +368,9 @@ function PipelineTab() {
     }
   }, []);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleMove = async (dealId: string, newStageId: string) => {
     try {
@@ -394,9 +413,7 @@ function PipelineTab() {
     const fromPipeline = pipeline[stageId]?.deals;
     if (fromPipeline && fromPipeline.length > 0) return fromPipeline;
     // Fallback to deals list
-    return deals.filter(
-      (d) => (d.stageId ?? d.stage ?? d.data?.stage_id) === stageId,
-    );
+    return deals.filter((d) => (d.stageId ?? d.stage ?? d.data?.stage_id) === stageId);
   };
 
   return (
@@ -405,7 +422,9 @@ function PipelineTab() {
       <div className="grid grid-cols-3 gap-4">
         <div className="bg-white border border-gray-200 rounded-xl px-5 py-4">
           <p className="text-xs text-gray-500 mb-1">Total Pipeline</p>
-          <p className="text-xl font-semibold text-gray-900">{formatCurrency(totalPipelineValue)}</p>
+          <p className="text-xl font-semibold text-gray-900">
+            {formatCurrency(totalPipelineValue)}
+          </p>
         </div>
         <div className="bg-white border border-gray-200 rounded-xl px-5 py-4">
           <p className="text-xs text-gray-500 mb-1">Weighted Value</p>
@@ -456,7 +475,10 @@ function PipelineTab() {
                 {addingToStage === stage.id ? (
                   <AddDealForm
                     stageId={stage.id}
-                    onSaved={async () => { setAddingToStage(null); await fetchData(); }}
+                    onSaved={async () => {
+                      setAddingToStage(null);
+                      await fetchData();
+                    }}
                     onCancel={() => setAddingToStage(null)}
                   />
                 ) : (
@@ -507,7 +529,10 @@ function ContactForm({ onSaved, onClose, initial, contactId }: ContactFormProps)
         phone,
         company,
         title,
-        tags: tags.split(',').map((t) => t.trim()).filter(Boolean),
+        tags: tags
+          .split(',')
+          .map((t) => t.trim())
+          .filter(Boolean),
         notes,
       };
       if (contactId) {
@@ -608,7 +633,9 @@ function ContactForm({ onSaved, onClose, initial, contactId }: ContactFormProps)
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Tags (comma-separated)</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">
+              Tags (comma-separated)
+            </label>
             <input
               type="text"
               value={tags}
@@ -676,9 +703,7 @@ function EnrichButton({ contactId }: { contactId: string }) {
 
   if (state === 'error') {
     return (
-      <span className="text-xs text-red-500 font-medium whitespace-nowrap">
-        Enrich failed
-      </span>
+      <span className="text-xs text-red-500 font-medium whitespace-nowrap">Enrich failed</span>
     );
   }
 
@@ -689,11 +714,7 @@ function EnrichButton({ contactId }: { contactId: string }) {
       title="AI Enrich contact"
       className="flex items-center gap-1 px-1.5 py-0.5 text-xs text-indigo-500 hover:text-indigo-700 rounded hover:bg-indigo-50 transition-colors disabled:opacity-50"
     >
-      {state === 'loading' ? (
-        <Loader2 size={12} className="animate-spin" />
-      ) : (
-        <Wand2 size={12} />
-      )}
+      {state === 'loading' ? <Loader2 size={12} className="animate-spin" /> : <Wand2 size={12} />}
       {state === 'loading' ? '' : 'Enrich'}
     </button>
   );
@@ -793,7 +814,9 @@ function SendPortalLinkModal({ contactId, email, onClose }: SendPortalLinkModalP
               </p>
 
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">Link expiry</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                  Link expiry
+                </label>
                 <div className="flex flex-wrap gap-2">
                   {EXPIRY_OPTIONS.map((opt) => (
                     <button
@@ -905,7 +928,9 @@ function ContactsTab() {
     }
   }, [debouncedSearch]);
 
-  useEffect(() => { fetchContacts(); }, [fetchContacts]);
+  useEffect(() => {
+    fetchContacts();
+  }, [fetchContacts]);
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this contact?')) return;
@@ -955,7 +980,10 @@ function ContactsTab() {
           className="flex-1 max-w-sm border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
         />
         <button
-          onClick={() => { setEditContact(null); setShowForm(true); }}
+          onClick={() => {
+            setEditContact(null);
+            setShowForm(true);
+          }}
           className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
         >
           <Plus size={14} />
@@ -1019,14 +1047,19 @@ function ContactsTab() {
                         <div className="flex items-center justify-end gap-2">
                           <EnrichButton contactId={contact.id} />
                           <button
-                            onClick={() => setPortalContact({ id: contact.id, email: d.email ?? '' })}
+                            onClick={() =>
+                              setPortalContact({ id: contact.id, email: d.email ?? '' })
+                            }
                             title="Send portal access"
                             className="text-gray-400 hover:text-indigo-500 transition-colors"
                           >
                             <Link2 size={13} />
                           </button>
                           <button
-                            onClick={() => { setEditContact(contact); setShowForm(true); }}
+                            onClick={() => {
+                              setEditContact(contact);
+                              setShowForm(true);
+                            }}
                             className="text-gray-400 hover:text-indigo-500 transition-colors"
                           >
                             <Edit2 size={13} />
@@ -1045,7 +1078,9 @@ function ContactsTab() {
                         <td colSpan={7} className="px-6 py-3">
                           <p className="text-xs font-medium text-gray-500 mb-2">Deals</p>
                           {deals.length === 0 ? (
-                            <p className="text-xs text-gray-400">No deals linked to this contact.</p>
+                            <p className="text-xs text-gray-400">
+                              No deals linked to this contact.
+                            </p>
                           ) : (
                             <div className="flex flex-wrap gap-2">
                               {deals.map((deal) => (
@@ -1056,7 +1091,9 @@ function ContactsTab() {
                                   <p className="font-medium text-gray-900">
                                     {deal.title ?? deal.data?.name ?? '(Unnamed)'}
                                   </p>
-                                  <p className="text-gray-500">{formatCurrency(deal.value ?? deal.data?.value)}</p>
+                                  <p className="text-gray-500">
+                                    {formatCurrency(deal.value ?? deal.data?.value)}
+                                  </p>
                                 </div>
                               ))}
                             </div>
@@ -1076,8 +1113,15 @@ function ContactsTab() {
         <ContactForm
           contactId={editContact?.id}
           initial={editContact?.data}
-          onClose={() => { setShowForm(false); setEditContact(null); }}
-          onSaved={async () => { setShowForm(false); setEditContact(null); await fetchContacts(); }}
+          onClose={() => {
+            setShowForm(false);
+            setEditContact(null);
+          }}
+          onSaved={async () => {
+            setShowForm(false);
+            setEditContact(null);
+            await fetchContacts();
+          }}
         />
       )}
 

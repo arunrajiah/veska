@@ -18,7 +18,10 @@ export default async function NotificationsPage() {
 
   let notifications: Notification[] = [];
   try {
-    const res = await apiFetch<{ data: Notification[] }>('/api/v1/notifications?limit=50', tenantId);
+    const res = await apiFetch<{ data: Notification[] }>(
+      '/api/v1/notifications?limit=50',
+      tenantId,
+    );
     notifications = Array.isArray(res) ? res : (res?.data ?? []);
   } catch {
     notifications = [];

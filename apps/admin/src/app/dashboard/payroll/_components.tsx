@@ -58,7 +58,11 @@ function fmt(amount?: number, currency = 'USD') {
 
 function fmtDate(d?: string) {
   if (!d) return '—';
-  return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(d).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 }
 
 function normalize(run: PayrollRun) {
@@ -89,7 +93,9 @@ function StatusBadge({ status }: { status: string }) {
   };
   const label = status.charAt(0).toUpperCase() + status.slice(1);
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${map[status] ?? 'bg-gray-100 text-gray-600'}`}>
+    <span
+      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${map[status] ?? 'bg-gray-100 text-gray-600'}`}
+    >
       {label}
     </span>
   );
@@ -102,13 +108,23 @@ function PeriodBadge({ period }: { period: string }) {
     weekly: 'bg-teal-50 text-teal-700',
   };
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${map[period] ?? 'bg-gray-100 text-gray-600'}`}>
+    <span
+      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${map[period] ?? 'bg-gray-100 text-gray-600'}`}
+    >
       {period}
     </span>
   );
 }
 
-function SlideOver({ open, onClose, onCreated }: { open: boolean; onClose: () => void; onCreated: () => void }) {
+function SlideOver({
+  open,
+  onClose,
+  onCreated,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onCreated: () => void;
+}) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -159,13 +175,21 @@ function SlideOver({ open, onClose, onCreated }: { open: boolean; onClose: () =>
         <form onSubmit={(e) => void handleSubmit(e)} className="flex-1 px-6 py-5 space-y-4">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Name *</label>
-            <input name="name" required placeholder="e.g. May 2026 Payroll"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              name="name"
+              required
+              placeholder="e.g. May 2026 Payroll"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Period *</label>
-            <select name="period" required defaultValue="monthly"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900">
+            <select
+              name="period"
+              required
+              defaultValue="monthly"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            >
               <option value="monthly">Monthly</option>
               <option value="bi-weekly">Bi-weekly</option>
               <option value="weekly">Weekly</option>
@@ -174,19 +198,30 @@ function SlideOver({ open, onClose, onCreated }: { open: boolean; onClose: () =>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Period start *</label>
-              <input name="periodStart" type="date" required
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+              <input
+                name="periodStart"
+                type="date"
+                required
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Period end *</label>
-              <input name="periodEnd" type="date" required
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+              <input
+                name="periodEnd"
+                type="date"
+                required
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Currency</label>
-            <select name="currency" defaultValue="USD"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900">
+            <select
+              name="currency"
+              defaultValue="USD"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            >
               <option value="USD">USD</option>
               <option value="EUR">EUR</option>
               <option value="GBP">GBP</option>
@@ -195,17 +230,27 @@ function SlideOver({ open, onClose, onCreated }: { open: boolean; onClose: () =>
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
-            <textarea name="notes" rows={3} placeholder="Optional notes…"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none" />
+            <textarea
+              name="notes"
+              rows={3}
+              placeholder="Optional notes…"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none"
+            />
           </div>
           {error && <p className="text-xs text-red-500">{error}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="submit" disabled={saving}
-              className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
+            <button
+              type="submit"
+              disabled={saving}
+              className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors"
+            >
               {saving ? 'Creating…' : 'Create'}
             </button>
-            <button type="button" onClick={onClose}
-              className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+            <button
+              type="button"
+              onClick={onClose}
+              className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+            >
               Cancel
             </button>
           </div>
@@ -215,7 +260,13 @@ function SlideOver({ open, onClose, onCreated }: { open: boolean; onClose: () =>
   );
 }
 
-function RunsTab({ runs, onRefresh }: { runs: ReturnType<typeof normalize>[]; onRefresh: () => void }) {
+function RunsTab({
+  runs,
+  onRefresh,
+}: {
+  runs: ReturnType<typeof normalize>[];
+  onRefresh: () => void;
+}) {
   const router = useRouter();
   const [, startTransition] = useTransition();
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -228,7 +279,10 @@ function RunsTab({ runs, onRefresh }: { runs: ReturnType<typeof normalize>[]; on
         headers: { 'Content-Type': 'application/json', 'x-tenant-id': TENANT_ID },
         body: JSON.stringify({ status }),
       });
-      startTransition(() => { router.refresh(); onRefresh(); });
+      startTransition(() => {
+        router.refresh();
+        onRefresh();
+      });
     } finally {
       setActionLoading(null);
     }
@@ -242,7 +296,10 @@ function RunsTab({ runs, onRefresh }: { runs: ReturnType<typeof normalize>[]; on
         method: 'DELETE',
         headers: { 'x-tenant-id': TENANT_ID },
       });
-      startTransition(() => { router.refresh(); onRefresh(); });
+      startTransition(() => {
+        router.refresh();
+        onRefresh();
+      });
     } finally {
       setActionLoading(null);
     }
@@ -276,25 +333,32 @@ function RunsTab({ runs, onRefresh }: { runs: ReturnType<typeof normalize>[]; on
           {runs.map((run) => (
             <tr key={run.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
               <td className="px-4 py-3 font-medium text-gray-900">{run.name || '—'}</td>
-              <td className="px-4 py-3"><PeriodBadge period={run.period} /></td>
+              <td className="px-4 py-3">
+                <PeriodBadge period={run.period} />
+              </td>
               <td className="px-4 py-3 text-xs text-gray-500">
                 {fmtDate(run.periodStart)} – {fmtDate(run.periodEnd)}
               </td>
               <td className="px-4 py-3 text-gray-600">{run.employeeCount}</td>
               <td className="px-4 py-3 text-gray-600">{fmt(run.totalGross, run.currency)}</td>
               <td className="px-4 py-3 text-gray-600">{fmt(run.totalNet, run.currency)}</td>
-              <td className="px-4 py-3"><StatusBadge status={run.status} /></td>
+              <td className="px-4 py-3">
+                <StatusBadge status={run.status} />
+              </td>
               <td className="px-4 py-3">
                 <div className="flex items-center justify-end gap-1.5">
-                  <a href={`/dashboard/payroll/${run.id}`}
-                    className="text-xs text-gray-500 hover:text-gray-900 px-2 py-1 rounded hover:bg-gray-100">
+                  <a
+                    href={`/dashboard/payroll/${run.id}`}
+                    className="text-xs text-gray-500 hover:text-gray-900 px-2 py-1 rounded hover:bg-gray-100"
+                  >
                     View
                   </a>
                   {run.status === 'processing' && (
                     <button
                       onClick={() => void transition(run.id, 'approved')}
                       disabled={actionLoading !== null}
-                      className="text-xs text-indigo-600 hover:text-indigo-800 px-2 py-1 rounded hover:bg-indigo-50 disabled:opacity-50">
+                      className="text-xs text-indigo-600 hover:text-indigo-800 px-2 py-1 rounded hover:bg-indigo-50 disabled:opacity-50"
+                    >
                       Approve
                     </button>
                   )}
@@ -302,7 +366,8 @@ function RunsTab({ runs, onRefresh }: { runs: ReturnType<typeof normalize>[]; on
                     <button
                       onClick={() => void transition(run.id, 'paid')}
                       disabled={actionLoading !== null}
-                      className="text-xs text-green-700 hover:text-green-900 px-2 py-1 rounded hover:bg-green-50 disabled:opacity-50">
+                      className="text-xs text-green-700 hover:text-green-900 px-2 py-1 rounded hover:bg-green-50 disabled:opacity-50"
+                    >
                       Pay
                     </button>
                   )}
@@ -310,7 +375,8 @@ function RunsTab({ runs, onRefresh }: { runs: ReturnType<typeof normalize>[]; on
                     <button
                       onClick={() => void deleteRun(run.id)}
                       disabled={actionLoading !== null}
-                      className="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50 disabled:opacity-50">
+                      className="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50 disabled:opacity-50"
+                    >
                       Delete
                     </button>
                   )}
@@ -327,13 +393,25 @@ function RunsTab({ runs, onRefresh }: { runs: ReturnType<typeof normalize>[]; on
 function AnalyticsTab({ summary }: { summary: PayrollSummary }) {
   const monthly = summary.monthlyTotals ?? [];
   const ytd = summary.ytdTotal ?? 0;
-  const avg = monthly.length > 0
-    ? monthly.reduce((s, m) => s + (m.total ?? 0), 0) / monthly.length
-    : 0;
+  const avg =
+    monthly.length > 0 ? monthly.reduce((s, m) => s + (m.total ?? 0), 0) / monthly.length : 0;
   const projected = avg * 12;
 
   // Build 12-month grid (use provided data or fill with zeros)
-  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const MONTHS = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
   const totals = MONTHS.map((m) => {
     const found = monthly.find((mt) => mt.month && mt.month.startsWith(m));
     return found?.total ?? 0;
@@ -358,7 +436,9 @@ function AnalyticsTab({ summary }: { summary: PayrollSummary }) {
       </div>
 
       <div className="bg-white border border-gray-200 rounded-xl p-6">
-        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-5">Monthly Payroll Cost</h3>
+        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-5">
+          Monthly Payroll Cost
+        </h3>
         <div className="flex items-end gap-2 h-40">
           {MONTHS.map((m, i) => {
             const total = totals[i] ?? 0;
@@ -380,16 +460,26 @@ function AnalyticsTab({ summary }: { summary: PayrollSummary }) {
   );
 }
 
-export function PayrollClient({ runs: initialRuns, summary }: { runs: PayrollRun[]; summary: PayrollSummary }) {
+export function PayrollClient({
+  runs: initialRuns,
+  summary,
+}: {
+  runs: PayrollRun[];
+  summary: PayrollSummary;
+}) {
   const [tab, setTab] = useState<'runs' | 'analytics'>('runs');
   const [showForm, setShowForm] = useState(false);
   const [runs, setRuns] = useState(initialRuns.map(normalize));
   const router = useRouter();
 
   const ytd = summary.ytdTotal ?? runs.reduce((s, r) => s + (r.totalGross ?? 0), 0);
-  const headcount = summary.headcount ?? (runs.length > 0 ? (runs[runs.length - 1]?.employeeCount ?? 0) : 0);
-  const lastPaid = summary.lastPaidDate
-    ?? runs.filter((r) => r.status === 'paid').sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0]?.periodEnd;
+  const headcount =
+    summary.headcount ?? (runs.length > 0 ? (runs[runs.length - 1]?.employeeCount ?? 0) : 0);
+  const lastPaid =
+    summary.lastPaidDate ??
+    runs
+      .filter((r) => r.status === 'paid')
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0]?.periodEnd;
 
   function handleCreated() {
     router.refresh();
@@ -401,11 +491,14 @@ export function PayrollClient({ runs: initialRuns, summary }: { runs: PayrollRun
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">Payroll</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{runs.length} run{runs.length !== 1 ? 's' : ''}</p>
+          <p className="text-sm text-gray-500 mt-0.5">
+            {runs.length} run{runs.length !== 1 ? 's' : ''}
+          </p>
         </div>
         <button
           onClick={() => setShowForm(true)}
-          className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+          className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+        >
           <Plus size={15} />
           New payroll run
         </button>
@@ -414,21 +507,27 @@ export function PayrollClient({ runs: initialRuns, summary }: { runs: PayrollRun
       {/* Summary bar */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="bg-white border border-gray-200 rounded-xl px-5 py-4 flex items-center gap-3">
-          <div className="p-2 bg-green-50 rounded-lg"><DollarSign size={16} className="text-green-600" /></div>
+          <div className="p-2 bg-green-50 rounded-lg">
+            <DollarSign size={16} className="text-green-600" />
+          </div>
           <div>
             <p className="text-xs text-gray-500">YTD Total Payroll</p>
             <p className="text-lg font-semibold text-gray-900">{fmt(ytd)}</p>
           </div>
         </div>
         <div className="bg-white border border-gray-200 rounded-xl px-5 py-4 flex items-center gap-3">
-          <div className="p-2 bg-blue-50 rounded-lg"><Users size={16} className="text-blue-600" /></div>
+          <div className="p-2 bg-blue-50 rounded-lg">
+            <Users size={16} className="text-blue-600" />
+          </div>
           <div>
             <p className="text-xs text-gray-500">Headcount</p>
             <p className="text-lg font-semibold text-gray-900">{headcount ?? '—'}</p>
           </div>
         </div>
         <div className="bg-white border border-gray-200 rounded-xl px-5 py-4 flex items-center gap-3">
-          <div className="p-2 bg-indigo-50 rounded-lg"><Clock size={16} className="text-indigo-600" /></div>
+          <div className="p-2 bg-indigo-50 rounded-lg">
+            <Clock size={16} className="text-indigo-600" />
+          </div>
           <div>
             <p className="text-xs text-gray-500">Last Paid Run</p>
             <p className="text-lg font-semibold text-gray-900">{fmtDate(lastPaid)}</p>
@@ -439,16 +538,23 @@ export function PayrollClient({ runs: initialRuns, summary }: { runs: PayrollRun
       {/* Tabs */}
       <div className="flex gap-1 mb-5 border-b border-gray-200">
         {(['runs', 'analytics'] as const).map((t) => (
-          <button key={t} onClick={() => setTab(t)}
+          <button
+            key={t}
+            onClick={() => setTab(t)}
             className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
-              tab === t ? 'border-gray-900 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}>
+              tab === t
+                ? 'border-gray-900 text-gray-900'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
             {t === 'runs' ? 'Runs' : 'Analytics'}
           </button>
         ))}
       </div>
 
-      {tab === 'runs' && <RunsTab runs={runs} onRefresh={() => setRuns(initialRuns.map(normalize))} />}
+      {tab === 'runs' && (
+        <RunsTab runs={runs} onRefresh={() => setRuns(initialRuns.map(normalize))} />
+      )}
       {tab === 'analytics' && <AnalyticsTab summary={summary} />}
 
       <SlideOver open={showForm} onClose={() => setShowForm(false)} onCreated={handleCreated} />

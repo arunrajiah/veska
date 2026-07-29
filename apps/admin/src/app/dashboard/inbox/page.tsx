@@ -7,10 +7,7 @@ interface AuditResponse {
   data?: AuditEvent[];
 }
 
-const TENANT_ID =
-  process.env.VESKA_TENANT_ID ??
-  process.env.NEXT_PUBLIC_TENANT_ID ??
-  'demo-tenant';
+const TENANT_ID = process.env.VESKA_TENANT_ID ?? process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 async function fetchEvents(action: string): Promise<AuditEvent[]> {
   try {

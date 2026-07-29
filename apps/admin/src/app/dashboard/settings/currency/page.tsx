@@ -4,7 +4,8 @@ import RatesTable from './_rates-table.js';
 
 const TENANT_ID = 'demo';
 const API_BASE =
-  (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/currencies';
+  (process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') +
+  '/api/v1/currencies';
 
 interface CurrencyOption {
   code: string;

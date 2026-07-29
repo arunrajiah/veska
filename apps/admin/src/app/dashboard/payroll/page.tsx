@@ -38,12 +38,20 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 function fmt(n: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(n);
 }
 
 function fmtDate(s?: string) {
   if (!s) return '—';
-  return new Date(s).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(s).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 }
 
 export default function PayrollPage() {
@@ -56,7 +64,7 @@ export default function PayrollPage() {
       try {
         const res = await fetch('/api/veska/payroll/runs?limit=10');
         if (res.ok) {
-          const json = await res.json() as { data?: PayrollRun[] } | PayrollRun[];
+          const json = (await res.json()) as { data?: PayrollRun[] } | PayrollRun[];
           const data = Array.isArray(json) ? json : (json.data ?? []);
           setRuns(data);
         }
@@ -84,7 +92,9 @@ export default function PayrollPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">{t('title')}</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Manage pay runs, payslips, and payroll settings</p>
+          <p className="text-sm text-gray-500 mt-0.5">
+            Manage pay runs, payslips, and payroll settings
+          </p>
         </div>
         <Link
           href="/dashboard/payroll/runs/new"
@@ -96,7 +106,11 @@ export default function PayrollPage() {
       </div>
 
       {/* Summary cards */}
-      <div role="region" aria-label="Payroll summary" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div
+        role="region"
+        aria-label="Payroll summary"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+      >
         <div className="bg-white rounded-xl border border-gray-200 p-5 flex items-start gap-4">
           <div className="p-2 bg-indigo-50 rounded-lg">
             <Users size={20} className="text-indigo-600" />
@@ -124,7 +138,11 @@ export default function PayrollPage() {
           <div>
             <p className="text-sm text-gray-500">{t('nextRun')}</p>
             <p className="text-lg font-semibold text-gray-900 mt-0.5">
-              {nextPayroll.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              {nextPayroll.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              })}
             </p>
           </div>
         </div>
@@ -145,7 +163,10 @@ export default function PayrollPage() {
       <div className="bg-white rounded-xl border border-gray-200">
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <h2 className="text-sm font-semibold text-gray-900">{t('payrollRuns')}</h2>
-          <Link href="/dashboard/payroll/runs" className="text-xs text-indigo-600 hover:text-indigo-700 font-medium">
+          <Link
+            href="/dashboard/payroll/runs"
+            className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+          >
             View all
           </Link>
         </div>
@@ -169,11 +190,21 @@ export default function PayrollPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-xs text-gray-500 border-b border-gray-100 bg-gray-50">
-                  <th scope="col" className="text-left px-5 py-3 font-medium">Period</th>
-                  <th scope="col" className="text-left px-5 py-3 font-medium">Status</th>
-                  <th scope="col" className="text-left px-5 py-3 font-medium">Employee Count</th>
-                  <th scope="col" className="text-right px-5 py-3 font-medium">Total Amount</th>
-                  <th scope="col" className="text-right px-5 py-3 font-medium">Actions</th>
+                  <th scope="col" className="text-left px-5 py-3 font-medium">
+                    Period
+                  </th>
+                  <th scope="col" className="text-left px-5 py-3 font-medium">
+                    Status
+                  </th>
+                  <th scope="col" className="text-left px-5 py-3 font-medium">
+                    Employee Count
+                  </th>
+                  <th scope="col" className="text-right px-5 py-3 font-medium">
+                    Total Amount
+                  </th>
+                  <th scope="col" className="text-right px-5 py-3 font-medium">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -189,9 +220,7 @@ export default function PayrollPage() {
                         {run.data.status ?? 'unknown'}
                       </span>
                     </td>
-                    <td className="px-5 py-3 text-gray-600">
-                      {run.data.employeeCount ?? '—'}
-                    </td>
+                    <td className="px-5 py-3 text-gray-600">{run.data.employeeCount ?? '—'}</td>
                     <td className="px-5 py-3 text-right font-medium text-gray-900">
                       {run.data.totalNet != null ? fmt(run.data.totalNet) : '—'}
                     </td>
@@ -214,9 +243,24 @@ export default function PayrollPage() {
       {/* Quick links */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
-          { href: '/dashboard/payroll/runs', icon: Play, label: t('payrollRuns'), desc: 'Manage and process pay runs' },
-          { href: '/dashboard/payroll/payslips', icon: FileText, label: t('payslips'), desc: 'View and download payslips' },
-          { href: '/dashboard/settings', icon: Settings, label: 'Settings', desc: 'Configure payroll settings' },
+          {
+            href: '/dashboard/payroll/runs',
+            icon: Play,
+            label: t('payrollRuns'),
+            desc: 'Manage and process pay runs',
+          },
+          {
+            href: '/dashboard/payroll/payslips',
+            icon: FileText,
+            label: t('payslips'),
+            desc: 'View and download payslips',
+          },
+          {
+            href: '/dashboard/settings',
+            icon: Settings,
+            label: 'Settings',
+            desc: 'Configure payroll settings',
+          },
         ].map((link) => (
           <Link
             key={link.href}
@@ -232,7 +276,10 @@ export default function PayrollPage() {
                 <p className="text-xs text-gray-500 mt-0.5">{link.desc}</p>
               </div>
             </div>
-            <ChevronRight size={16} className="text-gray-400 group-hover:text-indigo-500 transition-colors" />
+            <ChevronRight
+              size={16}
+              className="text-gray-400 group-hover:text-indigo-500 transition-colors"
+            />
           </Link>
         ))}
       </div>

@@ -169,10 +169,7 @@ export default function ConfigChat() {
     setSubmitting(true);
 
     // Add item in proposing state
-    setConversation((prev) => [
-      ...prev,
-      { id: itemId, request, diff: null, status: 'proposing' },
-    ]);
+    setConversation((prev) => [...prev, { id: itemId, request, diff: null, status: 'proposing' }]);
 
     try {
       const res = await fetch(`${API_URL}/api/v1/config/propose`, {
@@ -192,15 +189,17 @@ export default function ConfigChat() {
       const diff: ConfigDiff = await res.json();
 
       setConversation((prev) =>
-        prev.map((item) =>
-          item.id === itemId ? { ...item, diff, status: 'proposed' } : item,
-        ),
+        prev.map((item) => (item.id === itemId ? { ...item, diff, status: 'proposed' } : item)),
       );
     } catch (err) {
       setConversation((prev) =>
         prev.map((item) =>
           item.id === itemId
-            ? { ...item, status: 'error', error: err instanceof Error ? err.message : 'Unknown error' }
+            ? {
+                ...item,
+                status: 'error',
+                error: err instanceof Error ? err.message : 'Unknown error',
+              }
             : item,
         ),
       );
@@ -232,7 +231,11 @@ export default function ConfigChat() {
       setConversation((prev) =>
         prev.map((item) =>
           item.id === itemId
-            ? { ...item, status: 'error', error: err instanceof Error ? err.message : 'Unknown error' }
+            ? {
+                ...item,
+                status: 'error',
+                error: err instanceof Error ? err.message : 'Unknown error',
+              }
             : item,
         ),
       );
@@ -321,7 +324,9 @@ export default function ConfigChat() {
       <div className="w-80 flex-shrink-0 bg-white flex flex-col">
         <div className="px-5 py-4 border-b border-gray-200 flex-shrink-0">
           <p className="text-sm font-medium text-gray-700">New request</p>
-          <p className="text-xs text-gray-400 mt-0.5">Press Enter to send, Shift+Enter for new line</p>
+          <p className="text-xs text-gray-400 mt-0.5">
+            Press Enter to send, Shift+Enter for new line
+          </p>
         </div>
 
         <div className="flex-1 flex flex-col p-4 gap-3">

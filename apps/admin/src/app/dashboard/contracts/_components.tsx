@@ -49,7 +49,11 @@ function daysUntil(d?: string): number | null {
 
 function fmtDate(d?: string) {
   if (!d) return '—';
-  return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(d).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 }
 
 function fmtMoney(n?: number) {
@@ -113,31 +117,46 @@ function NewContractSlideOver({ onClose, onSaved }: { onClose: () => void; onSav
       <div className="relative bg-white w-full max-w-lg h-full overflow-y-auto shadow-xl flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-base font-semibold text-gray-900">New Contract</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <X size={18} />
+          </button>
         </div>
         <form onSubmit={(e) => void handleSubmit(e)} className="flex-1 px-6 py-5 space-y-4">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Title *</label>
-            <input name="title" required
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              name="title"
+              required
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Party Name *</label>
-              <input name="partyName" required
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+              <input
+                name="partyName"
+                required
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Party Email</label>
-              <input name="partyEmail" type="email"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+              <input
+                name="partyEmail"
+                type="email"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Type *</label>
-              <select name="type" required defaultValue="service"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900">
+              <select
+                name="type"
+                required
+                defaultValue="service"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              >
                 <option value="vendor">Vendor</option>
                 <option value="customer">Customer</option>
                 <option value="employee">Employee</option>
@@ -147,39 +166,66 @@ function NewContractSlideOver({ onClose, onSaved }: { onClose: () => void; onSav
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Value</label>
-              <input name="value" type="number" step="0.01" min="0"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+              <input
+                name="value"
+                type="number"
+                step="0.01"
+                min="0"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Start Date</label>
-              <input name="startDate" type="date"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+              <input
+                name="startDate"
+                type="date"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">End Date</label>
-              <input name="endDate" type="date"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+              <input
+                name="endDate"
+                type="date"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+              />
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <input name="autoRenew" id="autoRenew" type="checkbox" className="rounded border-gray-300" />
-            <label htmlFor="autoRenew" className="text-sm text-gray-700">Auto-renew</label>
+            <input
+              name="autoRenew"
+              id="autoRenew"
+              type="checkbox"
+              className="rounded border-gray-300"
+            />
+            <label htmlFor="autoRenew" className="text-sm text-gray-700">
+              Auto-renew
+            </label>
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
-            <textarea name="notes" rows={3}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none" />
+            <textarea
+              name="notes"
+              rows={3}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none"
+            />
           </div>
           {error && <p className="text-xs text-red-500">{error}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="submit" disabled={saving}
-              className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
+            <button
+              type="submit"
+              disabled={saving}
+              className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors"
+            >
               {saving ? 'Creating…' : 'Create Contract'}
             </button>
-            <button type="button" onClick={onClose}
-              className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+            <button
+              type="button"
+              onClick={onClose}
+              className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+            >
               Cancel
             </button>
           </div>
@@ -193,7 +239,7 @@ export function ContractsPageClient({ contracts: initialContracts }: { contracts
   const router = useRouter();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
-  const [tab, setTab] = useState<typeof TABS[number]>('all');
+  const [tab, setTab] = useState<(typeof TABS)[number]>('all');
   const [showNew, setShowNew] = useState(false);
   const [contracts] = useState(initialContracts);
 
@@ -227,7 +273,9 @@ export function ContractsPageClient({ contracts: initialContracts }: { contracts
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">Contracts</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{total} contract{total !== 1 ? 's' : ''}</p>
+          <p className="text-sm text-gray-500 mt-0.5">
+            {total} contract{total !== 1 ? 's' : ''}
+          </p>
         </div>
         <button
           onClick={() => setShowNew(true)}
@@ -260,7 +308,8 @@ export function ContractsPageClient({ contracts: initialContracts }: { contracts
             <AlertTriangle size={16} className="text-amber-600 mt-0.5 shrink-0" />
             <div>
               <p className="text-sm font-medium text-amber-800">
-                {expiringContracts.length} contract{expiringContracts.length !== 1 ? 's' : ''} expiring within 30 days
+                {expiringContracts.length} contract{expiringContracts.length !== 1 ? 's' : ''}{' '}
+                expiring within 30 days
               </p>
               <div className="flex flex-wrap gap-2 mt-2">
                 {expiringContracts.slice(0, 5).map((c) => {
@@ -288,7 +337,9 @@ export function ContractsPageClient({ contracts: initialContracts }: { contracts
             key={t}
             onClick={() => setTab(t)}
             className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px capitalize ${
-              tab === t ? 'border-gray-900 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700'
+              tab === t
+                ? 'border-gray-900 text-gray-900'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
           >
             {t}
@@ -312,8 +363,12 @@ export function ContractsPageClient({ contracts: initialContracts }: { contracts
                 <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Value</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Start</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">End</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Auto-Renew</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Days Left</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Auto-Renew
+                </th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">
+                  Days Left
+                </th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -324,7 +379,10 @@ export function ContractsPageClient({ contracts: initialContracts }: { contracts
                 const days = daysUntil(d.endDate);
                 const endColor = endDateColor(d.endDate, status);
                 return (
-                  <tr key={c.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                  <tr
+                    key={c.id}
+                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
+                  >
                     <td className="px-4 py-3 font-medium text-gray-900">
                       <Link href={`/dashboard/contracts/${c.id}`} className="hover:text-gray-700">
                         {d.title ?? '—'}
@@ -332,34 +390,51 @@ export function ContractsPageClient({ contracts: initialContracts }: { contracts
                     </td>
                     <td className="px-4 py-3 text-gray-600 text-xs">{d.partyName ?? '—'}</td>
                     <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${TYPE_COLORS[d.type ?? ''] ?? 'bg-gray-100 text-gray-600'}`}>
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${TYPE_COLORS[d.type ?? ''] ?? 'bg-gray-100 text-gray-600'}`}
+                      >
                         {d.type ?? '—'}
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-600'}`}>
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-600'}`}
+                      >
                         {status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right text-gray-700 text-xs font-medium">{fmtMoney(d.value)}</td>
+                    <td className="px-4 py-3 text-right text-gray-700 text-xs font-medium">
+                      {fmtMoney(d.value)}
+                    </td>
                     <td className="px-4 py-3 text-xs text-gray-500">{fmtDate(d.startDate)}</td>
-                    <td className={`px-4 py-3 text-xs ${endColor || 'text-gray-500'}`}>{fmtDate(d.endDate)}</td>
+                    <td className={`px-4 py-3 text-xs ${endColor || 'text-gray-500'}`}>
+                      {fmtDate(d.endDate)}
+                    </td>
                     <td className="px-4 py-3">
                       {d.autoRenew ? (
-                        <span className="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full font-medium">Auto</span>
+                        <span className="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full font-medium">
+                          Auto
+                        </span>
                       ) : (
                         <span className="text-xs text-gray-300">—</span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-right">
                       {status === 'active' && days != null ? (
-                        <span className={`text-xs font-medium ${days < 30 ? 'text-red-600' : days < 90 ? 'text-orange-500' : 'text-gray-500'}`}>
+                        <span
+                          className={`text-xs font-medium ${days < 30 ? 'text-red-600' : days < 90 ? 'text-orange-500' : 'text-gray-500'}`}
+                        >
                           {days > 0 ? `${days}d` : 'Expired'}
                         </span>
-                      ) : <span className="text-gray-300 text-xs">—</span>}
+                      ) : (
+                        <span className="text-gray-300 text-xs">—</span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <Link href={`/dashboard/contracts/${c.id}`} className="text-xs text-gray-500 hover:text-gray-900">
+                      <Link
+                        href={`/dashboard/contracts/${c.id}`}
+                        className="text-xs text-gray-500 hover:text-gray-900"
+                      >
                         View →
                       </Link>
                     </td>
@@ -374,7 +449,11 @@ export function ContractsPageClient({ contracts: initialContracts }: { contracts
       {showNew && (
         <NewContractSlideOver
           onClose={() => setShowNew(false)}
-          onSaved={() => startTransition(() => { router.refresh(); })}
+          onSaved={() =>
+            startTransition(() => {
+              router.refresh();
+            })
+          }
         />
       )}
     </div>
@@ -382,6 +461,12 @@ export function ContractsPageClient({ contracts: initialContracts }: { contracts
 }
 
 // Legacy export for backward compat with old page.tsx
-export function ContractsClient({ contracts, summary }: { contracts: unknown[]; summary: unknown }) {
+export function ContractsClient({
+  contracts,
+  summary,
+}: {
+  contracts: unknown[];
+  summary: unknown;
+}) {
   return <ContractsPageClient contracts={[]} />;
 }

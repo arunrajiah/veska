@@ -164,13 +164,7 @@ function SlideOver({
   );
 }
 
-function Field({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
       <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
@@ -232,13 +226,21 @@ function AddVariantForm({
     setAttrs((a) => a.map((row, idx) => (idx === i ? { ...row, [field]: val } : row)));
 
   const handleSave = async () => {
-    if (!sku.trim()) { setError('SKU is required'); return; }
-    if (!price) { setError('Price is required'); return; }
+    if (!sku.trim()) {
+      setError('SKU is required');
+      return;
+    }
+    if (!price) {
+      setError('Price is required');
+      return;
+    }
     setSaving(true);
     setError('');
     try {
       const attributes: Record<string, string> = {};
-      attrs.forEach(({ key, value }) => { if (key.trim()) attributes[key.trim()] = value; });
+      attrs.forEach(({ key, value }) => {
+        if (key.trim()) attributes[key.trim()] = value;
+      });
       await apiFetch(`/catalog/products/${productId}/variants`, {
         method: 'POST',
         body: JSON.stringify({
@@ -269,35 +271,86 @@ function AddVariantForm({
         <div className="grid grid-cols-3 gap-3 mb-3">
           <div>
             <label className="block text-xs text-gray-500 mb-1">SKU *</label>
-            <input type="text" value={sku} onChange={(e) => setSku(e.target.value)} className={inputCls} placeholder="SKU-001" />
+            <input
+              type="text"
+              value={sku}
+              onChange={(e) => setSku(e.target.value)}
+              className={inputCls}
+              placeholder="SKU-001"
+            />
           </div>
           <div>
             <label className="block text-xs text-gray-500 mb-1">Name</label>
-            <input type="text" value={name} onChange={(e) => setName(e.target.value)} className={inputCls} placeholder="Optional display name" />
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className={inputCls}
+              placeholder="Optional display name"
+            />
           </div>
           <div>
             <label className="block text-xs text-gray-500 mb-1">Price *</label>
-            <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} className={inputCls} placeholder="0.00" step="0.01" />
+            <input
+              type="number"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              className={inputCls}
+              placeholder="0.00"
+              step="0.01"
+            />
           </div>
           <div>
             <label className="block text-xs text-gray-500 mb-1">Compare-at price</label>
-            <input type="number" value={compareAt} onChange={(e) => setCompareAt(e.target.value)} className={inputCls} placeholder="0.00" step="0.01" />
+            <input
+              type="number"
+              value={compareAt}
+              onChange={(e) => setCompareAt(e.target.value)}
+              className={inputCls}
+              placeholder="0.00"
+              step="0.01"
+            />
           </div>
           <div>
             <label className="block text-xs text-gray-500 mb-1">Cost</label>
-            <input type="number" value={cost} onChange={(e) => setCost(e.target.value)} className={inputCls} placeholder="0.00" step="0.01" />
+            <input
+              type="number"
+              value={cost}
+              onChange={(e) => setCost(e.target.value)}
+              className={inputCls}
+              placeholder="0.00"
+              step="0.01"
+            />
           </div>
           <div>
             <label className="block text-xs text-gray-500 mb-1">Stock</label>
-            <input type="number" value={stock} onChange={(e) => setStock(e.target.value)} className={inputCls} placeholder="0" />
+            <input
+              type="number"
+              value={stock}
+              onChange={(e) => setStock(e.target.value)}
+              className={inputCls}
+              placeholder="0"
+            />
           </div>
           <div>
             <label className="block text-xs text-gray-500 mb-1">Weight (kg)</label>
-            <input type="number" value={weight} onChange={(e) => setWeight(e.target.value)} className={inputCls} placeholder="0.0" step="0.01" />
+            <input
+              type="number"
+              value={weight}
+              onChange={(e) => setWeight(e.target.value)}
+              className={inputCls}
+              placeholder="0.0"
+              step="0.01"
+            />
           </div>
           <div className="flex items-end pb-2">
             <label className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
-              <input type="checkbox" checked={isDefault} onChange={(e) => setIsDefault(e.target.checked)} className="rounded" />
+              <input
+                type="checkbox"
+                checked={isDefault}
+                onChange={(e) => setIsDefault(e.target.checked)}
+                className="rounded"
+              />
               Default variant
             </label>
           </div>
@@ -322,7 +375,10 @@ function AddVariantForm({
                   placeholder="Value (e.g. Red)"
                   className="border border-gray-200 rounded-lg px-3 py-1.5 text-xs w-36 focus:outline-none focus:ring-2 focus:ring-indigo-300"
                 />
-                <button onClick={() => removeAttr(i)} className="text-gray-400 hover:text-red-400 transition-colors">
+                <button
+                  onClick={() => removeAttr(i)}
+                  className="text-gray-400 hover:text-red-400 transition-colors"
+                >
                   <X size={12} />
                 </button>
               </div>
@@ -416,7 +472,9 @@ function VariantsRow({
                         </div>
                       </td>
                       <td className="py-2 pr-4 text-gray-900">{fmt(v.price)}</td>
-                      <td className="py-2 pr-4 text-gray-400 line-through">{v.compare_at_price ? fmt(v.compare_at_price) : '—'}</td>
+                      <td className="py-2 pr-4 text-gray-400 line-through">
+                        {v.compare_at_price ? fmt(v.compare_at_price) : '—'}
+                      </td>
                       <td className="py-2 pr-4 text-gray-700">{v.stock}</td>
                       <td className="py-2 pr-4">
                         {v.is_default && (
@@ -444,7 +502,10 @@ function VariantsRow({
       {addingVariant ? (
         <AddVariantForm
           productId={product.id}
-          onSaved={() => { setAddingVariant(false); onVariantChange(); }}
+          onSaved={() => {
+            setAddingVariant(false);
+            onVariantChange();
+          }}
           onCancel={() => setAddingVariant(false)}
         />
       ) : (
@@ -475,7 +536,10 @@ function NewProductForm({ onClose, onSaved }: { onClose: () => void; onSaved: ()
   const [error, setError] = useState('');
 
   const handleSave = async () => {
-    if (!name.trim()) { setError('Name is required'); return; }
+    if (!name.trim()) {
+      setError('Name is required');
+      return;
+    }
     setSaving(true);
     setError('');
     try {
@@ -486,7 +550,10 @@ function NewProductForm({ onClose, onSaved }: { onClose: () => void; onSaved: ()
           description: description.trim() || undefined,
           category: category.trim() || undefined,
           unit,
-          tags: tags.split(',').map((t) => t.trim()).filter(Boolean),
+          tags: tags
+            .split(',')
+            .map((t) => t.trim())
+            .filter(Boolean),
           status: 'active',
         }),
       });
@@ -499,23 +566,55 @@ function NewProductForm({ onClose, onSaved }: { onClose: () => void; onSaved: ()
   };
 
   return (
-    <SlideOver title="New Product" onClose={onClose} footer={
-      <>
-        <button onClick={onClose} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors">Cancel</button>
-        <button onClick={handleSave} disabled={saving} className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-60 transition-colors">
-          {saving ? 'Saving…' : 'Create Product'}
-        </button>
-      </>
-    }>
+    <SlideOver
+      title="New Product"
+      onClose={onClose}
+      footer={
+        <>
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-60 transition-colors"
+          >
+            {saving ? 'Saving…' : 'Create Product'}
+          </button>
+        </>
+      }
+    >
       {error && <p className="text-xs text-red-500">{error}</p>}
       <Field label="Name *">
-        <input autoFocus type="text" value={name} onChange={(e) => setName(e.target.value)} className={inputCls} placeholder="Product name" />
+        <input
+          autoFocus
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className={inputCls}
+          placeholder="Product name"
+        />
       </Field>
       <Field label="Description">
-        <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className={`${inputCls} resize-none`} placeholder="Short description…" />
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={3}
+          className={`${inputCls} resize-none`}
+          placeholder="Short description…"
+        />
       </Field>
       <Field label="Category">
-        <input type="text" value={category} onChange={(e) => setCategory(e.target.value)} className={inputCls} placeholder="e.g. Electronics" />
+        <input
+          type="text"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          className={inputCls}
+          placeholder="e.g. Electronics"
+        />
       </Field>
       <Field label="Unit">
         <select value={unit} onChange={(e) => setUnit(e.target.value)} className={selectCls}>
@@ -531,7 +630,13 @@ function NewProductForm({ onClose, onSaved }: { onClose: () => void; onSaved: ()
         </select>
       </Field>
       <Field label="Tags (comma-separated)">
-        <input type="text" value={tags} onChange={(e) => setTags(e.target.value)} className={inputCls} placeholder="tag1, tag2, tag3" />
+        <input
+          type="text"
+          value={tags}
+          onChange={(e) => setTags(e.target.value)}
+          className={inputCls}
+          placeholder="tag1, tag2, tag3"
+        />
       </Field>
     </SlideOver>
   );
@@ -557,10 +662,7 @@ function ProductsTab({ initialProducts }: { initialProducts: Product[] }) {
   const filtered = products.filter((p) => {
     if (!search) return true;
     const q = search.toLowerCase();
-    return (
-      p.name.toLowerCase().includes(q) ||
-      (p.category ?? '').toLowerCase().includes(q)
-    );
+    return p.name.toLowerCase().includes(q) || (p.category ?? '').toLowerCase().includes(q);
   });
 
   const priceRange = (variants: ProductVariant[] = []): string => {
@@ -606,7 +708,9 @@ function ProductsTab({ initialProducts }: { initialProducts: Product[] }) {
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Category</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Unit</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Variants</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Price range</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Price range
+                </th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Stock</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
                 <th className="px-4 py-3" />
@@ -628,7 +732,12 @@ function ProductsTab({ initialProducts }: { initialProducts: Product[] }) {
                         {product.tags && product.tags.length > 0 && (
                           <div className="flex flex-wrap gap-1 mt-1">
                             {product.tags.slice(0, 3).map((tag) => (
-                              <span key={tag} className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-500">{tag}</span>
+                              <span
+                                key={tag}
+                                className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-500"
+                              >
+                                {tag}
+                              </span>
                             ))}
                           </div>
                         )}
@@ -639,7 +748,9 @@ function ProductsTab({ initialProducts }: { initialProducts: Product[] }) {
                       <td className="px-4 py-3 text-gray-700">{priceRange(variants)}</td>
                       <td className="px-4 py-3 text-gray-700">{totalStock(variants)}</td>
                       <td className="px-4 py-3">
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${STATUS_BADGE[product.status ?? 'active'] ?? STATUS_BADGE.active}`}>
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${STATUS_BADGE[product.status ?? 'active'] ?? STATUS_BADGE.active}`}
+                        >
                           {product.status ?? 'active'}
                         </span>
                       </td>
@@ -649,9 +760,13 @@ function ProductsTab({ initialProducts }: { initialProducts: Product[] }) {
                           className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-700 transition-colors"
                         >
                           {isExpanded ? (
-                            <><ChevronUp size={14} /> Collapse</>
+                            <>
+                              <ChevronUp size={14} /> Collapse
+                            </>
                           ) : (
-                            <><ChevronDown size={14} /> View variants</>
+                            <>
+                              <ChevronDown size={14} /> View variants
+                            </>
                           )}
                         </button>
                       </td>
@@ -674,7 +789,10 @@ function ProductsTab({ initialProducts }: { initialProducts: Product[] }) {
       {showNewProduct && (
         <NewProductForm
           onClose={() => setShowNewProduct(false)}
-          onSaved={async () => { setShowNewProduct(false); await fetchProducts(); }}
+          onSaved={async () => {
+            setShowNewProduct(false);
+            await fetchProducts();
+          }}
         />
       )}
     </div>
@@ -687,13 +805,7 @@ function ProductsTab({ initialProducts }: { initialProducts: Product[] }) {
 
 // ─── New Price List Slide-Over ────────────────────────────────────────────────
 
-function NewPriceListForm({
-  onClose,
-  onSaved,
-}: {
-  onClose: () => void;
-  onSaved: () => void;
-}) {
+function NewPriceListForm({ onClose, onSaved }: { onClose: () => void; onSaved: () => void }) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [currency, setCurrency] = useState('USD');
@@ -706,7 +818,10 @@ function NewPriceListForm({
   const [error, setError] = useState('');
 
   const handleSave = async () => {
-    if (!name.trim()) { setError('Name is required'); return; }
+    if (!name.trim()) {
+      setError('Name is required');
+      return;
+    }
     setSaving(true);
     setError('');
     try {
@@ -733,24 +848,53 @@ function NewPriceListForm({
   };
 
   return (
-    <SlideOver title="New Price List" onClose={onClose} footer={
-      <>
-        <button onClick={onClose} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors">Cancel</button>
-        <button onClick={handleSave} disabled={saving} className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-60 transition-colors">
-          {saving ? 'Saving…' : 'Create Price List'}
-        </button>
-      </>
-    }>
+    <SlideOver
+      title="New Price List"
+      onClose={onClose}
+      footer={
+        <>
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-60 transition-colors"
+          >
+            {saving ? 'Saving…' : 'Create Price List'}
+          </button>
+        </>
+      }
+    >
       {error && <p className="text-xs text-red-500">{error}</p>}
       <Field label="Name *">
-        <input autoFocus type="text" value={name} onChange={(e) => setName(e.target.value)} className={inputCls} placeholder="e.g. VIP Customer Pricing" />
+        <input
+          autoFocus
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className={inputCls}
+          placeholder="e.g. VIP Customer Pricing"
+        />
       </Field>
       <Field label="Description">
-        <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} className={`${inputCls} resize-none`} />
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={2}
+          className={`${inputCls} resize-none`}
+        />
       </Field>
       <div className="grid grid-cols-2 gap-3">
         <Field label="Currency">
-          <select value={currency} onChange={(e) => setCurrency(e.target.value)} className={selectCls}>
+          <select
+            value={currency}
+            onChange={(e) => setCurrency(e.target.value)}
+            className={selectCls}
+          >
             <option value="USD">USD</option>
             <option value="EUR">EUR</option>
             <option value="GBP">GBP</option>
@@ -759,7 +903,11 @@ function NewPriceListForm({
           </select>
         </Field>
         <Field label="Type">
-          <select value={type} onChange={(e) => setType(e.target.value as 'fixed' | 'percentage')} className={selectCls}>
+          <select
+            value={type}
+            onChange={(e) => setType(e.target.value as 'fixed' | 'percentage')}
+            className={selectCls}
+          >
             <option value="fixed">Fixed</option>
             <option value="percentage">Percentage</option>
           </select>
@@ -767,19 +915,41 @@ function NewPriceListForm({
       </div>
       {type === 'percentage' && (
         <Field label="Adjustment (%)">
-          <input type="number" value={adjustment} onChange={(e) => setAdjustment(e.target.value)} className={inputCls} placeholder="-10 for 10% off" step="0.01" />
+          <input
+            type="number"
+            value={adjustment}
+            onChange={(e) => setAdjustment(e.target.value)}
+            className={inputCls}
+            placeholder="-10 for 10% off"
+            step="0.01"
+          />
         </Field>
       )}
       <div className="grid grid-cols-2 gap-3">
         <Field label="Start date">
-          <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className={inputCls} />
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className={inputCls}
+          />
         </Field>
         <Field label="End date">
-          <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className={inputCls} />
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            className={inputCls}
+          />
         </Field>
       </div>
       <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
-        <input type="checkbox" checked={isDefault} onChange={(e) => setIsDefault(e.target.checked)} className="rounded" />
+        <input
+          type="checkbox"
+          checked={isDefault}
+          onChange={(e) => setIsDefault(e.target.checked)}
+          className="rounded"
+        />
         Set as default price list
       </label>
     </SlideOver>
@@ -811,8 +981,14 @@ function AddPriceListItemForm({
   const variants = selectedProduct?.variants ?? [];
 
   const handleSave = async () => {
-    if (!selectedProductId) { setError('Select a product'); return; }
-    if (!fixedPrice && !percentageAdj) { setError('Enter a fixed price or percentage adjustment'); return; }
+    if (!selectedProductId) {
+      setError('Select a product');
+      return;
+    }
+    if (!fixedPrice && !percentageAdj) {
+      setError('Enter a fixed price or percentage adjustment');
+      return;
+    }
     setSaving(true);
     setError('');
     try {
@@ -842,36 +1018,86 @@ function AddPriceListItemForm({
         <div className="grid grid-cols-3 gap-3 mb-3">
           <div>
             <label className="block text-xs text-gray-500 mb-1">Product *</label>
-            <select value={selectedProductId} onChange={(e) => { setSelectedProductId(e.target.value); setSelectedVariantId(''); }} className={selectCls}>
+            <select
+              value={selectedProductId}
+              onChange={(e) => {
+                setSelectedProductId(e.target.value);
+                setSelectedVariantId('');
+              }}
+              className={selectCls}
+            >
               <option value="">Select product…</option>
-              {products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+              {products.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
             </select>
           </div>
           <div>
             <label className="block text-xs text-gray-500 mb-1">Variant</label>
-            <select value={selectedVariantId} onChange={(e) => setSelectedVariantId(e.target.value)} className={selectCls} disabled={variants.length === 0}>
+            <select
+              value={selectedVariantId}
+              onChange={(e) => setSelectedVariantId(e.target.value)}
+              className={selectCls}
+              disabled={variants.length === 0}
+            >
               <option value="">All variants</option>
-              {variants.map((v) => <option key={v.id} value={v.id}>{v.sku}{v.name ? ` – ${v.name}` : ''}</option>)}
+              {variants.map((v) => (
+                <option key={v.id} value={v.id}>
+                  {v.sku}
+                  {v.name ? ` – ${v.name}` : ''}
+                </option>
+              ))}
             </select>
           </div>
           <div>
             <label className="block text-xs text-gray-500 mb-1">Min qty</label>
-            <input type="number" value={minQty} onChange={(e) => setMinQty(e.target.value)} className={inputCls} min="1" />
+            <input
+              type="number"
+              value={minQty}
+              onChange={(e) => setMinQty(e.target.value)}
+              className={inputCls}
+              min="1"
+            />
           </div>
           <div>
             <label className="block text-xs text-gray-500 mb-1">Fixed price</label>
-            <input type="number" value={fixedPrice} onChange={(e) => setFixedPrice(e.target.value)} className={inputCls} placeholder="0.00" step="0.01" />
+            <input
+              type="number"
+              value={fixedPrice}
+              onChange={(e) => setFixedPrice(e.target.value)}
+              className={inputCls}
+              placeholder="0.00"
+              step="0.01"
+            />
           </div>
           <div>
             <label className="block text-xs text-gray-500 mb-1">Percentage adj. (%)</label>
-            <input type="number" value={percentageAdj} onChange={(e) => setPercentageAdj(e.target.value)} className={inputCls} placeholder="-10 for 10% off" step="0.01" />
+            <input
+              type="number"
+              value={percentageAdj}
+              onChange={(e) => setPercentageAdj(e.target.value)}
+              className={inputCls}
+              placeholder="-10 for 10% off"
+              step="0.01"
+            />
           </div>
         </div>
         <div className="flex gap-2">
-          <button onClick={handleSave} disabled={saving} className="px-4 py-1.5 text-xs bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-60 transition-colors">
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="px-4 py-1.5 text-xs bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-60 transition-colors"
+          >
             {saving ? 'Saving…' : 'Add item'}
           </button>
-          <button onClick={onCancel} className="px-4 py-1.5 text-xs text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">Cancel</button>
+          <button
+            onClick={onCancel}
+            className="px-4 py-1.5 text-xs text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            Cancel
+          </button>
         </div>
       </td>
     </tr>
@@ -893,21 +1119,30 @@ function PriceResolver({ products, priceLists }: { products: Product[]; priceLis
   const variants = selectedProduct?.variants ?? [];
 
   const resolve = async () => {
-    if (!productId) { setError('Select a product'); return; }
+    if (!productId) {
+      setError('Select a product');
+      return;
+    }
     setLoading(true);
     setError('');
     setResult(null);
     try {
-      const data = await apiFetch<{ effective_price: number; discount_percent?: number }>('/catalog/resolve-price', {
-        method: 'POST',
-        body: JSON.stringify({
-          product_id: productId,
-          variant_id: variantId || undefined,
-          price_list_id: priceListId || undefined,
-          quantity: parseInt(quantity, 10) || 1,
-        }),
+      const data = await apiFetch<{ effective_price: number; discount_percent?: number }>(
+        '/catalog/resolve-price',
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            product_id: productId,
+            variant_id: variantId || undefined,
+            price_list_id: priceListId || undefined,
+            quantity: parseInt(quantity, 10) || 1,
+          }),
+        },
+      );
+      setResult({
+        effectivePrice: data.effective_price,
+        ...(data.discount_percent !== undefined && { discount: data.discount_percent }),
       });
-      setResult({ effectivePrice: data.effective_price, ...(data.discount_percent !== undefined && { discount: data.discount_percent }) });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to resolve price');
     } finally {
@@ -921,32 +1156,70 @@ function PriceResolver({ products, priceLists }: { products: Product[]; priceLis
       <div className="grid grid-cols-4 gap-3 mb-3">
         <div>
           <label className="block text-xs text-gray-500 mb-1">Product</label>
-          <select value={productId} onChange={(e) => { setProductId(e.target.value); setVariantId(''); }} className={selectCls}>
+          <select
+            value={productId}
+            onChange={(e) => {
+              setProductId(e.target.value);
+              setVariantId('');
+            }}
+            className={selectCls}
+          >
             <option value="">Select…</option>
-            {products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+            {products.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
           </select>
         </div>
         <div>
           <label className="block text-xs text-gray-500 mb-1">Variant</label>
-          <select value={variantId} onChange={(e) => setVariantId(e.target.value)} className={selectCls} disabled={variants.length === 0}>
+          <select
+            value={variantId}
+            onChange={(e) => setVariantId(e.target.value)}
+            className={selectCls}
+            disabled={variants.length === 0}
+          >
             <option value="">All</option>
-            {variants.map((v) => <option key={v.id} value={v.id}>{v.sku}</option>)}
+            {variants.map((v) => (
+              <option key={v.id} value={v.id}>
+                {v.sku}
+              </option>
+            ))}
           </select>
         </div>
         <div>
           <label className="block text-xs text-gray-500 mb-1">Price list</label>
-          <select value={priceListId} onChange={(e) => setPriceListId(e.target.value)} className={selectCls}>
+          <select
+            value={priceListId}
+            onChange={(e) => setPriceListId(e.target.value)}
+            className={selectCls}
+          >
             <option value="">Default</option>
-            {priceLists.map((pl) => <option key={pl.id} value={pl.id}>{pl.name}</option>)}
+            {priceLists.map((pl) => (
+              <option key={pl.id} value={pl.id}>
+                {pl.name}
+              </option>
+            ))}
           </select>
         </div>
         <div>
           <label className="block text-xs text-gray-500 mb-1">Quantity</label>
-          <input type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} className={inputCls} min="1" />
+          <input
+            type="number"
+            value={quantity}
+            onChange={(e) => setQuantity(e.target.value)}
+            className={inputCls}
+            min="1"
+          />
         </div>
       </div>
       <div className="flex items-center gap-4">
-        <button onClick={resolve} disabled={loading} className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-60 transition-colors">
+        <button
+          onClick={resolve}
+          disabled={loading}
+          className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-60 transition-colors"
+        >
           {loading ? 'Resolving…' : 'Resolve price'}
         </button>
         {error && <p className="text-xs text-red-500">{error}</p>}
@@ -985,7 +1258,9 @@ function PriceListsTab({ products }: { products: Product[] }) {
     }
   }, []);
 
-  useEffect(() => { fetchPriceLists(); }, [fetchPriceLists]);
+  useEffect(() => {
+    fetchPriceLists();
+  }, [fetchPriceLists]);
 
   const fetchItems = async (plId: string) => {
     try {
@@ -997,7 +1272,10 @@ function PriceListsTab({ products }: { products: Product[] }) {
   };
 
   const handleExpand = async (plId: string) => {
-    if (expandedId === plId) { setExpandedId(null); return; }
+    if (expandedId === plId) {
+      setExpandedId(null);
+      return;
+    }
     setExpandedId(plId);
     if (!expandedItems[plId]) await fetchItems(plId);
   };
@@ -1015,7 +1293,10 @@ function PriceListsTab({ products }: { products: Product[] }) {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <button onClick={() => setShowNew(true)} className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+        <button
+          onClick={() => setShowNew(true)}
+          className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+        >
           <Plus size={14} /> New price list
         </button>
       </div>
@@ -1030,8 +1311,12 @@ function PriceListsTab({ products }: { products: Product[] }) {
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Name</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Type</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Currency</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Adjustment</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Date range</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Adjustment
+                </th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Date range
+                </th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
                 <th className="px-4 py-3" />
               </tr>
@@ -1050,30 +1335,46 @@ function PriceListsTab({ products }: { products: Product[] }) {
                       <td className="px-4 py-3">
                         <p className="font-medium text-gray-900">{pl.name}</p>
                         {pl.is_default && (
-                          <span className="text-xs px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700">Default</span>
+                          <span className="text-xs px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700">
+                            Default
+                          </span>
                         )}
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${pl.type === 'percentage' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}`}>
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded-full font-medium ${pl.type === 'percentage' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}`}
+                        >
                           {pl.type}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-gray-600">{pl.currency}</td>
                       <td className="px-4 py-3 text-gray-600">
-                        {pl.type === 'percentage' && pl.adjustment != null ? `${pl.adjustment}%` : '—'}
+                        {pl.type === 'percentage' && pl.adjustment != null
+                          ? `${pl.adjustment}%`
+                          : '—'}
                       </td>
                       <td className="px-4 py-3 text-gray-500 text-xs">
-                        {pl.start_date ? pl.start_date.slice(0, 10) : '∞'} → {pl.end_date ? pl.end_date.slice(0, 10) : '∞'}
+                        {pl.start_date ? pl.start_date.slice(0, 10) : '∞'} →{' '}
+                        {pl.end_date ? pl.end_date.slice(0, 10) : '∞'}
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${STATUS_BADGE[pl.status ?? 'active'] ?? STATUS_BADGE.active}`}>
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${STATUS_BADGE[pl.status ?? 'active'] ?? STATUS_BADGE.active}`}
+                        >
                           {pl.status ?? 'active'}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-end gap-2">
-                          {isExpanded ? <ChevronUp size={14} className="text-gray-400" /> : <ChevronDown size={14} className="text-gray-400" />}
-                          <button onClick={() => handleDeletePriceList(pl.id)} className="text-gray-400 hover:text-red-500 transition-colors">
+                          {isExpanded ? (
+                            <ChevronUp size={14} className="text-gray-400" />
+                          ) : (
+                            <ChevronDown size={14} className="text-gray-400" />
+                          )}
+                          <button
+                            onClick={() => handleDeletePriceList(pl.id)}
+                            className="text-gray-400 hover:text-red-500 transition-colors"
+                          >
                             <Trash2 size={13} />
                           </button>
                         </div>
@@ -1083,28 +1384,55 @@ function PriceListsTab({ products }: { products: Product[] }) {
                       <>
                         <tr key={`${pl.id}-items`} className="bg-blue-50/20">
                           <td colSpan={7} className="px-6 py-3">
-                            <p className="text-xs font-semibold text-gray-500 mb-2">Items ({items.length})</p>
+                            <p className="text-xs font-semibold text-gray-500 mb-2">
+                              Items ({items.length})
+                            </p>
                             {items.length === 0 ? (
                               <p className="text-xs text-gray-400">No items in this price list.</p>
                             ) : (
                               <table className="w-full text-xs">
                                 <thead>
                                   <tr className="border-b border-blue-100">
-                                    <th className="text-left pb-1.5 text-gray-400 font-medium pr-4">Product</th>
-                                    <th className="text-left pb-1.5 text-gray-400 font-medium pr-4">Variant SKU</th>
-                                    <th className="text-left pb-1.5 text-gray-400 font-medium pr-4">Fixed price</th>
-                                    <th className="text-left pb-1.5 text-gray-400 font-medium pr-4">% adj.</th>
-                                    <th className="text-left pb-1.5 text-gray-400 font-medium">Min qty</th>
+                                    <th className="text-left pb-1.5 text-gray-400 font-medium pr-4">
+                                      Product
+                                    </th>
+                                    <th className="text-left pb-1.5 text-gray-400 font-medium pr-4">
+                                      Variant SKU
+                                    </th>
+                                    <th className="text-left pb-1.5 text-gray-400 font-medium pr-4">
+                                      Fixed price
+                                    </th>
+                                    <th className="text-left pb-1.5 text-gray-400 font-medium pr-4">
+                                      % adj.
+                                    </th>
+                                    <th className="text-left pb-1.5 text-gray-400 font-medium">
+                                      Min qty
+                                    </th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   {items.map((item) => (
-                                    <tr key={item.id} className="border-b border-blue-50 last:border-0">
-                                      <td className="py-1.5 pr-4 text-gray-700">{item.product_name ?? item.product_id}</td>
-                                      <td className="py-1.5 pr-4 font-mono text-gray-500">{item.variant_sku ?? '—'}</td>
-                                      <td className="py-1.5 pr-4 text-gray-700">{item.fixed_price != null ? fmt(item.fixed_price) : '—'}</td>
-                                      <td className="py-1.5 pr-4 text-gray-700">{item.percentage_adjustment != null ? `${item.percentage_adjustment}%` : '—'}</td>
-                                      <td className="py-1.5 text-gray-700">{item.min_quantity ?? 1}</td>
+                                    <tr
+                                      key={item.id}
+                                      className="border-b border-blue-50 last:border-0"
+                                    >
+                                      <td className="py-1.5 pr-4 text-gray-700">
+                                        {item.product_name ?? item.product_id}
+                                      </td>
+                                      <td className="py-1.5 pr-4 font-mono text-gray-500">
+                                        {item.variant_sku ?? '—'}
+                                      </td>
+                                      <td className="py-1.5 pr-4 text-gray-700">
+                                        {item.fixed_price != null ? fmt(item.fixed_price) : '—'}
+                                      </td>
+                                      <td className="py-1.5 pr-4 text-gray-700">
+                                        {item.percentage_adjustment != null
+                                          ? `${item.percentage_adjustment}%`
+                                          : '—'}
+                                      </td>
+                                      <td className="py-1.5 text-gray-700">
+                                        {item.min_quantity ?? 1}
+                                      </td>
                                     </tr>
                                   ))}
                                 </tbody>
@@ -1117,14 +1445,20 @@ function PriceListsTab({ products }: { products: Product[] }) {
                             key={`${pl.id}-add-item`}
                             priceListId={pl.id}
                             products={products}
-                            onSaved={async () => { setAddingItemTo(null); await fetchItems(pl.id); }}
+                            onSaved={async () => {
+                              setAddingItemTo(null);
+                              await fetchItems(pl.id);
+                            }}
                             onCancel={() => setAddingItemTo(null)}
                           />
                         ) : (
                           <tr key={`${pl.id}-add-btn`} className="bg-blue-50/20">
                             <td colSpan={7} className="px-6 pb-3">
                               <button
-                                onClick={(e) => { e.stopPropagation(); setAddingItemTo(pl.id); }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setAddingItemTo(pl.id);
+                                }}
                                 className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 transition-colors"
                               >
                                 <Plus size={12} /> Add item
@@ -1147,7 +1481,10 @@ function PriceListsTab({ products }: { products: Product[] }) {
       {showNew && (
         <NewPriceListForm
           onClose={() => setShowNew(false)}
-          onSaved={async () => { setShowNew(false); await fetchPriceLists(); }}
+          onSaved={async () => {
+            setShowNew(false);
+            await fetchPriceLists();
+          }}
         />
       )}
     </div>
@@ -1183,8 +1520,14 @@ function NewDiscountForm({
   const [error, setError] = useState('');
 
   const handleSave = async () => {
-    if (!name.trim()) { setError('Name is required'); return; }
-    if (!value) { setError('Value is required'); return; }
+    if (!name.trim()) {
+      setError('Name is required');
+      return;
+    }
+    if (!value) {
+      setError('Value is required');
+      return;
+    }
     setSaving(true);
     setError('');
     try {
@@ -1213,54 +1556,118 @@ function NewDiscountForm({
   };
 
   const toggleProduct = (pid: string) =>
-    setProductIds((prev) => prev.includes(pid) ? prev.filter((x) => x !== pid) : [...prev, pid]);
+    setProductIds((prev) => (prev.includes(pid) ? prev.filter((x) => x !== pid) : [...prev, pid]));
 
   return (
-    <SlideOver title="New Discount" onClose={onClose} footer={
-      <>
-        <button onClick={onClose} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors">Cancel</button>
-        <button onClick={handleSave} disabled={saving} className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-60 transition-colors">
-          {saving ? 'Saving…' : 'Create Discount'}
-        </button>
-      </>
-    }>
+    <SlideOver
+      title="New Discount"
+      onClose={onClose}
+      footer={
+        <>
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-60 transition-colors"
+          >
+            {saving ? 'Saving…' : 'Create Discount'}
+          </button>
+        </>
+      }
+    >
       {error && <p className="text-xs text-red-500">{error}</p>}
       <Field label="Name *">
-        <input autoFocus type="text" value={name} onChange={(e) => setName(e.target.value)} className={inputCls} placeholder="e.g. Summer Sale" />
+        <input
+          autoFocus
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className={inputCls}
+          placeholder="e.g. Summer Sale"
+        />
       </Field>
       <Field label="Code (optional)">
-        <input type="text" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} className={`${inputCls} font-mono`} placeholder="SUMMER20" />
+        <input
+          type="text"
+          value={code}
+          onChange={(e) => setCode(e.target.value.toUpperCase())}
+          className={`${inputCls} font-mono`}
+          placeholder="SUMMER20"
+        />
       </Field>
       <div className="grid grid-cols-2 gap-3">
         <Field label="Type">
-          <select value={type} onChange={(e) => setType(e.target.value as 'percentage' | 'fixed' | 'bogo')} className={selectCls}>
+          <select
+            value={type}
+            onChange={(e) => setType(e.target.value as 'percentage' | 'fixed' | 'bogo')}
+            className={selectCls}
+          >
             <option value="percentage">Percentage</option>
             <option value="fixed">Fixed amount</option>
             <option value="bogo">BOGO</option>
           </select>
         </Field>
         <Field label="Value">
-          <input type="number" value={value} onChange={(e) => setValue(e.target.value)} className={inputCls} placeholder={type === 'percentage' ? '10 = 10%' : '0.00'} step="0.01" />
+          <input
+            type="number"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            className={inputCls}
+            placeholder={type === 'percentage' ? '10 = 10%' : '0.00'}
+            step="0.01"
+          />
         </Field>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <Field label="Min order value">
-          <input type="number" value={minOrderValue} onChange={(e) => setMinOrderValue(e.target.value)} className={inputCls} placeholder="0.00" step="0.01" />
+          <input
+            type="number"
+            value={minOrderValue}
+            onChange={(e) => setMinOrderValue(e.target.value)}
+            className={inputCls}
+            placeholder="0.00"
+            step="0.01"
+          />
         </Field>
         <Field label="Max uses">
-          <input type="number" value={maxUses} onChange={(e) => setMaxUses(e.target.value)} className={inputCls} placeholder="Unlimited" />
+          <input
+            type="number"
+            value={maxUses}
+            onChange={(e) => setMaxUses(e.target.value)}
+            className={inputCls}
+            placeholder="Unlimited"
+          />
         </Field>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <Field label="Start date">
-          <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className={inputCls} />
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className={inputCls}
+          />
         </Field>
         <Field label="End date">
-          <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className={inputCls} />
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            className={inputCls}
+          />
         </Field>
       </div>
       <Field label="Applicable to">
-        <select value={applicableTo} onChange={(e) => setApplicableTo(e.target.value as 'all' | 'products')} className={selectCls}>
+        <select
+          value={applicableTo}
+          onChange={(e) => setApplicableTo(e.target.value as 'all' | 'products')}
+          className={selectCls}
+        >
           <option value="all">All products</option>
           <option value="products">Specific products</option>
         </select>
@@ -1270,8 +1677,16 @@ function NewDiscountForm({
           <label className="block text-xs font-medium text-gray-500 mb-2">Select products</label>
           <div className="space-y-1 max-h-40 overflow-y-auto">
             {products.map((p) => (
-              <label key={p.id} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer hover:bg-gray-50 px-2 py-1 rounded">
-                <input type="checkbox" checked={productIds.includes(p.id)} onChange={() => toggleProduct(p.id)} className="rounded" />
+              <label
+                key={p.id}
+                className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer hover:bg-gray-50 px-2 py-1 rounded"
+              >
+                <input
+                  type="checkbox"
+                  checked={productIds.includes(p.id)}
+                  onChange={() => toggleProduct(p.id)}
+                  className="rounded"
+                />
                 {p.name}
               </label>
             ))}
@@ -1287,7 +1702,11 @@ function NewDiscountForm({
 function ValidateCodeWidget() {
   const [code, setCode] = useState('');
   const [orderValue, setOrderValue] = useState('');
-  const [result, setResult] = useState<{ valid: boolean; discount_amount?: number; message?: string } | null>(null);
+  const [result, setResult] = useState<{
+    valid: boolean;
+    discount_amount?: number;
+    message?: string;
+  } | null>(null);
   const [loading, setLoading] = useState(false);
 
   const validate = async () => {
@@ -1295,13 +1714,16 @@ function ValidateCodeWidget() {
     setLoading(true);
     setResult(null);
     try {
-      const data = await apiFetch<{ valid: boolean; discount_amount?: number; message?: string }>('/catalog/discounts/validate', {
-        method: 'POST',
-        body: JSON.stringify({
-          code: code.trim().toUpperCase(),
-          order_value: orderValue ? parseFloat(orderValue) : undefined,
-        }),
-      });
+      const data = await apiFetch<{ valid: boolean; discount_amount?: number; message?: string }>(
+        '/catalog/discounts/validate',
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            code: code.trim().toUpperCase(),
+            order_value: orderValue ? parseFloat(orderValue) : undefined,
+          }),
+        },
+      );
       setResult(data);
     } catch {
       setResult({ valid: false, message: 'Validation failed. Check the code and try again.' });
@@ -1346,14 +1768,18 @@ function ValidateCodeWidget() {
       </div>
 
       {result && (
-        <div className={`mt-3 flex items-center gap-2 px-4 py-3 rounded-lg ${result.valid ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
+        <div
+          className={`mt-3 flex items-center gap-2 px-4 py-3 rounded-lg ${result.valid ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}
+        >
           {result.valid ? (
             <CheckCircle size={16} className="text-green-600 flex-shrink-0" />
           ) : (
             <XCircle size={16} className="text-red-500 flex-shrink-0" />
           )}
           <div>
-            <p className={`text-sm font-medium ${result.valid ? 'text-green-800' : 'text-red-700'}`}>
+            <p
+              className={`text-sm font-medium ${result.valid ? 'text-green-800' : 'text-red-700'}`}
+            >
               {result.valid ? 'Valid coupon' : 'Invalid coupon'}
             </p>
             {result.valid && result.discount_amount != null && (
@@ -1389,7 +1815,9 @@ function DiscountsTab({ products }: { products: Product[] }) {
     }
   }, []);
 
-  useEffect(() => { fetchDiscounts(); }, [fetchDiscounts]);
+  useEffect(() => {
+    fetchDiscounts();
+  }, [fetchDiscounts]);
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this discount?')) return;
@@ -1417,7 +1845,10 @@ function DiscountsTab({ products }: { products: Product[] }) {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <button onClick={() => setShowNew(true)} className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+        <button
+          onClick={() => setShowNew(true)}
+          className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+        >
           <Plus size={14} /> New discount
         </button>
       </div>
@@ -1435,25 +1866,36 @@ function DiscountsTab({ products }: { products: Product[] }) {
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Value</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Min order</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Uses</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Date range</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Date range
+                </th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
             <tbody>
               {discounts.map((d) => (
-                <tr key={d.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                <tr
+                  key={d.id}
+                  className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
+                >
                   <td className="px-4 py-3 font-medium text-gray-900">{d.name}</td>
                   <td className="px-4 py-3">
                     {d.code ? (
                       <div className="flex items-center gap-1.5">
-                        <code className="font-mono text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-700">{d.code}</code>
+                        <code className="font-mono text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-700">
+                          {d.code}
+                        </code>
                         <button
                           onClick={() => copyCode(d.code!)}
                           className="text-gray-400 hover:text-gray-700 transition-colors"
                           title="Copy code"
                         >
-                          {copied === d.code ? <CheckCircle size={12} className="text-green-500" /> : <Copy size={12} />}
+                          {copied === d.code ? (
+                            <CheckCircle size={12} className="text-green-500" />
+                          ) : (
+                            <Copy size={12} />
+                          )}
                         </button>
                       </div>
                     ) : (
@@ -1461,26 +1903,37 @@ function DiscountsTab({ products }: { products: Product[] }) {
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${DISCOUNT_TYPE_BADGE[d.type] ?? 'bg-gray-100 text-gray-600'}`}>
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${DISCOUNT_TYPE_BADGE[d.type] ?? 'bg-gray-100 text-gray-600'}`}
+                    >
                       {d.type}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-gray-700 font-medium">{formatDiscountValue(d)}</td>
-                  <td className="px-4 py-3 text-gray-500">{d.min_order_value ? fmt(d.min_order_value) : '—'}</td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">
-                    {d.used_count ?? 0}{d.max_uses ? `/${d.max_uses}` : ''}
+                  <td className="px-4 py-3 text-gray-500">
+                    {d.min_order_value ? fmt(d.min_order_value) : '—'}
                   </td>
                   <td className="px-4 py-3 text-gray-500 text-xs">
-                    {d.start_date ? d.start_date.slice(0, 10) : '∞'} → {d.end_date ? d.end_date.slice(0, 10) : '∞'}
+                    {d.used_count ?? 0}
+                    {d.max_uses ? `/${d.max_uses}` : ''}
+                  </td>
+                  <td className="px-4 py-3 text-gray-500 text-xs">
+                    {d.start_date ? d.start_date.slice(0, 10) : '∞'} →{' '}
+                    {d.end_date ? d.end_date.slice(0, 10) : '∞'}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${STATUS_BADGE[d.status ?? 'active'] ?? STATUS_BADGE.active}`}>
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${STATUS_BADGE[d.status ?? 'active'] ?? STATUS_BADGE.active}`}
+                    >
                       {d.status ?? 'active'}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button onClick={() => handleDelete(d.id)} className="text-gray-400 hover:text-red-500 transition-colors">
+                      <button
+                        onClick={() => handleDelete(d.id)}
+                        className="text-gray-400 hover:text-red-500 transition-colors"
+                      >
                         <Trash2 size={13} />
                       </button>
                     </div>
@@ -1498,7 +1951,10 @@ function DiscountsTab({ products }: { products: Product[] }) {
         <NewDiscountForm
           products={products}
           onClose={() => setShowNew(false)}
-          onSaved={async () => { setShowNew(false); await fetchDiscounts(); }}
+          onSaved={async () => {
+            setShowNew(false);
+            await fetchDiscounts();
+          }}
         />
       )}
     </div>

@@ -35,10 +35,7 @@ export interface KBSummary {
   [key: string]: unknown;
 }
 
-const TENANT_ID =
-  process.env.VESKA_TENANT_ID ??
-  process.env.NEXT_PUBLIC_TENANT_ID ??
-  'demo-tenant';
+const TENANT_ID = process.env.VESKA_TENANT_ID ?? process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 export default async function KBPage() {
   let articles: Article[] = [];
@@ -47,13 +44,19 @@ export default async function KBPage() {
 
   await Promise.all([
     apiFetch<{ data: Article[] } | Article[]>('/api/v1/knowledge-base/articles?limit=50', TENANT_ID)
-      .then((res) => { articles = Array.isArray(res) ? res : (res?.data ?? []); })
+      .then((res) => {
+        articles = Array.isArray(res) ? res : (res?.data ?? []);
+      })
       .catch(() => {}),
     apiFetch<{ data: KBCategory[] } | KBCategory[]>('/api/v1/knowledge-base/categories', TENANT_ID)
-      .then((res) => { categories = Array.isArray(res) ? res : (res?.data ?? []); })
+      .then((res) => {
+        categories = Array.isArray(res) ? res : (res?.data ?? []);
+      })
       .catch(() => {}),
     apiFetch<KBSummary>('/api/v1/knowledge-base/summary', TENANT_ID)
-      .then((res) => { summary = res ?? {}; })
+      .then((res) => {
+        summary = res ?? {};
+      })
       .catch(() => {}),
   ]);
 

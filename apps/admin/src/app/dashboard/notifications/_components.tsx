@@ -82,7 +82,11 @@ const FILTER_TABS: { key: FilterTab; label: string }[] = [
   { key: 'anomalies', label: 'Anomalies' },
 ];
 
-export function NotificationsClient({ initialNotifications }: { initialNotifications: Notification[] }) {
+export function NotificationsClient({
+  initialNotifications,
+}: {
+  initialNotifications: Notification[];
+}) {
   const router = useRouter();
   const [, startTransition] = useTransition();
   const [notifications, setNotifications] = useState(initialNotifications);
@@ -150,7 +154,7 @@ export function NotificationsClient({ initialNotifications }: { initialNotificat
               read: true,
             },
           };
-        })
+        }),
       );
     } catch {
       // ignore
@@ -190,7 +194,10 @@ export function NotificationsClient({ initialNotifications }: { initialNotificat
           { label: 'AI Insights', value: aiInsights, color: 'text-violet-600' },
           { label: 'Anomalies', value: anomalies, color: 'text-orange-600' },
         ].map((s) => (
-          <div key={s.label} className="bg-white border border-gray-200 rounded-xl px-4 py-3 shadow-sm text-center">
+          <div
+            key={s.label}
+            className="bg-white border border-gray-200 rounded-xl px-4 py-3 shadow-sm text-center"
+          >
             <p className={`text-xl font-bold ${s.color}`}>{s.value}</p>
             <p className="text-xs text-gray-400 mt-0.5">{s.label}</p>
           </div>
@@ -234,7 +241,9 @@ export function NotificationsClient({ initialNotifications }: { initialNotificat
               >
                 <NotifTypeIcon {...(d.type !== undefined ? { type: d.type } : {})} />
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm text-gray-900 ${!d.read ? 'font-semibold' : 'font-medium'}`}>
+                  <p
+                    className={`text-sm text-gray-900 ${!d.read ? 'font-semibold' : 'font-medium'}`}
+                  >
                     {d.title ?? '—'}
                   </p>
                   {d.message && (
@@ -242,10 +251,10 @@ export function NotificationsClient({ initialNotifications }: { initialNotificat
                   )}
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <span className="text-xs text-gray-400 whitespace-nowrap">{timeAgo(d.createdAt)}</span>
-                  {!d.read && (
-                    <span className="w-2 h-2 rounded-full bg-indigo-500 flex-shrink-0" />
-                  )}
+                  <span className="text-xs text-gray-400 whitespace-nowrap">
+                    {timeAgo(d.createdAt)}
+                  </span>
+                  {!d.read && <span className="w-2 h-2 rounded-full bg-indigo-500 flex-shrink-0" />}
                 </div>
               </button>
             );

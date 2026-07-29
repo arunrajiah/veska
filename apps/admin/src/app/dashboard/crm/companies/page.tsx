@@ -16,7 +16,7 @@ export default async function CompaniesPage() {
       '/api/v1/crm/companies?limit=50',
       TENANT_ID,
     );
-    companies = Array.isArray(res) ? res : (res as { data: CompanyRecord[] }).data ?? [];
+    companies = Array.isArray(res) ? res : ((res as { data: CompanyRecord[] }).data ?? []);
   } catch {
     companies = [];
   }

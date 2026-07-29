@@ -49,42 +49,79 @@ export default function NewLeadPage() {
         <h1 className="text-2xl font-semibold text-gray-900">New lead</h1>
       </div>
 
-      <form onSubmit={(e) => void handleSubmit(e)} className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
+      <form
+        onSubmit={(e) => void handleSubmit(e)}
+        className="bg-white border border-gray-200 rounded-xl p-6 space-y-4"
+      >
         <div>
           <label className="block text-xs font-medium text-gray-700 mb-1">Full name *</label>
-          <input name="name" required className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+          <input
+            name="name"
+            required
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+          />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Email</label>
-            <input name="email" type="email" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              name="email"
+              type="email"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Phone</label>
-            <input name="phone" type="tel" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+            <input
+              name="phone"
+              type="tel"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            />
           </div>
         </div>
         <div>
           <label className="block text-xs font-medium text-gray-700 mb-1">Company</label>
-          <input name="company" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900" />
+          <input
+            name="company"
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+          />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Source</label>
-            <select name="source" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900">
-              {SOURCES.map((s) => <option key={s} value={s} className="capitalize">{s.replace(/_/g, ' ')}</option>)}
+            <select
+              name="source"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            >
+              {SOURCES.map((s) => (
+                <option key={s} value={s} className="capitalize">
+                  {s.replace(/_/g, ' ')}
+                </option>
+              ))}
             </select>
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Status</label>
-            <select name="status" defaultValue="new" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900">
-              {STATUSES.map((s) => <option key={s} value={s} className="capitalize">{s}</option>)}
+            <select
+              name="status"
+              defaultValue="new"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            >
+              {STATUSES.map((s) => (
+                <option key={s} value={s} className="capitalize">
+                  {s}
+                </option>
+              ))}
             </select>
           </div>
         </div>
         <div>
           <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
-          <textarea name="notes" rows={3} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none" />
+          <textarea
+            name="notes"
+            rows={3}
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none"
+          />
         </div>
 
         {error && <p className="text-xs text-red-500">{error}</p>}

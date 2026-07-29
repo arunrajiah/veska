@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, TrendingUp, TrendingDown } from 'lucide-react';
 
-
 function fmt(amount: number, currency = 'USD') {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);
 }
@@ -45,19 +44,26 @@ interface BudgetDetailClientProps {
   currency: string;
 }
 
-const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const ENTITY_TYPES = ['','invoice','expense','purchase-order','payroll'];
+const MONTH_NAMES = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
+const ENTITY_TYPES = ['', 'invoice', 'expense', 'purchase-order', 'payroll'];
 
 // ---------------------------------------------------------------------------
 // Line Items Tab
 // ---------------------------------------------------------------------------
-function LineItemsTab({
-  budgetId,
-  currency,
-}: {
-  budgetId: string;
-  currency: string;
-}) {
+function LineItemsTab({ budgetId, currency }: { budgetId: string; currency: string }) {
   const [items, setItems] = useState<LineItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -82,20 +88,29 @@ function LineItemsTab({
         headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
       });
       if (res.ok) {
-        const data = await res.json() as LineItem[] | { data: LineItem[] };
-        setItems(Array.isArray(data) ? data : (data as { data: LineItem[] }).data ?? []);
+        const data = (await res.json()) as LineItem[] | { data: LineItem[] };
+        setItems(Array.isArray(data) ? data : ((data as { data: LineItem[] }).data ?? []));
       }
     } finally {
       setLoading(false);
     }
   }, [budgetId]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   const addItem = async () => {
-    if (!addForm.category.trim()) { setAddError('Category is required.'); return; }
-    if (!addForm.plannedAmount || isNaN(Number(addForm.plannedAmount))) { setAddError('Planned amount is required.'); return; }
-    setAdding(true); setAddError(null);
+    if (!addForm.category.trim()) {
+      setAddError('Category is required.');
+      return;
+    }
+    if (!addForm.plannedAmount || isNaN(Number(addForm.plannedAmount))) {
+      setAddError('Planned amount is required.');
+      return;
+    }
+    setAdding(true);
+    setAddError(null);
     try {
       const body: Record<string, unknown> = {
         category: addForm.category,
@@ -106,11 +121,14 @@ function LineItemsTab({
       };
       const res = await fetch(`/api/veska/budgets/${budgetId}/line-items`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
+        },
         body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error(await res.text());
-      const created = await res.json() as LineItem;
+      const created = (await res.json()) as LineItem;
       setItems((prev) => [...prev, created]);
       setAddForm({ category: '', description: '', plannedAmount: '', entityType: '', notes: '' });
       setShowAdd(false);
@@ -145,11 +163,14 @@ function LineItemsTab({
     try {
       const res = await fetch(`/api/veska/budgets/${budgetId}/line-items/${editingId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
+        },
         body: JSON.stringify(editForm),
       });
       if (res.ok) {
-        const updated = await res.json() as LineItem;
+        const updated = (await res.json()) as LineItem;
         setItems((prev) => prev.map((i) => (i.id === editingId ? updated : i)));
       }
     } finally {
@@ -175,7 +196,9 @@ function LineItemsTab({
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Category</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Description</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Description
+                </th>
                 <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Planned</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Notes</th>
                 <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Order</th>
@@ -196,7 +219,9 @@ function LineItemsTab({
                     <td className="px-4 py-2">
                       <input
                         value={editForm.description ?? ''}
-                        onChange={(e) => setEditForm((p) => ({ ...p, description: e.target.value }))}
+                        onChange={(e) =>
+                          setEditForm((p) => ({ ...p, description: e.target.value }))
+                        }
                         className="w-full px-2 py-1 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-400"
                       />
                     </td>
@@ -204,7 +229,9 @@ function LineItemsTab({
                       <input
                         type="number"
                         value={editForm.plannedAmount ?? ''}
-                        onChange={(e) => setEditForm((p) => ({ ...p, plannedAmount: Number(e.target.value) }))}
+                        onChange={(e) =>
+                          setEditForm((p) => ({ ...p, plannedAmount: Number(e.target.value) }))
+                        }
                         className="w-full px-2 py-1 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-400 text-right"
                       />
                     </td>
@@ -219,27 +246,51 @@ function LineItemsTab({
                       <input
                         type="number"
                         value={editForm.sortOrder ?? ''}
-                        onChange={(e) => setEditForm((p) => ({ ...p, sortOrder: Number(e.target.value) }))}
+                        onChange={(e) =>
+                          setEditForm((p) => ({ ...p, sortOrder: Number(e.target.value) }))
+                        }
                         className="w-20 px-2 py-1 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-gray-400 text-right"
                       />
                     </td>
                     <td className="px-4 py-2 text-right">
                       <div className="flex items-center gap-1 justify-end">
-                        <button onClick={() => void saveEdit()} className="text-xs text-green-700 hover:text-green-900 px-2 py-1 rounded hover:bg-green-50">Save</button>
-                        <button onClick={() => setEditingId(null)} className="text-xs text-gray-500 hover:text-gray-900 px-2 py-1 rounded hover:bg-gray-100">Cancel</button>
+                        <button
+                          onClick={() => void saveEdit()}
+                          className="text-xs text-green-700 hover:text-green-900 px-2 py-1 rounded hover:bg-green-50"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={() => setEditingId(null)}
+                          className="text-xs text-gray-500 hover:text-gray-900 px-2 py-1 rounded hover:bg-gray-100"
+                        >
+                          Cancel
+                        </button>
                       </div>
                     </td>
                   </tr>
                 ) : (
-                  <tr key={item.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                  <tr
+                    key={item.id}
+                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
+                  >
                     <td className="px-4 py-3 font-medium text-gray-900">{item.category}</td>
                     <td className="px-4 py-3 text-gray-500 text-xs">{item.description ?? '—'}</td>
-                    <td className="px-4 py-3 text-right font-medium text-gray-900">{fmt(item.plannedAmount ?? 0, currency)}</td>
+                    <td className="px-4 py-3 text-right font-medium text-gray-900">
+                      {fmt(item.plannedAmount ?? 0, currency)}
+                    </td>
                     <td className="px-4 py-3 text-gray-400 text-xs">{item.notes ?? '—'}</td>
-                    <td className="px-4 py-3 text-right text-gray-400 text-xs">{item.sortOrder ?? '—'}</td>
+                    <td className="px-4 py-3 text-right text-gray-400 text-xs">
+                      {item.sortOrder ?? '—'}
+                    </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center gap-1 justify-end">
-                        <button onClick={() => startEdit(item)} className="text-xs text-blue-500 hover:text-blue-700 px-2 py-1 rounded hover:bg-blue-50">Edit</button>
+                        <button
+                          onClick={() => startEdit(item)}
+                          className="text-xs text-blue-500 hover:text-blue-700 px-2 py-1 rounded hover:bg-blue-50"
+                        >
+                          Edit
+                        </button>
                         <button
                           onClick={() => void deleteItem(item.id)}
                           disabled={deletingId === item.id}
@@ -250,13 +301,17 @@ function LineItemsTab({
                       </div>
                     </td>
                   </tr>
-                )
+                ),
               )}
             </tbody>
             <tfoot>
               <tr className="border-t border-gray-100 bg-gray-50">
-                <td colSpan={2} className="px-4 py-3 text-xs font-semibold text-gray-600">Total planned</td>
-                <td className="px-4 py-3 text-right text-sm font-semibold text-gray-900">{fmt(totalPlanned, currency)}</td>
+                <td colSpan={2} className="px-4 py-3 text-xs font-semibold text-gray-600">
+                  Total planned
+                </td>
+                <td className="px-4 py-3 text-right text-sm font-semibold text-gray-900">
+                  {fmt(totalPlanned, currency)}
+                </td>
                 <td colSpan={3} />
               </tr>
             </tfoot>
@@ -307,7 +362,9 @@ function LineItemsTab({
                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 bg-white"
               >
                 {ENTITY_TYPES.map((t) => (
-                  <option key={t} value={t}>{t || 'None'}</option>
+                  <option key={t} value={t}>
+                    {t || 'None'}
+                  </option>
                 ))}
               </select>
             </div>
@@ -331,7 +388,10 @@ function LineItemsTab({
               {adding ? 'Adding…' : 'Add item'}
             </button>
             <button
-              onClick={() => { setShowAdd(false); setAddError(null); }}
+              onClick={() => {
+                setShowAdd(false);
+                setAddError(null);
+              }}
               disabled={adding}
               className="text-sm px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
             >
@@ -370,7 +430,7 @@ function ActualsTab({ budgetId, currency }: { budgetId: string; currency: string
     })
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((data: ActualLine[] | { data: ActualLine[] }) => {
-        setActuals(Array.isArray(data) ? data : (data as { data: ActualLine[] }).data ?? []);
+        setActuals(Array.isArray(data) ? data : ((data as { data: ActualLine[] }).data ?? []));
       })
       .catch(() => setActuals([]))
       .finally(() => setLoading(false));
@@ -382,7 +442,7 @@ function ActualsTab({ budgetId, currency }: { budgetId: string; currency: string
     })
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((data: CashFlowMonth[] | { data: CashFlowMonth[] }) => {
-        setCashflow(Array.isArray(data) ? data : (data as { data: CashFlowMonth[] }).data ?? []);
+        setCashflow(Array.isArray(data) ? data : ((data as { data: CashFlowMonth[] }).data ?? []));
       })
       .catch(() => setCashflow([]))
       .finally(() => setCfLoading(false));
@@ -393,7 +453,11 @@ function ActualsTab({ budgetId, currency }: { budgetId: string; currency: string
   const totalVariance = totalPlanned - totalActual;
 
   const cfTotals = cashflow.reduce(
-    (acc, m) => ({ inflow: acc.inflow + m.inflow, outflow: acc.outflow + m.outflow, net: acc.net + m.net }),
+    (acc, m) => ({
+      inflow: acc.inflow + m.inflow,
+      outflow: acc.outflow + m.outflow,
+      net: acc.net + m.net,
+    }),
     { inflow: 0, outflow: 0, net: 0 },
   );
 
@@ -416,7 +480,9 @@ function ActualsTab({ budgetId, currency }: { budgetId: string; currency: string
                 <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Actual</th>
                 <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Variance</th>
                 <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Var %</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 w-40">Progress</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 w-40">
+                  Progress
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -426,18 +492,31 @@ function ActualsTab({ budgetId, currency }: { budgetId: string; currency: string
                 const pct = a.plannedAmount > 0 ? (a.actualAmount / a.plannedAmount) * 100 : 0;
                 const clampedPct = Math.min(pct, 100);
                 return (
-                  <tr key={a.lineItemId ?? idx} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                  <tr
+                    key={a.lineItemId ?? idx}
+                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
+                  >
                     <td className="px-4 py-3 font-medium text-gray-900">{a.category}</td>
-                    <td className="px-4 py-3 text-right text-gray-700">{fmt(a.plannedAmount ?? 0, currency)}</td>
-                    <td className="px-4 py-3 text-right text-gray-900 font-medium">{fmt(a.actualAmount ?? 0, currency)}</td>
-                    <td className={`px-4 py-3 text-right font-medium ${overBudget ? 'text-red-600' : 'text-green-700'}`}>
+                    <td className="px-4 py-3 text-right text-gray-700">
+                      {fmt(a.plannedAmount ?? 0, currency)}
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-900 font-medium">
+                      {fmt(a.actualAmount ?? 0, currency)}
+                    </td>
+                    <td
+                      className={`px-4 py-3 text-right font-medium ${overBudget ? 'text-red-600' : 'text-green-700'}`}
+                    >
                       <span className="flex items-center gap-0.5 justify-end">
                         {overBudget ? <TrendingDown size={12} /> : <TrendingUp size={12} />}
                         {fmt(Math.abs(variance), currency)}
                       </span>
                     </td>
-                    <td className={`px-4 py-3 text-right text-xs ${overBudget ? 'text-red-500' : 'text-green-600'}`}>
-                      {a.variancePct != null ? `${a.variancePct.toFixed(1)}%` : `${((Math.abs(variance) / (a.plannedAmount || 1)) * 100).toFixed(1)}%`}
+                    <td
+                      className={`px-4 py-3 text-right text-xs ${overBudget ? 'text-red-500' : 'text-green-600'}`}
+                    >
+                      {a.variancePct != null
+                        ? `${a.variancePct.toFixed(1)}%`
+                        : `${((Math.abs(variance) / (a.plannedAmount || 1)) * 100).toFixed(1)}%`}
                     </td>
                     <td className="px-4 py-3">
                       <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden">
@@ -455,9 +534,15 @@ function ActualsTab({ budgetId, currency }: { budgetId: string; currency: string
             <tfoot>
               <tr className="border-t border-gray-200 bg-gray-50 font-semibold">
                 <td className="px-4 py-3 text-xs text-gray-700">Totals</td>
-                <td className="px-4 py-3 text-right text-gray-900 text-sm">{fmt(totalPlanned, currency)}</td>
-                <td className="px-4 py-3 text-right text-gray-900 text-sm">{fmt(totalActual, currency)}</td>
-                <td className={`px-4 py-3 text-right text-sm ${totalVariance < 0 ? 'text-red-600' : 'text-green-700'}`}>
+                <td className="px-4 py-3 text-right text-gray-900 text-sm">
+                  {fmt(totalPlanned, currency)}
+                </td>
+                <td className="px-4 py-3 text-right text-gray-900 text-sm">
+                  {fmt(totalActual, currency)}
+                </td>
+                <td
+                  className={`px-4 py-3 text-right text-sm ${totalVariance < 0 ? 'text-red-600' : 'text-green-700'}`}
+                >
                   {fmt(Math.abs(totalVariance), currency)}
                 </td>
                 <td colSpan={2} />
@@ -470,7 +555,9 @@ function ActualsTab({ budgetId, currency }: { budgetId: string; currency: string
       {/* Cash Flow section */}
       <div>
         <div className="px-5 py-3 border-t border-b border-gray-100 bg-gray-50">
-          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Cash Flow — 12 Month</h3>
+          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            Cash Flow — 12 Month
+          </h3>
         </div>
         {cfLoading ? (
           <div className="px-5 py-8 text-sm text-gray-400 text-center">Loading cash flow…</div>
@@ -486,7 +573,9 @@ function ActualsTab({ budgetId, currency }: { budgetId: string; currency: string
                 <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Inflow</th>
                 <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Outflow</th>
                 <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Net</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Running Balance</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">
+                  Running Balance
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -498,13 +587,22 @@ function ActualsTab({ budgetId, currency }: { budgetId: string; currency: string
                     key={idx}
                     className={`border-b border-gray-50 last:border-0 hover:bg-gray-50/50 ${isProjected ? 'text-gray-400 italic' : ''}`}
                   >
-                    <td className="px-4 py-3">{monthName}{isProjected && <span className="ml-1 text-xs text-gray-300 not-italic">(proj)</span>}</td>
+                    <td className="px-4 py-3">
+                      {monthName}
+                      {isProjected && (
+                        <span className="ml-1 text-xs text-gray-300 not-italic">(proj)</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-right">{fmt(m.inflow ?? 0, currency)}</td>
                     <td className="px-4 py-3 text-right">{fmt(m.outflow ?? 0, currency)}</td>
-                    <td className={`px-4 py-3 text-right font-medium ${m.net < 0 ? 'text-red-600' : 'text-green-700'}`}>
+                    <td
+                      className={`px-4 py-3 text-right font-medium ${m.net < 0 ? 'text-red-600' : 'text-green-700'}`}
+                    >
                       {fmt(m.net ?? 0, currency)}
                     </td>
-                    <td className="px-4 py-3 text-right text-gray-700">{fmt(m.runningBalance ?? 0, currency)}</td>
+                    <td className="px-4 py-3 text-right text-gray-700">
+                      {fmt(m.runningBalance ?? 0, currency)}
+                    </td>
                   </tr>
                 );
               })}
@@ -512,9 +610,15 @@ function ActualsTab({ budgetId, currency }: { budgetId: string; currency: string
             <tfoot>
               <tr className="border-t border-gray-200 bg-gray-50 font-semibold">
                 <td className="px-4 py-3 text-xs text-gray-700">Total</td>
-                <td className="px-4 py-3 text-right text-sm text-gray-900">{fmt(cfTotals.inflow, currency)}</td>
-                <td className="px-4 py-3 text-right text-sm text-gray-900">{fmt(cfTotals.outflow, currency)}</td>
-                <td className={`px-4 py-3 text-right text-sm font-semibold ${cfTotals.net < 0 ? 'text-red-600' : 'text-green-700'}`}>
+                <td className="px-4 py-3 text-right text-sm text-gray-900">
+                  {fmt(cfTotals.inflow, currency)}
+                </td>
+                <td className="px-4 py-3 text-right text-sm text-gray-900">
+                  {fmt(cfTotals.outflow, currency)}
+                </td>
+                <td
+                  className={`px-4 py-3 text-right text-sm font-semibold ${cfTotals.net < 0 ? 'text-red-600' : 'text-green-700'}`}
+                >
                   {fmt(cfTotals.net, currency)}
                 </td>
                 <td />

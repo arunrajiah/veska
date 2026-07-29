@@ -40,7 +40,11 @@ function usd(v?: number) {
 
 function fmtDate(d?: string) {
   if (!d) return '—';
-  return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(d).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 }
 
 function StatusBadge({ status }: { status?: string }) {
@@ -52,13 +56,19 @@ function StatusBadge({ status }: { status?: string }) {
   };
   const label = status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Draft';
   return (
-    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${map[status ?? 'draft'] ?? 'bg-gray-100 text-gray-600'}`}>
+    <span
+      className={`text-xs px-2 py-0.5 rounded-full font-medium ${map[status ?? 'draft'] ?? 'bg-gray-100 text-gray-600'}`}
+    >
       {label}
     </span>
   );
 }
 
-export default async function PayrollRunDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function PayrollRunDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const tenantId = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
   const { id } = await params;
 
@@ -85,7 +95,10 @@ export default async function PayrollRunDetailPage({ params }: { params: Promise
     return (
       <div className="px-8 py-8 max-w-3xl">
         <p className="text-gray-500 text-sm">Payroll run not found.</p>
-        <Link href="/dashboard/payroll/runs" className="mt-4 inline-block text-sm text-gray-600 hover:text-gray-900">
+        <Link
+          href="/dashboard/payroll/runs"
+          className="mt-4 inline-block text-sm text-gray-600 hover:text-gray-900"
+        >
           ← Back to runs
         </Link>
       </div>
@@ -93,16 +106,23 @@ export default async function PayrollRunDetailPage({ params }: { params: Promise
   }
 
   const d = run.data;
-  const csvPayslips = payslips.map((p) =>
-    Object.fromEntries(
-      Object.entries({
-        employeeName: p.data?.employeeName,
-        grossPay: p.data?.grossPay,
-        tax: p.data?.tax,
-        netPay: p.data?.netPay,
-        status: p.data?.status,
-      }).filter(([, v]) => v !== undefined)
-    ) as { employeeName?: string; grossPay?: number; tax?: number; netPay?: number; status?: string }
+  const csvPayslips = payslips.map(
+    (p) =>
+      Object.fromEntries(
+        Object.entries({
+          employeeName: p.data?.employeeName,
+          grossPay: p.data?.grossPay,
+          tax: p.data?.tax,
+          netPay: p.data?.netPay,
+          status: p.data?.status,
+        }).filter(([, v]) => v !== undefined),
+      ) as {
+        employeeName?: string;
+        grossPay?: number;
+        tax?: number;
+        netPay?: number;
+        status?: string;
+      },
   );
 
   return (
@@ -133,19 +153,27 @@ export default async function PayrollRunDetailPage({ params }: { params: Promise
       {/* Summary cards */}
       <div className="grid grid-cols-4 gap-4 mb-8">
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-5 py-4">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Employees</p>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+            Employees
+          </p>
           <p className="text-2xl font-semibold text-gray-900">{d?.employeeCount ?? '—'}</p>
         </div>
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-5 py-4">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Total Gross</p>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+            Total Gross
+          </p>
           <p className="text-2xl font-semibold text-gray-900">{usd(d?.totalGross)}</p>
         </div>
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-5 py-4">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Total Net</p>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+            Total Net
+          </p>
           <p className="text-2xl font-semibold text-gray-900">{usd(d?.totalNet)}</p>
         </div>
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-5 py-4">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Total Tax</p>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+            Total Tax
+          </p>
           <p className="text-2xl font-semibold text-gray-900">{usd(d?.totalTax)}</p>
         </div>
       </div>
@@ -154,7 +182,9 @@ export default async function PayrollRunDetailPage({ params }: { params: Promise
       {(d?.processedAt || d?.notes) && (
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden mb-6">
           <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
-            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Details</h2>
+            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest">
+              Details
+            </h2>
           </div>
           <dl className="divide-y divide-gray-50">
             {d?.processedAt && (
@@ -188,7 +218,9 @@ export default async function PayrollRunDetailPage({ params }: { params: Promise
               <tr className="border-b border-gray-100 bg-gray-50">
                 <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Employee</th>
                 <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Gross</th>
-                <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Deductions</th>
+                <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">
+                  Deductions
+                </th>
                 <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Tax</th>
                 <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Net</th>
                 <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Status</th>
@@ -197,19 +229,33 @@ export default async function PayrollRunDetailPage({ params }: { params: Promise
             <tbody>
               {payslips.map((slip) => {
                 const sd = slip.data;
-                const totalDeductions = (sd?.deductions ?? []).reduce((s, d) => s + (d.amount ?? 0), 0);
+                const totalDeductions = (sd?.deductions ?? []).reduce(
+                  (s, d) => s + (d.amount ?? 0),
+                  0,
+                );
                 return (
-                  <tr key={slip.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
-                    <td className="px-5 py-3 font-medium text-gray-900">{sd?.employeeName ?? '—'}</td>
+                  <tr
+                    key={slip.id}
+                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
+                  >
+                    <td className="px-5 py-3 font-medium text-gray-900">
+                      {sd?.employeeName ?? '—'}
+                    </td>
                     <td className="px-5 py-3 text-gray-600">{usd(sd?.grossPay)}</td>
-                    <td className="px-5 py-3 text-gray-600">{totalDeductions > 0 ? usd(totalDeductions) : '—'}</td>
+                    <td className="px-5 py-3 text-gray-600">
+                      {totalDeductions > 0 ? usd(totalDeductions) : '—'}
+                    </td>
                     <td className="px-5 py-3 text-gray-600">{usd(sd?.tax)}</td>
                     <td className="px-5 py-3 text-gray-600">{usd(sd?.netPay)}</td>
                     <td className="px-5 py-3">
                       {sd?.status === 'paid' ? (
-                        <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-green-50 text-green-700">Paid</span>
+                        <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-green-50 text-green-700">
+                          Paid
+                        </span>
                       ) : (
-                        <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-gray-100 text-gray-600">Draft</span>
+                        <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-gray-100 text-gray-600">
+                          Draft
+                        </span>
                       )}
                     </td>
                   </tr>

@@ -11,7 +11,6 @@ const EVENT_OPTIONS = [
   { value: 'audit.*', label: 'audit.*' },
 ];
 
-
 interface WebhookFormProps {
   tenantId: string;
 }
@@ -73,9 +72,7 @@ export default function WebhookForm({ tenantId }: WebhookFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Endpoint URL
-        </label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Endpoint URL</label>
         <input
           type="url"
           placeholder="https://example.com/webhook"

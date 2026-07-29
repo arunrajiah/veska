@@ -114,10 +114,30 @@ const NAV_SECTIONS: NavSection[] = [
   {
     label: 'Finance',
     items: [
-      { href: '/dashboard/finance/invoices', icon: Receipt, label: 'Invoices', requiredPermission: 'invoices:read' },
-      { href: '/dashboard/finance/recurring', icon: RefreshCw, label: 'Recurring', requiredPermission: 'invoices:read' },
-      { href: '/dashboard/expenses', icon: Receipt, label: 'Expenses', requiredPermission: 'invoices:read' },
-      { href: '/dashboard/budgets', icon: PieChart, label: 'Budgets', requiredPermission: 'invoices:read' },
+      {
+        href: '/dashboard/finance/invoices',
+        icon: Receipt,
+        label: 'Invoices',
+        requiredPermission: 'invoices:read',
+      },
+      {
+        href: '/dashboard/finance/recurring',
+        icon: RefreshCw,
+        label: 'Recurring',
+        requiredPermission: 'invoices:read',
+      },
+      {
+        href: '/dashboard/expenses',
+        icon: Receipt,
+        label: 'Expenses',
+        requiredPermission: 'invoices:read',
+      },
+      {
+        href: '/dashboard/budgets',
+        icon: PieChart,
+        label: 'Budgets',
+        requiredPermission: 'invoices:read',
+      },
     ],
   },
   {
@@ -130,17 +150,47 @@ const NAV_SECTIONS: NavSection[] = [
   {
     label: 'HR',
     items: [
-      { href: '/dashboard/hr/employees', icon: Users, label: 'Employees', requiredPermission: 'hr:read' },
-      { href: '/dashboard/hr/departments', icon: Building2, label: 'Departments', requiredPermission: 'hr:read' },
-      { href: '/dashboard/hr/leave', icon: CalendarDays, label: 'Leave', requiredPermission: 'hr:read' },
+      {
+        href: '/dashboard/hr/employees',
+        icon: Users,
+        label: 'Employees',
+        requiredPermission: 'hr:read',
+      },
+      {
+        href: '/dashboard/hr/departments',
+        icon: Building2,
+        label: 'Departments',
+        requiredPermission: 'hr:read',
+      },
+      {
+        href: '/dashboard/hr/leave',
+        icon: CalendarDays,
+        label: 'Leave',
+        requiredPermission: 'hr:read',
+      },
     ],
   },
   {
     label: 'Payroll',
     items: [
-      { href: '/dashboard/payroll', icon: Receipt, label: 'Payroll Runs', requiredPermission: 'payroll:read' },
-      { href: '/dashboard/payroll/runs', icon: DollarSign, label: 'Pay Runs', requiredPermission: 'payroll:read' },
-      { href: '/dashboard/payroll/payslips', icon: FileText, label: 'Payslips', requiredPermission: 'payroll:read' },
+      {
+        href: '/dashboard/payroll',
+        icon: Receipt,
+        label: 'Payroll Runs',
+        requiredPermission: 'payroll:read',
+      },
+      {
+        href: '/dashboard/payroll/runs',
+        icon: DollarSign,
+        label: 'Pay Runs',
+        requiredPermission: 'payroll:read',
+      },
+      {
+        href: '/dashboard/payroll/payslips',
+        icon: FileText,
+        label: 'Payslips',
+        requiredPermission: 'payroll:read',
+      },
     ],
   },
   {
@@ -177,11 +227,36 @@ const NAV_SECTIONS: NavSection[] = [
   {
     label: 'Reports',
     items: [
-      { href: '/dashboard/reports', icon: BarChart2, label: 'Report Builder', requiredPermission: 'reports:read' },
-      { href: '/dashboard/reports/finance', icon: TrendingUp, label: 'Finance', requiredPermission: 'reports:read' },
-      { href: '/dashboard/reports/inventory', icon: BarChart3, label: 'Inventory', requiredPermission: 'reports:read' },
-      { href: '/dashboard/reports/hr', icon: PieChart, label: 'HR', requiredPermission: 'reports:read' },
-      { href: '/dashboard/reports/projects', icon: Activity, label: 'Projects', requiredPermission: 'reports:read' },
+      {
+        href: '/dashboard/reports',
+        icon: BarChart2,
+        label: 'Report Builder',
+        requiredPermission: 'reports:read',
+      },
+      {
+        href: '/dashboard/reports/finance',
+        icon: TrendingUp,
+        label: 'Finance',
+        requiredPermission: 'reports:read',
+      },
+      {
+        href: '/dashboard/reports/inventory',
+        icon: BarChart3,
+        label: 'Inventory',
+        requiredPermission: 'reports:read',
+      },
+      {
+        href: '/dashboard/reports/hr',
+        icon: PieChart,
+        label: 'HR',
+        requiredPermission: 'reports:read',
+      },
+      {
+        href: '/dashboard/reports/projects',
+        icon: Activity,
+        label: 'Projects',
+        requiredPermission: 'reports:read',
+      },
     ],
   },
   {
@@ -194,7 +269,12 @@ const NAV_SECTIONS: NavSection[] = [
   {
     label: 'Documents & Assets',
     items: [
-      { href: '/dashboard/contracts', icon: FileSignature, label: 'Contracts', requiredPermission: 'invoices:read' },
+      {
+        href: '/dashboard/contracts',
+        icon: FileSignature,
+        label: 'Contracts',
+        requiredPermission: 'invoices:read',
+      },
       { href: '/dashboard/templates', icon: FileText, label: 'Templates' },
       { href: '/dashboard/assets', icon: Building2, label: 'Assets' },
     ],
@@ -210,18 +290,48 @@ const NAV_SECTIONS: NavSection[] = [
   {
     label: 'Developer',
     items: [
-      { href: '/dashboard/developer/api-keys', icon: Key, label: 'API Keys', requiredPermission: 'admin:read' },
-      { href: '/dashboard/developer/webhooks', icon: Webhook, label: 'Webhooks', requiredPermission: 'admin:read' },
-      { href: '/dashboard/developer/jobs', icon: Cpu, label: 'Job Queues', requiredPermission: 'admin:read' },
-      { href: '/dashboard/settings/audit-log', icon: ClipboardList, label: 'Audit Log', requiredPermission: 'admin:read' },
-      { href: '/dashboard/import-export', icon: ArrowUpDown, label: 'Import / Export', requiredPermission: 'admin:read' },
+      {
+        href: '/dashboard/developer/api-keys',
+        icon: Key,
+        label: 'API Keys',
+        requiredPermission: 'admin:read',
+      },
+      {
+        href: '/dashboard/developer/webhooks',
+        icon: Webhook,
+        label: 'Webhooks',
+        requiredPermission: 'admin:read',
+      },
+      {
+        href: '/dashboard/developer/jobs',
+        icon: Cpu,
+        label: 'Job Queues',
+        requiredPermission: 'admin:read',
+      },
+      {
+        href: '/dashboard/settings/audit-log',
+        icon: ClipboardList,
+        label: 'Audit Log',
+        requiredPermission: 'admin:read',
+      },
+      {
+        href: '/dashboard/import-export',
+        icon: ArrowUpDown,
+        label: 'Import / Export',
+        requiredPermission: 'admin:read',
+      },
     ],
   },
   {
     label: 'Team',
     items: [
       { href: '/dashboard/team', icon: UserCog, label: 'Users', requiredPermission: 'admin:read' },
-      { href: '/dashboard/team/roles', icon: Shield, label: 'Roles', requiredPermission: 'admin:read' },
+      {
+        href: '/dashboard/team/roles',
+        icon: Shield,
+        label: 'Roles',
+        requiredPermission: 'admin:read',
+      },
     ],
   },
   {
@@ -269,7 +379,7 @@ function usePendingApprovalCount(): number {
       try {
         const res = await fetch('/api/veska/approval-requests/pending-count');
         if (!res.ok || cancelled) return;
-        const json = await res.json() as { count: number };
+        const json = (await res.json()) as { count: number };
         setCount(json.count ?? 0);
       } catch {
         // silently ignore — badge simply won't show
@@ -277,8 +387,13 @@ function usePendingApprovalCount(): number {
     }
 
     void fetchCount();
-    const interval = setInterval(() => { void fetchCount(); }, 30_000);
-    return () => { cancelled = true; clearInterval(interval); };
+    const interval = setInterval(() => {
+      void fetchCount();
+    }, 30_000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, []);
 
   return count;
@@ -307,7 +422,11 @@ export function SidebarNav({ onAIClick }: SidebarNavProps) {
   }, [userPermissions, isAdmin]);
 
   return (
-    <nav role="navigation" aria-label="Main navigation" className="flex-1 overflow-y-auto py-3 px-2">
+    <nav
+      role="navigation"
+      aria-label="Main navigation"
+      className="flex-1 overflow-y-auto py-3 px-2"
+    >
       {/* AI Assistant — pinned at top, opens floating panel */}
       <div className="mb-4 space-y-1">
         <button
@@ -353,15 +472,23 @@ export function SidebarNav({ onAIClick }: SidebarNavProps) {
               aria-level={2}
               className="px-2 mb-1 text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider"
             >
-              {section.label === 'Finance' ? t('finance')
-                : section.label === 'HR' ? t('hr')
-                : section.label === 'Payroll' ? t('payroll')
-                : section.label === 'CRM' ? t('crm')
-                : section.label === 'Support' ? t('support')
-                : section.label === 'Inventory' ? t('inventory')
-                : section.label === 'Projects' ? t('projects')
-                : section.label === 'Developer' ? t('developer')
-                : section.label}
+              {section.label === 'Finance'
+                ? t('finance')
+                : section.label === 'HR'
+                  ? t('hr')
+                  : section.label === 'Payroll'
+                    ? t('payroll')
+                    : section.label === 'CRM'
+                      ? t('crm')
+                      : section.label === 'Support'
+                        ? t('support')
+                        : section.label === 'Inventory'
+                          ? t('inventory')
+                          : section.label === 'Projects'
+                            ? t('projects')
+                            : section.label === 'Developer'
+                              ? t('developer')
+                              : section.label}
             </p>
           )}
           {section.items.map((item) => (

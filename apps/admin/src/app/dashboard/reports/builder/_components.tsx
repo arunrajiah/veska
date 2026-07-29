@@ -53,52 +53,69 @@ interface SavedReport {
 // ─────────────────────────────────────────────────────────────
 
 const ENTITY_TYPES: EntityType[] = [
-  'Invoice', 'Expense', 'Employee', 'Contact', 'Ticket', 'Project', 'Deal',
+  'Invoice',
+  'Expense',
+  'Employee',
+  'Contact',
+  'Ticket',
+  'Project',
+  'Deal',
 ];
 
 const ENTITY_FIELDS: Record<EntityType, string[]> = {
-  Invoice:  ['number', 'customerName', 'amount', 'status', 'dueDate', 'issuedAt', 'currency'],
-  Expense:  ['title', 'amount', 'category', 'status', 'date', 'submittedBy'],
+  Invoice: ['number', 'customerName', 'amount', 'status', 'dueDate', 'issuedAt', 'currency'],
+  Expense: ['title', 'amount', 'category', 'status', 'date', 'submittedBy'],
   Employee: ['name', 'department', 'role', 'salary', 'startDate'],
-  Contact:  ['name', 'email', 'company', 'status'],
-  Ticket:   ['title', 'status', 'priority', 'assignee', 'createdAt'],
-  Project:  ['name', 'status', 'budget', 'startDate', 'endDate', 'manager'],
-  Deal:     ['title', 'value', 'stage', 'contact', 'closedAt', 'probability'],
+  Contact: ['name', 'email', 'company', 'status'],
+  Ticket: ['title', 'status', 'priority', 'assignee', 'createdAt'],
+  Project: ['name', 'status', 'budget', 'startDate', 'endDate', 'manager'],
+  Deal: ['title', 'value', 'stage', 'contact', 'closedAt', 'probability'],
 };
 
 const ENTITY_GROUP_FIELDS: Record<EntityType, string[]> = {
-  Invoice:  ['status', 'currency', 'customerName', 'issuedAt'],
-  Expense:  ['category', 'status', 'submittedBy'],
+  Invoice: ['status', 'currency', 'customerName', 'issuedAt'],
+  Expense: ['category', 'status', 'submittedBy'],
   Employee: ['department', 'role', 'status'],
-  Contact:  ['company', 'status'],
-  Ticket:   ['status', 'priority', 'assignee'],
-  Project:  ['status', 'manager'],
-  Deal:     ['stage', 'contact'],
+  Contact: ['company', 'status'],
+  Ticket: ['status', 'priority', 'assignee'],
+  Project: ['status', 'manager'],
+  Deal: ['stage', 'contact'],
 };
 
 const OPERATORS: Array<{ value: Operator; label: string }> = [
-  { value: 'eq',       label: 'equals' },
-  { value: 'neq',      label: 'not equals' },
-  { value: 'gt',       label: 'greater than' },
-  { value: 'lt',       label: 'less than' },
-  { value: 'gte',      label: '>=' },
-  { value: 'lte',      label: '<=' },
+  { value: 'eq', label: 'equals' },
+  { value: 'neq', label: 'not equals' },
+  { value: 'gt', label: 'greater than' },
+  { value: 'lt', label: 'less than' },
+  { value: 'gte', label: '>=' },
+  { value: 'lte', label: '<=' },
   { value: 'contains', label: 'contains' },
-  { value: 'in',       label: 'in (comma-sep)' },
+  { value: 'in', label: 'in (comma-sep)' },
 ];
 
 const AGGREGATIONS: Aggregation[] = ['count', 'sum', 'avg', 'min', 'max'];
 const CHART_COLORS = ['#6366f1', '#22d3ee', '#f59e0b', '#10b981', '#f43f5e', '#a78bfa'];
 
 function tenantHeaders(): HeadersInit {
-  return { 'Content-Type': 'application/json', 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' };
+  return {
+    'Content-Type': 'application/json',
+    'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
+  };
 }
 
 // ─────────────────────────────────────────────────────────────
 // Simple SVG Charts
 // ─────────────────────────────────────────────────────────────
 
-function BarChart({ labels, values, color = '#6366f1' }: { labels: string[]; values: number[]; color?: string }) {
+function BarChart({
+  labels,
+  values,
+  color = '#6366f1',
+}: {
+  labels: string[];
+  values: number[];
+  color?: string;
+}) {
   if (!labels.length) return null;
   const max = Math.max(...values, 1);
   const barHeight = 24;
@@ -108,16 +125,35 @@ function BarChart({ labels, values, color = '#6366f1' }: { labels: string[]; val
   const height = labels.length * (barHeight + gap);
 
   return (
-    <svg width="100%" viewBox={`0 0 ${labelWidth + chartWidth + 60} ${height + 10}`} className="overflow-visible">
+    <svg
+      width="100%"
+      viewBox={`0 0 ${labelWidth + chartWidth + 60} ${height + 10}`}
+      className="overflow-visible"
+    >
       {labels.map((label, i) => {
         const y = i * (barHeight + gap);
         const barW = (values[i]! / max) * chartWidth;
         return (
           <g key={i} transform={`translate(0, ${y})`}>
-            <text x={labelWidth - 6} y={barHeight / 2 + 4} textAnchor="end" fontSize="11" fill="#6b7280" className="truncate">
+            <text
+              x={labelWidth - 6}
+              y={barHeight / 2 + 4}
+              textAnchor="end"
+              fontSize="11"
+              fill="#6b7280"
+              className="truncate"
+            >
               {label.length > 14 ? label.slice(0, 14) + '…' : label}
             </text>
-            <rect x={labelWidth} y={0} width={Math.max(barW, 2)} height={barHeight} rx={3} fill={color} opacity={0.85} />
+            <rect
+              x={labelWidth}
+              y={0}
+              width={Math.max(barW, 2)}
+              height={barHeight}
+              rx={3}
+              fill={color}
+              opacity={0.85}
+            />
             <text x={labelWidth + barW + 6} y={barHeight / 2 + 4} fontSize="11" fill="#374151">
               {typeof values[i] === 'number' ? Number(values[i]).toLocaleString() : values[i]}
             </text>
@@ -152,10 +188,18 @@ function LineChart({ labels, values }: { labels: string[]; values: number[] }) {
       {/* Grid lines */}
       {[0, 0.25, 0.5, 0.75, 1].map((t) => {
         const y = padY + t * (h - padY * 2);
-        return <line key={t} x1={padX} y1={y} x2={w - padX} y2={y} stroke="#e5e7eb" strokeWidth={1} />;
+        return (
+          <line key={t} x1={padX} y1={y} x2={w - padX} y2={y} stroke="#e5e7eb" strokeWidth={1} />
+        );
       })}
       {/* Line */}
-      <polyline points={points} fill="none" stroke="#6366f1" strokeWidth={2} strokeLinejoin="round" />
+      <polyline
+        points={points}
+        fill="none"
+        stroke="#6366f1"
+        strokeWidth={2}
+        strokeLinejoin="round"
+      />
       {/* Dots */}
       {values.map((v, i) => (
         <circle key={i} cx={px(i)} cy={py(v)} r={3} fill="#6366f1" />
@@ -189,7 +233,18 @@ function PieChart({ labels, values }: { labels: string[]; values: number[] }) {
     const midAngle = startAngle + angle / 2;
     const lx = cx + (r + 20) * Math.cos(midAngle);
     const ly = cy + (r + 20) * Math.sin(midAngle);
-    const slice = { x1, y1, x2, y2, largeArc, lx, ly, color: CHART_COLORS[i % CHART_COLORS.length]!, pct: Math.round((v / total) * 100), label: labels[i]! };
+    const slice = {
+      x1,
+      y1,
+      x2,
+      y2,
+      largeArc,
+      lx,
+      ly,
+      color: CHART_COLORS[i % CHART_COLORS.length]!,
+      pct: Math.round((v / total) * 100),
+      label: labels[i]!,
+    };
     startAngle = endAngle;
     return slice;
   });
@@ -209,7 +264,10 @@ function PieChart({ labels, values }: { labels: string[]; values: number[] }) {
       <div className="space-y-1.5">
         {slices.map((s, i) => (
           <div key={i} className="flex items-center gap-2 text-xs">
-            <span className="w-3 h-3 rounded-sm flex-shrink-0" style={{ backgroundColor: s.color }} />
+            <span
+              className="w-3 h-3 rounded-sm flex-shrink-0"
+              style={{ backgroundColor: s.color }}
+            />
             <span className="text-gray-600 truncate max-w-[120px]">{s.label}</span>
             <span className="text-gray-400 ml-auto">{s.pct}%</span>
           </div>
@@ -320,7 +378,10 @@ function PreviewPanel({
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100">
                   {columns.map((col) => (
-                    <th key={col} className="text-left px-3 py-2.5 font-medium text-gray-500 whitespace-nowrap">
+                    <th
+                      key={col}
+                      className="text-left px-3 py-2.5 font-medium text-gray-500 whitespace-nowrap"
+                    >
                       {col}
                     </th>
                   ))}
@@ -333,7 +394,9 @@ function PreviewPanel({
                       <td key={j} className="px-3 py-2 text-gray-700 font-mono whitespace-nowrap">
                         {cell === null || cell === undefined ? (
                           <span className="text-gray-300">—</span>
-                        ) : String(cell)}
+                        ) : (
+                          String(cell)
+                        )}
                       </td>
                     ))}
                   </tr>
@@ -452,12 +515,18 @@ function SaveModal({
 // Main Report Builder Client
 // ─────────────────────────────────────────────────────────────
 
-export function ReportBuilderClient({ initialSavedReports }: { initialSavedReports: SavedReport[] }) {
+export function ReportBuilderClient({
+  initialSavedReports,
+}: {
+  initialSavedReports: SavedReport[];
+}) {
   const router = useRouter();
 
   // Definition state
   const [entityType, setEntityType] = useState<EntityType>('Invoice');
-  const [selectedFields, setSelectedFields] = useState<Set<string>>(new Set(ENTITY_FIELDS['Invoice'].slice(0, 4)));
+  const [selectedFields, setSelectedFields] = useState<Set<string>>(
+    new Set(ENTITY_FIELDS['Invoice'].slice(0, 4)),
+  );
   const [filters, setFilters] = useState<FilterRow[]>([]);
   const [groupBy, setGroupBy] = useState('');
   const [aggregation, setAggregation] = useState<Aggregation>('count');
@@ -546,7 +615,17 @@ export function ReportBuilderClient({ initialSavedReports }: { initialSavedRepor
     } finally {
       setLoading(false);
     }
-  }, [entityType, selectedFields, filters, groupBy, aggregation, aggregationField, orderBy, orderDir, limit]);
+  }, [
+    entityType,
+    selectedFields,
+    filters,
+    groupBy,
+    aggregation,
+    aggregationField,
+    orderBy,
+    orderDir,
+    limit,
+  ]);
 
   // ── Save ─────────────────────────────────────────────────
   async function handleSave(name: string, description: string) {
@@ -667,19 +746,22 @@ export function ReportBuilderClient({ initialSavedReports }: { initialSavedRepor
       {runError && (
         <div className="mx-6 mt-3 flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-2.5">
           <span className="flex-1">{runError}</span>
-          <button onClick={() => setRunError('')}><X size={14} /></button>
+          <button onClick={() => setRunError('')}>
+            <X size={14} />
+          </button>
         </div>
       )}
 
       {/* ── 3-column layout ── */}
       <div className="flex flex-1 min-h-0 overflow-hidden">
-
         {/* ── Col 1: Data Source ── */}
         <div className="w-52 shrink-0 border-r border-gray-200 flex flex-col overflow-y-auto bg-gray-50/50">
           {/* Saved reports sidebar */}
           {savedReports.length > 0 && (
             <div className="border-b border-gray-200 p-3">
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Saved</p>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                Saved
+              </p>
               <div className="space-y-1">
                 {savedReports.slice(0, 8).map((sr) => (
                   <button
@@ -697,10 +779,15 @@ export function ReportBuilderClient({ initialSavedReports }: { initialSavedRepor
           <div className="p-3 space-y-4 flex-1">
             {/* Entity types */}
             <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Data Source</p>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                Data Source
+              </p>
               <div className="space-y-1">
                 {ENTITY_TYPES.map((et) => (
-                  <label key={et} className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
+                  <label
+                    key={et}
+                    className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
+                  >
                     <input
                       type="radio"
                       name="entityType"
@@ -716,7 +803,9 @@ export function ReportBuilderClient({ initialSavedReports }: { initialSavedRepor
 
             {/* Group by */}
             <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Group by</p>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                Group by
+              </p>
               <select
                 value={groupBy}
                 onChange={(e) => setGroupBy(e.target.value)}
@@ -724,7 +813,9 @@ export function ReportBuilderClient({ initialSavedReports }: { initialSavedRepor
               >
                 <option value="">None</option>
                 {groupFields.map((f) => (
-                  <option key={f} value={f}>{f}</option>
+                  <option key={f} value={f}>
+                    {f}
+                  </option>
                 ))}
               </select>
               {groupBy && (
@@ -735,7 +826,9 @@ export function ReportBuilderClient({ initialSavedReports }: { initialSavedRepor
                     className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   >
                     {AGGREGATIONS.map((a) => (
-                      <option key={a} value={a}>{a}</option>
+                      <option key={a} value={a}>
+                        {a}
+                      </option>
                     ))}
                   </select>
                   {aggregation !== 'count' && (
@@ -746,7 +839,9 @@ export function ReportBuilderClient({ initialSavedReports }: { initialSavedRepor
                     >
                       <option value="">Pick field…</option>
                       {availableFields.map((f) => (
-                        <option key={f} value={f}>{f}</option>
+                        <option key={f} value={f}>
+                          {f}
+                        </option>
                       ))}
                     </select>
                   )}
@@ -756,10 +851,15 @@ export function ReportBuilderClient({ initialSavedReports }: { initialSavedRepor
 
             {/* Chart type */}
             <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Chart type</p>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                Chart type
+              </p>
               <div className="space-y-1">
                 {(['table', 'bar', 'line', 'pie'] as ChartType[]).map((ct) => (
-                  <label key={ct} className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
+                  <label
+                    key={ct}
+                    className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
+                  >
                     <input
                       type="radio"
                       name="chartType"
@@ -768,7 +868,13 @@ export function ReportBuilderClient({ initialSavedReports }: { initialSavedRepor
                       className="accent-indigo-600"
                     />
                     <span className="text-sm text-gray-700 capitalize">
-                      {ct === 'table' ? 'Table' : ct === 'bar' ? 'Bar chart' : ct === 'line' ? 'Line chart' : 'Pie chart'}
+                      {ct === 'table'
+                        ? 'Table'
+                        : ct === 'bar'
+                          ? 'Bar chart'
+                          : ct === 'line'
+                            ? 'Line chart'
+                            : 'Pie chart'}
                     </span>
                   </label>
                 ))}
@@ -782,10 +888,15 @@ export function ReportBuilderClient({ initialSavedReports }: { initialSavedRepor
           <div className="p-4 space-y-5">
             {/* Fields */}
             <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Fields</p>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                Fields
+              </p>
               <div className="space-y-1">
                 {availableFields.map((f) => (
-                  <label key={f} className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-gray-50 cursor-pointer">
+                  <label
+                    key={f}
+                    className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-gray-50 cursor-pointer"
+                  >
                     <input
                       type="checkbox"
                       checked={selectedFields.has(f)}
@@ -801,7 +912,9 @@ export function ReportBuilderClient({ initialSavedReports }: { initialSavedRepor
             {/* Filters */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Filters</p>
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  Filters
+                </p>
                 <button
                   onClick={addFilter}
                   className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 font-medium"
@@ -810,11 +923,16 @@ export function ReportBuilderClient({ initialSavedReports }: { initialSavedRepor
                 </button>
               </div>
               {filters.length === 0 ? (
-                <p className="text-xs text-gray-400 italic px-2">No filters — all records included</p>
+                <p className="text-xs text-gray-400 italic px-2">
+                  No filters — all records included
+                </p>
               ) : (
                 <div className="space-y-2">
                   {filters.map((f, i) => (
-                    <div key={i} className="flex flex-col gap-1.5 p-2.5 bg-gray-50 rounded-lg border border-gray-100">
+                    <div
+                      key={i}
+                      className="flex flex-col gap-1.5 p-2.5 bg-gray-50 rounded-lg border border-gray-100"
+                    >
                       <div className="flex items-center gap-1.5">
                         <select
                           value={f.field}
@@ -822,7 +940,9 @@ export function ReportBuilderClient({ initialSavedReports }: { initialSavedRepor
                           className="flex-1 border border-gray-200 rounded px-2 py-1 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-indigo-400"
                         >
                           {availableFields.map((af) => (
-                            <option key={af} value={af}>{af}</option>
+                            <option key={af} value={af}>
+                              {af}
+                            </option>
                           ))}
                         </select>
                         <button
@@ -838,7 +958,9 @@ export function ReportBuilderClient({ initialSavedReports }: { initialSavedRepor
                         className="w-full border border-gray-200 rounded px-2 py-1 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-indigo-400"
                       >
                         {OPERATORS.map((op) => (
-                          <option key={op.value} value={op.value}>{op.label}</option>
+                          <option key={op.value} value={op.value}>
+                            {op.label}
+                          </option>
                         ))}
                       </select>
                       <input
@@ -856,7 +978,9 @@ export function ReportBuilderClient({ initialSavedReports }: { initialSavedRepor
 
             {/* Sort */}
             <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Sort by</p>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                Sort by
+              </p>
               <div className="flex gap-2">
                 <select
                   value={orderBy}
@@ -865,7 +989,9 @@ export function ReportBuilderClient({ initialSavedReports }: { initialSavedRepor
                 >
                   <option value="">Default</option>
                   {availableFields.map((f) => (
-                    <option key={f} value={f}>{f}</option>
+                    <option key={f} value={f}>
+                      {f}
+                    </option>
                   ))}
                 </select>
                 <button
@@ -880,10 +1006,14 @@ export function ReportBuilderClient({ initialSavedReports }: { initialSavedRepor
 
             {/* Limit */}
             <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Limit</p>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                Limit
+              </p>
               <select
                 value={limit === 'all' ? 'all' : String(limit)}
-                onChange={(e) => setLimit(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+                onChange={(e) =>
+                  setLimit(e.target.value === 'all' ? 'all' : Number(e.target.value))
+                }
                 className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 <option value="10">10</option>

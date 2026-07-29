@@ -58,11 +58,7 @@ function buildDeductions(d: PayrollData): Array<{ name: string; amount: number }
 }
 
 // ── Page ──────────────────────────────────────────────────────
-export default async function PayslipPrintPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function PayslipPrintPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const tenantId = process.env.VESKA_TENANT_ID ?? 'demo-tenant';
 

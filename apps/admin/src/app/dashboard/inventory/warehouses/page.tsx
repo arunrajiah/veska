@@ -9,7 +9,7 @@ export default async function WarehousesPage() {
       '/api/v1/inventory/warehouses?limit=20',
       process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
     );
-    warehouses = Array.isArray(res) ? res : (res as { data: WarehouseRecord[] }).data ?? [];
+    warehouses = Array.isArray(res) ? res : ((res as { data: WarehouseRecord[] }).data ?? []);
   } catch {
     warehouses = [];
   }

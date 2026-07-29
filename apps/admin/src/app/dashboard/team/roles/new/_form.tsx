@@ -134,16 +134,19 @@ export default function NewRoleForm() {
     setError('');
     setLoading(true);
     try {
-      const res = await fetch((process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/roles', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tenantId: 'demo',
-          name,
-          description: description || undefined,
-          permissions: Array.from(selectedPerms),
-        }),
-      });
+      const res = await fetch(
+        (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/roles',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tenantId: 'demo',
+            name,
+            description: description || undefined,
+            permissions: Array.from(selectedPerms),
+          }),
+        },
+      );
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.message ?? 'Failed to create role');
@@ -198,9 +201,7 @@ export default function NewRoleForm() {
       <div className="bg-white rounded-xl border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-semibold text-gray-900">Permissions</h3>
-          <span className="text-xs text-gray-500">
-            {selectedPerms.size} selected
-          </span>
+          <span className="text-xs text-gray-500">{selectedPerms.size} selected</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {PERMISSION_GROUPS.map((group) => {

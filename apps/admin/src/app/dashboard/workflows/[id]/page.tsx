@@ -62,11 +62,7 @@ const ACTION_LABELS: Record<string, string> = {
   wait: 'Wait',
 };
 
-export default async function WorkflowDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function WorkflowDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const tenantId = process.env.VESKA_TENANT_ID ?? '';
   const { id } = await params;
 
@@ -92,8 +88,7 @@ export default async function WorkflowDetailPage({
     );
   }
 
-  const triggerType =
-    typeof workflow.trigger?.type === 'string' ? workflow.trigger.type : 'manual';
+  const triggerType = typeof workflow.trigger?.type === 'string' ? workflow.trigger.type : 'manual';
   const recentRuns: WorkflowRun[] = Array.isArray(workflow.recentRuns) ? workflow.recentRuns : [];
 
   return (
@@ -121,9 +116,7 @@ export default async function WorkflowDetailPage({
             </span>
             <span
               className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                workflow.enabled
-                  ? 'bg-green-100 text-green-700'
-                  : 'bg-gray-100 text-gray-500'
+                workflow.enabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
               }`}
             >
               {workflow.enabled ? 'Enabled' : 'Disabled'}
@@ -240,7 +233,9 @@ export default async function WorkflowDetailPage({
                   <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Run ID</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Started</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Completed</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                    Completed
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -267,9 +262,7 @@ export default async function WorkflowDetailPage({
                         : '—'}
                     </td>
                     <td className="px-4 py-3 text-gray-400 text-xs">
-                      {run.completedAt
-                        ? run.completedAt.replace('T', ' ').slice(0, 19)
-                        : '—'}
+                      {run.completedAt ? run.completedAt.replace('T', ' ').slice(0, 19) : '—'}
                     </td>
                   </tr>
                 ))}

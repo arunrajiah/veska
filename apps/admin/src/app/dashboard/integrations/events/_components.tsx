@@ -75,7 +75,9 @@ function EventStatusBadge({ status }: { status: EventStatus }) {
   };
   const { cls, Icon } = map[status] ?? map.pending;
   return (
-    <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border ${cls} capitalize`}>
+    <span
+      className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border ${cls} capitalize`}
+    >
       <Icon size={10} />
       {status}
     </span>
@@ -90,25 +92,36 @@ function EventRow({ event }: { event: IntegrationEvent }) {
 
   function fmt(iso?: string | null) {
     if (!iso) return '—';
-    try { return new Date(iso).toLocaleString(); } catch { return iso; }
+    try {
+      return new Date(iso).toLocaleString();
+    } catch {
+      return iso;
+    }
   }
 
   return (
     <>
-      <tr
-        className="hover:bg-gray-50/60 cursor-pointer"
-        onClick={() => setExpanded((v) => !v)}
-      >
+      <tr className="hover:bg-gray-50/60 cursor-pointer" onClick={() => setExpanded((v) => !v)}>
         <td className="py-3 pl-5 pr-4">
           <div className="flex items-center gap-1.5">
-            {expanded ? <ChevronDown size={13} className="text-gray-400" /> : <ChevronRight size={13} className="text-gray-400" />}
+            {expanded ? (
+              <ChevronDown size={13} className="text-gray-400" />
+            ) : (
+              <ChevronRight size={13} className="text-gray-400" />
+            )}
             <span className="text-xs font-mono text-gray-700">{event.eventType}</span>
           </div>
         </td>
-        <td className="py-3 pr-4 text-xs text-gray-600">{event.integrationName ?? event.integrationId}</td>
-        <td className="py-3 pr-4"><EventStatusBadge status={event.status} /></td>
+        <td className="py-3 pr-4 text-xs text-gray-600">
+          {event.integrationName ?? event.integrationId}
+        </td>
+        <td className="py-3 pr-4">
+          <EventStatusBadge status={event.status} />
+        </td>
         <td className="py-3 pr-4 text-xs text-gray-500">{event.statusCode ?? '—'}</td>
-        <td className="py-3 pr-5 text-xs text-gray-500 whitespace-nowrap">{fmt(event.deliveredAt ?? event.createdAt)}</td>
+        <td className="py-3 pr-5 text-xs text-gray-500 whitespace-nowrap">
+          {fmt(event.deliveredAt ?? event.createdAt)}
+        </td>
       </tr>
       {expanded && event.payload && (
         <tr className="bg-gray-50">
@@ -149,7 +162,9 @@ export function IntegrationEventsClient() {
     }
   }, []);
 
-  useEffect(() => { void fetchEvents(); }, [fetchEvents]);
+  useEffect(() => {
+    void fetchEvents();
+  }, [fetchEvents]);
 
   async function handleClear() {
     setClearing(true);
@@ -158,7 +173,10 @@ export function IntegrationEventsClient() {
         method: 'DELETE',
         headers: apiHeaders(),
       });
-      if (!res.ok) { showToast('Failed to clear events', 'error'); return; }
+      if (!res.ok) {
+        showToast('Failed to clear events', 'error');
+        return;
+      }
       showToast('Old events cleared');
       void fetchEvents();
     } catch {
@@ -170,7 +188,7 @@ export function IntegrationEventsClient() {
 
   // Unique integrations for filter
   const integrationOptions = Array.from(
-    new Map(events.map((e) => [e.integrationId, e.integrationName ?? e.integrationId])).entries()
+    new Map(events.map((e) => [e.integrationId, e.integrationName ?? e.integrationId])).entries(),
   );
 
   const filtered = events.filter((e) => {
@@ -188,7 +206,9 @@ export function IntegrationEventsClient() {
           <Plug size={22} className="text-indigo-600" />
           <div>
             <h1 className="text-2xl font-semibold text-gray-900">Integration Events</h1>
-            <p className="text-xs text-gray-500 mt-0.5">Delivery log for all integration webhook events</p>
+            <p className="text-xs text-gray-500 mt-0.5">
+              Delivery log for all integration webhook events
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -204,9 +224,11 @@ export function IntegrationEventsClient() {
             disabled={clearing}
             className="inline-flex items-center gap-2 text-sm border border-red-200 text-red-600 px-3 py-2 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-60"
           >
-            {clearing
-              ? <span className="w-4 h-4 border-2 border-red-300 border-t-red-600 rounded-full animate-spin" />
-              : <Trash2 size={13} />}
+            {clearing ? (
+              <span className="w-4 h-4 border-2 border-red-300 border-t-red-600 rounded-full animate-spin" />
+            ) : (
+              <Trash2 size={13} />
+            )}
             Clear old events
           </button>
         </div>
@@ -234,7 +256,9 @@ export function IntegrationEventsClient() {
           >
             <option value="all">All integrations</option>
             {integrationOptions.map(([id, name]) => (
-              <option key={id} value={id}>{name}</option>
+              <option key={id} value={id}>
+                {name}
+              </option>
             ))}
           </select>
         </div>
@@ -252,11 +276,21 @@ export function IntegrationEventsClient() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/50">
-                  <th className="text-left text-xs font-medium text-gray-400 pl-5 py-3 pr-4">Event type</th>
-                  <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4 pt-3">Integration</th>
-                  <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4 pt-3">Status</th>
-                  <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4 pt-3">Code</th>
-                  <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-5 pt-3">Delivered at</th>
+                  <th className="text-left text-xs font-medium text-gray-400 pl-5 py-3 pr-4">
+                    Event type
+                  </th>
+                  <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4 pt-3">
+                    Integration
+                  </th>
+                  <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4 pt-3">
+                    Status
+                  </th>
+                  <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4 pt-3">
+                    Code
+                  </th>
+                  <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-5 pt-3">
+                    Delivered at
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">

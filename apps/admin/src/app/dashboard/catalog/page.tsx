@@ -33,24 +33,16 @@ interface DiscountCode {
   value?: number | string;
 }
 
-function LimitDisplay({
-  used,
-  limit,
-}: {
-  used: number;
-  limit: number | 'unlimited';
-}) {
+function LimitDisplay({ used, limit }: { used: number; limit: number | 'unlimited' }) {
   if (limit === 'unlimited') {
     return (
       <p className="text-sm text-gray-500">
-        {used.toLocaleString()} used{' '}
-        <span className="text-gray-400">/ unlimited</span>
+        {used.toLocaleString()} used <span className="text-gray-400">/ unlimited</span>
       </p>
     );
   }
   const pct = Math.min((used / limit) * 100, 100);
-  const barColor =
-    pct >= 90 ? 'bg-red-500' : pct >= 70 ? 'bg-amber-500' : 'bg-indigo-500';
+  const barColor = pct >= 90 ? 'bg-red-500' : pct >= 70 ? 'bg-amber-500' : 'bg-indigo-500';
 
   return (
     <div>
@@ -61,10 +53,7 @@ function LimitDisplay({
         <span className="text-xs text-gray-400">{Math.round(pct)}%</span>
       </div>
       <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-        <div
-          className={`h-full rounded-full ${barColor}`}
-          style={{ width: `${pct}%` }}
-        />
+        <div className={`h-full rounded-full ${barColor}`} style={{ width: `${pct}%` }} />
       </div>
     </div>
   );
@@ -80,7 +69,7 @@ export default async function CatalogPage() {
       '/api/v1/catalog/products?limit=500',
       TENANT_ID,
     );
-    variants = Array.isArray(res) ? res : (res as { data: ProductVariant[] }).data ?? [];
+    variants = Array.isArray(res) ? res : ((res as { data: ProductVariant[] }).data ?? []);
   } catch {
     variants = [];
   }
@@ -90,7 +79,7 @@ export default async function CatalogPage() {
       '/api/v1/catalog/price-lists?limit=50',
       TENANT_ID,
     );
-    priceLists = Array.isArray(res) ? res : (res as { data: PriceList[] }).data ?? [];
+    priceLists = Array.isArray(res) ? res : ((res as { data: PriceList[] }).data ?? []);
   } catch {
     priceLists = [];
   }
@@ -100,15 +89,13 @@ export default async function CatalogPage() {
       '/api/v1/catalog/discounts?limit=50',
       TENANT_ID,
     );
-    discounts = Array.isArray(res) ? res : (res as { data: DiscountCode[] }).data ?? [];
+    discounts = Array.isArray(res) ? res : ((res as { data: DiscountCode[] }).data ?? []);
   } catch {
     discounts = [];
   }
 
   // Compute unique product count from the variants list
-  const uniqueProductIds = new Set(
-    variants.map((v) => v.data?.productId ?? v.productId ?? v.id),
-  );
+  const uniqueProductIds = new Set(variants.map((v) => v.data?.productId ?? v.productId ?? v.id));
 
   return (
     <div className="px-8 py-8 max-w-5xl">
@@ -147,10 +134,7 @@ export default async function CatalogPage() {
             </p>
           )}
 
-          <LimitDisplay
-            used={variants.length}
-            limit={PLAN_LIMITS.productVariants}
-          />
+          <LimitDisplay used={variants.length} limit={PLAN_LIMITS.productVariants} />
 
           <div className="mt-4 pt-4 border-t border-gray-100">
             <Link
@@ -173,16 +157,12 @@ export default async function CatalogPage() {
               <h2 className="text-sm font-semibold text-gray-900">Price Lists</h2>
               <p className="text-xs text-gray-400">
                 Plan limit:{' '}
-                <span className="font-medium text-gray-600">
-                  {PLAN_LIMITS.priceLists}
-                </span>
+                <span className="font-medium text-gray-600">{PLAN_LIMITS.priceLists}</span>
               </p>
             </div>
           </div>
 
-          <p className="text-sm text-gray-600 mb-3">
-            {priceLists.length} active price lists
-          </p>
+          <p className="text-sm text-gray-600 mb-3">{priceLists.length} active price lists</p>
 
           {priceLists.length > 0 ? (
             <div className="space-y-1.5 mb-3">
@@ -207,10 +187,7 @@ export default async function CatalogPage() {
             <p className="text-sm text-gray-400 mb-3">No price lists yet.</p>
           )}
 
-          <LimitDisplay
-            used={priceLists.length}
-            limit={PLAN_LIMITS.priceLists}
-          />
+          <LimitDisplay used={priceLists.length} limit={PLAN_LIMITS.priceLists} />
 
           <div className="mt-4 pt-4 border-t border-gray-100">
             <Link
@@ -234,22 +211,15 @@ export default async function CatalogPage() {
             <h2 className="text-sm font-semibold text-gray-900">Discount Codes</h2>
             <p className="text-xs text-gray-400">
               Plan limit:{' '}
-              <span className="font-medium text-gray-600">
-                {PLAN_LIMITS.discountCodes}
-              </span>
+              <span className="font-medium text-gray-600">{PLAN_LIMITS.discountCodes}</span>
             </p>
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-5">
           <div>
-            <p className="text-sm text-gray-600 mb-3">
-              {discounts.length} active discount codes
-            </p>
-            <LimitDisplay
-              used={discounts.length}
-              limit={PLAN_LIMITS.discountCodes}
-            />
+            <p className="text-sm text-gray-600 mb-3">{discounts.length} active discount codes</p>
+            <LimitDisplay used={discounts.length} limit={PLAN_LIMITS.discountCodes} />
           </div>
 
           <div>

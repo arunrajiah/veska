@@ -9,7 +9,7 @@ export default async function MovementsPage() {
       '/api/v1/inventory/movements?limit=50',
       process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
     );
-    movements = Array.isArray(res) ? res : (res as { data: MovementRecord[] }).data ?? [];
+    movements = Array.isArray(res) ? res : ((res as { data: MovementRecord[] }).data ?? []);
   } catch {
     movements = [];
   }

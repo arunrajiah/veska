@@ -56,7 +56,13 @@ const STATUS_COLORS: Record<string, string> = {
 
 function OrderStatusBadge({ status }: { status?: string | undefined }) {
   const s = status ?? 'pending';
-  return <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${STATUS_COLORS[s] ?? 'bg-gray-100 text-gray-600'}`}>{s}</span>;
+  return (
+    <span
+      className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${STATUS_COLORS[s] ?? 'bg-gray-100 text-gray-600'}`}
+    >
+      {s}
+    </span>
+  );
 }
 
 interface OrderItem {
@@ -80,7 +86,7 @@ function NewOrderSlideOver({ onClose, onSaved }: { onClose: () => void; onSaved:
   }
 
   function updateItem(idx: number, field: keyof OrderItem, value: string | number) {
-    setItems((prev) => prev.map((item, i) => i === idx ? { ...item, [field]: value } : item));
+    setItems((prev) => prev.map((item, i) => (i === idx ? { ...item, [field]: value } : item)));
   }
 
   function calcItemTotal(item: OrderItem) {
@@ -129,7 +135,8 @@ function NewOrderSlideOver({ onClose, onSaved }: { onClose: () => void; onSaved:
     }
   }
 
-  const inputClass = 'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900';
+  const inputClass =
+    'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900';
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
@@ -137,7 +144,9 @@ function NewOrderSlideOver({ onClose, onSaved }: { onClose: () => void; onSaved:
       <div className="relative bg-white w-full max-w-xl h-full overflow-y-auto shadow-xl flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-base font-semibold text-gray-900">New Order</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <X size={18} />
+          </button>
         </div>
         <form onSubmit={(e) => void handleSubmit(e)} className="flex-1 px-6 py-5 space-y-4">
           <div>
@@ -146,7 +155,11 @@ function NewOrderSlideOver({ onClose, onSaved }: { onClose: () => void; onSaved:
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Shipping Address</label>
-            <textarea name="shippingAddress" rows={2} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none" />
+            <textarea
+              name="shippingAddress"
+              rows={2}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900 resize-none"
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Delivery Date</label>
@@ -157,8 +170,11 @@ function NewOrderSlideOver({ onClose, onSaved }: { onClose: () => void; onSaved:
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-xs font-medium text-gray-700">Order Items</label>
-              <button type="button" onClick={addItem}
-                className="text-xs text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+              <button
+                type="button"
+                onClick={addItem}
+                className="text-xs text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+              >
                 <Plus size={12} /> Add Item
               </button>
             </div>
@@ -175,7 +191,8 @@ function NewOrderSlideOver({ onClose, onSaved }: { onClose: () => void; onSaved:
                   </div>
                   <div className="col-span-2">
                     <input
-                      type="number" min="1"
+                      type="number"
+                      min="1"
                       placeholder="Qty"
                       value={item.quantity ?? 1}
                       onChange={(e) => updateItem(idx, 'quantity', parseInt(e.target.value) || 1)}
@@ -184,10 +201,14 @@ function NewOrderSlideOver({ onClose, onSaved }: { onClose: () => void; onSaved:
                   </div>
                   <div className="col-span-3">
                     <input
-                      type="number" min="0" step="0.01"
+                      type="number"
+                      min="0"
+                      step="0.01"
                       placeholder="Unit price"
                       value={item.unitPrice ?? 0}
-                      onChange={(e) => updateItem(idx, 'unitPrice', parseFloat(e.target.value) || 0)}
+                      onChange={(e) =>
+                        updateItem(idx, 'unitPrice', parseFloat(e.target.value) || 0)
+                      }
                       className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-xs outline-none focus:ring-2 focus:ring-gray-900"
                     />
                   </div>
@@ -195,8 +216,12 @@ function NewOrderSlideOver({ onClose, onSaved }: { onClose: () => void; onSaved:
                     {formatCurrency(calcItemTotal(item))}
                   </div>
                   <div className="col-span-1">
-                    <button type="button" onClick={() => removeItem(idx)} disabled={items.length === 1}
-                      className="text-gray-300 hover:text-red-500 disabled:opacity-20">
+                    <button
+                      type="button"
+                      onClick={() => removeItem(idx)}
+                      disabled={items.length === 1}
+                      className="text-gray-300 hover:text-red-500 disabled:opacity-20"
+                    >
                       <Trash2 size={13} />
                     </button>
                   </div>
@@ -212,10 +237,18 @@ function NewOrderSlideOver({ onClose, onSaved }: { onClose: () => void; onSaved:
 
           {error && <p className="text-xs text-red-500">{error}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="submit" disabled={saving} className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors">
+            <button
+              type="submit"
+              disabled={saving}
+              className="bg-gray-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors"
+            >
               {saving ? 'Creating…' : 'Create Order'}
             </button>
-            <button type="button" onClick={onClose} className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+            <button
+              type="button"
+              onClick={onClose}
+              className="border border-gray-200 text-gray-600 text-sm px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+            >
               Cancel
             </button>
           </div>
@@ -270,7 +303,14 @@ export function OrdersClient({ orders: initial }: { orders: OrderRecord[] }) {
           { label: 'Total Orders', value: totalOrders },
           { label: 'Pending', value: pending },
           { label: 'Shipped', value: shipped },
-          { label: 'Revenue This Month', value: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(thisMonthRevenue) },
+          {
+            label: 'Revenue This Month',
+            value: new Intl.NumberFormat('en-US', {
+              style: 'currency',
+              currency: 'USD',
+              maximumFractionDigits: 0,
+            }).format(thisMonthRevenue),
+          },
         ].map((s) => (
           <div key={s.label} className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
             <p className="text-xs text-gray-500 mb-1">{s.label}</p>
@@ -282,8 +322,10 @@ export function OrdersClient({ orders: initial }: { orders: OrderRecord[] }) {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-semibold text-gray-900">Sales Orders</h1>
-        <button onClick={() => setShowAdd(true)}
-          className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+        <button
+          onClick={() => setShowAdd(true)}
+          className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+        >
           <Plus size={15} /> New Order
         </button>
       </div>
@@ -291,10 +333,15 @@ export function OrdersClient({ orders: initial }: { orders: OrderRecord[] }) {
       {/* Filter Tabs */}
       <div className="flex gap-1 border-b border-gray-200 mb-4">
         {TABS.map((t) => (
-          <button key={t.key} onClick={() => setFilter(t.key)}
+          <button
+            key={t.key}
+            onClick={() => setFilter(t.key)}
             className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
-              filter === t.key ? 'border-gray-900 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}>
+              filter === t.key
+                ? 'border-gray-900 text-gray-900'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
             {t.label}
           </button>
         ))}
@@ -315,8 +362,12 @@ export function OrdersClient({ orders: initial }: { orders: OrderRecord[] }) {
                 <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Items</th>
                 <th className="text-right px-4 py-3 text-xs font-medium text-gray-500">Total</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Status</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Order Date</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Delivery Date</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Order Date
+                </th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">
+                  Delivery Date
+                </th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -326,22 +377,39 @@ export function OrdersClient({ orders: initial }: { orders: OrderRecord[] }) {
                 const orderNum = d.orderNumber ?? order.id.slice(0, 8).toUpperCase();
                 const itemCount = d.items?.length ?? 0;
                 return (
-                  <tr key={order.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                  <tr
+                    key={order.id}
+                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50"
+                  >
                     <td className="px-4 py-3">
-                      <Link href={`/dashboard/sales/orders/${order.id}`}
-                        className="font-mono text-xs text-gray-600 hover:text-gray-900 hover:underline">
+                      <Link
+                        href={`/dashboard/sales/orders/${order.id}`}
+                        className="font-mono text-xs text-gray-600 hover:text-gray-900 hover:underline"
+                      >
                         {orderNum}
                       </Link>
                     </td>
                     <td className="px-4 py-3 text-gray-700">{d.customerName || '—'}</td>
                     <td className="px-4 py-3 text-right text-gray-500">{itemCount}</td>
-                    <td className="px-4 py-3 text-right font-medium text-gray-900">{formatCurrency(d.total ?? 0)}</td>
-                    <td className="px-4 py-3"><OrderStatusBadge status={d.status} /></td>
-                    <td className="px-4 py-3 text-xs text-gray-400">{d.orderDate ? d.orderDate.slice(0, 10) : '—'}</td>
-                    <td className="px-4 py-3 text-xs text-gray-400">{d.deliveryDate ? d.deliveryDate.slice(0, 10) : '—'}</td>
+                    <td className="px-4 py-3 text-right font-medium text-gray-900">
+                      {formatCurrency(d.total ?? 0)}
+                    </td>
+                    <td className="px-4 py-3">
+                      <OrderStatusBadge status={d.status} />
+                    </td>
+                    <td className="px-4 py-3 text-xs text-gray-400">
+                      {d.orderDate ? d.orderDate.slice(0, 10) : '—'}
+                    </td>
+                    <td className="px-4 py-3 text-xs text-gray-400">
+                      {d.deliveryDate ? d.deliveryDate.slice(0, 10) : '—'}
+                    </td>
                     <td className="px-4 py-3 text-right">
-                      <Link href={`/dashboard/sales/orders/${order.id}`}
-                        className="text-xs text-gray-500 hover:text-gray-900">View →</Link>
+                      <Link
+                        href={`/dashboard/sales/orders/${order.id}`}
+                        className="text-xs text-gray-500 hover:text-gray-900"
+                      >
+                        View →
+                      </Link>
                     </td>
                   </tr>
                 );

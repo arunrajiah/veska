@@ -2,7 +2,16 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Search, FileText, Building2, Users, Receipt, Package, Folder, ShoppingCart } from 'lucide-react';
+import {
+  Search,
+  FileText,
+  Building2,
+  Users,
+  Receipt,
+  Package,
+  Folder,
+  ShoppingCart,
+} from 'lucide-react';
 
 interface SearchResult {
   id: string;
@@ -87,9 +96,7 @@ export function SearchPageClient({ results, query, initialTypes }: SearchPageCli
   const allTypes = Array.from(new Set(results.map((r) => r.type)));
 
   const filtered =
-    activeTypes.length === 0
-      ? results
-      : results.filter((r) => activeTypes.includes(r.type));
+    activeTypes.length === 0 ? results : results.filter((r) => activeTypes.includes(r.type));
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -267,7 +274,10 @@ export function GlobalSearchBar() {
 
   return (
     <form onSubmit={handleSubmit} className="relative">
-      <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+      <Search
+        size={14}
+        className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+      />
       <input
         type="text"
         value={value}

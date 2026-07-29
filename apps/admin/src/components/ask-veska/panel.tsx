@@ -71,7 +71,6 @@ function getEntityHref(tool: string, answerContent: string): string | null {
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
-
 const SUGGESTED_PROMPTS = [
   "Summarise this month's expenses",
   'Show pending leave requests',
@@ -96,9 +95,18 @@ function getAuthHeaders(): Record<string, string> {
 function TypingDots() {
   return (
     <div className="flex items-center gap-1 px-1 py-1">
-      <span className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '0ms' }} />
-      <span className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '150ms' }} />
-      <span className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+      <span
+        className="w-2 h-2 rounded-full bg-gray-400 animate-bounce"
+        style={{ animationDelay: '0ms' }}
+      />
+      <span
+        className="w-2 h-2 rounded-full bg-gray-400 animate-bounce"
+        style={{ animationDelay: '150ms' }}
+      />
+      <span
+        className="w-2 h-2 rounded-full bg-gray-400 animate-bounce"
+        style={{ animationDelay: '300ms' }}
+      />
     </div>
   );
 }
@@ -141,7 +149,7 @@ function AskVeskaPanelContent({ onClose }: { onClose: () => void }) {
         body: JSON.stringify({ title: 'Ask Veska' }),
       });
       if (!res.ok) return null;
-      const raw = await res.json() as ConversationCreateResponse;
+      const raw = (await res.json()) as ConversationCreateResponse;
       return raw.conversation?.id ?? raw.id ?? null;
     } catch {
       return null;
@@ -187,7 +195,7 @@ function AskVeskaPanelContent({ onClose }: { onClose: () => void }) {
 
         if (!res.ok) throw new Error(`Chat API error ${res.status}`);
 
-        const raw = await res.json() as ChatResponse;
+        const raw = (await res.json()) as ChatResponse;
 
         const aiContent =
           raw.message?.content ??
@@ -257,7 +265,12 @@ function AskVeskaPanelContent({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* Messages or empty state */}
-      <div className="flex-1 overflow-y-auto" role="log" aria-live="polite" aria-label="Conversation">
+      <div
+        className="flex-1 overflow-y-auto"
+        role="log"
+        aria-live="polite"
+        aria-label="Conversation"
+      >
         {!hasMessages ? (
           /* Empty state */
           <div className="flex flex-col items-center justify-center h-full px-6 py-12 text-center">
@@ -312,28 +325,28 @@ function AskVeskaPanelContent({ onClose }: { onClose: () => void }) {
                     msg.toolsUsed.length > 0 && (
                       <div className="flex flex-col gap-1.5 px-1 w-full">
                         {/* Action cards for write tools */}
-                        {msg.toolsUsed.filter((t) => ACTION_TOOLS.has(t)).map((tool) => {
-                          const href = getEntityHref(tool, msg.content);
-                          return (
-                            <div
-                              key={`action-${tool}`}
-                              className="flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-200 rounded-xl text-xs text-green-800"
-                            >
-                              <CheckCircle2 size={13} className="text-green-600 flex-shrink-0" />
-                              <span className="flex-1">
-                                {TOOL_LABELS[tool] ?? tool}
-                              </span>
-                              {href && (
-                                <a
-                                  href={href}
-                                  className="text-green-700 underline font-medium hover:text-green-900 flex-shrink-0"
-                                >
-                                  View
-                                </a>
-                              )}
-                            </div>
-                          );
-                        })}
+                        {msg.toolsUsed
+                          .filter((t) => ACTION_TOOLS.has(t))
+                          .map((tool) => {
+                            const href = getEntityHref(tool, msg.content);
+                            return (
+                              <div
+                                key={`action-${tool}`}
+                                className="flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-200 rounded-xl text-xs text-green-800"
+                              >
+                                <CheckCircle2 size={13} className="text-green-600 flex-shrink-0" />
+                                <span className="flex-1">{TOOL_LABELS[tool] ?? tool}</span>
+                                {href && (
+                                  <a
+                                    href={href}
+                                    className="text-green-700 underline font-medium hover:text-green-900 flex-shrink-0"
+                                  >
+                                    View
+                                  </a>
+                                )}
+                              </div>
+                            );
+                          })}
                         {/* Tool chips for all tools */}
                         <div className="flex flex-wrap gap-1">
                           <span className="text-xs text-gray-400 mr-0.5">Used:</span>

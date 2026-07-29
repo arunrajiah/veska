@@ -35,7 +35,10 @@ export default async function ContractDetailPage({ params }: { params: Promise<{
     return (
       <div className="px-8 py-8">
         <p className="text-gray-500 text-sm">Contract not found.</p>
-        <Link href="/dashboard/contracts" className="mt-4 inline-block text-sm text-gray-600 hover:text-gray-900">
+        <Link
+          href="/dashboard/contracts"
+          className="mt-4 inline-block text-sm text-gray-600 hover:text-gray-900"
+        >
           ← Back to contracts
         </Link>
       </div>

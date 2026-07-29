@@ -1,3 +1,4 @@
+import { apiFetch } from '@/lib/api.js';
 import Link from 'next/link';
 import { Lock, Plus, Eye, Trash2 } from 'lucide-react';
 import { revalidatePath } from 'next/cache';
@@ -13,12 +14,8 @@ interface Role {
 
 async function getRoles(): Promise<Role[]> {
   try {
-    const res = await fetch((process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/roles?tenantId=demo', {
-      cache: 'no-store',
-    });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.roles ?? data ?? [];
+    const data = await apiFetch<Role[] | { roles?: Role[]; data?: Role[] }>('/api/v1/roles', '');
+    return Array.isArray(data) ? data : (data.roles ?? data.data ?? []);
   } catch {
     return [];
   }
@@ -27,11 +24,15 @@ async function getRoles(): Promise<Role[]> {
 async function seedSystemRoles() {
   'use server';
   try {
-    await fetch((process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/roles/seed', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tenantId: 'demo' }),
-    });
+    await fetch(
+      (process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') +
+        '/api/v1/roles/seed',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tenantId: 'demo' }),
+      },
+    );
   } catch {
     // ignore
   }
@@ -70,7 +71,9 @@ export default async function RolesPage() {
 
       {roles.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
-          <p className="text-gray-500 mb-4">No roles yet. Seed system roles or create a custom one.</p>
+          <p className="text-gray-500 mb-4">
+            No roles yet. Seed system roles or create a custom one.
+          </p>
           <Link
             href="/dashboard/team/roles/new"
             className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors"
@@ -115,9 +118,7 @@ export default async function RolesPage() {
                       {role.name}
                     </Link>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    {role.description ?? '—'}
-                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-500">{role.description ?? '—'}</td>
                   <td className="px-6 py-4">
                     {role.isSystem ? (
                       <Lock size={14} className="text-gray-400" />
@@ -128,9 +129,7 @@ export default async function RolesPage() {
                   <td className="px-6 py-4 text-sm text-gray-700">
                     {(role.permissions ?? []).length}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-700">
-                    {role.memberCount ?? 0}
-                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-700">{role.memberCount ?? 0}</td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-3">
                       <Link

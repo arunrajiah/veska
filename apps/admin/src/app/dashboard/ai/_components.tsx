@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Bot, Sparkles, Send, Plus, MessageSquare } from 'lucide-react';
 
-
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
 interface Conversation {
@@ -223,17 +222,14 @@ export function AIChatClient() {
       setLoading(true);
 
       try {
-        const res = await fetch(
-          `/api/veska/ai/conversations/${targetConvId}/chat`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
-            },
-            body: JSON.stringify({ message: trimmed }),
+        const res = await fetch(`/api/veska/ai/conversations/${targetConvId}/chat`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
           },
-        );
+          body: JSON.stringify({ message: trimmed }),
+        });
         if (!res.ok) throw new Error(`Chat API error ${res.status}`);
         const raw: ChatResponse = await res.json();
         const aiMsg: Message = raw.message ?? {
@@ -376,7 +372,10 @@ export function AIChatClient() {
           /* Messages thread */
           <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4">
             {messages.map((msg, i) => (
-              <div key={msg.id} className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div
+                key={msg.id}
+                className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
                 {msg.role === 'assistant' && (
                   <div className="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Bot size={14} className="text-indigo-600" />

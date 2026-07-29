@@ -74,9 +74,15 @@ export default async function InventoryReportPage() {
               <tr className="bg-gray-50 border-b border-gray-100">
                 <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Product</th>
                 <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">SKU</th>
-                <th className="text-right px-5 py-3 text-xs font-medium text-gray-500">Qty on hand</th>
-                <th className="text-right px-5 py-3 text-xs font-medium text-gray-500">Cost price</th>
-                <th className="text-right px-5 py-3 text-xs font-medium text-gray-500">Total value</th>
+                <th className="text-right px-5 py-3 text-xs font-medium text-gray-500">
+                  Qty on hand
+                </th>
+                <th className="text-right px-5 py-3 text-xs font-medium text-gray-500">
+                  Cost price
+                </th>
+                <th className="text-right px-5 py-3 text-xs font-medium text-gray-500">
+                  Total value
+                </th>
               </tr>
             </thead>
             <tbody>

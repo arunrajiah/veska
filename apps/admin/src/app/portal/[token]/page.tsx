@@ -3,7 +3,7 @@ import { PortalHome } from './_components.js';
 
 export const dynamic = 'force-dynamic';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+const API_BASE = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 interface PortalContact {
   id: string;
@@ -44,7 +44,8 @@ async function PortalPageInner({ token }: { token: string }) {
         </div>
         <h1 className="text-xl font-semibold text-gray-900 mb-2">Link Invalid or Expired</h1>
         <p className="text-gray-500 text-sm max-w-sm mx-auto">
-          This portal link is invalid or has expired. Please contact support to receive a new access link.
+          This portal link is invalid or has expired. Please contact support to receive a new access
+          link.
         </p>
       </div>
     );

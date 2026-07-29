@@ -17,13 +17,20 @@ function apiHeaders() {
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
 
-interface Toast { id: number; message: string; type: 'success' | 'error' }
+interface Toast {
+  id: number;
+  message: string;
+  type: 'success' | 'error';
+}
 
 function ToastList({ toasts }: { toasts: Toast[] }) {
   return (
     <div className="fixed bottom-6 right-6 z-50 space-y-2">
       {toasts.map((t) => (
-        <div key={t.id} className={`px-4 py-3 rounded-xl shadow-lg text-sm font-medium ${t.type === 'success' ? 'bg-gray-900 text-white' : 'bg-red-600 text-white'}`}>
+        <div
+          key={t.id}
+          className={`px-4 py-3 rounded-xl shadow-lg text-sm font-medium ${t.type === 'success' ? 'bg-gray-900 text-white' : 'bg-red-600 text-white'}`}
+        >
           {t.message}
         </div>
       ))}
@@ -82,13 +89,21 @@ export function NewContactSlideOver({ onClose, onSaved }: NewContactProps) {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">First Name</label>
-              <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+              <input
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+              />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">Last Name</label>
-              <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+              <input
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+              />
             </div>
           </div>
 
@@ -100,24 +115,40 @@ export function NewContactSlideOver({ onClose, onSaved }: NewContactProps) {
           ].map(({ label, value, setter, type }) => (
             <div key={label}>
               <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
-              <input type={type} value={value} onChange={(e) => setter(e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+              <input
+                type={type}
+                value={value}
+                onChange={(e) => setter(e.target.value)}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+              />
             </div>
           ))}
 
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1">Notes</label>
-            <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-none" />
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={3}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-none"
+            />
           </div>
 
           {error && <p className="text-xs text-red-600">{error}</p>}
         </div>
 
         <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-2">
-          <button onClick={onClose} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors">Cancel</button>
-          <button onClick={() => void handleSave()} disabled={saving}
-            className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-60">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => void handleSave()}
+            disabled={saving}
+            className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-60"
+          >
             {saving ? 'Saving…' : 'Create Contact'}
           </button>
         </div>
@@ -159,7 +190,10 @@ export function ContactsTable({ initialContacts }: ContactsTableProps) {
 
   const handleImportComplete = ({ imported, skipped }: { imported: number; skipped: number }) => {
     setShowImport(false);
-    addToast(`${imported} contacts imported${skipped > 0 ? `, ${skipped} skipped` : ''}`, 'success');
+    addToast(
+      `${imported} contacts imported${skipped > 0 ? `, ${skipped} skipped` : ''}`,
+      'success',
+    );
     startTransition(() => router.refresh());
   };
 
@@ -198,7 +232,10 @@ export function ContactsTable({ initialContacts }: ContactsTableProps) {
       {initialContacts.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-8 py-16 text-center">
           <p className="text-gray-400 text-sm">No contacts yet.</p>
-          <button onClick={() => setShowForm(true)} className="mt-4 inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900">
+          <button
+            onClick={() => setShowForm(true)}
+            className="mt-4 inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900"
+          >
             <Plus size={14} /> Add your first contact
           </button>
         </div>
@@ -208,7 +245,12 @@ export function ContactsTable({ initialContacts }: ContactsTableProps) {
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
                 {['Name', 'Email', 'Phone', 'Company', 'Last Contacted', 'Created'].map((h) => (
-                  <th key={h} className="text-left px-4 py-3 text-xs font-medium uppercase tracking-widest text-gray-400">{h}</th>
+                  <th
+                    key={h}
+                    className="text-left px-4 py-3 text-xs font-medium uppercase tracking-widest text-gray-400"
+                  >
+                    {h}
+                  </th>
                 ))}
                 <th className="px-4 py-3" />
               </tr>
@@ -216,9 +258,14 @@ export function ContactsTable({ initialContacts }: ContactsTableProps) {
             <tbody>
               {initialContacts.map((record) => {
                 const d = record.data;
-                const fullName = [d['first_name'], d['last_name']].filter(Boolean).join(' ') || [d['firstName'], d['lastName']].filter(Boolean).join(' ');
-                const created = typeof record.createdAt === 'string' ? record.createdAt.slice(0, 10) : '';
-                const lastContacted = d['last_contacted'] ? String(d['last_contacted']).slice(0, 10) : '—';
+                const fullName =
+                  [d['first_name'], d['last_name']].filter(Boolean).join(' ') ||
+                  [d['firstName'], d['lastName']].filter(Boolean).join(' ');
+                const created =
+                  typeof record.createdAt === 'string' ? record.createdAt.slice(0, 10) : '';
+                const lastContacted = d['last_contacted']
+                  ? String(d['last_contacted']).slice(0, 10)
+                  : '—';
                 return (
                   <tr
                     key={record.id}
@@ -231,7 +278,9 @@ export function ContactsTable({ initialContacts }: ContactsTableProps) {
                     </td>
                     <td className="px-4 py-3 text-gray-600">{String(d['email'] ?? '—')}</td>
                     <td className="px-4 py-3 text-gray-600">{String(d['phone'] ?? '—')}</td>
-                    <td className="px-4 py-3 text-gray-500">{String(d['company'] ?? d['company_id'] ?? '—')}</td>
+                    <td className="px-4 py-3 text-gray-500">
+                      {String(d['company'] ?? d['company_id'] ?? '—')}
+                    </td>
                     <td className="px-4 py-3 text-gray-400 text-xs">{lastContacted}</td>
                     <td className="px-4 py-3 text-gray-400 text-xs">{created}</td>
                     <td className="px-4 py-3 text-right text-xs text-gray-400">→</td>
@@ -243,9 +292,7 @@ export function ContactsTable({ initialContacts }: ContactsTableProps) {
         </div>
       )}
 
-      {showForm && (
-        <NewContactSlideOver onClose={() => setShowForm(false)} onSaved={handleSaved} />
-      )}
+      {showForm && <NewContactSlideOver onClose={() => setShowForm(false)} onSaved={handleSaved} />}
 
       <ToastList toasts={toasts} />
     </>

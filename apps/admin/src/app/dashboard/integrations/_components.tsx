@@ -79,7 +79,14 @@ interface ProviderDef {
 function ZapierIcon() {
   return (
     <svg viewBox="0 0 24 24" className="w-6 h-6" fill="currentColor">
-      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+        stroke="currentColor"
+        strokeWidth="2"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -204,7 +211,14 @@ interface AddSlideoverProps {
   editIntegration?: Integration | null;
 }
 
-function AddSlideover({ open, onClose, onAdded, defaultProvider, showToast, editIntegration }: AddSlideoverProps) {
+function AddSlideover({
+  open,
+  onClose,
+  onAdded,
+  defaultProvider,
+  showToast,
+  editIntegration,
+}: AddSlideoverProps) {
   const [provider, setProvider] = useState(defaultProvider ?? 'zapier');
   const [name, setName] = useState('');
   const [webhookUrl, setWebhookUrl] = useState('');
@@ -234,7 +248,13 @@ function AddSlideover({ open, onClose, onAdded, defaultProvider, showToast, edit
     e.preventDefault();
     setSaving(true);
     try {
-      const body = { provider, name, webhookUrl: webhookUrl || undefined, apiKey: apiKey || undefined, enabled };
+      const body = {
+        provider,
+        name,
+        webhookUrl: webhookUrl || undefined,
+        apiKey: apiKey || undefined,
+        enabled,
+      };
       const url = editIntegration
         ? `${API_BASE}/integrations/${editIntegration.id}`
         : `${API_BASE}/integrations`;
@@ -244,7 +264,10 @@ function AddSlideover({ open, onClose, onAdded, defaultProvider, showToast, edit
         body: JSON.stringify(body),
       });
       const d = (await res.json()) as { message?: string };
-      if (!res.ok) { showToast(d.message ?? 'Save failed', 'error'); return; }
+      if (!res.ok) {
+        showToast(d.message ?? 'Save failed', 'error');
+        return;
+      }
       showToast(editIntegration ? 'Integration updated' : 'Integration added');
       onAdded();
       onClose();
@@ -267,7 +290,10 @@ function AddSlideover({ open, onClose, onAdded, defaultProvider, showToast, edit
             <XCircle size={18} />
           </button>
         </div>
-        <form onSubmit={(e) => void handleSave(e)} className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+        <form
+          onSubmit={(e) => void handleSave(e)}
+          className="flex-1 overflow-y-auto px-6 py-5 space-y-4"
+        >
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Provider</label>
             <select
@@ -276,7 +302,9 @@ function AddSlideover({ open, onClose, onAdded, defaultProvider, showToast, edit
               className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             >
               {PROVIDERS.map((p) => (
-                <option key={p.id} value={p.id}>{p.name}</option>
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
               ))}
             </select>
           </div>
@@ -302,7 +330,9 @@ function AddSlideover({ open, onClose, onAdded, defaultProvider, showToast, edit
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">API Key (optional)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              API Key (optional)
+            </label>
             <input
               type="password"
               value={apiKey}
@@ -320,7 +350,9 @@ function AddSlideover({ open, onClose, onAdded, defaultProvider, showToast, edit
                 enabled ? 'bg-indigo-600' : 'bg-gray-200'
               }`}
             >
-              <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${enabled ? 'translate-x-4.5' : 'translate-x-0.5'}`} />
+              <span
+                className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${enabled ? 'translate-x-4.5' : 'translate-x-0.5'}`}
+              />
             </button>
           </div>
           <div className="pt-2">
@@ -329,7 +361,9 @@ function AddSlideover({ open, onClose, onAdded, defaultProvider, showToast, edit
               disabled={saving}
               className="w-full inline-flex items-center justify-center gap-2 text-sm bg-indigo-600 text-white px-4 py-2.5 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-60"
             >
-              {saving && <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
+              {saving && (
+                <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+              )}
               {editIntegration ? 'Save changes' : 'Add integration'}
             </button>
           </div>
@@ -379,7 +413,11 @@ function IntegrationRow({
 
   function fmt(iso?: string | null) {
     if (!iso) return '—';
-    try { return new Date(iso).toLocaleString(); } catch { return iso; }
+    try {
+      return new Date(iso).toLocaleString();
+    } catch {
+      return iso;
+    }
   }
 
   return (
@@ -393,7 +431,9 @@ function IntegrationRow({
           )}
           <div>
             <div className="text-sm font-medium text-gray-900">{integration.name}</div>
-            <div className="text-xs text-gray-400 capitalize">{providerDef?.name ?? integration.provider}</div>
+            <div className="text-xs text-gray-400 capitalize">
+              {providerDef?.name ?? integration.provider}
+            </div>
           </div>
         </div>
       </td>
@@ -404,11 +444,17 @@ function IntegrationRow({
             integration.enabled ? 'bg-indigo-600' : 'bg-gray-200'
           }`}
         >
-          <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${integration.enabled ? 'translate-x-4.5' : 'translate-x-0.5'}`} />
+          <span
+            className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${integration.enabled ? 'translate-x-4.5' : 'translate-x-0.5'}`}
+          />
         </button>
       </td>
-      <td className="py-3.5 pr-4 text-xs text-gray-500 whitespace-nowrap">{fmt(integration.lastTestedAt)}</td>
-      <td className="py-3.5 pr-4"><TestStatusBadge status={integration.testStatus} /></td>
+      <td className="py-3.5 pr-4 text-xs text-gray-500 whitespace-nowrap">
+        {fmt(integration.lastTestedAt)}
+      </td>
+      <td className="py-3.5 pr-4">
+        <TestStatusBadge status={integration.testStatus} />
+      </td>
       <td className="py-3.5 text-right">
         <div className="flex items-center justify-end gap-2">
           <button
@@ -416,9 +462,11 @@ function IntegrationRow({
             disabled={testing === integration.id}
             className="inline-flex items-center gap-1.5 text-xs border border-gray-200 text-gray-600 px-2.5 py-1 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
           >
-            {testing === integration.id
-              ? <span className="w-3 h-3 border border-gray-400 border-t-gray-600 rounded-full animate-spin" />
-              : <RefreshCw size={11} />}
+            {testing === integration.id ? (
+              <span className="w-3 h-3 border border-gray-400 border-t-gray-600 rounded-full animate-spin" />
+            ) : (
+              <RefreshCw size={11} />
+            )}
             Test
           </button>
           <button
@@ -464,7 +512,9 @@ export function IntegrationsClient() {
     }
   }, []);
 
-  useEffect(() => { void fetchIntegrations(); }, [fetchIntegrations]);
+  useEffect(() => {
+    void fetchIntegrations();
+  }, [fetchIntegrations]);
 
   function handleConnect(providerId: string) {
     setDefaultProvider(providerId);
@@ -479,7 +529,7 @@ export function IntegrationsClient() {
   }
 
   async function handleToggle(id: string, enabled: boolean) {
-    setIntegrations((prev) => prev.map((x) => x.id === id ? { ...x, enabled } : x));
+    setIntegrations((prev) => prev.map((x) => (x.id === id ? { ...x, enabled } : x)));
     try {
       const res = await fetch(`${API_BASE}/integrations/${id}`, {
         method: 'PUT',
@@ -487,11 +537,11 @@ export function IntegrationsClient() {
         body: JSON.stringify({ enabled }),
       });
       if (!res.ok) {
-        setIntegrations((prev) => prev.map((x) => x.id === id ? { ...x, enabled: !enabled } : x));
+        setIntegrations((prev) => prev.map((x) => (x.id === id ? { ...x, enabled: !enabled } : x)));
         showToast('Failed to update integration', 'error');
       }
     } catch {
-      setIntegrations((prev) => prev.map((x) => x.id === id ? { ...x, enabled: !enabled } : x));
+      setIntegrations((prev) => prev.map((x) => (x.id === id ? { ...x, enabled: !enabled } : x)));
       showToast('Network error', 'error');
     }
   }
@@ -506,12 +556,25 @@ export function IntegrationsClient() {
       const d = (await res.json()) as { status?: string; message?: string };
       const status = res.ok ? (d.status ?? 'success') : 'failed';
       setIntegrations((prev) =>
-        prev.map((x) => x.id === id ? { ...x, testStatus: status as 'success' | 'pending' | 'failed' | null, lastTestedAt: new Date().toISOString() } : x)
+        prev.map((x) =>
+          x.id === id
+            ? {
+                ...x,
+                testStatus: status as 'success' | 'pending' | 'failed' | null,
+                lastTestedAt: new Date().toISOString(),
+              }
+            : x,
+        ),
       );
-      showToast(res.ok ? 'Test passed' : (d.message ?? 'Test failed'), res.ok ? 'success' : 'error');
+      showToast(
+        res.ok ? 'Test passed' : (d.message ?? 'Test failed'),
+        res.ok ? 'success' : 'error',
+      );
     } catch {
       setIntegrations((prev) =>
-        prev.map((x) => x.id === id ? { ...x, testStatus: 'failed', lastTestedAt: new Date().toISOString() } : x)
+        prev.map((x) =>
+          x.id === id ? { ...x, testStatus: 'failed', lastTestedAt: new Date().toISOString() } : x,
+        ),
       );
       showToast('Test failed', 'error');
     } finally {
@@ -533,9 +596,7 @@ export function IntegrationsClient() {
     }
   }
 
-  const connectedProviders = new Set(
-    integrations.filter((i) => i.enabled).map((i) => i.provider)
-  );
+  const connectedProviders = new Set(integrations.filter((i) => i.enabled).map((i) => i.provider));
 
   return (
     <div className="px-8 py-8 max-w-5xl">
@@ -555,7 +616,11 @@ export function IntegrationsClient() {
             Event log
           </a>
           <button
-            onClick={() => { setEditIntegration(null); setDefaultProvider(undefined); setSlideoverOpen(true); }}
+            onClick={() => {
+              setEditIntegration(null);
+              setDefaultProvider(undefined);
+              setSlideoverOpen(true);
+            }}
             className="inline-flex items-center gap-2 text-sm bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
           >
             <Plus size={14} />
@@ -594,10 +659,18 @@ export function IntegrationsClient() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50/50">
-                    <th className="text-left text-xs font-medium text-gray-400 px-5 py-3 pr-4">Provider / Name</th>
-                    <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4 pt-3">Enabled</th>
-                    <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4 pt-3">Last tested</th>
-                    <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4 pt-3">Status</th>
+                    <th className="text-left text-xs font-medium text-gray-400 px-5 py-3 pr-4">
+                      Provider / Name
+                    </th>
+                    <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4 pt-3">
+                      Enabled
+                    </th>
+                    <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4 pt-3">
+                      Last tested
+                    </th>
+                    <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4 pt-3">
+                      Status
+                    </th>
                     <th className="pb-3 pt-3 pr-5" />
                   </tr>
                 </thead>
@@ -607,17 +680,24 @@ export function IntegrationsClient() {
                       <td className="py-3.5 pl-5 pr-4">
                         <div className="flex items-center gap-2.5">
                           {(() => {
-                            const providerDef = PROVIDERS.find((p) => p.id === integration.provider);
+                            const providerDef = PROVIDERS.find(
+                              (p) => p.id === integration.provider,
+                            );
                             return providerDef ? (
-                              <div className={`p-1.5 rounded-lg ${providerDef.bgColor} ${providerDef.color}`}>
+                              <div
+                                className={`p-1.5 rounded-lg ${providerDef.bgColor} ${providerDef.color}`}
+                              >
                                 {providerDef.icon}
                               </div>
                             ) : null;
                           })()}
                           <div>
-                            <div className="text-sm font-medium text-gray-900">{integration.name}</div>
+                            <div className="text-sm font-medium text-gray-900">
+                              {integration.name}
+                            </div>
                             <div className="text-xs text-gray-400 capitalize">
-                              {PROVIDERS.find((p) => p.id === integration.provider)?.name ?? integration.provider}
+                              {PROVIDERS.find((p) => p.id === integration.provider)?.name ??
+                                integration.provider}
                             </div>
                           </div>
                         </div>
@@ -629,13 +709,19 @@ export function IntegrationsClient() {
                             integration.enabled ? 'bg-indigo-600' : 'bg-gray-200'
                           }`}
                         >
-                          <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${integration.enabled ? 'translate-x-4.5' : 'translate-x-0.5'}`} />
+                          <span
+                            className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${integration.enabled ? 'translate-x-4.5' : 'translate-x-0.5'}`}
+                          />
                         </button>
                       </td>
                       <td className="py-3.5 pr-4 text-xs text-gray-500 whitespace-nowrap">
-                        {integration.lastTestedAt ? new Date(integration.lastTestedAt).toLocaleString() : '—'}
+                        {integration.lastTestedAt
+                          ? new Date(integration.lastTestedAt).toLocaleString()
+                          : '—'}
                       </td>
-                      <td className="py-3.5 pr-4"><TestStatusBadge status={integration.testStatus} /></td>
+                      <td className="py-3.5 pr-4">
+                        <TestStatusBadge status={integration.testStatus} />
+                      </td>
                       <td className="py-3.5 pr-5 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <button
@@ -643,9 +729,11 @@ export function IntegrationsClient() {
                             disabled={testing === integration.id}
                             className="inline-flex items-center gap-1.5 text-xs border border-gray-200 text-gray-600 px-2.5 py-1 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
                           >
-                            {testing === integration.id
-                              ? <span className="w-3 h-3 border border-gray-400 border-t-gray-600 rounded-full animate-spin" />
-                              : <RefreshCw size={11} />}
+                            {testing === integration.id ? (
+                              <span className="w-3 h-3 border border-gray-400 border-t-gray-600 rounded-full animate-spin" />
+                            ) : (
+                              <RefreshCw size={11} />
+                            )}
                             Test
                           </button>
                           <button

@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-
 interface StatusButtonsProps {
   entryId: string;
   tenantId: string;
