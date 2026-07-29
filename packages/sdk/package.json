@@ -32,5 +32,22 @@
     "@types/node": "^22.10.0",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
+  },
+  "keywords": [
+    "veska",
+    "plugin",
+    "sdk",
+    "erp",
+    "crm",
+    "self-hosted"
+  ],
+  "homepage": "https://github.com/arunrajiah/veska/tree/main/packages/sdk#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arunrajiah/veska.git",
+    "directory": "packages/sdk"
+  },
+  "bugs": {
+    "url": "https://github.com/arunrajiah/veska/issues"
   }
 }

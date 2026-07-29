@@ -40,5 +40,22 @@
     "@types/prompts": "^2.4.9",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
+  },
+  "keywords": [
+    "veska",
+    "cli",
+    "plugin",
+    "scaffold",
+    "erp",
+    "self-hosted"
+  ],
+  "homepage": "https://github.com/arunrajiah/veska/tree/main/packages/cli#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arunrajiah/veska.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/arunrajiah/veska/issues"
   }
 }
