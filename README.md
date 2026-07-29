@@ -48,7 +48,7 @@ Traditional ERP systems take months to implement, require consultants, and need 
 
 ## Try it in 5 minutes
 
-Spin up a complete demo company — contacts, a $564K deal pipeline, invoices, expenses, support tickets — and click around:
+Spin up a complete demo company — contacts, a $258K open deal pipeline, invoices, expenses, support tickets — and click around:
 
 ```bash
 # Prerequisites: Node.js 22+, pnpm 9+, Docker
@@ -106,7 +106,7 @@ Under the hood it is not a thin wrapper around a chat model:
     <td><img src="docs/images/screenshot-support.png" alt="Support inbox" /></td>
   </tr>
   <tr>
-    <td align="center"><em>CRM — contacts, deals pipeline &amp; $564K in open deals</em></td>
+    <td align="center"><em>CRM — contacts, deals pipeline &amp; $258K in open deals</em></td>
     <td align="center"><em>Support — ticket inbox with channel badges &amp; thread view</em></td>
   </tr>
   <tr>

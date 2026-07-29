@@ -27,7 +27,7 @@ cp .env.example .env
 docker compose up -d
 
 # 3. Run database migrations
-docker compose exec api node apps/api/dist/db/migrate.js
+docker compose exec api node packages/core/dist/db/migrate.js
 
 # 4. Open the admin UI
 open http://localhost:3000
@@ -79,7 +79,7 @@ See [.env.example](.env.example) for the full list with descriptions. Minimum re
 git pull origin main
 docker compose pull
 docker compose up -d
-docker compose exec api node apps/api/dist/db/migrate.js
+docker compose exec api node packages/core/dist/db/migrate.js
 ```
 
 Migrations are always forward-only and safe to run on a live instance.

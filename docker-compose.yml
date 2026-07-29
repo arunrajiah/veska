@@ -68,7 +68,11 @@ services:
     ports:
       - '3000:3000'
     environment:
+      # Browser-side: reached from the host, so localhost.
       NEXT_PUBLIC_API_URL: http://localhost:3001
+      # Server-side (route handlers and the /api/veska proxy): reached over the compose
+      # network, where localhost is this container, not the API.
+      API_URL: http://api:3001
       NODE_ENV: development
     depends_on:
       - api

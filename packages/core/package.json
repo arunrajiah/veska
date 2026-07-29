@@ -19,7 +19,7 @@
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json && pnpm run copy:migrations",
     "dev": "tsc -p tsconfig.build.json --watch",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src",
@@ -30,7 +30,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "seed": "tsx src/db/seed.ts",
-    "seed:clear": "tsx src/db/seed-clear.ts"
+    "seed:clear": "tsx src/db/seed-clear.ts",
+    "copy:migrations": "mkdir -p dist/db/migrations && cp -R src/db/migrations/. dist/db/migrations/"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.2",
