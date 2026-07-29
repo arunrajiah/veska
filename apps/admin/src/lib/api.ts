@@ -26,20 +26,30 @@ export async function apiFetch<T>(path: string, tenantId: string, init?: Request
 
   let token: string | null = null;
   let identityId = 'system';
+  let cookieTenantId: string | null = null;
   try {
     const cookieStore = await cookies();
     token = cookieStore.get('veska_session')?.value ?? null;
     identityId =
       cookieStore.get('veska_identity')?.value ?? cookieStore.get('veska_user')?.value ?? 'system';
+    cookieTenantId = cookieStore.get('veska_tenant')?.value ?? null;
   } catch {
     token = null;
   }
+
+  // The API rejects a tenant header that contradicts the session with a 403 Tenant
+  // mismatch. Callers pass a tenantId that is often the NEXT_PUBLIC_TENANT_ID ??
+  // 'demo-tenant' placeholder, so prefer the session's own tenant cookie and send no
+  // header at all rather than a value we know to be made up.
+  const isUuid = (v: string | null): v is string =>
+    !!v && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
+  const resolvedTenantId = cookieTenantId ?? (isUuid(tenantId) ? tenantId : null);
 
   const res = await fetch(`${API_BASE}${path}`, {
     ...init,
     headers: {
       'Content-Type': 'application/json',
-      'X-Veska-Tenant-Id': tenantId,
+      ...(resolvedTenantId ? { 'X-Veska-Tenant-Id': resolvedTenantId } : {}),
       'X-Veska-Identity-Id': identityId,
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(init?.headers ?? {}),

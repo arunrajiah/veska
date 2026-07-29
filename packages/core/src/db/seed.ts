@@ -564,9 +564,7 @@ async function seed() {
   console.log('  finance@acme.com/ demo1234  (Finance)');
   console.log('  john@acme.com   / demo1234  (Employee)');
 
-  console.log('\nAdd these to your .env so the Admin UI can reach the API:');
-  console.log(`  NEXT_PUBLIC_TENANT_ID=${tenantId}`);
-  console.log(`  NEXT_PUBLIC_ADMIN_IDENTITY_ID=${adminId}`);
+  console.log('\nSign in at http://localhost:3000 — no further configuration needed.');
 }
 
 seed()
