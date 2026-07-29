@@ -31,7 +31,11 @@ import {
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 function tenantHeaders(extra?: HeadersInit): HeadersInit {
-  return { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant', 'Content-Type': 'application/json', ...extra };
+  return {
+    'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
+    'Content-Type': 'application/json',
+    ...extra,
+  };
 }
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -119,17 +123,67 @@ const TIMEZONES = [
 const DATE_FORMATS = ['YYYY-MM-DD', 'DD/MM/YYYY', 'MM/DD/YYYY'];
 
 const ALL_MODULES = [
-  { id: 'crm', label: 'CRM', icon: '👥', description: 'Leads, contacts, deals and pipeline management' },
-  { id: 'finance', label: 'Finance', icon: '💰', description: 'Invoices, expenses, budgets and payments' },
-  { id: 'hr', label: 'HR', icon: '🧑‍💼', description: 'Employees, departments, leave and onboarding' },
-  { id: 'inventory', label: 'Inventory', icon: '📦', description: 'Products, warehouses and stock levels' },
-  { id: 'projects', label: 'Projects', icon: '📁', description: 'Projects, tasks and time tracking' },
-  { id: 'service-desk', label: 'Service Desk', icon: '🎫', description: 'Tickets, SLAs and support queues' },
-  { id: 'knowledge-base', label: 'Knowledge Base', icon: '📚', description: 'Internal wiki and documentation' },
+  {
+    id: 'crm',
+    label: 'CRM',
+    icon: '👥',
+    description: 'Leads, contacts, deals and pipeline management',
+  },
+  {
+    id: 'finance',
+    label: 'Finance',
+    icon: '💰',
+    description: 'Invoices, expenses, budgets and payments',
+  },
+  {
+    id: 'hr',
+    label: 'HR',
+    icon: '🧑‍💼',
+    description: 'Employees, departments, leave and onboarding',
+  },
+  {
+    id: 'inventory',
+    label: 'Inventory',
+    icon: '📦',
+    description: 'Products, warehouses and stock levels',
+  },
+  {
+    id: 'projects',
+    label: 'Projects',
+    icon: '📁',
+    description: 'Projects, tasks and time tracking',
+  },
+  {
+    id: 'service-desk',
+    label: 'Service Desk',
+    icon: '🎫',
+    description: 'Tickets, SLAs and support queues',
+  },
+  {
+    id: 'knowledge-base',
+    label: 'Knowledge Base',
+    icon: '📚',
+    description: 'Internal wiki and documentation',
+  },
   { id: 'lms', label: 'LMS', icon: '🎓', description: 'Learning management and employee training' },
-  { id: 'events', label: 'Events & Facilities', icon: '🏢', description: 'Rooms, events and facility bookings' },
-  { id: 'catalog', label: 'Product Catalog', icon: '🛍️', description: 'Product listings and pricing rules' },
-  { id: 'payroll', label: 'Payroll', icon: '💵', description: 'Pay runs, payslips and payroll reports' },
+  {
+    id: 'events',
+    label: 'Events & Facilities',
+    icon: '🏢',
+    description: 'Rooms, events and facility bookings',
+  },
+  {
+    id: 'catalog',
+    label: 'Product Catalog',
+    icon: '🛍️',
+    description: 'Product listings and pricing rules',
+  },
+  {
+    id: 'payroll',
+    label: 'Payroll',
+    icon: '💵',
+    description: 'Pay runs, payslips and payroll reports',
+  },
   { id: 'contracts', label: 'Contracts', icon: '📝', description: 'Contract lifecycle management' },
   { id: 'vendors', label: 'Vendors', icon: '🚚', description: 'Vendor management and purchasing' },
 ];
@@ -250,7 +304,12 @@ function CompanyProfileTab({
 
       <div className="grid grid-cols-2 gap-4">
         <Field label="Company Name" value={form.companyName} onChange={set('companyName')} />
-        <Field label="Company Email" value={form.companyEmail} onChange={set('companyEmail')} type="email" />
+        <Field
+          label="Company Email"
+          value={form.companyEmail}
+          onChange={set('companyEmail')}
+          type="email"
+        />
         <Field label="Phone" value={form.companyPhone} onChange={set('companyPhone')} type="tel" />
         <Field label="Website" value={form.website} onChange={set('website')} type="url" />
         <Field label="Tax ID (VAT/EIN)" value={form.taxId} onChange={set('taxId')} />
@@ -323,7 +382,10 @@ function BrandingTab({
         <p className="text-xs font-medium text-gray-600 mb-2">Preview</p>
         <div
           className="rounded-xl p-5 border"
-          style={{ borderColor: form.primaryColor + '40', backgroundColor: form.primaryColor + '08' }}
+          style={{
+            borderColor: form.primaryColor + '40',
+            backgroundColor: form.primaryColor + '08',
+          }}
         >
           <div className="flex items-center justify-between mb-3">
             <span className="font-semibold text-sm" style={{ color: form.primaryColor }}>
@@ -336,8 +398,14 @@ function BrandingTab({
               Active
             </span>
           </div>
-          <div className="h-2 rounded-full mb-2" style={{ backgroundColor: form.primaryColor + '30' }}>
-            <div className="h-2 rounded-full w-2/3" style={{ backgroundColor: form.primaryColor }} />
+          <div
+            className="h-2 rounded-full mb-2"
+            style={{ backgroundColor: form.primaryColor + '30' }}
+          >
+            <div
+              className="h-2 rounded-full w-2/3"
+              style={{ backgroundColor: form.primaryColor }}
+            />
           </div>
           <p className="text-xs text-gray-500">Sample card preview using selected brand colors</p>
           <button
@@ -413,7 +481,11 @@ interface NewRateForm {
   isDefault: boolean;
 }
 
-function TaxRatesTab({ showToast }: { showToast: (msg: string, type?: 'success' | 'error') => void }) {
+function TaxRatesTab({
+  showToast,
+}: {
+  showToast: (msg: string, type?: 'success' | 'error') => void;
+}) {
   const [rates, setRates] = useState<TaxRate[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -435,7 +507,7 @@ function TaxRatesTab({ showToast }: { showToast: (msg: string, type?: 'success' 
       const res = await fetch(`${API_BASE}/tax-rates`, { headers: tenantHeaders() });
       if (!res.ok) return;
       const data = await res.json();
-      setRates(Array.isArray(data) ? data : data.data ?? []);
+      setRates(Array.isArray(data) ? data : (data.data ?? []));
     } catch {
       // silently ignore
     } finally {
@@ -646,9 +718,7 @@ function TaxRatesTab({ showToast }: { showToast: (msg: string, type?: 'success' 
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-gray-700">
-                    {(r.rate * 100).toFixed(2)}%
-                  </td>
+                  <td className="px-4 py-3 text-gray-700">{(r.rate * 100).toFixed(2)}%</td>
                   <td className="px-4 py-3 text-gray-500">{r.jurisdiction ?? '—'}</td>
                   <td className="px-4 py-3 text-gray-500 capitalize">{r.appliesTo ?? 'all'}</td>
                   <td className="px-4 py-3">{statusBadge(r.status)}</td>
@@ -814,7 +884,7 @@ function EmailSmtpTab({
     setTesting(true);
     setTestResult(null);
     try {
-      const res = await fetch(`${API_BASE}/tenant-settings/test-smtp`, {
+      const res = await fetch(`/api/veska/tenant-settings/test-smtp`, {
         method: 'POST',
         headers: tenantHeaders(),
         body: JSON.stringify({
@@ -828,7 +898,10 @@ function EmailSmtpTab({
       const data = await res.json();
       setTestResult(data);
       if (data.success) {
-        showToast(`Connection successful${data.latencyMs ? ` (${data.latencyMs}ms)` : ''}`, 'success');
+        showToast(
+          `Connection successful${data.latencyMs ? ` (${data.latencyMs}ms)` : ''}`,
+          'success',
+        );
       } else {
         showToast(data.error ?? 'Connection failed', 'error');
       }
@@ -849,9 +922,25 @@ function EmailSmtpTab({
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <Field label="SMTP Host" value={form.smtpHost} onChange={set('smtpHost')} placeholder="smtp.example.com" />
-        <Field label="Port" value={form.smtpPort} onChange={set('smtpPort')} type="number" placeholder="587" />
-        <Field label="Username" value={form.smtpUser} onChange={set('smtpUser')} placeholder="user@example.com" />
+        <Field
+          label="SMTP Host"
+          value={form.smtpHost}
+          onChange={set('smtpHost')}
+          placeholder="smtp.example.com"
+        />
+        <Field
+          label="Port"
+          value={form.smtpPort}
+          onChange={set('smtpPort')}
+          type="number"
+          placeholder="587"
+        />
+        <Field
+          label="Username"
+          value={form.smtpUser}
+          onChange={set('smtpUser')}
+          placeholder="user@example.com"
+        />
         <div>
           <label className="block text-xs font-medium text-gray-600 mb-1">Password</label>
           <div className="relative">
@@ -872,8 +961,19 @@ function EmailSmtpTab({
           </div>
           <p className="text-xs text-gray-400 mt-1">Leave blank to keep existing password</p>
         </div>
-        <Field label="From Name" value={form.smtpFromName} onChange={set('smtpFromName')} placeholder="Acme Inc" />
-        <Field label="From Email" value={form.smtpFromEmail} onChange={set('smtpFromEmail')} type="email" placeholder="noreply@example.com" />
+        <Field
+          label="From Name"
+          value={form.smtpFromName}
+          onChange={set('smtpFromName')}
+          placeholder="Acme Inc"
+        />
+        <Field
+          label="From Email"
+          value={form.smtpFromEmail}
+          onChange={set('smtpFromEmail')}
+          type="email"
+          placeholder="noreply@example.com"
+        />
       </div>
 
       {/* Test result */}
@@ -884,7 +984,7 @@ function EmailSmtpTab({
           {testResult.success ? <CheckCircle size={14} /> : <XCircle size={14} />}
           {testResult.success
             ? `Connection successful${testResult.latencyMs ? ` — ${testResult.latencyMs}ms` : ''}`
-            : testResult.error ?? 'Connection failed'}
+            : (testResult.error ?? 'Connection failed')}
         </div>
       )}
 
@@ -1179,7 +1279,10 @@ function SubSectionNav() {
               </p>
               <p className="text-xs text-gray-500 leading-tight mt-0.5">{s.description}</p>
             </div>
-            <ChevronRight size={12} className="text-gray-400 group-hover:text-indigo-500 mt-auto self-end transition-colors" />
+            <ChevronRight
+              size={12}
+              className="text-gray-400 group-hover:text-indigo-500 mt-auto self-end transition-colors"
+            />
           </Link>
         );
       })}
@@ -1197,7 +1300,7 @@ export function SettingsClient({ initialSettings }: { initialSettings: TenantSet
 
   const handleSave = useCallback(
     async (updates: Partial<TenantSettings>) => {
-      const res = await fetch(`${API_BASE}/tenant-settings`, {
+      const res = await fetch(`/api/veska/tenant-settings`, {
         method: 'PUT',
         headers: tenantHeaders(),
         body: JSON.stringify(updates),
@@ -1250,15 +1353,9 @@ export function SettingsClient({ initialSettings }: { initialSettings: TenantSet
 
         {/* Content */}
         <div className="flex-1 min-w-0 bg-white border border-gray-200 rounded-xl p-6">
-          {activeTab === 'company' && (
-            <CompanyProfileTab settings={settings} onSave={handleSave} />
-          )}
-          {activeTab === 'branding' && (
-            <BrandingTab settings={settings} onSave={handleSave} />
-          )}
-          {activeTab === 'tax' && (
-            <TaxRatesTab showToast={showToast} />
-          )}
+          {activeTab === 'company' && <CompanyProfileTab settings={settings} onSave={handleSave} />}
+          {activeTab === 'branding' && <BrandingTab settings={settings} onSave={handleSave} />}
+          {activeTab === 'tax' && <TaxRatesTab showToast={showToast} />}
           {activeTab === 'email' && (
             <EmailSmtpTab settings={settings} onSave={handleSave} showToast={showToast} />
           )}

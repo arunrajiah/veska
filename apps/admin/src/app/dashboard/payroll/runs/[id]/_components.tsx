@@ -3,7 +3,6 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 function apiHeaders() {
@@ -24,7 +23,7 @@ export function ProcessRunButton({ runId, status }: { runId: string; status: str
   async function handleProcess() {
     setLoading(true);
     try {
-      await fetch(`${API_BASE}/api/v1/payroll/runs/${runId}/process`, {
+      await fetch(`/api/veska/payroll/runs/${runId}/process`, {
         method: 'PATCH',
         headers: apiHeaders(),
       });

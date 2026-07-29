@@ -4,7 +4,6 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 function apiHeaders() {
@@ -87,7 +86,7 @@ function NewProjectSlideOver({ open, onClose, onCreated }: { open: boolean; onCl
       status: 'planning',
     };
     try {
-      const res = await fetch(`${API_BASE}/api/v1/projects`, {
+      const res = await fetch(`/api/veska/projects`, {
         method: 'POST',
         headers: apiHeaders(),
         body: JSON.stringify(body),

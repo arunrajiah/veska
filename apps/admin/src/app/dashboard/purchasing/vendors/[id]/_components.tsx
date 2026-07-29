@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { X } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 export interface PurchasingVendor {
@@ -94,7 +93,7 @@ function EditVendorSlideOver({ vendor, onClose, onSaved }: { vendor: PurchasingV
       notes: (fd.get('notes') as string) || undefined,
     };
     try {
-      const res = await fetch(`${API_BASE}/api/v1/purchasing/vendors/${vendor.id}`, {
+      const res = await fetch(`/api/veska/purchasing/vendors/${vendor.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 const PERIODS = [
   { value: 'monthly', label: 'Monthly' },
@@ -97,7 +96,7 @@ export function BudgetForm({ tenantId }: BudgetFormProps) {
         body['quarter'] = Number(form.quarter);
       }
 
-      const res = await fetch(`${API_BASE}/api/v1/budgets`, {
+      const res = await fetch(`/api/veska/budgets`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

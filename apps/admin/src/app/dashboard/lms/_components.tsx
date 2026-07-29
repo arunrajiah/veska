@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { Plus, X, Star, GraduationCap, Users, BookOpen, BarChart2, ClipboardList } from 'lucide-react';
 import type { Course, Enrollment, LMSSummary } from './page';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 function apiHeaders() {
@@ -64,7 +63,7 @@ function NewCourseModal({ open, onClose }: { open: boolean; onClose: () => void 
       status:      (fd.get('status') as string) || 'draft',
     };
     try {
-      const res = await fetch(`${API_BASE}/api/v1/lms/courses`, {
+      const res = await fetch(`/api/veska/lms/courses`, {
         method:  'POST',
         headers: apiHeaders(),
         body:    JSON.stringify(body),

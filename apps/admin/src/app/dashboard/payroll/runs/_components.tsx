@@ -4,7 +4,6 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 function apiHeaders() {
@@ -69,7 +68,7 @@ function NewRunSlideOver({ open, onClose, onCreated }: { open: boolean; onClose:
       notes: (fd.get('notes') as string) || undefined,
     };
     try {
-      const res = await fetch(`${API_BASE}/api/v1/payroll/runs`, {
+      const res = await fetch(`/api/veska/payroll/runs`, {
         method: 'POST',
         headers: apiHeaders(),
         body: JSON.stringify(body),
@@ -157,7 +156,7 @@ export function PayrollRunsClient({ initialRuns }: { initialRuns: PayrollRun[] }
   async function processRun(id: string) {
     setActionLoading(id);
     try {
-      await fetch(`${API_BASE}/api/v1/payroll/runs/${id}/process`, {
+      await fetch(`/api/veska/payroll/runs/${id}/process`, {
         method: 'PATCH',
         headers: apiHeaders(),
       });

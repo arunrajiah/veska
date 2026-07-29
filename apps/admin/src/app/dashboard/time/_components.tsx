@@ -4,7 +4,6 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 function apiHeaders() {
@@ -128,7 +127,7 @@ function LogTimeSlideOver({ open, onClose, onCreated }: { open: boolean; onClose
       billable,
     };
     try {
-      const res = await fetch(`${API_BASE}/api/v1/time-tracking`, {
+      const res = await fetch(`/api/veska/time-tracking`, {
         method: 'POST',
         headers: apiHeaders(),
         body: JSON.stringify(body),
@@ -236,7 +235,7 @@ export function TimeTrackingPageClient({ entries }: { entries: TimeEntry[] }) {
     setApprovingId(id);
     try {
       // Optimistic: try PATCH, ignore error
-      await fetch(`${API_BASE}/api/v1/time-tracking/${id}/approve`, {
+      await fetch(`/api/veska/time-tracking/${id}/approve`, {
         method: 'PATCH',
         headers: apiHeaders(),
       });

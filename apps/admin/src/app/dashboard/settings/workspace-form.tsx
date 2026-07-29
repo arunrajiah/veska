@@ -2,8 +2,6 @@
 
 import { useState } from 'react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
-
 interface WorkspaceFormValues {
   companyName: string;
   timezone: string;
@@ -31,7 +29,7 @@ export function WorkspaceForm({ initial }: { initial?: Partial<WorkspaceFormValu
     e.preventDefault();
     setStatus('saving');
     try {
-      const res = await fetch(`${API_BASE}/tenant-settings`, {
+      const res = await fetch(`/api/veska/tenant-settings`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -91,7 +89,13 @@ export function WorkspaceForm({ initial }: { initial?: Partial<WorkspaceFormValu
         disabled={status === 'saving'}
         className="mt-4 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        {status === 'saving' ? 'Saving…' : status === 'saved' ? 'Saved' : status === 'error' ? 'Error — retry?' : 'Save changes'}
+        {status === 'saving'
+          ? 'Saving…'
+          : status === 'saved'
+            ? 'Saved'
+            : status === 'error'
+              ? 'Error — retry?'
+              : 'Save changes'}
       </button>
     </form>
   );

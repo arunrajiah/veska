@@ -4,7 +4,6 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Sparkles, X } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 function apiHeaders() {
@@ -66,7 +65,7 @@ export function AIEnrichButton({ entityId, onToast }: AIEnrichButtonProps) {
     e.stopPropagation();
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/ai/enrich/${entityId}`, {
+      const res = await fetch(`/api/veska/ai/enrich/${entityId}`, {
         method: 'POST',
         headers: apiHeaders(),
       });
@@ -113,7 +112,7 @@ export function NewLeadSlideOver({ onClose, onSaved }: LeadFormProps) {
     setSaving(true);
     setError('');
     try {
-      const res = await fetch(`${API_BASE}/api/v1/crm/leads`, {
+      const res = await fetch(`/api/veska/crm/leads`, {
         method: 'POST',
         headers: apiHeaders(),
         body: JSON.stringify({ name, email, phone, company, source, notes }),

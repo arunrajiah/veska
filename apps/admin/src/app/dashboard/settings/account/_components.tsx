@@ -39,7 +39,15 @@ function authHeaders(): HeadersInit {
 
 type ToastKind = 'success' | 'error';
 
-function Toast({ message, kind, onClose }: { message: string; kind: ToastKind; onClose: () => void }) {
+function Toast({
+  message,
+  kind,
+  onClose,
+}: {
+  message: string;
+  kind: ToastKind;
+  onClose: () => void;
+}) {
   useEffect(() => {
     const t = setTimeout(onClose, 4000);
     return () => clearTimeout(t);
@@ -62,7 +70,15 @@ function Toast({ message, kind, onClose }: { message: string; kind: ToastKind; o
 
 // ── Section card wrapper ──────────────────────────────────────────────────────
 
-function SectionCard({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
+function SectionCard({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
     <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
       <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
@@ -128,7 +144,7 @@ function PasswordSection({ onToast }: { onToast: (msg: string, kind: ToastKind) 
     }
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/users/me/password`, {
+      const res = await fetch(`/api/veska/users/me/password`, {
         method: 'PATCH',
         headers: authHeaders(),
         body: JSON.stringify({ currentPassword, newPassword }),
@@ -177,7 +193,9 @@ function PasswordSection({ onToast }: { onToast: (msg: string, kind: ToastKind) 
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1.5">Confirm new password</label>
+          <label className="block text-xs font-medium text-gray-700 mb-1.5">
+            Confirm new password
+          </label>
           <input
             type="password"
             required
@@ -193,7 +211,9 @@ function PasswordSection({ onToast }: { onToast: (msg: string, kind: ToastKind) 
           disabled={loading}
           className="bg-indigo-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-60 flex items-center gap-2"
         >
-          {loading && <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
+          {loading && (
+            <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+          )}
           Update password
         </button>
       </form>
@@ -254,7 +274,9 @@ function MfaSection({ onToast }: { onToast: (msg: string, kind: ToastKind) => vo
               disabled={loading}
               className="flex-shrink-0 bg-indigo-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-60 flex items-center gap-2"
             >
-              {loading && <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
+              {loading && (
+                <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+              )}
               Set up MFA
             </button>
           )}
@@ -279,7 +301,6 @@ function MfaSection({ onToast }: { onToast: (msg: string, kind: ToastKind) => vo
             </p>
             {setupData.qrCodeUrl ? (
               <div className="flex justify-center mb-4">
-
                 <img src={setupData.qrCodeUrl} alt="MFA QR Code" className="w-48 h-48" />
               </div>
             ) : null}
@@ -372,7 +393,10 @@ function SessionsSection({ onToast }: { onToast: (msg: string, kind: ToastKind) 
               {sessions.map((session) => (
                 <tr key={session.id} className="hover:bg-gray-50 transition-colors">
                   <td className="py-2.5 pr-4 text-gray-700">{session.ipAddress ?? '—'}</td>
-                  <td className="py-2.5 pr-4 text-gray-500 max-w-[200px] truncate" title={session.userAgent}>
+                  <td
+                    className="py-2.5 pr-4 text-gray-500 max-w-[200px] truncate"
+                    title={session.userAgent}
+                  >
                     {session.userAgent ?? '—'}
                   </td>
                   <td className="py-2.5 pr-4 text-gray-500 whitespace-nowrap">
@@ -469,17 +493,13 @@ export function AccountSettingsClient() {
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-8 space-y-6">
-      {toast && (
-        <Toast
-          message={toast.message}
-          kind={toast.kind}
-          onClose={() => setToast(null)}
-        />
-      )}
+      {toast && <Toast message={toast.message} kind={toast.kind} onClose={() => setToast(null)} />}
 
       <div>
         <h1 className="text-xl font-semibold text-gray-900">Account Settings</h1>
-        <p className="text-sm text-gray-500 mt-1">Manage your profile, security, and active sessions.</p>
+        <p className="text-sm text-gray-500 mt-1">
+          Manage your profile, security, and active sessions.
+        </p>
       </div>
 
       <ProfileSection profile={profile} />

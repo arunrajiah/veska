@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { Star, Users, BarChart2, BookOpen } from 'lucide-react';
 import type { Course } from '../page.js';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 function apiHeaders() {
@@ -52,7 +51,7 @@ export function CourseDetailClient({ course }: { course: Course }) {
     setToggling(true);
     const newStatus = currentStatus === 'published' ? 'draft' : 'published';
     try {
-      await fetch(`${API_BASE}/api/v1/lms/${course.id}`, {
+      await fetch(`/api/veska/lms/${course.id}`, {
         method: 'PATCH',
         headers: apiHeaders(),
         body: JSON.stringify({ status: newStatus }),

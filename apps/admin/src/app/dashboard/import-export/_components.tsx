@@ -3,7 +3,6 @@
 import { useState, useRef } from 'react';
 import { Upload, Download, FileText, CheckCircle, XCircle } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 function apiHeaders() {
@@ -44,7 +43,7 @@ function ImportSection({ onJobAdded }: { onJobAdded: (job: JobRecord) => void })
       const form = new FormData();
       form.append('file', file);
       form.append('entityType', entityType);
-      const res = await fetch(`${API_BASE}/api/v1/import-export/import`, {
+      const res = await fetch(`/api/veska/import-export/import`, {
         method: 'POST',
         headers: apiHeaders(),
         body: form,
@@ -163,7 +162,7 @@ function ExportSection({ onJobAdded }: { onJobAdded: (job: JobRecord) => void })
       const params = new URLSearchParams({ entityType, format });
       if (dateFrom) params.set('dateFrom', dateFrom);
       if (dateTo) params.set('dateTo', dateTo);
-      const res = await fetch(`${API_BASE}/api/v1/import-export/export?${params.toString()}`, {
+      const res = await fetch(`/api/veska/import-export/export?${params.toString()}`, {
         headers: apiHeaders(),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);

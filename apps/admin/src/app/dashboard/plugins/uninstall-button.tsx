@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 interface UninstallButtonProps {
   pluginId: string;
@@ -20,7 +19,7 @@ export function UninstallButton({ pluginId, pluginName, tenantId }: UninstallBut
     if (!confirm(`Uninstall "${pluginName}"? This cannot be undone.`)) return;
     setLoading(true);
     try {
-      await fetch(`${API_BASE}/api/v1/plugins/${pluginId}`, {
+      await fetch(`/api/veska/plugins/${pluginId}`, {
         method: 'DELETE',
         headers: {
           'X-Veska-Tenant-Id': tenantId,

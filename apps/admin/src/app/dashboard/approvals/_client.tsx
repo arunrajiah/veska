@@ -83,7 +83,7 @@ export function ApprovalsClient({ pending, all, fetchError }: ApprovalsClientPro
   async function handleApprove(id: string) {
     setLoadingId(id);
     try {
-      await fetch(`${API_BASE}/api/v1/approval-requests/${id}/approve`, {
+      await fetch(`/api/veska/approval-requests/${id}/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ approverName: 'Admin' }),
@@ -97,7 +97,7 @@ export function ApprovalsClient({ pending, all, fetchError }: ApprovalsClientPro
   async function handleRejectSubmit(id: string) {
     setLoadingId(id);
     try {
-      await fetch(`${API_BASE}/api/v1/approval-requests/${id}/reject`, {
+      await fetch(`/api/veska/approval-requests/${id}/reject`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ approverName: 'Admin', comment: rejectComment }),

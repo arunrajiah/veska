@@ -54,9 +54,7 @@ export default function PayrollPage() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch('/api/v1/payroll/runs?limit=10', {
-          headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
-        });
+        const res = await fetch('/api/veska/payroll/runs?limit=10');
         if (res.ok) {
           const json = await res.json() as { data?: PayrollRun[] } | PayrollRun[];
           const data = Array.isArray(json) ? json : (json.data ?? []);

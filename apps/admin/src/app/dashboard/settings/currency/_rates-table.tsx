@@ -50,9 +50,12 @@ export default function RatesTable({
     setDeletingId(id);
     startTransition(async () => {
       try {
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/currencies/rates/${id}?tenantId=${tenantId}`, {
-          method: 'DELETE',
-        });
+        await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/currencies/rates/${id}?tenantId=${tenantId}`,
+          {
+            method: 'DELETE',
+          },
+        );
         setRates((prev) => prev.filter((r) => r.id !== id));
       } catch {
         // ignore
@@ -109,9 +112,7 @@ export default function RatesTable({
                   <td className="px-4 py-3 font-mono font-medium text-gray-900">
                     {rate.targetCurrency}
                   </td>
-                  <td className="px-4 py-3 text-gray-700">
-                    {Number(rate.rate).toFixed(6)}
-                  </td>
+                  <td className="px-4 py-3 text-gray-700">{Number(rate.rate).toFixed(6)}</td>
                   <td className="px-4 py-3 text-gray-600">
                     {String(rate.effectiveDate).split('T')[0]}
                   </td>

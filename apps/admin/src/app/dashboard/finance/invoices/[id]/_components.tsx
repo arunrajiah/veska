@@ -70,7 +70,7 @@ function RecurringSection({
     if (schedule !== undefined) return;
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/finance/invoices/${invoiceId}/recurring`, {
+      const res = await fetch(`/api/veska/finance/invoices/${invoiceId}/recurring`, {
         headers: authHeaders(tenantId),
       });
       if (res.ok) {
@@ -114,7 +114,7 @@ function RecurringSection({
       if (dayOfMonth) body['dayOfMonth'] = parseInt(dayOfMonth, 10);
       if (startDate) body['startDate'] = startDate;
 
-      const res = await fetch(`${API_BASE}/api/v1/finance/invoices/${invoiceId}/recurring`, {
+      const res = await fetch(`/api/veska/finance/invoices/${invoiceId}/recurring`, {
         method: 'POST',
         headers: authHeaders(tenantId),
         body: JSON.stringify(body),
@@ -137,14 +137,14 @@ function RecurringSection({
     try {
       if (!newEnabled) {
         // Disable via DELETE (sets enabled=false)
-        await fetch(`${API_BASE}/api/v1/finance/invoices/${invoiceId}/recurring`, {
+        await fetch(`/api/veska/finance/invoices/${invoiceId}/recurring`, {
           method: 'DELETE',
           headers: authHeaders(tenantId),
         });
         setSchedule({ ...schedule, enabled: false });
       } else {
         // Re-enable via POST
-        const res = await fetch(`${API_BASE}/api/v1/finance/invoices/${invoiceId}/recurring`, {
+        const res = await fetch(`/api/veska/finance/invoices/${invoiceId}/recurring`, {
           method: 'POST',
           headers: authHeaders(tenantId),
           body: JSON.stringify({
@@ -318,7 +318,6 @@ function RecurringSection({
   );
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 function authHeaders(tenantId: string): HeadersInit {
   return {
@@ -384,7 +383,7 @@ function AIInsights({ invoiceId, tenantId }: { invoiceId: string; tenantId: stri
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/ai/enrich/${invoiceId}`, {
+      const res = await fetch(`/api/veska/ai/enrich/${invoiceId}`, {
         method: 'POST',
         headers: authHeaders(tenantId),
         body: JSON.stringify({ entityType: 'invoice' }),
@@ -453,7 +452,7 @@ export function InvoiceDetailClient({
   const handleSend = async () => {
     setLoading('send');
     try {
-      const res = await fetch(`${API_BASE}/api/v1/finance/invoices/${record.id}/send`, {
+      const res = await fetch(`/api/veska/finance/invoices/${record.id}/send`, {
         method: 'POST',
         headers: authHeaders(tenantId),
         body: JSON.stringify({}),
@@ -471,7 +470,7 @@ export function InvoiceDetailClient({
   const handleMarkPaid = async () => {
     setLoading('paid');
     try {
-      const res = await fetch(`${API_BASE}/api/v1/finance/invoices/${record.id}`, {
+      const res = await fetch(`/api/veska/finance/invoices/${record.id}`, {
         method: 'PATCH',
         headers: authHeaders(tenantId),
         body: JSON.stringify({ status: 'paid' }),
@@ -688,7 +687,7 @@ export function SendInvoiceButton({ invoiceId, tenantId }: { invoiceId: string; 
   const handleSend = async () => {
     setLoading(true);
     try {
-      await fetch(`${API_BASE}/api/v1/finance/invoices/${invoiceId}/send`, {
+      await fetch(`/api/veska/finance/invoices/${invoiceId}/send`, {
         method: 'POST',
         headers: authHeaders(tenantId),
         body: JSON.stringify({}),
@@ -715,7 +714,7 @@ export function MarkAsPaidForm({ invoiceId, tenantId }: { invoiceId: string; ten
   const handle = async () => {
     setLoading(true);
     try {
-      await fetch(`${API_BASE}/api/v1/finance/invoices/${invoiceId}`, {
+      await fetch(`/api/veska/finance/invoices/${invoiceId}`, {
         method: 'PATCH',
         headers: authHeaders(tenantId),
         body: JSON.stringify({ status: 'paid' }),

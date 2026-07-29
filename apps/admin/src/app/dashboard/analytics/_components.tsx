@@ -127,7 +127,7 @@ function useChartData<T>(url: string, deps: unknown[]) {
 
 function RevenueChart({ period }: { period: Period }) {
   const { data, loading, error } = useChartData<ChartData>(
-    `${API_BASE}/api/v1/analytics/revenue?period=${period}`,
+    `/api/veska/analytics/revenue?period=${period}`,
     [period],
   );
 
@@ -145,7 +145,7 @@ function RevenueChart({ period }: { period: Period }) {
 
 function ExpensesDonut({ period }: { period: Period }) {
   const { data, loading, error } = useChartData<DonutSlice[] | { categories?: DonutSlice[] }>(
-    `${API_BASE}/api/v1/analytics/expenses?period=${period}`,
+    `/api/veska/analytics/expenses?period=${period}`,
     [period],
   );
 
@@ -164,7 +164,7 @@ function ExpensesDonut({ period }: { period: Period }) {
 
 function PipelineBar() {
   const { data, loading, error } = useChartData<ChartData | { stages?: { label: string; value: number }[] }>(
-    `${API_BASE}/api/v1/analytics/pipeline`,
+    `/api/veska/analytics/pipeline`,
     [],
   );
 
@@ -190,7 +190,7 @@ function PipelineBar() {
 
 function HeadcountBar() {
   const { data, loading, error } = useChartData<ChartData | { departments?: { label: string; value: number }[] }>(
-    `${API_BASE}/api/v1/analytics/headcount`,
+    `/api/veska/analytics/headcount`,
     [],
   );
 

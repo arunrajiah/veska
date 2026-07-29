@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { SUPPORTED_CURRENCIES } from '@/lib/currency.js';
 
 const STORAGE_KEY = 'veska_display_currency';
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 export function useDashboardCurrency() {
   const [currency, setCurrencyState] = useState('USD');
@@ -22,7 +21,7 @@ export function useDashboardCurrency() {
 
   // Fetch rates timestamp
   useEffect(() => {
-    fetch(`${API_BASE}/api/v1/currencies/rates?base=USD`, {
+    fetch(`/api/veska/currencies/rates?base=USD`, {
       headers: { 'X-Veska-Tenant-Id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant', 'X-Veska-Identity-Id': 'admin' },
     })
       .then((r) => r.json())

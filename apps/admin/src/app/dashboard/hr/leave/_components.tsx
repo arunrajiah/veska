@@ -6,7 +6,6 @@ import { Plus, X, Check, XCircle } from 'lucide-react';
 import { BulkActionBar } from '@/components/bulk-action-bar.js';
 import { useTranslations } from 'next-intl';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 const IDENTITY_ID = process.env.NEXT_PUBLIC_ADMIN_IDENTITY_ID ?? 'admin';
 
@@ -86,7 +85,7 @@ function RequestLeaveSlideOver({ onClose, onSaved }: { onClose: () => void; onSa
       status: 'pending',
     };
     try {
-      const res = await fetch(`${API_BASE}/api/v1/hr/leave`, {
+      const res = await fetch(`/api/veska/hr/leave`, {
         method: 'POST',
         headers: fmtHeaders(),
         body: JSON.stringify(body),
@@ -159,7 +158,7 @@ function LeaveActionButtons({ leaveId, status, onRefresh }: { leaveId: string; s
   async function doAction(action: 'approve' | 'reject') {
     setLoading(action);
     try {
-      await fetch(`${API_BASE}/api/v1/hr/leave/${leaveId}/${action}`, {
+      await fetch(`/api/veska/hr/leave/${leaveId}/${action}`, {
         method: 'PATCH',
         headers: fmtHeaders(),
         body: JSON.stringify({}),
@@ -246,7 +245,7 @@ export function LeaveClient({ records: initial }: { records: LeaveRecord[] }) {
     if (selected.size === 0) return;
     setBulkLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/hr/leave/bulk`, {
+      const res = await fetch(`/api/veska/hr/leave/bulk`, {
         method: 'POST',
         headers: fmtHeaders(),
         body: JSON.stringify({ ids: Array.from(selected), action }),

@@ -4,7 +4,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 async function fetchSettings(): Promise<TenantSettings> {
   try {
-    const res = await fetch(`${API_BASE}/tenant-settings`, {
+    const res = await fetch(`${API_BASE}/api/v1/tenant-settings`, {
       headers: {
         'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant',
         'Content-Type': 'application/json',

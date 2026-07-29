@@ -53,7 +53,11 @@ function Toast({ toast }: { toast: { msg: string; type: 'success' | 'error' } | 
 // ---------------------------------------------------------------------------
 function fmt(iso: string | null | undefined) {
   if (!iso) return '—';
-  try { return new Date(iso).toLocaleString(); } catch { return iso; }
+  try {
+    return new Date(iso).toLocaleString();
+  } catch {
+    return iso;
+  }
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -88,7 +92,9 @@ function DataExportTab({ showToast }: { showToast: (m: string, t?: 'success' | '
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState<ExportRequest[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
-  const [downloadBlob, setDownloadBlob] = useState<{ url: string; req: ExportRequest } | null>(null);
+  const [downloadBlob, setDownloadBlob] = useState<{ url: string; req: ExportRequest } | null>(
+    null,
+  );
 
   const fetchHistory = useCallback(async () => {
     setHistoryLoading(true);
@@ -103,7 +109,9 @@ function DataExportTab({ showToast }: { showToast: (m: string, t?: 'success' | '
     }
   }, []);
 
-  useEffect(() => { void fetchHistory(); }, [fetchHistory]);
+  useEffect(() => {
+    void fetchHistory();
+  }, [fetchHistory]);
 
   async function handleRequestExport(e: React.FormEvent) {
     e.preventDefault();
@@ -115,7 +123,10 @@ function DataExportTab({ showToast }: { showToast: (m: string, t?: 'success' | '
         body: JSON.stringify({ requestedBy: 'admin@demo.com', notes }),
       });
       const d = (await res.json()) as ExportRequest & { message?: string };
-      if (!res.ok) { showToast(d.message ?? 'Request failed', 'error'); return; }
+      if (!res.ok) {
+        showToast(d.message ?? 'Request failed', 'error');
+        return;
+      }
       showToast('Export request submitted');
       setNotes('');
       if (d.exportData) {
@@ -153,7 +164,8 @@ function DataExportTab({ showToast }: { showToast: (m: string, t?: 'success' | '
       <div className="flex gap-3 p-4 bg-blue-50 border border-blue-200 rounded-xl">
         <ShieldCheck size={18} className="text-blue-600 flex-shrink-0 mt-0.5" />
         <p className="text-sm text-blue-800">
-          <span className="font-medium">GDPR Article 15/20</span> — Users have the right to receive a copy of their personal data.
+          <span className="font-medium">GDPR Article 15/20</span> — Users have the right to receive
+          a copy of their personal data.
         </p>
       </div>
 
@@ -162,7 +174,9 @@ function DataExportTab({ showToast }: { showToast: (m: string, t?: 'success' | '
         <h2 className="text-sm font-semibold text-gray-900 mb-4">Request Data Export</h2>
         <form onSubmit={(e) => void handleRequestExport(e)} className="space-y-4 max-w-lg">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Notes (optional)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Notes (optional)
+            </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -177,9 +191,11 @@ function DataExportTab({ showToast }: { showToast: (m: string, t?: 'success' | '
               disabled={loading}
               className="inline-flex items-center gap-2 text-sm bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-60"
             >
-              {loading
-                ? <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                : <Download size={14} />}
+              {loading ? (
+                <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+              ) : (
+                <Download size={14} />
+              )}
               Request data export
             </button>
             {downloadBlob && (
@@ -209,7 +225,9 @@ function DataExportTab({ showToast }: { showToast: (m: string, t?: 'success' | '
               <thead>
                 <tr className="border-b border-gray-100">
                   <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4">Date</th>
-                  <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4">Requested By</th>
+                  <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4">
+                    Requested By
+                  </th>
                   <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4">Status</th>
                   <th className="pb-3" />
                 </tr>
@@ -217,9 +235,13 @@ function DataExportTab({ showToast }: { showToast: (m: string, t?: 'success' | '
               <tbody className="divide-y divide-gray-50">
                 {history.map((r) => (
                   <tr key={r.id}>
-                    <td className="py-3 pr-4 text-xs text-gray-600 whitespace-nowrap">{fmt(r.createdAt)}</td>
+                    <td className="py-3 pr-4 text-xs text-gray-600 whitespace-nowrap">
+                      {fmt(r.createdAt)}
+                    </td>
                     <td className="py-3 pr-4 text-xs text-gray-700">{r.requestedBy}</td>
-                    <td className="py-3 pr-4"><StatusBadge status={r.status} /></td>
+                    <td className="py-3 pr-4">
+                      <StatusBadge status={r.status} />
+                    </td>
                     <td className="py-3 text-right">
                       {r.exportData && (
                         <button
@@ -274,11 +296,16 @@ function ErasureTab({ showToast }: { showToast: (m: string, t?: 'success' | 'err
     }
   }, []);
 
-  useEffect(() => { void fetchHistory(); }, [fetchHistory]);
+  useEffect(() => {
+    void fetchHistory();
+  }, [fetchHistory]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!confirmed) { showToast('Please confirm the irreversible action', 'error'); return; }
+    if (!confirmed) {
+      showToast('Please confirm the irreversible action', 'error');
+      return;
+    }
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/privacy/erasure-request`, {
@@ -287,7 +314,10 @@ function ErasureTab({ showToast }: { showToast: (m: string, t?: 'success' | 'err
         body: JSON.stringify({ targetUserId, notes }),
       });
       const d = (await res.json()) as { message?: string };
-      if (!res.ok) { showToast(d.message ?? 'Request failed', 'error'); return; }
+      if (!res.ok) {
+        showToast(d.message ?? 'Request failed', 'error');
+        return;
+      }
       showToast('Erasure request submitted');
       setTargetUserId('');
       setNotes('');
@@ -306,7 +336,8 @@ function ErasureTab({ showToast }: { showToast: (m: string, t?: 'success' | 'err
       <div className="flex gap-3 p-4 bg-blue-50 border border-blue-200 rounded-xl">
         <ShieldCheck size={18} className="text-blue-600 flex-shrink-0 mt-0.5" />
         <p className="text-sm text-blue-800">
-          <span className="font-medium">GDPR Article 17</span> — Users may request deletion of their personal data.
+          <span className="font-medium">GDPR Article 17</span> — Users may request deletion of their
+          personal data.
         </p>
       </div>
 
@@ -314,7 +345,8 @@ function ErasureTab({ showToast }: { showToast: (m: string, t?: 'success' | 'err
       <div className="flex gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
         <AlertTriangle size={18} className="text-red-600 flex-shrink-0 mt-0.5" />
         <p className="text-sm text-red-800">
-          <span className="font-medium">Warning:</span> This action permanently anonymizes the user&apos;s data and cannot be undone.
+          <span className="font-medium">Warning:</span> This action permanently anonymizes the
+          user&apos;s data and cannot be undone.
         </p>
       </div>
 
@@ -323,7 +355,9 @@ function ErasureTab({ showToast }: { showToast: (m: string, t?: 'success' | 'err
         <h2 className="text-sm font-semibold text-gray-900 mb-4">Submit Erasure Request</h2>
         <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4 max-w-lg">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Target User ID or Email</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Target User ID or Email
+            </label>
             <input
               type="text"
               required
@@ -334,7 +368,9 @@ function ErasureTab({ showToast }: { showToast: (m: string, t?: 'success' | 'err
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Notes (optional)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Notes (optional)
+            </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -350,16 +386,21 @@ function ErasureTab({ showToast }: { showToast: (m: string, t?: 'success' | 'err
               onChange={(e) => setConfirmed(e.target.checked)}
               className="mt-0.5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
             />
-            <span className="text-sm text-gray-700">I understand this action is irreversible and will permanently anonymize the user&apos;s data.</span>
+            <span className="text-sm text-gray-700">
+              I understand this action is irreversible and will permanently anonymize the
+              user&apos;s data.
+            </span>
           </label>
           <button
             type="submit"
             disabled={loading || !confirmed}
             className="inline-flex items-center gap-2 text-sm bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-60"
           >
-            {loading
-              ? <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-              : <Trash2 size={14} />}
+            {loading ? (
+              <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+            ) : (
+              <Trash2 size={14} />
+            )}
             Submit erasure request
           </button>
         </form>
@@ -378,7 +419,9 @@ function ErasureTab({ showToast }: { showToast: (m: string, t?: 'success' | 'err
               <thead>
                 <tr className="border-b border-gray-100">
                   <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4">Date</th>
-                  <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4">Target User</th>
+                  <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4">
+                    Target User
+                  </th>
                   <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4">Notes</th>
                   <th className="text-left text-xs font-medium text-gray-400 pb-3">Status</th>
                 </tr>
@@ -386,10 +429,16 @@ function ErasureTab({ showToast }: { showToast: (m: string, t?: 'success' | 'err
               <tbody className="divide-y divide-gray-50">
                 {history.map((r) => (
                   <tr key={r.id}>
-                    <td className="py-3 pr-4 text-xs text-gray-600 whitespace-nowrap">{fmt(r.createdAt)}</td>
+                    <td className="py-3 pr-4 text-xs text-gray-600 whitespace-nowrap">
+                      {fmt(r.createdAt)}
+                    </td>
                     <td className="py-3 pr-4 text-xs text-gray-700 font-mono">{r.targetUserId}</td>
-                    <td className="py-3 pr-4 text-xs text-gray-500 max-w-xs truncate">{r.notes ?? '—'}</td>
-                    <td className="py-3"><StatusBadge status={r.status} /></td>
+                    <td className="py-3 pr-4 text-xs text-gray-500 max-w-xs truncate">
+                      {r.notes ?? '—'}
+                    </td>
+                    <td className="py-3">
+                      <StatusBadge status={r.status} />
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -422,7 +471,7 @@ interface ConsentRecord {
 }
 
 const PURPOSES = ['marketing', 'analytics', 'functional', 'ai_training'] as const;
-type Purpose = typeof PURPOSES[number];
+type Purpose = (typeof PURPOSES)[number];
 
 const PURPOSE_LABELS: Record<Purpose, string> = {
   marketing: 'Marketing',
@@ -435,9 +484,11 @@ function ConsentCell({ val }: { val?: { granted: boolean; date: string } | null 
   if (!val) return <span className="text-gray-300 text-xs">—</span>;
   return (
     <div className="flex items-center gap-1.5">
-      {val.granted
-        ? <CheckCircle size={14} className="text-green-500" />
-        : <XCircle size={14} className="text-red-400" />}
+      {val.granted ? (
+        <CheckCircle size={14} className="text-green-500" />
+      ) : (
+        <XCircle size={14} className="text-red-400" />
+      )}
       <span className="text-xs text-gray-500">{fmt(val.date).split(',')[0]}</span>
     </div>
   );
@@ -481,7 +532,10 @@ function ConsentLogTab({ showToast }: { showToast: (m: string, t?: 'success' | '
     }
   }, []);
 
-  useEffect(() => { void fetchSummary(); void fetchLog(); }, [fetchSummary, fetchLog]);
+  useEffect(() => {
+    void fetchSummary();
+    void fetchLog();
+  }, [fetchSummary, fetchLog]);
 
   async function handleRecordConsent(e: React.FormEvent) {
     e.preventDefault();
@@ -493,7 +547,10 @@ function ConsentLogTab({ showToast }: { showToast: (m: string, t?: 'success' | '
         body: JSON.stringify({ userId, purpose, granted }),
       });
       const d = (await res.json()) as { message?: string };
-      if (!res.ok) { showToast(d.message ?? 'Failed to record consent', 'error'); return; }
+      if (!res.ok) {
+        showToast(d.message ?? 'Failed to record consent', 'error');
+        return;
+      }
       showToast('Consent recorded');
       setUserId('');
       void fetchSummary();
@@ -520,9 +577,15 @@ function ConsentLogTab({ showToast }: { showToast: (m: string, t?: 'success' | '
               <thead>
                 <tr className="border-b border-gray-100">
                   <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4">User ID</th>
-                  <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4">Marketing</th>
-                  <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4">Analytics</th>
-                  <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4">Functional</th>
+                  <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4">
+                    Marketing
+                  </th>
+                  <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4">
+                    Analytics
+                  </th>
+                  <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4">
+                    Functional
+                  </th>
                   <th className="text-left text-xs font-medium text-gray-400 pb-3">AI Training</th>
                 </tr>
               </thead>
@@ -530,10 +593,18 @@ function ConsentLogTab({ showToast }: { showToast: (m: string, t?: 'success' | '
                 {summary.map((row) => (
                   <tr key={row.userId}>
                     <td className="py-3 pr-4 text-xs text-gray-700 font-mono">{row.userId}</td>
-                    <td className="py-3 pr-4"><ConsentCell val={row.marketing} /></td>
-                    <td className="py-3 pr-4"><ConsentCell val={row.analytics} /></td>
-                    <td className="py-3 pr-4"><ConsentCell val={row.functional} /></td>
-                    <td className="py-3"><ConsentCell val={row.aiTraining} /></td>
+                    <td className="py-3 pr-4">
+                      <ConsentCell val={row.marketing} />
+                    </td>
+                    <td className="py-3 pr-4">
+                      <ConsentCell val={row.analytics} />
+                    </td>
+                    <td className="py-3 pr-4">
+                      <ConsentCell val={row.functional} />
+                    </td>
+                    <td className="py-3">
+                      <ConsentCell val={row.aiTraining} />
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -545,7 +616,10 @@ function ConsentLogTab({ showToast }: { showToast: (m: string, t?: 'success' | '
       {/* Record consent */}
       <section className="bg-white border border-gray-200 rounded-xl p-6">
         <h2 className="text-sm font-semibold text-gray-900 mb-4">Record Consent</h2>
-        <form onSubmit={(e) => void handleRecordConsent(e)} className="flex flex-wrap items-end gap-3 max-w-2xl">
+        <form
+          onSubmit={(e) => void handleRecordConsent(e)}
+          className="flex flex-wrap items-end gap-3 max-w-2xl"
+        >
           <div className="flex-1 min-w-[160px]">
             <label className="block text-xs font-medium text-gray-700 mb-1.5">User ID</label>
             <input
@@ -565,7 +639,9 @@ function ConsentLogTab({ showToast }: { showToast: (m: string, t?: 'success' | '
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             >
               {PURPOSES.map((p) => (
-                <option key={p} value={p}>{PURPOSE_LABELS[p]}</option>
+                <option key={p} value={p}>
+                  {PURPOSE_LABELS[p]}
+                </option>
               ))}
             </select>
           </div>
@@ -578,8 +654,12 @@ function ConsentLogTab({ showToast }: { showToast: (m: string, t?: 'success' | '
                 granted ? 'bg-green-500' : 'bg-gray-300'
               }`}
             >
-              <span className={`inline-block h-6 w-6 transform rounded-md bg-white shadow transition-transform ${granted ? 'translate-x-9' : 'translate-x-1'}`} />
-              <span className={`absolute text-xs font-medium text-white ${granted ? 'left-2' : 'right-2'}`}>
+              <span
+                className={`inline-block h-6 w-6 transform rounded-md bg-white shadow transition-transform ${granted ? 'translate-x-9' : 'translate-x-1'}`}
+              />
+              <span
+                className={`absolute text-xs font-medium text-white ${granted ? 'left-2' : 'right-2'}`}
+              >
                 {granted ? 'Yes' : 'No'}
               </span>
             </button>
@@ -589,9 +669,11 @@ function ConsentLogTab({ showToast }: { showToast: (m: string, t?: 'success' | '
             disabled={submitting}
             className="inline-flex items-center gap-2 text-sm bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-60 h-9"
           >
-            {submitting
-              ? <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-              : <Plus size={14} />}
+            {submitting ? (
+              <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+            ) : (
+              <Plus size={14} />
+            )}
             Record
           </button>
         </form>
@@ -620,14 +702,22 @@ function ConsentLogTab({ showToast }: { showToast: (m: string, t?: 'success' | '
                 {log.map((r) => (
                   <tr key={r.id}>
                     <td className="py-3 pr-4 text-xs text-gray-700 font-mono">{r.userId}</td>
-                    <td className="py-3 pr-4 text-xs text-gray-600 capitalize">{r.purpose.replace('_', ' ')}</td>
-                    <td className="py-3 pr-4">
-                      {r.granted
-                        ? <CheckCircle size={14} className="text-green-500" />
-                        : <XCircle size={14} className="text-red-400" />}
+                    <td className="py-3 pr-4 text-xs text-gray-600 capitalize">
+                      {r.purpose.replace('_', ' ')}
                     </td>
-                    <td className="py-3 pr-4 text-xs text-gray-500 font-mono">{r.ipAddress ?? '—'}</td>
-                    <td className="py-3 text-xs text-gray-500 whitespace-nowrap">{fmt(r.createdAt)}</td>
+                    <td className="py-3 pr-4">
+                      {r.granted ? (
+                        <CheckCircle size={14} className="text-green-500" />
+                      ) : (
+                        <XCircle size={14} className="text-red-400" />
+                      )}
+                    </td>
+                    <td className="py-3 pr-4 text-xs text-gray-500 font-mono">
+                      {r.ipAddress ?? '—'}
+                    </td>
+                    <td className="py-3 text-xs text-gray-500 whitespace-nowrap">
+                      {fmt(r.createdAt)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -655,9 +745,24 @@ interface RetentionEnforceResult {
   details?: Record<string, number>;
 }
 
-const ENTITY_TYPES = ['invoice', 'expense', 'employee', 'customer', 'lead', 'contact', 'deal', 'order', 'project', 'time_entry'] as const;
+const ENTITY_TYPES = [
+  'invoice',
+  'expense',
+  'employee',
+  'customer',
+  'lead',
+  'contact',
+  'deal',
+  'order',
+  'project',
+  'time_entry',
+] as const;
 
-function DataRetentionTab({ showToast }: { showToast: (m: string, t?: 'success' | 'error') => void }) {
+function DataRetentionTab({
+  showToast,
+}: {
+  showToast: (m: string, t?: 'success' | 'error') => void;
+}) {
   const [policies, setPolicies] = useState<RetentionPolicy[]>([]);
   const [loading, setLoading] = useState(true);
   const [enforcing, setEnforcing] = useState(false);
@@ -682,11 +787,13 @@ function DataRetentionTab({ showToast }: { showToast: (m: string, t?: 'success' 
     }
   }, []);
 
-  useEffect(() => { void fetchPolicies(); }, [fetchPolicies]);
+  useEffect(() => {
+    void fetchPolicies();
+  }, [fetchPolicies]);
 
   async function toggleAutoDelete(policy: RetentionPolicy) {
     const next = { ...policy, autoDelete: !policy.autoDelete };
-    setPolicies((p) => p.map((x) => x.id === policy.id ? next : x));
+    setPolicies((p) => p.map((x) => (x.id === policy.id ? next : x)));
     try {
       await fetch(`${API_BASE}/privacy/retention/${policy.id}`, {
         method: 'PUT',
@@ -694,7 +801,7 @@ function DataRetentionTab({ showToast }: { showToast: (m: string, t?: 'success' 
         body: JSON.stringify({ autoDelete: next.autoDelete }),
       });
     } catch {
-      setPolicies((p) => p.map((x) => x.id === policy.id ? policy : x));
+      setPolicies((p) => p.map((x) => (x.id === policy.id ? policy : x)));
       showToast('Failed to update policy', 'error');
     }
   }
@@ -723,7 +830,10 @@ function DataRetentionTab({ showToast }: { showToast: (m: string, t?: 'success' 
         body: JSON.stringify({ entityType, retainDays: parseInt(retainDays, 10), autoDelete }),
       });
       const d = (await res.json()) as { message?: string };
-      if (!res.ok) { showToast(d.message ?? 'Failed to add policy', 'error'); return; }
+      if (!res.ok) {
+        showToast(d.message ?? 'Failed to add policy', 'error');
+        return;
+      }
       showToast('Policy added');
       setRetainDays('365');
       setAutoDelete(false);
@@ -743,7 +853,10 @@ function DataRetentionTab({ showToast }: { showToast: (m: string, t?: 'success' 
         headers: apiHeaders(),
       });
       const d = (await res.json()) as RetentionEnforceResult & { message?: string };
-      if (!res.ok) { showToast(d.message ?? 'Enforcement failed', 'error'); return; }
+      if (!res.ok) {
+        showToast(d.message ?? 'Enforcement failed', 'error');
+        return;
+      }
       setEnforceResult(d);
     } catch {
       showToast('Network error', 'error');
@@ -763,9 +876,11 @@ function DataRetentionTab({ showToast }: { showToast: (m: string, t?: 'success' 
             disabled={enforcing}
             className="inline-flex items-center gap-2 text-sm bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-60"
           >
-            {enforcing
-              ? <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-              : <RefreshCw size={14} />}
+            {enforcing ? (
+              <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+            ) : (
+              <RefreshCw size={14} />
+            )}
             Run retention now
           </button>
         </div>
@@ -773,22 +888,32 @@ function DataRetentionTab({ showToast }: { showToast: (m: string, t?: 'success' 
         {loading ? (
           <div className="text-sm text-gray-400 py-4 text-center">Loading…</div>
         ) : policies.length === 0 ? (
-          <div className="text-sm text-gray-400 py-4 text-center">No retention policies configured.</div>
+          <div className="text-sm text-gray-400 py-4 text-center">
+            No retention policies configured.
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100">
-                  <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4">Entity Type</th>
-                  <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4">Retain (days)</th>
-                  <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4">Auto-delete</th>
+                  <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4">
+                    Entity Type
+                  </th>
+                  <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4">
+                    Retain (days)
+                  </th>
+                  <th className="text-left text-xs font-medium text-gray-400 pb-3 pr-4">
+                    Auto-delete
+                  </th>
                   <th className="pb-3" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {policies.map((p) => (
                   <tr key={p.id}>
-                    <td className="py-3 pr-4 text-xs text-gray-700 capitalize">{p.entityType.replace('_', ' ')}</td>
+                    <td className="py-3 pr-4 text-xs text-gray-700 capitalize">
+                      {p.entityType.replace('_', ' ')}
+                    </td>
                     <td className="py-3 pr-4 text-xs text-gray-600">{p.retainDays}</td>
                     <td className="py-3 pr-4">
                       <button
@@ -797,7 +922,9 @@ function DataRetentionTab({ showToast }: { showToast: (m: string, t?: 'success' 
                           p.autoDelete ? 'bg-indigo-600' : 'bg-gray-200'
                         }`}
                       >
-                        <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${p.autoDelete ? 'translate-x-4.5' : 'translate-x-0.5'}`} />
+                        <span
+                          className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${p.autoDelete ? 'translate-x-4.5' : 'translate-x-0.5'}`}
+                        />
                       </button>
                     </td>
                     <td className="py-3 text-right">
@@ -819,7 +946,10 @@ function DataRetentionTab({ showToast }: { showToast: (m: string, t?: 'success' 
       {/* Add policy form */}
       <section className="bg-white border border-gray-200 rounded-xl p-6">
         <h2 className="text-sm font-semibold text-gray-900 mb-4">Add Policy</h2>
-        <form onSubmit={(e) => void handleAddPolicy(e)} className="flex flex-wrap items-end gap-3 max-w-2xl">
+        <form
+          onSubmit={(e) => void handleAddPolicy(e)}
+          className="flex flex-wrap items-end gap-3 max-w-2xl"
+        >
           <div className="min-w-[160px]">
             <label className="block text-xs font-medium text-gray-700 mb-1.5">Entity Type</label>
             <select
@@ -828,7 +958,9 @@ function DataRetentionTab({ showToast }: { showToast: (m: string, t?: 'success' 
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             >
               {ENTITY_TYPES.map((t) => (
-                <option key={t} value={t}>{t.replace('_', ' ')}</option>
+                <option key={t} value={t}>
+                  {t.replace('_', ' ')}
+                </option>
               ))}
             </select>
           </div>
@@ -852,8 +984,12 @@ function DataRetentionTab({ showToast }: { showToast: (m: string, t?: 'success' 
                 autoDelete ? 'bg-indigo-600' : 'bg-gray-300'
               }`}
             >
-              <span className={`inline-block h-6 w-6 transform rounded-md bg-white shadow transition-transform ${autoDelete ? 'translate-x-9' : 'translate-x-1'}`} />
-              <span className={`absolute text-xs font-medium text-white ${autoDelete ? 'left-2' : 'right-2'}`}>
+              <span
+                className={`inline-block h-6 w-6 transform rounded-md bg-white shadow transition-transform ${autoDelete ? 'translate-x-9' : 'translate-x-1'}`}
+              />
+              <span
+                className={`absolute text-xs font-medium text-white ${autoDelete ? 'left-2' : 'right-2'}`}
+              >
                 {autoDelete ? 'On' : 'Off'}
               </span>
             </button>
@@ -863,9 +999,11 @@ function DataRetentionTab({ showToast }: { showToast: (m: string, t?: 'success' 
             disabled={adding}
             className="inline-flex items-center gap-2 text-sm bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-60 h-9"
           >
-            {adding
-              ? <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-              : <Plus size={14} />}
+            {adding ? (
+              <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+            ) : (
+              <Plus size={14} />
+            )}
             Add policy
           </button>
         </form>
@@ -880,8 +1018,10 @@ function DataRetentionTab({ showToast }: { showToast: (m: string, t?: 'success' 
               <h3 className="text-base font-semibold text-gray-900">Retention Enforced</h3>
             </div>
             <p className="text-sm text-gray-600 mb-3">
-              Deleted <span className="font-semibold text-gray-900">{enforceResult.deleted}</span> records
-              across <span className="font-semibold text-gray-900">{enforceResult.entityTypes}</span> entity types.
+              Deleted <span className="font-semibold text-gray-900">{enforceResult.deleted}</span>{' '}
+              records across{' '}
+              <span className="font-semibold text-gray-900">{enforceResult.entityTypes}</span>{' '}
+              entity types.
             </p>
             {enforceResult.details && (
               <div className="mb-4 bg-gray-50 rounded-lg p-3 space-y-1">

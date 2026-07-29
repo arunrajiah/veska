@@ -3,8 +3,6 @@
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
-
 interface CreateKeyFormProps {
   tenantId: string;
 }
@@ -26,7 +24,7 @@ export function CreateKeyForm({ tenantId }: CreateKeyFormProps) {
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/api-keys`, {
+      const res = await fetch(`/api/veska/api-keys`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

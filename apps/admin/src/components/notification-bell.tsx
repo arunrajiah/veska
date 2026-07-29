@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { currentIdentityId } from '@/lib/api-client';
 import {
   Bell,
   Info,
@@ -15,7 +16,6 @@ import {
 import { useRealtimeEvents } from '@/hooks/useRealtimeEvents.js';
 import type { RealtimeEvent } from '@/hooks/useRealtimeEvents.js';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? '';
 
 function apiHeaders() {
@@ -104,7 +104,10 @@ function liveEventLabel(type: string): string {
   return map[type] ?? type;
 }
 
-export default function NotificationBell({ userId = 'demo-user' }: { userId?: string }) {
+export default function NotificationBell({ userId }: { userId?: string }) {
+  // Falls back to the signed-in identity rather than a placeholder id, which used to
+  // make every caller query notifications for a user named 'demo-user'.
+  const currentUserId = userId ?? currentIdentityId();
   const router = useRouter();
   const [count, setCount] = useState(0);
   const [open, setOpen] = useState(false);
@@ -134,9 +137,10 @@ export default function NotificationBell({ userId = 'demo-user' }: { userId?: st
   );
 
   const fetchCount = useCallback(async () => {
+    if (!currentUserId) return;
     try {
       const res = await fetch(
-        `${API_BASE}/api/v1/notifications/unread-count?userId=${encodeURIComponent(userId)}`,
+        `/api/veska/notifications/unread-count?userId=${encodeURIComponent(currentUserId)}`,
         { headers: apiHeaders(), cache: 'no-store' },
       );
       if (res.ok) {
@@ -146,13 +150,14 @@ export default function NotificationBell({ userId = 'demo-user' }: { userId?: st
     } catch {
       // ignore
     }
-  }, [userId]);
+  }, [currentUserId]);
 
   const fetchNotifications = useCallback(async () => {
+    if (!currentUserId) return;
     setLoadingList(true);
     try {
       const res = await fetch(
-        `${API_BASE}/api/v1/notifications?userId=${encodeURIComponent(userId)}&limit=10`,
+        `/api/veska/notifications?userId=${encodeURIComponent(currentUserId)}&limit=10`,
         { headers: apiHeaders(), cache: 'no-store' },
       );
       if (res.ok) {
@@ -164,7 +169,7 @@ export default function NotificationBell({ userId = 'demo-user' }: { userId?: st
     } finally {
       setLoadingList(false);
     }
-  }, [userId]);
+  }, [currentUserId]);
 
   // Poll unread count every 30s
   useEffect(() => {
@@ -195,13 +200,11 @@ export default function NotificationBell({ userId = 'demo-user' }: { userId?: st
   async function markRead(notif: Notification) {
     const actionUrl = notif.actionUrl ?? notif.link;
     try {
-      await fetch(`${API_BASE}/api/v1/notifications/${notif.id}/read`, {
+      await fetch(`/api/veska/notifications/${notif.id}/read`, {
         method: 'POST',
         headers: apiHeaders(),
       });
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === notif.id ? { ...n, read: true } : n)),
-      );
+      setNotifications((prev) => prev.map((n) => (n.id === notif.id ? { ...n, read: true } : n)));
       setCount((c) => Math.max(0, c - 1));
     } catch {
       // ignore
@@ -216,7 +219,7 @@ export default function NotificationBell({ userId = 'demo-user' }: { userId?: st
   async function markAllRead() {
     setMarkingAll(true);
     try {
-      await fetch(`${API_BASE}/api/v1/notifications/read-all`, {
+      await fetch(`/api/veska/notifications/read-all`, {
         method: 'POST',
         headers: apiHeaders(),
       });
@@ -266,7 +269,10 @@ export default function NotificationBell({ userId = 'demo-user' }: { userId?: st
             <span className="text-sm font-semibold text-gray-900">Notifications</span>
             <div className="flex items-center gap-2">
               <button
-                onClick={() => { void markAllRead(); markAllLiveRead(); }}
+                onClick={() => {
+                  void markAllRead();
+                  markAllLiveRead();
+                }}
                 disabled={markingAll}
                 className="text-xs text-indigo-600 hover:text-indigo-800 disabled:opacity-50 transition-colors"
               >
@@ -338,12 +344,12 @@ export default function NotificationBell({ userId = 'demo-user' }: { userId?: st
                     <NotifIcon type={n.type} />
                   </span>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-xs font-medium text-gray-900 truncate ${!n.read ? 'font-semibold' : ''}`}>
+                    <p
+                      className={`text-xs font-medium text-gray-900 truncate ${!n.read ? 'font-semibold' : ''}`}
+                    >
                       {n.title}
                     </p>
-                    {n.body && (
-                      <p className="text-xs text-gray-500 truncate">{n.body}</p>
-                    )}
+                    {n.body && <p className="text-xs text-gray-500 truncate">{n.body}</p>}
                     <p className="text-[10px] text-gray-400 mt-0.5">{timeAgo(n.createdAt)}</p>
                   </div>
                   {!n.read && (
@@ -357,7 +363,10 @@ export default function NotificationBell({ userId = 'demo-user' }: { userId?: st
           {/* Footer */}
           <div className="px-4 py-2.5 border-t border-gray-100 bg-gray-50">
             <button
-              onClick={() => { setOpen(false); router.push('/dashboard/notifications'); }}
+              onClick={() => {
+                setOpen(false);
+                router.push('/dashboard/notifications');
+              }}
               className="text-xs text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
             >
               View all notifications →

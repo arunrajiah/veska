@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Trash2, ChevronDown } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? '';
 
 interface StepDraft {
@@ -132,7 +131,7 @@ export default function WorkflowBuilder() {
 
     setSaving(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/workflows`, {
+      const res = await fetch(`/api/veska/workflows`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

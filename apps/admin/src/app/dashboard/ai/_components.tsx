@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Bot, Sparkles, Send, Plus, MessageSquare } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -126,7 +125,7 @@ export function AIChatClient() {
   useEffect(() => {
     async function loadConversations() {
       try {
-        const res = await fetch(`${API_BASE}/api/v1/ai/conversations`, {
+        const res = await fetch(`/api/veska/ai/conversations`, {
           headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
         });
         if (!res.ok) return;
@@ -143,7 +142,7 @@ export function AIChatClient() {
   // Create a new conversation via API
   const createConversation = useCallback(async (firstMessage?: string): Promise<string | null> => {
     try {
-      const res = await fetch(`${API_BASE}/api/v1/ai/conversations`, {
+      const res = await fetch(`/api/veska/ai/conversations`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -174,7 +173,7 @@ export function AIChatClient() {
   // Load messages for a conversation
   const loadMessages = useCallback(async (convId: string) => {
     try {
-      const res = await fetch(`${API_BASE}/api/v1/ai/conversations/${convId}/messages`, {
+      const res = await fetch(`/api/veska/ai/conversations/${convId}/messages`, {
         headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
       });
       if (!res.ok) return;
@@ -225,7 +224,7 @@ export function AIChatClient() {
 
       try {
         const res = await fetch(
-          `${API_BASE}/api/v1/ai/conversations/${targetConvId}/chat`,
+          `/api/veska/ai/conversations/${targetConvId}/chat`,
           {
             method: 'POST',
             headers: {

@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { Plus, X, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 const IDENTITY_ID = process.env.NEXT_PUBLIC_ADMIN_IDENTITY_ID ?? 'admin';
 
@@ -115,7 +114,7 @@ function NewOrderSlideOver({ onClose, onSaved }: { onClose: () => void; onSaved:
       orderDate: new Date().toISOString().slice(0, 10),
     };
     try {
-      const res = await fetch(`${API_BASE}/api/v1/sales/orders`, {
+      const res = await fetch(`/api/veska/sales/orders`, {
         method: 'POST',
         headers: fmtHeaders(),
         body: JSON.stringify(body),

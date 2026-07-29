@@ -3,7 +3,8 @@ import CurrencySettings from './_currency-settings.js';
 import RatesTable from './_rates-table.js';
 
 const TENANT_ID = 'demo';
-const API_BASE = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/currencies';
+const API_BASE =
+  (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/currencies';
 
 interface CurrencyOption {
   code: string;
@@ -90,7 +91,9 @@ export default async function CurrencySettingsPage() {
 
       {/* Section 1: Base Currency & Supported Currencies */}
       <section className="mb-10">
-        <h2 className="text-base font-medium text-gray-900 mb-4">Base &amp; Supported Currencies</h2>
+        <h2 className="text-base font-medium text-gray-900 mb-4">
+          Base &amp; Supported Currencies
+        </h2>
         <div className="rounded-xl border border-gray-200 bg-white p-6">
           <CurrencySettings
             tenantId={TENANT_ID}

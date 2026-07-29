@@ -24,7 +24,8 @@ const ENTITY_LABELS: Record<string, string> = {
 async function fetchDefs(): Promise<CustomFieldDef[]> {
   try {
     const res = await fetch(
-      (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/custom-fields/defs?tenantId=demo',
+      (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') +
+        '/api/v1/custom-fields/defs?tenantId=demo',
       { cache: 'no-store' },
     );
     if (!res.ok) return [];

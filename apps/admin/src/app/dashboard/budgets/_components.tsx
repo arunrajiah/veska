@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { Plus, X, PieChart, TrendingUp, TrendingDown } from 'lucide-react';
 import type { Budget, BudgetSummary } from './page.js';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 function authHeaders(tenantId: string): HeadersInit {
   return {
@@ -114,7 +113,7 @@ function NewBudgetSlideover({ tenantId, onClose, onCreated }: NewBudgetSlideover
         status: 'draft',
         spent: 0,
       };
-      const res = await fetch(`${API_BASE}/api/v1/budgets`, {
+      const res = await fetch(`/api/veska/budgets`, {
         method: 'POST',
         headers: authHeaders(tenantId),
         body: JSON.stringify(body),

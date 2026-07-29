@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? '';
 
 export default function VendorForm() {
@@ -28,7 +27,7 @@ export default function VendorForm() {
     if (fd.get('notes')) body['notes'] = fd.get('notes');
 
     try {
-      const res = await fetch(`${API_BASE}/api/v1/purchasing/vendors`, {
+      const res = await fetch(`/api/veska/purchasing/vendors`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

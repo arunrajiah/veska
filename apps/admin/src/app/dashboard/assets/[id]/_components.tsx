@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { X } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 export interface Asset {
@@ -85,7 +84,7 @@ function EditAssetSlideOver({ asset, onClose, onSaved }: { asset: Asset; onClose
       notes: (fd.get('notes') as string) || undefined,
     };
     try {
-      const res = await fetch(`${API_BASE}/api/v1/assets/${asset.id}`, {
+      const res = await fetch(`/api/veska/assets/${asset.id}`, {
         method: 'PATCH',
         headers: reqHeaders(),
         body: JSON.stringify({ data: body }),
@@ -222,7 +221,7 @@ export function AssetDetailClient({ asset }: { asset: Asset }) {
     if (!confirm(`Mark asset as ${newStatus}?`)) return;
     setActionLoading(newStatus);
     try {
-      await fetch(`${API_BASE}/api/v1/assets/${asset.id}`, {
+      await fetch(`/api/veska/assets/${asset.id}`, {
         method: 'PATCH',
         headers: reqHeaders(),
         body: JSON.stringify({ data: { status: newStatus } }),

@@ -4,7 +4,6 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, X } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 function apiHeaders() {
@@ -51,7 +50,7 @@ function NewCompanySlideOver({ onClose, onSaved }: NewCompanyProps) {
     setSaving(true);
     setError('');
     try {
-      const res = await fetch(`${API_BASE}/api/v1/crm/companies`, {
+      const res = await fetch(`/api/veska/crm/companies`, {
         method: 'POST',
         headers: apiHeaders(),
         body: JSON.stringify({

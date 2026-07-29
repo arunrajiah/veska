@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? '';
 
 export default function DepartmentForm() {
@@ -26,7 +25,7 @@ export default function DepartmentForm() {
     };
 
     try {
-      const res = await fetch(`${API_BASE}/api/v1/hr/departments`, {
+      const res = await fetch(`/api/veska/hr/departments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

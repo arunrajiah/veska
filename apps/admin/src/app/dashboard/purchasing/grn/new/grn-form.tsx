@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? '';
 
 interface LineItem {
@@ -69,7 +68,7 @@ export default function GRNForm() {
         })),
       };
 
-      const res = await fetch(`${API_BASE}/api/v1/grn`, {
+      const res = await fetch(`/api/veska/grn`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

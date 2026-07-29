@@ -6,7 +6,6 @@ import { Plus, X, Upload } from 'lucide-react';
 import Link from 'next/link';
 import { ImportModal } from '@/components/import-modal.js';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 const IDENTITY_ID = process.env.NEXT_PUBLIC_ADMIN_IDENTITY_ID ?? 'admin';
 
@@ -66,7 +65,7 @@ function AddProductSlideOver({ onClose, onSaved }: { onClose: () => void; onSave
       status: 'active',
     };
     try {
-      const res = await fetch(`${API_BASE}/api/v1/inventory/products`, {
+      const res = await fetch(`/api/veska/inventory/products`, {
         method: 'POST',
         headers: fmtHeaders(),
         body: JSON.stringify(body),

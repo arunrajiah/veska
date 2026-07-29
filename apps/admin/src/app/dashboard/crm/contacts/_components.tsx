@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { Plus, X, Upload } from 'lucide-react';
 import { ImportModal } from '@/components/import-modal.js';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 function apiHeaders() {
@@ -54,7 +53,7 @@ export function NewContactSlideOver({ onClose, onSaved }: NewContactProps) {
     setSaving(true);
     setError('');
     try {
-      const res = await fetch(`${API_BASE}/api/v1/crm/contacts`, {
+      const res = await fetch(`/api/veska/crm/contacts`, {
         method: 'POST',
         headers: apiHeaders(),
         body: JSON.stringify({ firstName, lastName, email, phone, company, title, notes }),

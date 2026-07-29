@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Trash2 } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 interface DeleteButtonProps {
   id: string;
@@ -19,7 +18,7 @@ export function DeleteButton({ id, tenantId }: DeleteButtonProps) {
     if (!confirm('Delete this webhook subscription?')) return;
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/webhooks/${id}`, {
+      const res = await fetch(`/api/veska/webhooks/${id}`, {
         method: 'DELETE',
         headers: {
           'X-Veska-Tenant-Id': tenantId,

@@ -10,7 +10,6 @@ import { formatCurrency, SUPPORTED_CURRENCIES } from '@/lib/currency.js';
 import type { Invoice } from './page.js';
 import { useTranslations } from 'next-intl';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 function authHeaders(): HeadersInit {
@@ -92,7 +91,7 @@ function RecurringTab({ tenantId }: { tenantId: string }) {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`${API_BASE}/api/v1/recurring-invoices`, {
+    fetch(`/api/veska/recurring-invoices`, {
       headers: {
         'X-Veska-Tenant-Id': tenantId,
         'X-Veska-Identity-Id': process.env.NEXT_PUBLIC_ADMIN_IDENTITY_ID ?? 'admin',
@@ -258,7 +257,7 @@ function NewInvoiceSlideover({ onClose, onCreated, tenantId }: NewInvoiceSlideov
     const controller = new AbortController();
     setConversionLoading(true);
     fetch(
-      `${API_BASE}/api/v1/currencies/convert?from=${form.currency}&to=USD&amount=${total}`,
+      `/api/veska/currencies/convert?from=${form.currency}&to=USD&amount=${total}`,
       {
         headers: { 'X-Veska-Tenant-Id': tenantId, 'X-Veska-Identity-Id': process.env.NEXT_PUBLIC_ADMIN_IDENTITY_ID ?? 'admin' },
         signal: controller.signal,
@@ -297,7 +296,7 @@ function NewInvoiceSlideover({ onClose, onCreated, tenantId }: NewInvoiceSlideov
         })),
         status: 'draft',
       };
-      const res = await fetch(`${API_BASE}/api/v1/finance/invoices`, {
+      const res = await fetch(`/api/veska/finance/invoices`, {
         method: 'POST',
         headers: authHeaders(),
         body: JSON.stringify(body),
@@ -607,7 +606,7 @@ export function InvoicesClient({
     if (selected.size === 0) return;
     setBulkLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/finance/invoices/bulk`, {
+      const res = await fetch(`/api/veska/finance/invoices/bulk`, {
         method: 'POST',
         headers: authHeaders(),
         body: JSON.stringify({ ids: Array.from(selected), action }),
@@ -651,7 +650,7 @@ export function InvoicesClient({
   const handleSend = async (inv: Invoice) => {
     setSendingId(inv.id);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/finance/invoices/${inv.id}/send`, {
+      const res = await fetch(`/api/veska/finance/invoices/${inv.id}/send`, {
         method: 'POST',
         headers: authHeaders(),
         body: JSON.stringify({}),
@@ -702,7 +701,7 @@ export function InvoicesClient({
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => window.open(`${API_BASE}/api/v1/finance/invoices/export?format=csv`, '_blank')}
+            onClick={() => window.open(`/api/veska/finance/invoices/export?format=csv`, '_blank')}
             className="flex items-center gap-1.5 border border-gray-200 text-gray-700 text-sm px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
           >
             <Download size={15} />

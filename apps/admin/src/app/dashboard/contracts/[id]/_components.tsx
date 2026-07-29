@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { X } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 export interface ContractDetail {
@@ -94,7 +93,7 @@ function EditContractSlideOver({
       notes: (fd.get('notes') as string) || undefined,
     };
     try {
-      const res = await fetch(`${API_BASE}/api/v1/contracts/${contract.id}`, {
+      const res = await fetch(`/api/veska/contracts/${contract.id}`, {
         method: 'PATCH',
         headers: reqHeaders(),
         body: JSON.stringify({ data: body }),
@@ -203,7 +202,7 @@ export function ContractDetailPageClient({ contract }: { contract: ContractDetai
     if (newStatus === 'terminated' && !confirm('Terminate this contract?')) return;
     setActionLoading(newStatus);
     try {
-      await fetch(`${API_BASE}/api/v1/contracts/${contract.id}`, {
+      await fetch(`/api/veska/contracts/${contract.id}`, {
         method: 'PATCH',
         headers: reqHeaders(),
         body: JSON.stringify({ data: { status: newStatus } }),

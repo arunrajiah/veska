@@ -32,17 +32,20 @@ export default function AddRate({
 
     startTransition(async () => {
       try {
-        const res = await fetch((process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/currencies/rates', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            tenantId,
-            baseCurrency,
-            targetCurrency: toCurrency,
-            rate: parseFloat(rate),
-            effectiveDate,
-          }),
-        });
+        const res = await fetch(
+          (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/currencies/rates',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              tenantId,
+              baseCurrency,
+              targetCurrency: toCurrency,
+              rate: parseFloat(rate),
+              effectiveDate,
+            }),
+          },
+        );
         if (!res.ok) throw new Error('Failed to add rate');
         setToCurrency('');
         setRate('');
@@ -75,7 +78,9 @@ export default function AddRate({
         >
           <option value="">Select currency</option>
           {targets.map((c) => (
-            <option key={c} value={c}>{c}</option>
+            <option key={c} value={c}>
+              {c}
+            </option>
           ))}
         </select>
       </div>

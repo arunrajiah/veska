@@ -11,7 +11,6 @@ const EVENT_OPTIONS = [
   { value: 'audit.*', label: 'audit.*' },
 ];
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 interface WebhookFormProps {
   tenantId: string;
@@ -44,7 +43,7 @@ export default function WebhookForm({ tenantId }: WebhookFormProps) {
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/webhooks`, {
+      const res = await fetch(`/api/veska/webhooks`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -4,7 +4,6 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, X } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 const IDENTITY_ID = process.env.NEXT_PUBLIC_ADMIN_IDENTITY_ID ?? 'admin';
 
@@ -61,7 +60,7 @@ function AddWarehouseSlideOver({ onClose, onSaved }: { onClose: () => void; onSa
       manager: (fd.get('manager') as string) || undefined,
     };
     try {
-      const res = await fetch(`${API_BASE}/api/v1/inventory/warehouses`, {
+      const res = await fetch(`/api/veska/inventory/warehouses`, {
         method: 'POST',
         headers: fmtHeaders(),
         body: JSON.stringify(body),

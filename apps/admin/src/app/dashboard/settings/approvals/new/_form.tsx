@@ -88,11 +88,14 @@ export default function NewApprovalChainForm() {
 
     setSubmitting(true);
     try {
-      const res = await fetch((process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/approval-chains', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      const res = await fetch(
+        (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/approval-chains',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        },
+      );
 
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
@@ -268,8 +271,7 @@ export default function NewApprovalChainForm() {
                   </div>
                   <div className="col-span-2">
                     <label className="block text-xs font-medium text-gray-600 mb-1">
-                      Specific User ID{' '}
-                      <span className="text-gray-400 font-normal">(optional)</span>
+                      Specific User ID <span className="text-gray-400 font-normal">(optional)</span>
                     </label>
                     <input
                       type="text"

@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { Key, Plus, X, AlertTriangle, Copy, Check } from 'lucide-react';
 import type { ApiKey } from './page.js';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 function apiHeaders() {
@@ -99,7 +98,7 @@ function NewApiKeySlideOver({ open, onClose, onCreated }: { open: boolean; onClo
       expiresAt: (fd.get('expiresAt') as string) || undefined,
     };
     try {
-      const res = await fetch(`${API_BASE}/api/v1/api-keys`, {
+      const res = await fetch(`/api/veska/api-keys`, {
         method: 'POST',
         headers: apiHeaders(),
         body: JSON.stringify(body),
@@ -184,7 +183,7 @@ export function ApiKeysClient({ apiKeys: initial }: { apiKeys: ApiKey[] }) {
     if (!confirm(`Revoke key "${name}"? This cannot be undone.`)) return;
     setRevoking(id);
     try {
-      await fetch(`${API_BASE}/api/v1/api-keys/${id}`, {
+      await fetch(`/api/veska/api-keys/${id}`, {
         method: 'DELETE',
         headers: apiHeaders(),
       });

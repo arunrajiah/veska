@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? '';
 
 interface ApprovalButtonsProps {
@@ -22,7 +21,7 @@ export default function ApprovalButtons({ orderId, currentStatus }: ApprovalButt
     setLoading(status);
     setError('');
     try {
-      const res = await fetch(`${API_BASE}/api/v1/purchasing/orders/${orderId}`, {
+      const res = await fetch(`/api/veska/purchasing/orders/${orderId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

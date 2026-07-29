@@ -34,7 +34,11 @@ interface RoutingTableProps {
   tenantId: string;
 }
 
-export default function RoutingTable({ routes: initialRoutes, channels, tenantId }: RoutingTableProps) {
+export default function RoutingTable({
+  routes: initialRoutes,
+  channels,
+  tenantId,
+}: RoutingTableProps) {
   const [routes, setRoutes] = useState<Route[]>(initialRoutes);
   const [selectedChannel, setSelectedChannel] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState<string | null>(null);
@@ -59,11 +63,15 @@ export default function RoutingTable({ routes: initialRoutes, channels, tenantId
     setLoading(optimisticId);
 
     try {
-      const res = await fetch((process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/notification-channels/routes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tenantId, event: eventKey, channelId }),
-      });
+      const res = await fetch(
+        (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') +
+          '/api/v1/notification-channels/routes',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tenantId, event: eventKey, channelId }),
+        },
+      );
 
       if (!res.ok) throw new Error('Failed to add route');
       const created: Route = await res.json();
@@ -80,11 +88,14 @@ export default function RoutingTable({ routes: initialRoutes, channels, tenantId
     setRoutes((prev) => prev.filter((r) => r.id !== routeId));
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/notification-channels/routes/${routeId}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tenantId }),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/notification-channels/routes/${routeId}`,
+        {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tenantId }),
+        },
+      );
 
       if (!res.ok) throw new Error('Failed to remove route');
     } catch {

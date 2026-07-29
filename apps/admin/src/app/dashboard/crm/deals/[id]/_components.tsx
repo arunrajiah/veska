@@ -4,7 +4,6 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Sparkles, X, Clock } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 function apiHeaders() {
@@ -76,7 +75,7 @@ export function EditDealSlideOver({ dealId, initial, onClose, onSaved }: EditDea
     setSaving(true);
     setError('');
     try {
-      const res = await fetch(`${API_BASE}/api/v1/crm/deals/${dealId}`, {
+      const res = await fetch(`/api/veska/crm/deals/${dealId}`, {
         method: 'PATCH',
         headers: apiHeaders(),
         body: JSON.stringify({
@@ -223,7 +222,7 @@ export function DealDetailClient({ dealId, data: d, stage, aiSummary }: DealDeta
   const handleAiAnalysis = async () => {
     setAiLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/ai/enrich/${dealId}`, {
+      const res = await fetch(`/api/veska/ai/enrich/${dealId}`, {
         method: 'POST',
         headers: apiHeaders(),
       });

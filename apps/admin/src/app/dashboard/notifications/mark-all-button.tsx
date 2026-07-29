@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? '';
 
 export default function MarkAllButton() {
@@ -13,7 +12,7 @@ export default function MarkAllButton() {
   async function markAll() {
     setLoading(true);
     try {
-      await fetch(`${API_BASE}/api/v1/notifications/read-all`, {
+      await fetch(`/api/veska/notifications/read-all`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

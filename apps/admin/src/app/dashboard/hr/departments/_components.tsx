@@ -4,7 +4,6 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, X } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 const IDENTITY_ID = process.env.NEXT_PUBLIC_ADMIN_IDENTITY_ID ?? 'admin';
 
@@ -50,7 +49,7 @@ function AddDeptSlideOver({ onClose, onSaved }: { onClose: () => void; onSaved: 
       budget: fd.get('budget') ? Number(fd.get('budget')) : undefined,
     };
     try {
-      const res = await fetch(`${API_BASE}/api/v1/hr/departments`, {
+      const res = await fetch(`/api/veska/hr/departments`, {
         method: 'POST',
         headers: fmtHeaders(),
         body: JSON.stringify(body),

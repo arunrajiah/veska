@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { RefreshCw, Plus, Pause, Play, X } from 'lucide-react';
 import type { RecurringInvoice } from './page.js';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 function authHeaders(tenantId: string): HeadersInit {
   return {
@@ -105,7 +104,7 @@ function NewRecurringSlideover({ tenantId, onClose, onCreated }: NewRecurringSli
         notes: form.notes || undefined,
         status: 'active',
       };
-      const res = await fetch(`${API_BASE}/api/v1/finance/recurring`, {
+      const res = await fetch(`/api/veska/finance/recurring`, {
         method: 'POST',
         headers: authHeaders(tenantId),
         body: JSON.stringify(body),
@@ -277,7 +276,7 @@ export function RecurringClient({
     const next = current === 'paused' ? 'active' : 'paused';
     setTogglingId(rec.id);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/finance/recurring/${rec.id}`, {
+      const res = await fetch(`/api/veska/finance/recurring/${rec.id}`, {
         method: 'PATCH',
         headers: authHeaders(tenantId),
         body: JSON.stringify({ status: next }),

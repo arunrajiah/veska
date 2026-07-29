@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { Plus, X, Webhook, Edit, Trash2, CheckCircle2, XCircle } from 'lucide-react';
 import type { Webhook as WebhookType } from './page.js';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 function apiHeaders() {
@@ -71,8 +70,8 @@ function WebhookSlideOver({
     };
     try {
       const url = webhook
-        ? `${API_BASE}/api/v1/webhooks/${webhook.id}`
-        : `${API_BASE}/api/v1/webhooks`;
+        ? `/api/veska/webhooks/${webhook.id}`
+        : `/api/veska/webhooks`;
       const method = webhook ? 'PATCH' : 'POST';
       const res = await fetch(url, {
         method,
@@ -162,7 +161,7 @@ export function WebhooksClient({ webhooks: initial }: { webhooks: WebhookType[] 
     setToggling(id);
     const newStatus = current === 'active' ? 'inactive' : 'active';
     try {
-      await fetch(`${API_BASE}/api/v1/webhooks/${id}`, {
+      await fetch(`/api/veska/webhooks/${id}`, {
         method: 'PATCH',
         headers: apiHeaders(),
         body: JSON.stringify({ status: newStatus }),
@@ -182,7 +181,7 @@ export function WebhooksClient({ webhooks: initial }: { webhooks: WebhookType[] 
     if (!confirm(`Delete webhook "${name}"?`)) return;
     setDeleting(id);
     try {
-      await fetch(`${API_BASE}/api/v1/webhooks/${id}`, {
+      await fetch(`/api/veska/webhooks/${id}`, {
         method: 'DELETE',
         headers: apiHeaders(),
       });

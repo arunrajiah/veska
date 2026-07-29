@@ -16,7 +16,6 @@ import {
   Loader2,
 } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 function apiHeaders() {
@@ -247,11 +246,11 @@ export function AIUsageClient() {
     const fetchAll = async () => {
       try {
         const [aiUsage, portalTokens, savedReports] = await Promise.allSettled([
-          fetch(`${API_BASE}/api/v1/ai/usage/summary?days=30`, { headers: apiHeaders() })
+          fetch(`/api/veska/ai/usage/summary?days=30`, { headers: apiHeaders() })
             .then(r => r.ok ? r.json() as Promise<UsageData> : Promise.reject(r.status)),
-          fetch(`${API_BASE}/api/v1/portal-mgmt/tokens`, { headers: apiHeaders() })
+          fetch(`/api/veska/portal-mgmt/tokens`, { headers: apiHeaders() })
             .then(r => r.ok ? r.json() as Promise<unknown[]> : Promise.reject(r.status)),
-          fetch(`${API_BASE}/api/v1/reports/saved`, { headers: apiHeaders() })
+          fetch(`/api/veska/reports/saved`, { headers: apiHeaders() })
             .then(r => r.ok ? r.json() as Promise<unknown[]> : Promise.reject(r.status)),
         ]);
 

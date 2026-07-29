@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { Play } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 interface TriggerButtonProps {
   workflowId: string;
@@ -18,7 +17,7 @@ export function TriggerButton({ workflowId, tenantId }: TriggerButtonProps) {
     setLoading(true);
     setStatus('idle');
     try {
-      const res = await fetch(`${API_BASE}/api/v1/workflows/${workflowId}/trigger`, {
+      const res = await fetch(`/api/veska/workflows/${workflowId}/trigger`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

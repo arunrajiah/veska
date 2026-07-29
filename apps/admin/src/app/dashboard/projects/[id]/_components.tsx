@@ -4,7 +4,6 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { X, ChevronDown, ChevronRight } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 function apiHeaders() {
@@ -77,7 +76,7 @@ function AddTaskSlideOver({ projectId, open, onClose, onCreated }: { projectId: 
       projectId,
     };
     try {
-      const res = await fetch(`${API_BASE}/api/v1/projects/${projectId}/tasks`, {
+      const res = await fetch(`/api/veska/projects/${projectId}/tasks`, {
         method: 'POST',
         headers: apiHeaders(),
         body: JSON.stringify(body),
@@ -181,7 +180,7 @@ function TaskCard({ task, projectId }: { task: Task; projectId: string }) {
   async function markDone() {
     setMarking(true);
     try {
-      await fetch(`${API_BASE}/api/v1/projects/${projectId}/tasks/${task.id}`, {
+      await fetch(`/api/veska/projects/${projectId}/tasks/${task.id}`, {
         method: 'PATCH',
         headers: apiHeaders(),
         body: JSON.stringify({ status: 'done' }),

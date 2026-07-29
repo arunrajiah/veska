@@ -14,8 +14,6 @@ import {
   Loader2,
 } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
-
 function getCookieToken(): string {
   if (typeof document === 'undefined') return '';
   const match = document.cookie.split('; ').find((row) => row.startsWith('veska_session='));
@@ -91,26 +89,35 @@ function WebhookSlideOver({
   const [error, setError] = useState('');
 
   function toggleEvent(ev: string) {
-    setSelectedEvents((prev) =>
-      prev.includes(ev) ? prev.filter((e) => e !== ev) : [...prev, ev],
-    );
+    setSelectedEvents((prev) => (prev.includes(ev) ? prev.filter((e) => e !== ev) : [...prev, ev]));
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!url.trim()) { setError('URL is required'); return; }
-    if (selectedEvents.length === 0) { setError('Select at least one event'); return; }
+    if (!url.trim()) {
+      setError('URL is required');
+      return;
+    }
+    if (selectedEvents.length === 0) {
+      setError('Select at least one event');
+      return;
+    }
     setError('');
     setSaving(true);
     try {
       const apiUrl = endpoint
-        ? `${API_BASE}/api/v1/webhooks/endpoints/${endpoint.id}`
-        : `${API_BASE}/api/v1/webhooks/endpoints`;
+        ? `/api/veska/webhooks/endpoints/${endpoint.id}`
+        : `/api/veska/webhooks/endpoints`;
       const method = endpoint ? 'PATCH' : 'POST';
       const res = await fetch(apiUrl, {
         method,
         headers: apiHeaders(),
-        body: JSON.stringify({ url: url.trim(), description: description.trim() || undefined, events: selectedEvents, enabled }),
+        body: JSON.stringify({
+          url: url.trim(),
+          description: description.trim() || undefined,
+          events: selectedEvents,
+          enabled,
+        }),
       });
       if (!res.ok) throw new Error(await res.text());
       onSaved();
@@ -231,11 +238,7 @@ interface TestResult {
 
 // ─── Main client ─────────────────────────────────────────────────────────────
 
-export function WebhookSettingsClient({
-  endpoints: initial,
-}: {
-  endpoints: WebhookEndpoint[];
-}) {
+export function WebhookSettingsClient({ endpoints: initial }: { endpoints: WebhookEndpoint[] }) {
   const router = useRouter();
   const [, startTransition] = useTransition();
   const [endpoints, setEndpoints] = useState<WebhookEndpoint[]>(initial);
@@ -250,11 +253,11 @@ export function WebhookSettingsClient({
     // Optimistically re-fetch to update local state
     void (async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/v1/webhooks/endpoints`, {
+        const res = await fetch(`/api/veska/webhooks/endpoints`, {
           headers: apiHeaders(),
         });
         if (!res.ok) return;
-        const data = await res.json() as { endpoints: WebhookEndpoint[] };
+        const data = (await res.json()) as { endpoints: WebhookEndpoint[] };
         setEndpoints(data.endpoints ?? []);
       } catch {
         // silently ignore
@@ -266,7 +269,7 @@ export function WebhookSettingsClient({
     if (!confirm('Delete this webhook endpoint?')) return;
     setDeleting(id);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/webhooks/endpoints/${id}`, {
+      const res = await fetch(`/api/veska/webhooks/endpoints/${id}`, {
         method: 'DELETE',
         headers: apiHeaders(),
       });
@@ -281,18 +284,25 @@ export function WebhookSettingsClient({
 
   async function handleTest(endpointId: string) {
     setTesting(endpointId);
-    setTestResults((prev) => { const next = { ...prev }; delete next[endpointId]; return next; });
+    setTestResults((prev) => {
+      const next = { ...prev };
+      delete next[endpointId];
+      return next;
+    });
     try {
-      const res = await fetch(`${API_BASE}/api/v1/webhooks/test/${endpointId}`, {
+      const res = await fetch(`/api/veska/webhooks/test/${endpointId}`, {
         method: 'POST',
         headers: apiHeaders(),
       });
-      const data = await res.json() as TestResult;
+      const data = (await res.json()) as TestResult;
       setTestResults((prev) => ({ ...prev, [endpointId]: data }));
     } catch (err) {
       setTestResults((prev) => ({
         ...prev,
-        [endpointId]: { status: 'failed', responseBody: err instanceof Error ? err.message : 'Request failed' },
+        [endpointId]: {
+          status: 'failed',
+          responseBody: err instanceof Error ? err.message : 'Request failed',
+        },
       }));
     } finally {
       setTesting(null);
@@ -337,17 +347,11 @@ export function WebhookSettingsClient({
           {endpoints.map((ep) => {
             const testResult = testResults[ep.id];
             return (
-              <div
-                key={ep.id}
-                className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm"
-              >
+              <div key={ep.id} className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     {/* URL */}
-                    <p
-                      className="font-mono text-sm text-gray-900 truncate mb-1"
-                      title={ep.url}
-                    >
+                    <p className="font-mono text-sm text-gray-900 truncate mb-1" title={ep.url}>
                       {ep.url}
                     </p>
                     {ep.description && (
@@ -381,15 +385,17 @@ export function WebhookSettingsClient({
                     {/* Status badge */}
                     <span
                       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                        ep.enabled
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-gray-100 text-gray-500'
+                        ep.enabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
                       }`}
                     >
                       {ep.enabled ? (
-                        <><CheckCircle2 size={10} /> Active</>
+                        <>
+                          <CheckCircle2 size={10} /> Active
+                        </>
                       ) : (
-                        <><XCircle size={10} /> Inactive</>
+                        <>
+                          <XCircle size={10} /> Inactive
+                        </>
                       )}
                     </span>
 
@@ -455,11 +461,7 @@ export function WebhookSettingsClient({
         </div>
       )}
 
-      <WebhookSlideOver
-        open={showNew}
-        onClose={() => setShowNew(false)}
-        onSaved={reload}
-      />
+      <WebhookSlideOver open={showNew} onClose={() => setShowNew(false)} onSaved={reload} />
       {editingEndpoint && (
         <WebhookSlideOver
           open={true}

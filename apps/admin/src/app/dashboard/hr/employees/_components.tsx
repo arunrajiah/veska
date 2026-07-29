@@ -7,7 +7,6 @@ import Link from 'next/link';
 import { ImportModal } from '@/components/import-modal.js';
 import { useTranslations } from 'next-intl';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 const IDENTITY_ID = process.env.NEXT_PUBLIC_ADMIN_IDENTITY_ID ?? 'admin';
 
@@ -80,7 +79,7 @@ function AddEmployeeSlideOver({ onClose, onSaved }: { onClose: () => void; onSav
       status: 'active',
     };
     try {
-      const res = await fetch(`${API_BASE}/api/v1/hr/employees`, {
+      const res = await fetch(`/api/veska/hr/employees`, {
         method: 'POST',
         headers: fmtHeaders(),
         body: JSON.stringify(body),
@@ -159,7 +158,7 @@ export function EnrichRowButton({ employeeId }: { employeeId: string }) {
   async function handleEnrich() {
     setState('loading');
     try {
-      await fetch(`${API_BASE}/api/v1/entities/Employee/${employeeId}/enrich`, {
+      await fetch(`/api/veska/entities/Employee/${employeeId}/enrich`, {
         method: 'POST',
         headers: fmtHeaders(),
         body: JSON.stringify({}),

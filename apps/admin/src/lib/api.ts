@@ -1,48 +1,47 @@
 import { cookies } from 'next/headers';
+import { apiRequest } from './api-client';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+const API_BASE = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
-export async function apiFetch<T>(
-  path: string,
-  tenantId: string,
-  init?: RequestInit,
-): Promise<T> {
-  let token: string | null = null;
-  let identityId: string | null = null;
-
-  // Server-side (RSC): read session + identity from the cookie store
-  if (typeof window === 'undefined') {
-    try {
-      const cookieStore = await cookies();
-      token      = cookieStore.get('veska_session')?.value  ?? null;
-      identityId = cookieStore.get('veska_identity')?.value
-                ?? cookieStore.get('veska_user')?.value
-                ?? 'system';
-    } catch {
-      token = null;
-      identityId = 'system';
+/**
+ * Isomorphic API fetch.
+ *
+ * On the server it reads the session cookie and calls the API directly. In the
+ * browser it goes through the same-origin proxy, because the session cookie is
+ * HttpOnly and unreadable from client code: the previous document.cookie lookup here
+ * always came back empty, so the Authorization header was dropped and the request
+ * 401'd.
+ *
+ * `tenantId` is kept for call-site compatibility but is only a hint. The API takes
+ * the authoritative tenant from the session either way.
+ */
+export async function apiFetch<T>(path: string, tenantId: string, init?: RequestInit): Promise<T> {
+  if (typeof window !== 'undefined') {
+    const res = await apiRequest(path, { ...init, cache: 'no-store' });
+    if (!res.ok) {
+      throw new Error(`API error ${res.status}: ${await res.text()}`);
     }
-  } else {
-    // Client-side: read from cookie
-    const getCookie = (name: string) => {
-      const match = document.cookie.split('; ').find((row) => row.startsWith(`${name}=`));
-      return match ? decodeURIComponent(match.split('=')[1] ?? '') : null;
-    };
-    token      = getCookie('veska_session');
-    identityId = getCookie('veska_identity') ?? getCookie('veska_user') ?? 'system';
+    return res.json() as Promise<T>;
   }
 
-  const authHeaders: HeadersInit = {
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    'X-Veska-Identity-Id': identityId ?? 'system',
-  };
+  let token: string | null = null;
+  let identityId = 'system';
+  try {
+    const cookieStore = await cookies();
+    token = cookieStore.get('veska_session')?.value ?? null;
+    identityId =
+      cookieStore.get('veska_identity')?.value ?? cookieStore.get('veska_user')?.value ?? 'system';
+  } catch {
+    token = null;
+  }
 
   const res = await fetch(`${API_BASE}${path}`, {
     ...init,
     headers: {
       'Content-Type': 'application/json',
       'X-Veska-Tenant-Id': tenantId,
-      ...authHeaders,
+      'X-Veska-Identity-Id': identityId,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(init?.headers ?? {}),
     },
     cache: 'no-store',

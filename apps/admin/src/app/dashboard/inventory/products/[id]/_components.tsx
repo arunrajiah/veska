@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 const IDENTITY_ID = process.env.NEXT_PUBLIC_ADMIN_IDENTITY_ID ?? 'admin';
 
@@ -20,7 +19,7 @@ export function EnrichButton({ productId }: { productId: string }) {
   async function handleEnrich() {
     setState('loading');
     try {
-      await fetch(`${API_BASE}/api/v1/entities/Product/${productId}/enrich`, {
+      await fetch(`/api/veska/entities/Product/${productId}/enrich`, {
         method: 'POST',
         headers: fmtHeaders(),
         body: JSON.stringify({}),
@@ -76,7 +75,7 @@ export function EditProductToggle({ productId, data }: { productId: string; data
       status: fd.get('status') as string,
     };
     try {
-      const res = await fetch(`${API_BASE}/api/v1/inventory/products/${productId}`, {
+      const res = await fetch(`/api/veska/inventory/products/${productId}`, {
         method: 'PATCH',
         headers: fmtHeaders(),
         body: JSON.stringify(body),

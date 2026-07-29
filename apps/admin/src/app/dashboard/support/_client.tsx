@@ -6,7 +6,6 @@ import { MessageSquare, X, Send, Loader2, Plus, InboxIcon } from 'lucide-react';
 import { TicketRow } from './_ticket-row.js';
 import type { Ticket } from './page.js';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 function apiHeaders() {
@@ -58,7 +57,7 @@ function NewTicketModal({ open, onClose }: { open: boolean; onClose: () => void 
       channel: (fd.get('channel') as string) || 'web',
     };
     try {
-      const res = await fetch(`${API_BASE}/api/v1/support/tickets`, {
+      const res = await fetch(`/api/veska/support/tickets`, {
         method: 'POST',
         headers: apiHeaders(),
         body: JSON.stringify(body),
@@ -168,7 +167,7 @@ function TicketDetailPanel({ ticket }: { ticket: Ticket }) {
     if (!msg) return;
     setSending(true);
     try {
-      await fetch(`${API_BASE}/api/v1/support/tickets/${ticket.id}/reply`, {
+      await fetch(`/api/veska/support/tickets/${ticket.id}/reply`, {
         method: 'POST',
         headers: apiHeaders(),
         body: JSON.stringify({ message: msg }),

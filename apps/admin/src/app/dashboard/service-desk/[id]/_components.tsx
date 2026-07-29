@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { AlertCircle, Clock, CheckCircle2 } from 'lucide-react';
 import type { ServiceDeskDetail } from './page.js';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 function apiHeaders() {
@@ -76,7 +75,7 @@ export function ServiceDeskDetailClient({ item: initial }: { item: ServiceDeskDe
   async function saveStatus() {
     setStatusSaving(true);
     try {
-      await fetch(`${API_BASE}/api/v1/service-desk/${item.id}`, {
+      await fetch(`/api/veska/service-desk/${item.id}`, {
         method: 'PATCH',
         headers: apiHeaders(),
         body: JSON.stringify({ status: statusValue }),
@@ -93,7 +92,7 @@ export function ServiceDeskDetailClient({ item: initial }: { item: ServiceDeskDe
   async function saveResolution() {
     setResSaving(true);
     try {
-      await fetch(`${API_BASE}/api/v1/service-desk/${item.id}`, {
+      await fetch(`/api/veska/service-desk/${item.id}`, {
         method: 'PATCH',
         headers: apiHeaders(),
         body: JSON.stringify({ resolution, status: 'resolved' }),

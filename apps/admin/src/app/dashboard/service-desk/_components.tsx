@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { Plus, X, AlertCircle, Clock, CheckCircle2 } from 'lucide-react';
 import type { ServiceDeskItem } from './page.js';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 function apiHeaders() {
@@ -95,7 +94,7 @@ function NewRequestSlideOver({ open, onClose }: { open: boolean; onClose: () => 
       status: 'new',
     };
     try {
-      const res = await fetch(`${API_BASE}/api/v1/service-desk`, {
+      const res = await fetch(`/api/veska/service-desk`, {
         method: 'POST',
         headers: apiHeaders(),
         body: JSON.stringify(body),

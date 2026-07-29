@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 const CATEGORIES = [
   { value: 'travel', label: 'Travel' },
@@ -61,7 +60,7 @@ export function ExpenseForm({ tenantId }: ExpenseFormProps) {
     setError(null);
 
     try {
-      const res = await fetch(`${API_BASE}/api/v1/expenses`, {
+      const res = await fetch(`/api/veska/expenses`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

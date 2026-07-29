@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 interface StatusButtonsProps {
   entryId: string;
@@ -16,7 +15,7 @@ export function StatusButtons({ entryId, tenantId, currentStatus }: StatusButton
   const [loading, setLoading] = useState<string | null>(null);
 
   const patch = async (body: Record<string, unknown>) => {
-    const res = await fetch(`${API_BASE}/api/v1/time/entries/${entryId}`, {
+    const res = await fetch(`/api/veska/time/entries/${entryId}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',

@@ -94,9 +94,7 @@ export default function ProjectsPage() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch('/api/v1/projects?limit=50', {
-          headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
-        });
+        const res = await fetch('/api/veska/projects?limit=50');
         if (res.ok) {
           const json = await res.json() as { data?: Project[] } | Project[];
           const data = Array.isArray(json) ? json : (json.data ?? []);

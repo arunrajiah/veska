@@ -4,7 +4,6 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 interface LineItem {
@@ -93,7 +92,7 @@ export function OrderDetailClient({
   async function patchStatus(newStatus: string) {
     setActionLoading(newStatus);
     try {
-      await fetch(`${API_BASE}/api/v1/purchasing/orders/${order.id}`, {
+      await fetch(`/api/veska/purchasing/orders/${order.id}`, {
         method: 'PATCH',
         headers: reqHeaders(),
         body: JSON.stringify({ data: { status: newStatus } }),
@@ -107,7 +106,7 @@ export function OrderDetailClient({
   async function createGRN() {
     setActionLoading('grn');
     try {
-      const res = await fetch(`${API_BASE}/api/v1/grn`, {
+      const res = await fetch(`/api/veska/grn`, {
         method: 'POST',
         headers: reqHeaders(),
         body: JSON.stringify({
@@ -323,7 +322,7 @@ export default function StatusButtons({ orderId, currentStatus, tenantId, poNumb
   async function updateStatus(status: string) {
     setLoading(status);
     try {
-      await fetch(`${API_BASE}/api/v1/purchasing/orders/${orderId}`, {
+      await fetch(`/api/veska/purchasing/orders/${orderId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'X-Veska-Tenant-Id': tenantId },
         body: JSON.stringify({ data: { status } }),

@@ -35,11 +35,15 @@ export default function CurrencySettings({
   function handleSave() {
     startTransition(async () => {
       try {
-        const res = await fetch((process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/currencies/settings', {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tenantId, baseCurrency, supportedCurrencies: supported }),
-        });
+        const res = await fetch(
+          (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') +
+            '/api/v1/currencies/settings',
+          {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tenantId, baseCurrency, supportedCurrencies: supported }),
+          },
+        );
         if (!res.ok) throw new Error('Failed to save');
         setMessage({ type: 'success', text: 'Currency settings saved.' });
       } catch {
@@ -83,9 +87,7 @@ export default function CurrencySettings({
 
       {/* Supported currencies */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Supported Currencies
-        </label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Supported Currencies</label>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
           {availableCurrencies.map((c) => (
             <label

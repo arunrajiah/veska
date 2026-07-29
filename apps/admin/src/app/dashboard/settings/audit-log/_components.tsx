@@ -1,11 +1,17 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { ScrollText, ChevronRight, ChevronDown, Download, RefreshCw, GitCompare } from 'lucide-react';
+import {
+  ScrollText,
+  ChevronRight,
+  ChevronDown,
+  Download,
+  RefreshCw,
+  GitCompare,
+} from 'lucide-react';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const PAGE_SIZE = 50;
 
 const ACTION_OPTIONS = ['all', 'create', 'update', 'delete', 'login', 'export'] as const;
@@ -147,9 +153,15 @@ function DiffViewer({ entry }: { entry: AuditEntry }) {
         <table className="w-full text-xs border-collapse">
           <thead>
             <tr className="bg-gray-100 dark:bg-gray-800">
-              <th className="text-left px-3 py-2 font-medium text-gray-600 dark:text-gray-400 w-1/3">Field</th>
-              <th className="text-left px-3 py-2 font-medium text-gray-600 dark:text-gray-400 w-1/3">Before</th>
-              <th className="text-left px-3 py-2 font-medium text-gray-600 dark:text-gray-400 w-1/3">After</th>
+              <th className="text-left px-3 py-2 font-medium text-gray-600 dark:text-gray-400 w-1/3">
+                Field
+              </th>
+              <th className="text-left px-3 py-2 font-medium text-gray-600 dark:text-gray-400 w-1/3">
+                Before
+              </th>
+              <th className="text-left px-3 py-2 font-medium text-gray-600 dark:text-gray-400 w-1/3">
+                After
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -190,14 +202,16 @@ const ACTION_BADGE: Record<string, string> = {
   create: 'bg-green-100 text-green-700',
   update: 'bg-blue-100 text-blue-700',
   delete: 'bg-red-100 text-red-700',
-  login:  'bg-gray-100 text-gray-600',
+  login: 'bg-gray-100 text-gray-600',
   export: 'bg-yellow-100 text-yellow-700',
 };
 
 function ActionBadge({ action }: { action: string }) {
   const styles = ACTION_BADGE[action.toLowerCase()] ?? 'bg-gray-100 text-gray-600';
   return (
-    <span className={`inline-flex items-center text-xs font-medium px-2 py-0.5 rounded-full capitalize ${styles}`}>
+    <span
+      className={`inline-flex items-center text-xs font-medium px-2 py-0.5 rounded-full capitalize ${styles}`}
+    >
       {action}
     </span>
   );
@@ -233,34 +247,40 @@ export function AuditLogClient() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   // Filters
-  const [action, setAction]         = useState('all');
+  const [action, setAction] = useState('all');
   const [entityType, setEntityType] = useState('all');
-  const [from, setFrom]             = useState('');
-  const [to, setTo]                 = useState('');
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
 
-  const fetchEntries = useCallback(async (currentOffset: number) => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({ limit: String(PAGE_SIZE), offset: String(currentOffset) });
-      if (action !== 'all')     params.set('action', action);
-      if (entityType !== 'all') params.set('entityType', entityType);
-      if (from)                 params.set('from', from);
-      if (to)                   params.set('to', to);
+  const fetchEntries = useCallback(
+    async (currentOffset: number) => {
+      setLoading(true);
+      try {
+        const params = new URLSearchParams({
+          limit: String(PAGE_SIZE),
+          offset: String(currentOffset),
+        });
+        if (action !== 'all') params.set('action', action);
+        if (entityType !== 'all') params.set('entityType', entityType);
+        if (from) params.set('from', from);
+        if (to) params.set('to', to);
 
-      const res = await fetch(`${API_BASE}/api/v1/audit?${params.toString()}`, {
-        headers: getAuthHeaders(),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = (await res.json()) as ApiResponse;
-      setEntries(data.entries ?? []);
-      setTotal(data.total ?? 0);
-    } catch {
-      setEntries([]);
-      setTotal(0);
-    } finally {
-      setLoading(false);
-    }
-  }, [action, entityType, from, to]);
+        const res = await fetch(`/api/veska/audit?${params.toString()}`, {
+          headers: getAuthHeaders(),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = (await res.json()) as ApiResponse;
+        setEntries(data.entries ?? []);
+        setTotal(data.total ?? 0);
+      } catch {
+        setEntries([]);
+        setTotal(0);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [action, entityType, from, to],
+  );
 
   // Re-fetch on filter changes, reset to page 0
   useEffect(() => {
@@ -309,7 +329,7 @@ export function AuditLogClient() {
   }
 
   const from1 = offset + 1;
-  const to1   = Math.min(offset + PAGE_SIZE, total);
+  const to1 = Math.min(offset + PAGE_SIZE, total);
   const hasPrev = offset > 0;
   const hasNext = offset + PAGE_SIZE < total;
 
@@ -350,7 +370,12 @@ export function AuditLogClient() {
       <div className="flex flex-wrap items-end gap-3 mb-4">
         {/* Action filter */}
         <div>
-          <label htmlFor="audit-action-filter" className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Action</label>
+          <label
+            htmlFor="audit-action-filter"
+            className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
+          >
+            Action
+          </label>
           <select
             id="audit-action-filter"
             value={action}
@@ -359,14 +384,21 @@ export function AuditLogClient() {
             className="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             {ACTION_OPTIONS.map((a) => (
-              <option key={a} value={a}>{a === 'all' ? 'All actions' : a}</option>
+              <option key={a} value={a}>
+                {a === 'all' ? 'All actions' : a}
+              </option>
             ))}
           </select>
         </div>
 
         {/* Entity type filter */}
         <div>
-          <label htmlFor="audit-entity-filter" className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Entity Type</label>
+          <label
+            htmlFor="audit-entity-filter"
+            className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
+          >
+            Entity Type
+          </label>
           <select
             id="audit-entity-filter"
             value={entityType}
@@ -375,14 +407,21 @@ export function AuditLogClient() {
             className="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             {ENTITY_OPTIONS.map((et) => (
-              <option key={et} value={et}>{et === 'all' ? 'All entities' : et}</option>
+              <option key={et} value={et}>
+                {et === 'all' ? 'All entities' : et}
+              </option>
             ))}
           </select>
         </div>
 
         {/* Date from */}
         <div>
-          <label htmlFor="audit-from-date" className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">From</label>
+          <label
+            htmlFor="audit-from-date"
+            className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
+          >
+            From
+          </label>
           <input
             id="audit-from-date"
             type="date"
@@ -395,7 +434,12 @@ export function AuditLogClient() {
 
         {/* Date to */}
         <div>
-          <label htmlFor="audit-to-date" className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">To</label>
+          <label
+            htmlFor="audit-to-date"
+            className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
+          >
+            To
+          </label>
           <input
             id="audit-to-date"
             type="date"
@@ -413,13 +457,48 @@ export function AuditLogClient() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700">
               <tr>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">Timestamp</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">User</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Action</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">Entity Type</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">Entity ID</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">Changed Fields</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Details</th>
+                <th
+                  scope="col"
+                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap"
+                >
+                  Timestamp
+                </th>
+                <th
+                  scope="col"
+                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400"
+                >
+                  User
+                </th>
+                <th
+                  scope="col"
+                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400"
+                >
+                  Action
+                </th>
+                <th
+                  scope="col"
+                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap"
+                >
+                  Entity Type
+                </th>
+                <th
+                  scope="col"
+                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap"
+                >
+                  Entity ID
+                </th>
+                <th
+                  scope="col"
+                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap"
+                >
+                  Changed Fields
+                </th>
+                <th
+                  scope="col"
+                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400"
+                >
+                  Details
+                </th>
               </tr>
             </thead>
             <tbody aria-live="polite" aria-label="Audit log entries">
@@ -435,7 +514,9 @@ export function AuditLogClient() {
                     <div className="flex flex-col items-center justify-center py-16 text-gray-400">
                       <ScrollText size={36} className="mb-3 opacity-40" />
                       <p className="text-sm font-medium">No audit events yet</p>
-                      <p className="text-xs mt-1">Events will appear here when workspace actions are taken</p>
+                      <p className="text-xs mt-1">
+                        Events will appear here when workspace actions are taken
+                      </p>
                     </div>
                   </td>
                 </tr>
@@ -458,8 +539,12 @@ export function AuditLogClient() {
 
                         {/* User */}
                         <td className="px-4 py-3 text-xs font-mono text-gray-700 dark:text-gray-300">
-                          {entry.actorId ? truncate(entry.actorId, 20) : (
-                            <span className="text-gray-400 italic">{entry.actorType ?? 'system'}</span>
+                          {entry.actorId ? (
+                            truncate(entry.actorId, 20)
+                          ) : (
+                            <span className="text-gray-400 italic">
+                              {entry.actorType ?? 'system'}
+                            </span>
                           )}
                         </td>
 
@@ -477,7 +562,9 @@ export function AuditLogClient() {
                         <td className="px-4 py-3 text-xs font-mono text-gray-500 dark:text-gray-400">
                           {entry.entityId ? (
                             <span title={entry.entityId}>{truncate(entry.entityId, 12)}</span>
-                          ) : '—'}
+                          ) : (
+                            '—'
+                          )}
                         </td>
 
                         {/* Changed Fields */}

@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 interface ToggleButtonProps {
   id: string;
@@ -18,7 +17,7 @@ export function ToggleButton({ id, enabled, tenantId }: ToggleButtonProps) {
   async function handleToggle() {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/webhooks/${id}`, {
+      const res = await fetch(`/api/veska/webhooks/${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

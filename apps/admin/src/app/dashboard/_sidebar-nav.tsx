@@ -267,12 +267,7 @@ function usePendingApprovalCount(): number {
 
     async function fetchCount() {
       try {
-        const tenantId = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
-        const res = await fetch('/api/v1/approval-requests/pending-count', {
-          headers: {
-            'X-Veska-Tenant-Id': tenantId,
-          },
-        });
+        const res = await fetch('/api/veska/approval-requests/pending-count');
         if (!res.ok || cancelled) return;
         const json = await res.json() as { count: number };
         setCount(json.count ?? 0);

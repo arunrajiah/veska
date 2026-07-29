@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 interface ActionButtonsProps {
   leaveId: string;
@@ -18,7 +17,7 @@ export function ApproveButton({ leaveId, tenantId, currentStatus }: ActionButton
   const handleApprove = async () => {
     setLoading(true);
     try {
-      await fetch(`${API_BASE}/api/v1/hr/leave/${leaveId}`, {
+      await fetch(`/api/veska/hr/leave/${leaveId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -53,7 +52,7 @@ export function RejectButton({ leaveId, tenantId, currentStatus }: ActionButtons
   const handleReject = async () => {
     setLoading(true);
     try {
-      await fetch(`${API_BASE}/api/v1/hr/leave/${leaveId}`, {
+      await fetch(`/api/veska/hr/leave/${leaveId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

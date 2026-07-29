@@ -5,7 +5,6 @@ import { DashboardCurrencySelector } from './_currency-selector.js';
 import { formatCurrencyCompact } from '@/lib/currency.js';
 
 const STORAGE_KEY = 'veska_display_currency';
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 export interface ConvertedStats {
   totalPaidThisMonth: number;
@@ -54,7 +53,7 @@ export function DashboardClientCurrency({
 
   // Fetch live rates once
   useEffect(() => {
-    fetch(`${API_BASE}/api/v1/currencies/rates?base=USD`, {
+    fetch(`/api/veska/currencies/rates?base=USD`, {
       headers: { 'X-Veska-Tenant-Id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant', 'X-Veska-Identity-Id': 'admin' },
     })
       .then((r) => r.json())

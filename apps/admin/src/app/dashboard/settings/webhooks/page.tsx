@@ -2,8 +2,7 @@ import { apiFetch } from '@/lib/api.js';
 import { WebhookSettingsClient, type WebhookEndpoint } from './_components.js';
 
 export default async function WebhookSettingsPage() {
-  const tenantId =
-    process.env.VESKA_TENANT_ID ?? 'demo-tenant';
+  const tenantId = process.env.VESKA_TENANT_ID ?? 'demo-tenant';
 
   let endpoints: WebhookEndpoint[] = [];
   try {

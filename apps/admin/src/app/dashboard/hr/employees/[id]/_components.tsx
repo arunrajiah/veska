@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 const IDENTITY_ID = process.env.NEXT_PUBLIC_ADMIN_IDENTITY_ID ?? 'admin';
 
@@ -21,7 +20,7 @@ export function EnrichButton({ employeeId }: { employeeId: string }) {
   async function handleEnrich() {
     setState('loading');
     try {
-      await fetch(`${API_BASE}/api/v1/entities/Employee/${employeeId}/enrich`, {
+      await fetch(`/api/veska/entities/Employee/${employeeId}/enrich`, {
         method: 'POST',
         headers: fmtHeaders(),
         body: JSON.stringify({}),
@@ -87,7 +86,7 @@ export function EditEmployeeForm({
       status: fd.get('status') as string,
     };
     try {
-      const res = await fetch(`${API_BASE}/api/v1/hr/employees/${employeeId}`, {
+      const res = await fetch(`/api/veska/hr/employees/${employeeId}`, {
         method: 'PATCH',
         headers: fmtHeaders(),
         body: JSON.stringify(body),

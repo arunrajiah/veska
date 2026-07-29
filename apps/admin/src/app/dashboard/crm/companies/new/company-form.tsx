@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? '';
 
 export default function CompanyForm() {
@@ -30,7 +29,7 @@ export default function CompanyForm() {
     };
 
     try {
-      const res = await fetch(`${API_BASE}/api/v1/entities`, {
+      const res = await fetch(`/api/veska/entities`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

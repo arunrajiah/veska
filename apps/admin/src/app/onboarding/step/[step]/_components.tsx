@@ -134,7 +134,6 @@ const STEP_LABELS = [
   'Ready!',
 ];
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 // ─── Step Indicator ──────────────────────────────────────────────────────────
 
@@ -543,7 +542,7 @@ function Step4({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
 
   const fetchProvider = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/v1/ai/provider-info`, {
+      const res = await fetch(`/api/veska/ai/provider-info`, {
         headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
       });
       if (res.ok) {
@@ -738,7 +737,7 @@ function Step5({ onBack }: { onBack: () => void }) {
     if (submitted || submitting) return;
     setSubmitting(true);
     try {
-      await fetch(`${API_BASE}/api/v1/setup/onboarding`, {
+      await fetch(`/api/veska/setup/onboarding`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

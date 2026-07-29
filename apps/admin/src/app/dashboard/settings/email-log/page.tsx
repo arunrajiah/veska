@@ -4,8 +4,6 @@ import React, { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, RefreshCw, Mail, AlertCircle } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
-
 interface EmailLogEntry {
   id: string;
   toEmail: string;
@@ -28,7 +26,9 @@ function StatusBadge({ status }: { status: EmailLogEntry['status'] }) {
     pending: 'bg-yellow-100 text-yellow-700',
   };
   return (
-    <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${styles[status] ?? styles.skipped}`}>
+    <span
+      className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${styles[status] ?? styles.skipped}`}
+    >
       {status}
     </span>
   );
@@ -53,7 +53,7 @@ export default function EmailLogPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/tenant-settings/email-log?limit=50`, {
+      const res = await fetch(`/api/veska/tenant-settings/email-log?limit=50`, {
         headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
       });
       if (!res.ok) {

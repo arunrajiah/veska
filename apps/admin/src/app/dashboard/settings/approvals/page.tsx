@@ -22,7 +22,8 @@ interface ApprovalChain {
 async function fetchChains(): Promise<ApprovalChain[]> {
   try {
     const res = await fetch(
-      (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/approval-chains?tenantId=demo',
+      (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') +
+        '/api/v1/approval-chains?tenantId=demo',
       { cache: 'no-store' },
     );
     if (!res.ok) return [];
@@ -98,8 +99,8 @@ export default async function ApprovalsSettingsPage() {
           <GitBranch size={40} className="mb-3 text-gray-300" />
           <p className="text-base font-medium text-gray-600 mb-1">No approval chains yet</p>
           <p className="text-sm text-center max-w-xs">
-            Approval chains define the sequence of approvers required before an action is
-            finalized. Create your first chain to get started.
+            Approval chains define the sequence of approvers required before an action is finalized.
+            Create your first chain to get started.
           </p>
           <Link
             href="/dashboard/settings/approvals/new"

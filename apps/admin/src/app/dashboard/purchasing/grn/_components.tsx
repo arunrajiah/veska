@@ -4,7 +4,6 @@ import { useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Plus, X, ChevronDown, ChevronRight } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 export interface GRN {
@@ -75,7 +74,7 @@ function RecordGRNSlideOver({ onClose, onSaved }: { onClose: () => void; onSaved
       notes: (fd.get('notes') as string) || undefined,
     };
     try {
-      const res = await fetch(`${API_BASE}/api/v1/grn`, {
+      const res = await fetch(`/api/veska/grn`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

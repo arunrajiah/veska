@@ -78,17 +78,21 @@ export default function AddChannelForm() {
     setSubmitting(true);
 
     try {
-      const res = await fetch((process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') + '/api/v1/notification-channels/channels', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tenantId: TENANT_ID,
-          type: selectedType,
-          name,
-          config: buildConfig(),
-          enabled: true,
-        }),
-      });
+      const res = await fetch(
+        (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001') +
+          '/api/v1/notification-channels/channels',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tenantId: TENANT_ID,
+            type: selectedType,
+            name,
+            config: buildConfig(),
+            enabled: true,
+          }),
+        },
+      );
 
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
@@ -135,7 +139,10 @@ export default function AddChannelForm() {
       {/* Back */}
       <button
         type="button"
-        onClick={() => { setStep(1); setError(null); }}
+        onClick={() => {
+          setStep(1);
+          setError(null);
+        }}
         className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-800 transition-colors"
       >
         <ChevronLeft size={14} />
@@ -199,8 +206,7 @@ export default function AddChannelForm() {
           </div>
           <div>
             <label htmlFor="fromEmail" className="block text-sm font-medium text-gray-700 mb-1">
-              From Email{' '}
-              <span className="text-gray-400 font-normal">(optional)</span>
+              From Email <span className="text-gray-400 font-normal">(optional)</span>
             </label>
             <input
               id="fromEmail"
@@ -254,8 +260,7 @@ export default function AddChannelForm() {
           </div>
           <div>
             <label htmlFor="webhookSecret" className="block text-sm font-medium text-gray-700 mb-1">
-              Signing Secret{' '}
-              <span className="text-gray-400 font-normal">(optional)</span>
+              Signing Secret <span className="text-gray-400 font-normal">(optional)</span>
             </label>
             <input
               id="webhookSecret"

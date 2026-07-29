@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Plus, X, AlertTriangle } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 export interface Contract {
@@ -89,7 +88,7 @@ function NewContractSlideOver({ onClose, onSaved }: { onClose: () => void; onSav
       status: 'draft',
     };
     try {
-      const res = await fetch(`${API_BASE}/api/v1/contracts`, {
+      const res = await fetch(`/api/veska/contracts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 interface TimeFormProps {
   tenantId: string;
@@ -56,7 +55,7 @@ export function TimeForm({ tenantId }: TimeFormProps) {
     setError(null);
 
     try {
-      const res = await fetch(`${API_BASE}/api/v1/time/entries`, {
+      const res = await fetch(`/api/veska/time/entries`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

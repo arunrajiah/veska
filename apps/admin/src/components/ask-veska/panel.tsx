@@ -71,7 +71,6 @@ function getEntityHref(tool: string, answerContent: string): string | null {
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 const SUGGESTED_PROMPTS = [
   "Summarise this month's expenses",
@@ -136,7 +135,7 @@ function AskVeskaPanelContent({ onClose }: { onClose: () => void }) {
 
   const createConversation = useCallback(async (): Promise<string | null> => {
     try {
-      const res = await fetch(`${API_BASE}/api/v1/ai/conversations`, {
+      const res = await fetch(`/api/veska/ai/conversations`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({ title: 'Ask Veska' }),
@@ -180,7 +179,7 @@ function AskVeskaPanelContent({ onClose }: { onClose: () => void }) {
           typeof window !== 'undefined' ? ` [User is on page: ${window.location.pathname}]` : '';
         const messageWithHint = trimmed + pageHint;
 
-        const res = await fetch(`${API_BASE}/api/v1/ai/conversations/${convId}/chat`, {
+        const res = await fetch(`/api/veska/ai/conversations/${convId}/chat`, {
           method: 'POST',
           headers: getAuthHeaders(),
           body: JSON.stringify({ message: messageWithHint }),

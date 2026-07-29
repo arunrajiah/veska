@@ -4,8 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Trash2 } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
-
 interface RevokeButtonProps {
   id: string;
   name: string;
@@ -20,7 +18,7 @@ export function RevokeButton({ id, name, tenantId }: RevokeButtonProps) {
     if (!confirm(`Revoke API key "${name}"? This cannot be undone.`)) return;
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/api-keys/${id}`, {
+      const res = await fetch(`/api/veska/api-keys/${id}`, {
         method: 'DELETE',
         headers: {
           'X-Veska-Tenant-Id': tenantId,

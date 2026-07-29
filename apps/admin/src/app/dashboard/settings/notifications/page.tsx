@@ -23,11 +23,11 @@ async function fetchChannels(): Promise<Channel[]> {
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/notification-channels/channels?tenantId=${TENANT_ID}`,
-      { cache: 'no-store' }
+      { cache: 'no-store' },
     );
     if (!res.ok) return [];
     const data = await res.json();
-    return Array.isArray(data) ? data : data.channels ?? [];
+    return Array.isArray(data) ? data : (data.channels ?? []);
   } catch {
     return [];
   }
@@ -37,11 +37,11 @@ async function fetchRoutes(): Promise<Route[]> {
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/notification-channels/routes?tenantId=${TENANT_ID}`,
-      { cache: 'no-store' }
+      { cache: 'no-store' },
     );
     if (!res.ok) return [];
     const data = await res.json();
-    return Array.isArray(data) ? data : data.routes ?? [];
+    return Array.isArray(data) ? data : (data.routes ?? []);
   } catch {
     return [];
   }

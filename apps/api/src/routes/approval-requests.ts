@@ -6,19 +6,22 @@ import { ApprovalService } from '@veska/core';
 import { sharedDb } from '../shared.js';
 import type { TenantContext } from '../middleware/tenant-context.js';
 import { dispatchWebhookEvent } from '../middleware/webhook-events.js';
-import { sendApprovalDecisionEmail, sendApprovalRequestedEmail } from '../lib/notification-mailer.js';
+import {
+  sendApprovalDecisionEmail,
+  sendApprovalRequestedEmail,
+} from '../lib/notification-mailer.js';
 import { logAudit } from './audit.js';
 import { computeDiff, redactDiff } from '../lib/diff.js';
 
 /** Map entityType → new status after approval/rejection */
 const ENTITY_STATUS_MAP: Record<string, { approved: string; rejected: string }> = {
-  invoice:        { approved: 'sent',     rejected: 'rejected' },
-  Invoice:        { approved: 'sent',     rejected: 'rejected' },
+  invoice: { approved: 'sent', rejected: 'rejected' },
+  Invoice: { approved: 'sent', rejected: 'rejected' },
   purchase_order: { approved: 'approved', rejected: 'rejected' },
-  PurchaseOrder:  { approved: 'approved', rejected: 'rejected' },
-  Expense:        { approved: 'approved', rejected: 'rejected' },
-  expense:        { approved: 'approved', rejected: 'rejected' },
-  LeaveRequest:   { approved: 'approved', rejected: 'rejected' },
+  PurchaseOrder: { approved: 'approved', rejected: 'rejected' },
+  Expense: { approved: 'approved', rejected: 'rejected' },
+  expense: { approved: 'approved', rejected: 'rejected' },
+  LeaveRequest: { approved: 'approved', rejected: 'rejected' },
 };
 
 export const approvalRequestsRouter = new Hono<{ Variables: TenantContext }>();
@@ -117,6 +120,33 @@ approvalRequestsRouter.post('/', zValidator('json', createSchema), async (c) => 
   const request = (result.rows ?? [])[0];
   if (!request) return c.json({ error: 'Failed to create approval request' }, 500);
   return c.json(request, 201);
+});
+
+// Registered before /:id: Hono matches in declaration order, so a literal
+// segment placed after /:id is swallowed by it and parsed as a UUID.
+// ── GET /pending-count — count of pending triggers for tenant ──
+
+approvalRequestsRouter.get('/pending-count', async (c) => {
+  const { tenantId, db } = c.get('tenantCtx');
+
+  const result = (await db.execute(sql`
+    SELECT COUNT(*)::int AS count
+    FROM "approvalTriggers"
+    WHERE "tenantId" = ${tenantId}::uuid
+      AND status = 'pending'
+  `)) as unknown as { rows: Array<{ count: number }> };
+
+  const count = result.rows[0]?.count ?? 0;
+  return c.json({ count });
+});
+
+// ── GET /triggers — list pending approvalTriggers ──────────────
+
+approvalRequestsRouter.get('/triggers', async (c) => {
+  const { tenantId, db } = c.get('tenantCtx');
+  const approvalSvc = new ApprovalService(db);
+  const pending = await approvalSvc.getPending(tenantId);
+  return c.json({ data: pending, total: pending.length });
 });
 
 // ── Get single with decisions ─────────────────────────────────
@@ -276,31 +306,6 @@ approvalRequestsRouter.post('/:id/cancel', async (c) => {
   return c.json(request);
 });
 
-// ── GET /pending-count — count of pending triggers for tenant ──
-
-approvalRequestsRouter.get('/pending-count', async (c) => {
-  const { tenantId, db } = c.get('tenantCtx');
-
-  const result = await db.execute(sql`
-    SELECT COUNT(*)::int AS count
-    FROM "approvalTriggers"
-    WHERE "tenantId" = ${tenantId}::uuid
-      AND status = 'pending'
-  `) as unknown as { rows: Array<{ count: number }> };
-
-  const count = result.rows[0]?.count ?? 0;
-  return c.json({ count });
-});
-
-// ── GET /triggers — list pending approvalTriggers ──────────────
-
-approvalRequestsRouter.get('/triggers', async (c) => {
-  const { tenantId, db } = c.get('tenantCtx');
-  const approvalSvc = new ApprovalService(db);
-  const pending = await approvalSvc.getPending(tenantId);
-  return c.json({ data: pending, total: pending.length });
-});
-
 // ── PATCH /triggers/:id/decide — approve or reject a trigger ──
 
 approvalRequestsRouter.patch(
@@ -319,12 +324,12 @@ approvalRequestsRouter.patch(
     const approvalSvc = new ApprovalService(db);
 
     // Fetch trigger before deciding so we know the entityType + entityId
-    const triggerResult = await db.execute(sql`
+    const triggerResult = (await db.execute(sql`
       SELECT "entityType", "entityId"
       FROM "approvalTriggers"
       WHERE id = ${triggerId}::uuid
         AND "tenantId" = ${tenantId}::uuid
-    `) as unknown as { rows: Array<{ entityType: string; entityId: string }> };
+    `)) as unknown as { rows: Array<{ entityType: string; entityId: string }> };
 
     const trigger = triggerResult.rows[0];
 
@@ -371,35 +376,41 @@ approvalRequestsRouter.patch(
       // Look up requester email and send decision notification (fire-and-forget)
       void (async () => {
         try {
-          const triggerRow = (await db.execute(sql`
+          const triggerRow = (
+            (await db.execute(sql`
             SELECT "requestedBy" FROM "approvalTriggers"
             WHERE id = ${triggerId}::uuid
               AND "tenantId" = ${tenantId}::uuid
-          `) as unknown as { rows: Array<{ requestedBy: string | null }> }).rows[0];
+          `)) as unknown as { rows: Array<{ requestedBy: string | null }> }
+          ).rows[0];
 
           const requestedBy = triggerRow?.requestedBy;
           if (!requestedBy) return;
 
-          const userRow = (await db.execute(sql`
+          const userRow = (
+            (await db.execute(sql`
             SELECT data->>'email' AS email,
                    COALESCE(data->>'name', data->>'full_name', data->>'firstName') AS name
             FROM "entityRecords"
             WHERE id = ${requestedBy}::uuid
               AND "tenantId" = ${tenantId}::uuid
             LIMIT 1
-          `) as unknown as { rows: Array<{ email: string | null; name: string | null }> }).rows[0];
+          `)) as unknown as { rows: Array<{ email: string | null; name: string | null }> }
+          ).rows[0];
 
           const email = userRow?.email;
           if (!email) return;
 
-          const entityData = (await db.execute(sql`
+          const entityData = (
+            (await db.execute(sql`
             SELECT data->>'number' AS ref,
                    COALESCE(data->>'title', data->>'description', data->>'number') AS ref2
             FROM "entityRecords"
             WHERE id = ${trigger.entityId}::uuid
               AND "tenantId" = ${tenantId}::uuid
             LIMIT 1
-          `) as unknown as { rows: Array<{ ref: string | null; ref2: string | null }> }).rows[0];
+          `)) as unknown as { rows: Array<{ ref: string | null; ref2: string | null }> }
+          ).rows[0];
 
           const entityRef = entityData?.ref ?? entityData?.ref2 ?? trigger.entityId;
           const dashboardUrl = `${process.env['ADMIN_BASE_URL'] ?? 'http://localhost:3000'}/dashboard`;
@@ -425,7 +436,13 @@ approvalRequestsRouter.patch(
       db,
       event: webhookEvent,
       resourceId: triggerId,
-      data: { triggerId, tenantId, decision: body.decision, reason: body.reason, decidedBy: identityId },
+      data: {
+        triggerId,
+        tenantId,
+        decision: body.decision,
+        reason: body.reason,
+        decidedBy: identityId,
+      },
     });
 
     return c.json({ success: true });

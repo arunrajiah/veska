@@ -7,7 +7,6 @@ import { Plus, X, CheckCircle, XCircle } from 'lucide-react';
 import { BulkActionBar } from '@/components/bulk-action-bar.js';
 import type { Expense } from './page.js';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 function authHeaders(tenantId: string): HeadersInit {
   return {
@@ -96,7 +95,7 @@ function SubmitExpenseSlideover({ tenantId, onClose, onCreated }: SubmitExpenseS
         receiptUrl: form.receiptUrl || undefined,
         status: 'pending',
       };
-      const res = await fetch(`${API_BASE}/api/v1/expenses`, {
+      const res = await fetch(`/api/veska/expenses`, {
         method: 'POST',
         headers: authHeaders(tenantId),
         body: JSON.stringify(body),
@@ -307,7 +306,7 @@ export function ExpensesClient({
     if (selected.size === 0) return;
     setBulkLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/expenses/bulk`, {
+      const res = await fetch(`/api/veska/expenses/bulk`, {
         method: 'POST',
         headers: authHeaders(tenantId),
         body: JSON.stringify({ ids: Array.from(selected), action }),
@@ -346,7 +345,7 @@ export function ExpensesClient({
   const handleApprove = async (expense: Expense) => {
     setActionLoading(expense.id + '-approve');
     try {
-      const res = await fetch(`${API_BASE}/api/v1/expenses/${expense.id}/approve`, {
+      const res = await fetch(`/api/veska/expenses/${expense.id}/approve`, {
         method: 'PATCH',
         headers: authHeaders(tenantId),
         body: JSON.stringify({}),
@@ -366,7 +365,7 @@ export function ExpensesClient({
   const handleReject = async (expense: Expense) => {
     setActionLoading(expense.id + '-reject');
     try {
-      const res = await fetch(`${API_BASE}/api/v1/expenses/${expense.id}/reject`, {
+      const res = await fetch(`/api/veska/expenses/${expense.id}/reject`, {
         method: 'PATCH',
         headers: authHeaders(tenantId),
         body: JSON.stringify({}),

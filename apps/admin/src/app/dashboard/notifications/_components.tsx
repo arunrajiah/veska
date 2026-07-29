@@ -6,7 +6,6 @@ import { Bell, Info, AlertTriangle, AlertCircle, CheckCircle, Sparkles } from 'l
 import { useRealtimeEvents } from '@/hooks/useRealtimeEvents.js';
 import type { Notification } from './page.js';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 function apiHeaders() {
@@ -113,7 +112,7 @@ export function NotificationsClient({ initialNotifications }: { initialNotificat
   async function markAllRead() {
     setMarkingAll(true);
     try {
-      await fetch(`${API_BASE}/api/v1/notifications/read-all`, {
+      await fetch(`/api/veska/notifications/read-all`, {
         method: 'PATCH',
         headers: apiHeaders(),
       });
@@ -132,7 +131,7 @@ export function NotificationsClient({ initialNotifications }: { initialNotificat
       return;
     }
     try {
-      await fetch(`${API_BASE}/api/v1/notifications/${n.id}/read`, {
+      await fetch(`/api/veska/notifications/${n.id}/read`, {
         method: 'PATCH',
         headers: apiHeaders(),
       });

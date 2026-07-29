@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, TrendingUp, TrendingDown } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 function fmt(amount: number, currency = 'USD') {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);
@@ -79,7 +78,7 @@ function LineItemsTab({
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/budgets/${budgetId}/line-items`, {
+      const res = await fetch(`/api/veska/budgets/${budgetId}/line-items`, {
         headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
       });
       if (res.ok) {
@@ -105,7 +104,7 @@ function LineItemsTab({
         notes: addForm.notes || undefined,
         entityType: addForm.entityType || undefined,
       };
-      const res = await fetch(`${API_BASE}/api/v1/budgets/${budgetId}/line-items`, {
+      const res = await fetch(`/api/veska/budgets/${budgetId}/line-items`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
         body: JSON.stringify(body),
@@ -126,7 +125,7 @@ function LineItemsTab({
     if (!confirm('Delete this line item?')) return;
     setDeletingId(id);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/budgets/${budgetId}/line-items/${id}`, {
+      const res = await fetch(`/api/veska/budgets/${budgetId}/line-items/${id}`, {
         method: 'DELETE',
         headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
       });
@@ -144,7 +143,7 @@ function LineItemsTab({
   const saveEdit = async () => {
     if (!editingId) return;
     try {
-      const res = await fetch(`${API_BASE}/api/v1/budgets/${budgetId}/line-items/${editingId}`, {
+      const res = await fetch(`/api/veska/budgets/${budgetId}/line-items/${editingId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
         body: JSON.stringify(editForm),
@@ -366,7 +365,7 @@ function ActualsTab({ budgetId, currency }: { budgetId: string; currency: string
   const [cfLoading, setCfLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_BASE}/api/v1/budgets/${budgetId}/actuals`, {
+    fetch(`/api/veska/budgets/${budgetId}/actuals`, {
       headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
     })
       .then((r) => (r.ok ? r.json() : Promise.reject()))
@@ -378,7 +377,7 @@ function ActualsTab({ budgetId, currency }: { budgetId: string; currency: string
   }, [budgetId]);
 
   useEffect(() => {
-    fetch(`${API_BASE}/api/v1/budgets/${budgetId}/cashflow`, {
+    fetch(`/api/veska/budgets/${budgetId}/cashflow`, {
       headers: { 'x-tenant-id': process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant' },
     })
       .then((r) => (r.ok ? r.json() : Promise.reject()))

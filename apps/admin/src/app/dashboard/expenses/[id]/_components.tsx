@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { CheckCircle, XCircle, DollarSign } from 'lucide-react';
 import type { ExpenseRecord } from './page.js';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 function authHeaders(tenantId: string): HeadersInit {
   return {
@@ -60,7 +59,7 @@ export function ExpenseDetailClient({
   const handleApprove = async () => {
     setLoading('approve');
     try {
-      const res = await fetch(`${API_BASE}/api/v1/expenses/${record.id}/approve`, {
+      const res = await fetch(`/api/veska/expenses/${record.id}/approve`, {
         method: 'PATCH',
         headers: authHeaders(tenantId),
         body: JSON.stringify({}),
@@ -79,7 +78,7 @@ export function ExpenseDetailClient({
   const handleReject = async () => {
     setLoading('reject');
     try {
-      const res = await fetch(`${API_BASE}/api/v1/expenses/${record.id}/reject`, {
+      const res = await fetch(`/api/veska/expenses/${record.id}/reject`, {
         method: 'PATCH',
         headers: authHeaders(tenantId),
         body: JSON.stringify({ notes: rejectNotes || undefined }),
@@ -99,7 +98,7 @@ export function ExpenseDetailClient({
   const handleMarkPaid = async () => {
     setLoading('paid');
     try {
-      const res = await fetch(`${API_BASE}/api/v1/expenses/${record.id}`, {
+      const res = await fetch(`/api/veska/expenses/${record.id}`, {
         method: 'PATCH',
         headers: authHeaders(tenantId),
         body: JSON.stringify({ status: 'paid' }),
@@ -263,7 +262,7 @@ export function ActionButtons({ expenseId, tenantId, currentStatus }: { expenseI
   const [loading, setLoading] = useState<string | null>(null);
 
   const patch = async (body: Record<string, unknown>) => {
-    const res = await fetch(`${API_BASE}/api/v1/expenses/${expenseId}`, {
+    const res = await fetch(`/api/veska/expenses/${expenseId}`, {
       method: 'PATCH',
       headers: authHeaders(tenantId),
       body: JSON.stringify(body),

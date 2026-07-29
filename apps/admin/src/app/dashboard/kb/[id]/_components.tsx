@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { Eye, ThumbsUp, ThumbsDown, Tag, Edit, X } from 'lucide-react';
 import type { Article } from '../page.js';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 function apiHeaders() {
@@ -36,7 +35,7 @@ function EditModal({ article, onClose }: { article: Article; onClose: () => void
     setSaving(true);
     setError('');
     try {
-      const res = await fetch(`${API_BASE}/api/v1/kb/${article.id}`, {
+      const res = await fetch(`/api/veska/kb/${article.id}`, {
         method: 'PATCH',
         headers: apiHeaders(),
         body: JSON.stringify({
@@ -119,7 +118,7 @@ export function ArticleDetailClient({ article }: { article: Article }) {
     setToggling(true);
     const newStatus = currentStatus === 'published' ? 'draft' : 'published';
     try {
-      await fetch(`${API_BASE}/api/v1/kb/${article.id}`, {
+      await fetch(`/api/veska/kb/${article.id}`, {
         method: 'PATCH',
         headers: apiHeaders(),
         body: JSON.stringify({ status: newStatus }),

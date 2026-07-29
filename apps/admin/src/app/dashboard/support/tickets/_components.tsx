@@ -7,7 +7,6 @@ import { useRealtimeEvents } from '@/hooks/useRealtimeEvents.js';
 import type { Ticket } from './page.js';
 import { useTranslations } from 'next-intl';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 function apiHeaders() {
@@ -63,7 +62,7 @@ function NewTicketSlideOver({ open, onClose }: { open: boolean; onClose: () => v
       status: 'open',
     };
     try {
-      const res = await fetch(`${API_BASE}/api/v1/support/tickets`, {
+      const res = await fetch(`/api/veska/support/tickets`, {
         method: 'POST',
         headers: apiHeaders(),
         body: JSON.stringify(body),

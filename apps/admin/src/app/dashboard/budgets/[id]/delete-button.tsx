@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 interface DeleteButtonProps {
   budgetId: string;
@@ -18,7 +17,7 @@ export function DeleteButton({ budgetId, tenantId }: DeleteButtonProps) {
   const handleDelete = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/budgets/${budgetId}`, {
+      const res = await fetch(`/api/veska/budgets/${budgetId}`, {
         method: 'DELETE',
         headers: {
           'X-Veska-Tenant-Id': tenantId,

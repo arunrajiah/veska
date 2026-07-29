@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { Sparkles, MessageSquare } from 'lucide-react';
 import type { TicketDetail } from './page.js';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 function apiHeaders() {
@@ -47,7 +46,7 @@ export function TicketDetailClient({ ticket: initial }: { ticket: TicketDetail }
   async function saveStatus() {
     setStatusSaving(true);
     try {
-      await fetch(`${API_BASE}/api/v1/support/tickets/${ticket.id}`, {
+      await fetch(`/api/veska/support/tickets/${ticket.id}`, {
         method: 'PATCH',
         headers: apiHeaders(),
         body: JSON.stringify({ status: statusValue }),
@@ -64,7 +63,7 @@ export function TicketDetailClient({ ticket: initial }: { ticket: TicketDetail }
   async function saveResolution() {
     setResSaving(true);
     try {
-      await fetch(`${API_BASE}/api/v1/support/tickets/${ticket.id}`, {
+      await fetch(`/api/veska/support/tickets/${ticket.id}`, {
         method: 'PATCH',
         headers: apiHeaders(),
         body: JSON.stringify({ resolution, status: 'resolved' }),
@@ -82,7 +81,7 @@ export function TicketDetailClient({ ticket: initial }: { ticket: TicketDetail }
   async function runAiSummarize() {
     setAiLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/ai/enrich/${ticket.id}`, {
+      const res = await fetch(`/api/veska/ai/enrich/${ticket.id}`, {
         method: 'POST',
         headers: apiHeaders(),
         body: JSON.stringify({ type: 'summarize' }),

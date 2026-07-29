@@ -22,11 +22,14 @@ export default function DeleteChannelButton({ channelId, tenantId }: DeleteChann
 
     setLoading(true);
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/notification-channels/channels/${channelId}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tenantId }),
-      });
+      await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/v1/notification-channels/channels/${channelId}`,
+        {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tenantId }),
+        },
+      );
       router.refresh();
     } catch {
       console.error('Failed to delete channel');

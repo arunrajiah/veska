@@ -11,7 +11,6 @@ import {
   ServerCrash,
 } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 function getCookieToken(): string {
   if (typeof document === 'undefined') return '';
@@ -91,7 +90,7 @@ function JobTable({ queueName }: { queueName: string }) {
     setLoading(true);
     try {
       const res = await fetch(
-        `${API_BASE}/api/v1/job-queues/${queueName}/jobs?status=${status}&limit=${PAGE_SIZE}&offset=${off}`,
+        `/api/veska/job-queues/${queueName}/jobs?status=${status}&limit=${PAGE_SIZE}&offset=${off}`,
         { headers: apiHeaders() },
       );
       if (!res.ok) throw new Error(await res.text());
@@ -116,7 +115,7 @@ function JobTable({ queueName }: { queueName: string }) {
   }
 
   async function retryJob(id: string) {
-    await fetch(`${API_BASE}/api/v1/job-queues/${queueName}/jobs/${id}/retry`, {
+    await fetch(`/api/veska/job-queues/${queueName}/jobs/${id}/retry`, {
       method: 'POST',
       headers: apiHeaders(),
     });
@@ -125,7 +124,7 @@ function JobTable({ queueName }: { queueName: string }) {
 
   async function removeJob(id: string) {
     if (!confirm('Remove this job?')) return;
-    await fetch(`${API_BASE}/api/v1/job-queues/${queueName}/jobs/${id}`, {
+    await fetch(`/api/veska/job-queues/${queueName}/jobs/${id}`, {
       method: 'DELETE',
       headers: apiHeaders(),
     });
@@ -406,7 +405,7 @@ export function JobQueuesDashboard() {
   const fetchQueues = useCallback(async (showSpinner = false) => {
     if (showSpinner) setRefreshing(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/job-queues`, {
+      const res = await fetch(`/api/veska/job-queues`, {
         headers: apiHeaders(),
       });
       if (!res.ok) throw new Error(await res.text());
@@ -430,12 +429,12 @@ export function JobQueuesDashboard() {
 
   async function cleanQueue(queueName: string) {
     await Promise.all([
-      fetch(`${API_BASE}/api/v1/job-queues/${queueName}/clean`, {
+      fetch(`/api/veska/job-queues/${queueName}/clean`, {
         method: 'POST',
         headers: apiHeaders(),
         body: JSON.stringify({ status: 'completed' }),
       }),
-      fetch(`${API_BASE}/api/v1/job-queues/${queueName}/clean`, {
+      fetch(`/api/veska/job-queues/${queueName}/clean`, {
         method: 'POST',
         headers: apiHeaders(),
         body: JSON.stringify({ status: 'failed' }),

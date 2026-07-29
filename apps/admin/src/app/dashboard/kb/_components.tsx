@@ -7,7 +7,6 @@ import {
 } from 'lucide-react';
 import type { Article, KBCategory, KBSummary } from './page';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
 function apiHeaders() {
@@ -56,7 +55,7 @@ function NewArticleModal({
       status:     fd.get('status') as string,
     };
     try {
-      const res = await fetch(`${API_BASE}/api/v1/knowledge-base/articles`, {
+      const res = await fetch(`/api/veska/knowledge-base/articles`, {
         method:  'POST',
         headers: apiHeaders(),
         body:    JSON.stringify(body),
