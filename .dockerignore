@@ -2,8 +2,22 @@ node_modules
 .next
 dist
 .git
+.github
 .env
 *.log
 .turbo
 coverage
 .nyc_output
+.claude
+.changeset
+
+# 4.4 MB of docs and screenshots that no build reads. Leaving them in the context
+# meant editing a screenshot invalidated `COPY . .` for every image.
+docs
+*.md
+
+# Test output and local artefacts
+playwright-report
+test-results
+*.tsbuildinfo
+dump.rdb

@@ -34,7 +34,8 @@ services:
   api:
     build:
       context: .
-      dockerfile: apps/api/Dockerfile
+      dockerfile: Dockerfile
+      target: api
     restart: unless-stopped
     ports:
       - '3001:3001'
@@ -63,7 +64,8 @@ services:
   admin:
     build:
       context: .
-      dockerfile: apps/admin/Dockerfile
+      dockerfile: Dockerfile
+      target: admin
     restart: unless-stopped
     ports:
       - '3000:3000'
@@ -85,7 +87,8 @@ services:
   marketing:
     build:
       context: .
-      dockerfile: apps/marketing/Dockerfile
+      dockerfile: Dockerfile
+      target: marketing
     restart: unless-stopped
     ports:
       - '3002:3002'
@@ -100,7 +103,8 @@ services:
   marketplace:
     build:
       context: .
-      dockerfile: apps/marketplace/Dockerfile
+      dockerfile: Dockerfile
+      target: marketplace
     restart: unless-stopped
     ports:
       - '3003:3003'

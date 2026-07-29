@@ -177,13 +177,13 @@ This is an alternative to the quickstart above, not an addition to it: it builds
 
 The compose file uses `develop.watch` for live reload during development — run `docker compose up --watch` to enable it.
 
-**Individual image builds** (from repo root, passing the full monorepo context):
+**Individual image builds** — every service is a target in the single root `Dockerfile`, so dependencies are installed and compiled once and shared across all four:
 
 ```bash
-docker build -f apps/api/Dockerfile         -t veska-api         .
-docker build -f apps/admin/Dockerfile       -t veska-admin       .
-docker build -f apps/marketing/Dockerfile   -t veska-marketing   .
-docker build -f apps/marketplace/Dockerfile -t veska-marketplace .
+docker build --target api         -t veska-api         .
+docker build --target admin       -t veska-admin       .
+docker build --target marketing   -t veska-marketing   .
+docker build --target marketplace -t veska-marketplace .
 ```
 
 ## Build a plugin
