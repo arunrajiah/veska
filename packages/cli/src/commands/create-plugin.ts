@@ -106,6 +106,24 @@ export function createPluginCommand(): Command {
         ),
       );
 
+      // esbuild.mjs — the plugin runtime runs a single CommonJS file and blocks
+      // require(), so everything the plugin imports has to be bundled in.
+      writeFileSync(
+        join(dir, 'esbuild.mjs'),
+        `import { build } from 'esbuild';
+
+await build({
+  entryPoints: ['src/index.ts'],
+  outfile: 'dist/index.cjs',
+  bundle: true,
+  platform: 'node',
+  format: 'cjs',
+  target: 'node22',
+  logLevel: 'info',
+});
+`,
+      );
+
       // Main entry point
       writeFileSync(
         join(dir, 'src', 'index.ts'),
