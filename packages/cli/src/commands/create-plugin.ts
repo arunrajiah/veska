@@ -5,49 +5,90 @@ import prompts from 'prompts';
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 
+interface CreatePluginOptions {
+  author?: string;
+  developerId?: string;
+  description?: string;
+  license?: string;
+  yes?: boolean;
+}
+
+interface ScaffoldAnswers {
+  pluginName?: string;
+  authorName?: string;
+  developerId?: string;
+  description?: string;
+  license?: string;
+}
+
+const LICENSES = ['Apache-2.0', 'MIT', 'Commercial'];
+
 export function createPluginCommand(): Command {
   return new Command('create-plugin')
     .description('Scaffold a new Veska plugin')
     .argument('[name]', 'Plugin name (e.g. my-inventory-plugin)')
-    .action(async (name?: string) => {
+    .option('--author <name>', 'Author / company name')
+    .option('--developer-id <id>', 'Your Veska developer ID')
+    .option('--description <text>', 'Short description')
+    .option('--license <spdx>', `License (${LICENSES.join(', ')})`)
+    .option('-y, --yes', 'Skip all prompts and use flags plus defaults')
+    .action(async (name: string | undefined, options: CreatePluginOptions) => {
+      if (options.license && !LICENSES.includes(options.license)) {
+        console.error(
+          chalk.red(
+            `Unknown license "${options.license}". Expected one of: ${LICENSES.join(', ')}`,
+          ),
+        );
+        process.exitCode = 1;
+        return;
+      }
+
       console.log(chalk.bold('\nVeska Plugin Scaffolder\n'));
 
-      const answers = await prompts([
-        {
-          type: name ? null : 'text',
-          name: 'pluginName',
-          message: 'Plugin name (kebab-case)',
-          initial: 'my-plugin',
-        },
-        {
-          type: 'text',
-          name: 'authorName',
-          message: 'Author / company name',
-        },
-        {
-          type: 'text',
-          name: 'developerId',
-          message: 'Your Veska developer ID',
-          initial: 'dev_',
-        },
-        {
-          type: 'text',
-          name: 'description',
-          message: 'Short description',
-        },
-        {
-          type: 'select',
-          name: 'license',
-          message: 'License',
-          choices: [
-            { title: 'Apache 2.0', value: 'Apache-2.0' },
-            { title: 'MIT', value: 'MIT' },
-            { title: 'Commercial', value: 'Commercial' },
-          ],
-        },
-      ]);
+      // Every value can arrive as a flag. Only ask for what is still missing, and with
+      // --yes ask for nothing at all so the command can run in scripts and in CI.
+      const answers: ScaffoldAnswers = options.yes
+        ? {}
+        : await prompts([
+            {
+              type: name ? null : 'text',
+              name: 'pluginName',
+              message: 'Plugin name (kebab-case)',
+              initial: 'my-plugin',
+            },
+            {
+              type: options.author ? null : 'text',
+              name: 'authorName',
+              message: 'Author / company name',
+            },
+            {
+              type: options.developerId ? null : 'text',
+              name: 'developerId',
+              message: 'Your Veska developer ID',
+              initial: 'dev_',
+            },
+            {
+              type: options.description ? null : 'text',
+              name: 'description',
+              message: 'Short description',
+            },
+            {
+              type: options.license ? null : 'select',
+              name: 'license',
+              message: 'License',
+              choices: LICENSES.map((value) => ({
+                title: value === 'Apache-2.0' ? 'Apache 2.0' : value,
+                value,
+              })),
+            },
+          ]);
 
-      const pluginName = (name ?? answers.pluginName) as string;
+      const pluginName = (name ?? answers.pluginName ?? 'my-plugin') as string;
+      const authorName = (options.author ?? answers.authorName ?? '') as string;
+      const developerId = (options.developerId ?? answers.developerId ?? 'dev_') as string;
+      const description = (options.description ?? answers.description ?? '') as string;
+      const license = (options.license ?? answers.license ?? 'Apache-2.0') as string;
+
       const spinner = ora(`Creating plugin ${chalk.cyan(pluginName)}`).start();
 
       const dir = join(process.cwd(), pluginName);
@@ -61,17 +102,17 @@ export function createPluginCommand(): Command {
             id: `com.example.${pluginName}`,
             name: pluginName,
             version: '0.1.0',
-            description: answers.description,
+            description,
             author: {
-              name: answers.authorName,
-              developerId: answers.developerId,
+              name: authorName,
+              developerId,
             },
             veskaMinVersion: '0.1.0',
             capabilitiesRequired: [],
             capabilitiesProvided: [],
             networkWhitelist: [],
             pricing: { model: 'free' },
-            license: answers.license,
+            license,
           },
           null,
           2,
