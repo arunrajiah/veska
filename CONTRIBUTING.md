@@ -15,8 +15,9 @@ git clone https://github.com/arunrajiah/veska.git
 cd veska
 pnpm install
 cp .env.example .env
-docker compose up -d
+docker compose up -d postgres redis   # Postgres + Redis only; pnpm dev serves the apps
 pnpm db:migrate
+pnpm seed
 pnpm dev
 ```
 

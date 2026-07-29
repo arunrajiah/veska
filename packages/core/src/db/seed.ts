@@ -2,6 +2,7 @@
  * Seed script — creates a realistic demo company "Acme Corp" with ERP data.
  * Run: pnpm --filter @veska/core seed
  */
+import '../load-env.js';
 import { createDatabase } from './client.js';
 import * as schema from './schema.js';
 import { randomUUID } from 'node:crypto';

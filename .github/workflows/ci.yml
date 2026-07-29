@@ -117,3 +117,94 @@ jobs:
 
       - name: Build
         run: pnpm turbo build
+
+  smoke:
+    name: Quickstart smoke test
+    runs-on: ubuntu-latest
+    # Walks the README quickstart end to end on a clean checkout: cp .env.example
+    # .env, migrate, seed, boot the API, and confirm it reports healthy. Deliberately
+    # does NOT set DATABASE_URL in the job env — the whole point is that the root
+    # .env is what makes it work, exactly as a first-time contributor experiences it.
+    services:
+      postgres:
+        # Must match docker-compose.yml: migrations create the "vector" extension.
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: veska
+          POSTGRES_PASSWORD: veska
+          POSTGRES_DB: veska
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U veska"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Configure environment
+        run: cp .env.example .env
+
+      - name: Build
+        run: pnpm build
+
+      - name: Run migrations
+        run: pnpm db:migrate
+
+      - name: Seed the demo company
+        run: pnpm seed
+
+      - name: Boot the API and wait for a healthy response
+        run: |
+          pnpm --filter @veska/api start &
+          API_PID=$!
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3001/health -o health.json; then
+              break
+            fi
+            if ! kill -0 "$API_PID" 2>/dev/null; then
+              echo "API process exited before it became reachable"
+              exit 1
+            fi
+            sleep 2
+          done
+          cat health.json
+          node -e '
+            const h = require("./health.json");
+            const bad = Object.entries(h.services ?? {}).filter(([, s]) => s.status !== "up");
+            if (h.status !== "healthy" || bad.length) {
+              console.error("API unhealthy:", JSON.stringify(h));
+              process.exit(1);
+            }
+            console.log("API healthy; services up:", Object.keys(h.services).join(", "));
+          '
+          kill "$API_PID"
+
+      - name: Verify the seed produced demo data
+        run: |
+          PGPASSWORD=veska psql -h localhost -U veska -d veska -tAc \
+            "select count(*) from \"entityRecords\"" > count.txt
+          COUNT=$(tr -d '[:space:]' < count.txt)
+          echo "entityRecords seeded: $COUNT"
+          test "$COUNT" -gt 0

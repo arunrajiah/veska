@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import './load-env.js';
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';

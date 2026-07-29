@@ -57,7 +57,7 @@ git clone https://github.com/arunrajiah/veska.git
 cd veska
 cp .env.example .env          # works out of the box; add ANTHROPIC_API_KEY (or local Ollama) for AI features
 pnpm install
-docker compose up -d          # starts Postgres 16 + Redis 7
+docker compose up -d postgres redis   # Postgres 16 + Redis 7 only; pnpm dev serves the apps
 pnpm db:migrate
 pnpm seed                     # loads the "Acme Corp" demo company
 pnpm dev
@@ -166,12 +166,14 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the full design.
 
 ## Docker
 
-Run the full stack (Postgres, Redis, API, Admin UI) with a single command:
+Run the full stack (Postgres, Redis, API, Admin UI, marketplace, marketing) with a single command:
 
 ```bash
 cp .env.example .env
 docker compose up --build
 ```
+
+This is an alternative to the quickstart above, not an addition to it: it builds every app from source (several minutes on a first run) and binds the same ports, so don't run it alongside `pnpm dev`. For day-to-day development, start only the databases (`docker compose up -d postgres redis`) and run the apps with `pnpm dev`.
 
 The compose file uses `develop.watch` for live reload during development — run `docker compose up --watch` to enable it.
 

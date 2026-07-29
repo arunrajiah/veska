@@ -7,8 +7,8 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "dev": "node --watch dist/index.js",
-    "dev:ts": "tsx watch src/index.ts",
+    "dev": "tsx watch src/index.ts",
+    "dev:dist": "node --watch dist/index.js",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src",

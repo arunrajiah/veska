@@ -3,6 +3,7 @@
  * Useful for resetting the demo environment before re-seeding.
  * Run: pnpm --filter @veska/core seed:clear
  */
+import '../load-env.js';
 import { createDatabase } from './client.js';
 import * as schema from './schema.js';
 import { eq } from 'drizzle-orm';
