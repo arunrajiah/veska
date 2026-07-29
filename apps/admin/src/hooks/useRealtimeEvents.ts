@@ -1,8 +1,6 @@
 'use client';
 import { useEffect, useRef, useCallback } from 'react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
-
 export type RealtimeEvent = {
   type: string;
   payload: Record<string, unknown>;
@@ -26,7 +24,10 @@ export function useRealtimeEvents(
 // ── Implementation ────────────────────────────────────────────────────────────
 export function useRealtimeEvents(
   first: Handler | string | string[],
-  second?: Handler | { tenantId?: string; enabled?: boolean } | ((data: RealtimeEvent['payload']) => void),
+  second?:
+    | Handler
+    | { tenantId?: string; enabled?: boolean }
+    | ((data: RealtimeEvent['payload']) => void),
   _deps?: unknown[],
 ): void {
   // Determine which overload is being used
@@ -36,7 +37,7 @@ export function useRealtimeEvents(
 
   const handlerRef = useRef<Handler | ((data: RealtimeEvent['payload']) => void)>(
     isFilteredMode
-      ? (second as (data: RealtimeEvent['payload']) => void) ?? (() => {})
+      ? ((second as (data: RealtimeEvent['payload']) => void) ?? (() => {}))
       : (first as Handler),
   );
 
@@ -49,7 +50,9 @@ export function useRealtimeEvents(
     }
   });
 
-  const options = isFilteredMode ? undefined : (second as { tenantId?: string; enabled?: boolean } | undefined);
+  const options = isFilteredMode
+    ? undefined
+    : (second as { tenantId?: string; enabled?: boolean } | undefined);
   const enabled = options?.enabled ?? true;
 
   // Normalise event-type filter to an array (or null = accept all)
@@ -67,8 +70,10 @@ export function useRealtimeEvents(
   const connect = useCallback(() => {
     if (abortRef.current || !enabled) return;
 
-    const url = `${API_BASE}/api/v1/events/stream`;
-    const es = new EventSource(url, { withCredentials: false });
+    // Same-origin proxy: it reads the HttpOnly session cookie and forwards the
+    // Bearer token that the API requires. Hitting the API directly can never
+    // authenticate, because EventSource cannot set request headers.
+    const es = new EventSource('/api/events/stream');
     esRef.current = es;
 
     es.onmessage = (e) => {

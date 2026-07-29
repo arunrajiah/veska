@@ -1,7 +1,9 @@
 import { Hono } from 'hono';
 import { stream } from 'hono/streaming';
+import type { SessionContext } from '../middleware/session.js';
+import type { TenantContext } from '../middleware/tenant-context.js';
 
-export const sseRouter = new Hono();
+export const sseRouter = new Hono<{ Variables: TenantContext & SessionContext }>();
 
 // In-memory subscriber map: tenantId → Set<(data: string) => void>
 const subscribers = new Map<string, Set<(data: string) => void>>();
@@ -32,7 +34,9 @@ export function broadcastToTenant(
 
 // GET /api/v1/events/stream
 sseRouter.get('/stream', async (c) => {
-  const tenantId = c.req.header('X-Veska-Tenant-Id') ?? 'demo-tenant';
+  // Authoritative tenant comes from the session via tenantContext, never from a
+  // client-supplied header, and there is no 'demo-tenant' fallback to leak into.
+  const { tenantId } = c.get('tenantCtx');
 
   return stream(c, async (s) => {
     // SSE headers must be set before streaming starts
@@ -50,9 +54,7 @@ sseRouter.get('/stream', async (c) => {
     subscribers.get(tenantId)!.add(send);
 
     // Send initial connected ping
-    await s.write(
-      `data: ${JSON.stringify({ type: 'connected', payload: { tenantId } })}\n\n`,
-    );
+    await s.write(`data: ${JSON.stringify({ type: 'connected', payload: { tenantId } })}\n\n`);
 
     // Keep-alive comment every 25 seconds
     const keepAlive = setInterval(() => {
