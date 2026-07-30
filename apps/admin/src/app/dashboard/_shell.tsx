@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Lock, UserCog, Menu, X, Sun, Moon, Monitor } from 'lucide-react';
+import { UserCog, Menu, X, Sun, Moon, Monitor } from 'lucide-react';
 import { SidebarNav } from './_sidebar-nav.js';
 import { AskVeskaPanel } from '@/components/ask-veska/panel.js';
 import { AskVeskaContext, useAskVeskaState } from '@/hooks/useAskVeska.js';
@@ -115,13 +115,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             >
               <UserCog size={11} className="flex-shrink-0" />
               Account Settings
-            </Link>
-            <Link
-              href="/super-admin"
-              className="flex items-center gap-1.5 mt-1.5 text-xs text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-300 transition-colors"
-            >
-              <Lock size={11} className="flex-shrink-0" />
-              Super Admin
             </Link>
           </div>
         </aside>
