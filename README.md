@@ -85,7 +85,7 @@ Once configured, almost nobody logs in. Employees, customers, and vendors intera
 Under the hood it is not a thin wrapper around a chat model:
 
 - **Real double-entry accounting** — an immutable ledger, invoices, expenses, budgets, recurring billing
-- **An AI action agent with 57 ERP tools** — create invoices, approve expenses, search contacts, forecast revenue — every action audit-logged with the AI's reasoning trace
+- **An AI action agent with 30 ERP tools** — create invoices, approve expenses, search contacts, forecast revenue — every action audit-logged with the AI's reasoning trace
 - **Multi-tenant by design** — tenant isolation enforced at the database layer, capability-based RBAC, TOTP 2FA
 - **A workflow engine** — triggers on any entity event, with approvals routed to Slack/Email
 - **A plugin SDK** — Stripe, QuickBooks, Shopify, Xero, and Google Calendar plugins ship in-repo
@@ -136,7 +136,7 @@ Under the hood it is not a thin wrapper around a chat model:
 | Scope | CRM + support + finance + HR | Full ERP suite | CRM |
 | Setup | Describe your business in plain English | Manual module configuration | Manual setup |
 | Daily use | Slack / WhatsApp / Email — chat-first | Web dashboard | Web dashboard |
-| AI | Agent with 57 ERP tools at the core | Add-ons | Assistive features |
+| AI | Agent with 30 ERP tools at the core | Add-ons | Assistive features |
 | Stack | TypeScript end-to-end | Python | TypeScript |
 | Maturity | Early (v0.x) — honest about it | Very mature | Mature |
 

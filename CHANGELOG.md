@@ -85,7 +85,7 @@ The first tagged release of Veska: a self-hosted, AI-native operations platform 
 
 ### AI
 
-- Action agent built on the Anthropic SDK with 57 ERP tools (create invoices, approve expenses, forecast revenue, …)
+- Action agent built on the Anthropic SDK with 30 ERP tools (create invoices, approve expenses, forecast revenue, …)
 - Pluggable LLM provider: Anthropic Claude, or fully local via Ollama / any OpenAI-compatible endpoint
 - Per-tenant AI usage and token tracking
 - AI onboarding: describe your company in plain language to configure modules

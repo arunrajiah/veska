@@ -32,7 +32,7 @@ Veska is early (v0.x) and built in the open. This roadmap is directional, not a 
 
 - [x] Core platform: entities, workflows, RBAC, multi-tenancy, audit log
 - [x] CRM, support desk, finance (double-entry ledger), HR modules
-- [x] AI action agent with 57 ERP tools (Anthropic Claude or local Ollama)
+- [x] AI action agent with 30 ERP tools (Anthropic Claude or local Ollama)
 - [x] Slack and Email channel adapters
 - [x] Plugin SDK + Stripe, QuickBooks, Google Calendar plugins
 - [x] Docker Compose self-hosting, CI, 222 unit tests (core + API routes + plugins)

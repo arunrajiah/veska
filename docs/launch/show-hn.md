@@ -17,7 +17,7 @@ Setup is also conversational: you describe your company in plain English and the
 What's under the hood (it's not a thin LLM wrapper):
 
 - Real double-entry accounting: immutable ledger, invoices, expenses, budgets, recurring billing
-- An agent with 57 ERP tools via the Anthropic SDK — every AI action is audit-logged with its reasoning trace; money-moving actions always require human confirmation
+- An agent with 30 ERP tools via the Anthropic SDK — every AI action is audit-logged with its reasoning trace. Approval chains gate money-moving actions behind human sign-off by amount threshold (configure a chain; there is no default one yet)
 - Works fully offline with Ollama or any OpenAI-compatible endpoint if you don't want data leaving your network
 - Multi-tenant Postgres (Drizzle, 32 migrations), capability-based RBAC, TOTP 2FA
 - TypeScript monorepo: Hono API, Next.js admin, plugin SDK with Stripe/QuickBooks/Google Calendar plugins
