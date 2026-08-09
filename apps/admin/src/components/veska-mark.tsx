@@ -12,7 +12,7 @@ export function VeskaMark({ className = 'w-6 h-6' }: { className?: string }) {
         d="M30 30l18 18 18-18"
         fill="none"
         stroke="#fff"
-        strokeWidth="9"
+        strokeWidth="11"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -20,7 +20,7 @@ export function VeskaMark({ className = 'w-6 h-6' }: { className?: string }) {
         d="M30 52l18 18 18-18"
         fill="none"
         stroke="#A5B4FC"
-        strokeWidth="9"
+        strokeWidth="11"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
