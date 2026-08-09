@@ -884,7 +884,7 @@ async function seed() {
   ];
   let timeCount = 0;
   for (const userId of [adminId, hrId, financeId, johnId]) {
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 2; i++) {
       await db.insert(schema.entityRecords).values({
         id: randomUUID(),
         tenantId,

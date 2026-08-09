@@ -41,11 +41,18 @@ function getVerb(entityType: string, status?: string): string {
 
 function toActivity(record: Record<string, unknown>): ActivityItem {
   const d = (record['data'] as Record<string, unknown>) ?? {};
+  // Covers the field each entity type actually uses for its human name. Types whose
+  // label lives elsewhere (TimeEntry.description, PayrollRun.period, orders'
+  // orderNumber) previously fell through to a raw id fragment, so the activity feed
+  // showed rows like "Time logged  c9d381f5".
   const label =
     (d['title'] as string) ||
     (d['name'] as string) ||
+    (d['orderNumber'] as string) ||
     (d['number'] as string) ||
     (d['subject'] as string) ||
+    (d['description'] as string) ||
+    (d['period'] as string) ||
     (record['id'] as string).slice(0, 8);
   const entityType = (record['entity_type'] ?? record['entityType']) as string;
   const status = (d['status'] as string | undefined) ?? (record['status'] as string | undefined);
@@ -69,7 +76,7 @@ function toActivity(record: Record<string, unknown>): ActivityItem {
 function firstRow(result: unknown): Record<string, string> | undefined {
   if (Array.isArray(result)) return result[0] as Record<string, string> | undefined;
   const r = result as { rows?: unknown[] };
-  return (r.rows?.[0]) as Record<string, string> | undefined;
+  return r.rows?.[0] as Record<string, string> | undefined;
 }
 
 function allRows(result: unknown): Record<string, unknown>[] {
@@ -314,6 +321,9 @@ dashboardRouter.get('/activity', async (c) => {
         data->>'name' AS name,
         data->>'number' AS number,
         data->>'subject' AS subject,
+        data->>'description' AS description,
+        data->>'period' AS period,
+        data->>'orderNumber' AS "orderNumber",
         data,
         "createdAt",
         "updatedAt"
@@ -333,7 +343,9 @@ dashboardRouter.get('/activity', async (c) => {
           name: row['name'],
           number: row['number'],
           subject: row['subject'],
-          ...(typeof row['data'] === 'object' && row['data'] !== null ? (row['data'] as Record<string, unknown>) : {}),
+          ...(typeof row['data'] === 'object' && row['data'] !== null
+            ? (row['data'] as Record<string, unknown>)
+            : {}),
         },
       };
       return toActivity(enriched);
