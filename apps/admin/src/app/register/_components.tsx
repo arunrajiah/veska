@@ -1,5 +1,6 @@
 'use client';
 
+import { VeskaMark } from '@/components/veska-mark.js';
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -92,7 +93,7 @@ export function RegisterClient() {
       <div className="w-full max-w-sm bg-white shadow-lg rounded-2xl p-8">
         <div className="flex flex-col items-center mb-8">
           <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center mb-3">
-            <span className="text-white font-bold text-lg">V</span>
+            <VeskaMark />
           </div>
           <h1 className="text-xl font-semibold text-gray-900">Veska</h1>
         </div>

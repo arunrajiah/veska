@@ -9,7 +9,9 @@ export const metadata: Metadata = {
   description: 'AI-native operations platform',
   manifest: '/manifest.json',
   appleWebApp: { capable: true, statusBarStyle: 'default', title: 'Veska' },
-  icons: { icon: '/favicon.ico', apple: '/apple-touch-icon.png' },
+  // Points at files that exist: there is no favicon.ico in public/, so the previous
+  // reference 404'd on every page load.
+  icons: { icon: '/favicon-32.png', apple: '/apple-touch-icon.png' },
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
