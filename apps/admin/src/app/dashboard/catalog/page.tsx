@@ -2,13 +2,6 @@ import Link from 'next/link';
 import { Package, Tag, Percent, ArrowRight } from 'lucide-react';
 import { apiFetch } from '@/lib/api.js';
 
-// Growth plan limits (static — sourced from packages/billing/src/plans.ts)
-const PLAN_LIMITS = {
-  priceLists: 10,
-  productVariants: 500,
-  discountCodes: 25,
-} as const;
-
 const ADMIN_URL = process.env.NEXT_PUBLIC_VESKA_ADMIN_URL ?? '';
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? 'demo-tenant';
 
@@ -33,30 +26,8 @@ interface DiscountCode {
   value?: number | string;
 }
 
-function LimitDisplay({ used, limit }: { used: number; limit: number | 'unlimited' }) {
-  if (limit === 'unlimited') {
-    return (
-      <p className="text-sm text-gray-500">
-        {used.toLocaleString()} used <span className="text-gray-400">/ unlimited</span>
-      </p>
-    );
-  }
-  const pct = Math.min((used / limit) * 100, 100);
-  const barColor = pct >= 90 ? 'bg-red-500' : pct >= 70 ? 'bg-amber-500' : 'bg-indigo-500';
-
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-1.5">
-        <span className="text-sm text-gray-600">
-          {used.toLocaleString()} / {limit.toLocaleString()}
-        </span>
-        <span className="text-xs text-gray-400">{Math.round(pct)}%</span>
-      </div>
-      <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-        <div className={`h-full rounded-full ${barColor}`} style={{ width: `${pct}%` }} />
-      </div>
-    </div>
-  );
+function CountDisplay({ used }: { used: number }) {
+  return <p className="text-sm text-gray-600">{used.toLocaleString()} configured</p>;
 }
 
 export default async function CatalogPage() {
@@ -118,10 +89,7 @@ export default async function CatalogPage() {
             <div>
               <h2 className="text-sm font-semibold text-gray-900">Product Variants</h2>
               <p className="text-xs text-gray-400">
-                Plan limit:{' '}
-                <span className="font-medium text-gray-600">
-                  {PLAN_LIMITS.productVariants.toLocaleString()}
-                </span>
+                Plan limit: <span className="font-medium text-gray-600"></span>
               </p>
             </div>
           </div>
@@ -134,7 +102,7 @@ export default async function CatalogPage() {
             </p>
           )}
 
-          <LimitDisplay used={variants.length} limit={PLAN_LIMITS.productVariants} />
+          <CountDisplay used={variants.length} />
 
           <div className="mt-4 pt-4 border-t border-gray-100">
             <Link
@@ -155,10 +123,7 @@ export default async function CatalogPage() {
             </div>
             <div>
               <h2 className="text-sm font-semibold text-gray-900">Price Lists</h2>
-              <p className="text-xs text-gray-400">
-                Plan limit:{' '}
-                <span className="font-medium text-gray-600">{PLAN_LIMITS.priceLists}</span>
-              </p>
+              <p className="text-xs text-gray-400">Plan limit: </p>
             </div>
           </div>
 
@@ -187,7 +152,7 @@ export default async function CatalogPage() {
             <p className="text-sm text-gray-400 mb-3">No price lists yet.</p>
           )}
 
-          <LimitDisplay used={priceLists.length} limit={PLAN_LIMITS.priceLists} />
+          <CountDisplay used={priceLists.length} />
 
           <div className="mt-4 pt-4 border-t border-gray-100">
             <Link
@@ -209,17 +174,14 @@ export default async function CatalogPage() {
           </div>
           <div>
             <h2 className="text-sm font-semibold text-gray-900">Discount Codes</h2>
-            <p className="text-xs text-gray-400">
-              Plan limit:{' '}
-              <span className="font-medium text-gray-600">{PLAN_LIMITS.discountCodes}</span>
-            </p>
+            <p className="text-xs text-gray-400">Plan limit: </p>
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-5">
           <div>
             <p className="text-sm text-gray-600 mb-3">{discounts.length} active discount codes</p>
-            <LimitDisplay used={discounts.length} limit={PLAN_LIMITS.discountCodes} />
+            <CountDisplay used={discounts.length} />
           </div>
 
           <div>

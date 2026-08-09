@@ -1,7 +1,5 @@
 # Production overrides — use with: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 
-version: '3.9'
-
 services:
   postgres:
     restart: unless-stopped
