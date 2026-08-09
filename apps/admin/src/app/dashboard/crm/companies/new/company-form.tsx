@@ -29,13 +29,13 @@ export default function CompanyForm() {
     };
 
     try {
-      const res = await fetch(`/api/veska/entities`, {
+      const res = await fetch(`/api/veska/entities/Company`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-Veska-Tenant-Id': TENANT_ID,
         },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ data: body.data }),
       });
       if (!res.ok) throw new Error(await res.text());
       router.push('/dashboard/crm/companies');
