@@ -179,14 +179,70 @@ async function seed() {
 
   // ── Contacts (CRM) ─────────────────────────────────────────────────────────
   const contacts = [
-    { firstName: 'Montgomery', lastName: 'Burns', email: 'mburns@globex.com', phone: '+1-555-0101', company: 'Globex Corporation', title: 'CEO' },
-    { firstName: 'Bill', lastName: 'Lumbergh', email: 'blumbergh@initech.com', phone: '+1-555-0102', company: 'Initech', title: 'VP Engineering' },
-    { firstName: 'Albert', lastName: 'Wesker', email: 'awesker@umbrella.com', phone: '+1-555-0103', company: 'Umbrella Corp', title: 'Director' },
-    { firstName: 'Gavin', lastName: 'Belson', email: 'gbelson@hooli.com', phone: '+1-555-0104', company: 'Hooli', title: 'CEO' },
-    { firstName: 'Michael', lastName: 'Scott', email: 'mscott@dundermifflin.com', phone: '+1-555-0105', company: 'Dunder Mifflin', title: 'Regional Manager' },
-    { firstName: 'Logan', lastName: 'Roy', email: 'lroy@waystar.com', phone: '+1-555-0106', company: 'Waystar Royco', title: 'Chairman' },
-    { firstName: 'Don', lastName: 'Draper', email: 'ddraper@sterlingcooper.com', phone: '+1-555-0107', company: 'Sterling Cooper', title: 'Creative Director' },
-    { firstName: 'George', lastName: 'Bluth', email: 'gbluth@bluth.com', phone: '+1-555-0108', company: 'Bluth Company', title: 'Founder' },
+    {
+      firstName: 'Montgomery',
+      lastName: 'Burns',
+      email: 'mburns@globex.com',
+      phone: '+1-555-0101',
+      company: 'Globex Corporation',
+      title: 'CEO',
+    },
+    {
+      firstName: 'Bill',
+      lastName: 'Lumbergh',
+      email: 'blumbergh@initech.com',
+      phone: '+1-555-0102',
+      company: 'Initech',
+      title: 'VP Engineering',
+    },
+    {
+      firstName: 'Albert',
+      lastName: 'Wesker',
+      email: 'awesker@umbrella.com',
+      phone: '+1-555-0103',
+      company: 'Umbrella Corp',
+      title: 'Director',
+    },
+    {
+      firstName: 'Gavin',
+      lastName: 'Belson',
+      email: 'gbelson@hooli.com',
+      phone: '+1-555-0104',
+      company: 'Hooli',
+      title: 'CEO',
+    },
+    {
+      firstName: 'Michael',
+      lastName: 'Scott',
+      email: 'mscott@dundermifflin.com',
+      phone: '+1-555-0105',
+      company: 'Dunder Mifflin',
+      title: 'Regional Manager',
+    },
+    {
+      firstName: 'Logan',
+      lastName: 'Roy',
+      email: 'lroy@waystar.com',
+      phone: '+1-555-0106',
+      company: 'Waystar Royco',
+      title: 'Chairman',
+    },
+    {
+      firstName: 'Don',
+      lastName: 'Draper',
+      email: 'ddraper@sterlingcooper.com',
+      phone: '+1-555-0107',
+      company: 'Sterling Cooper',
+      title: 'Creative Director',
+    },
+    {
+      firstName: 'George',
+      lastName: 'Bluth',
+      email: 'gbluth@bluth.com',
+      phone: '+1-555-0108',
+      company: 'Bluth Company',
+      title: 'Founder',
+    },
   ];
 
   const contactIds: string[] = [];
@@ -242,15 +298,57 @@ async function seed() {
 
   // ── Invoices ───────────────────────────────────────────────────────────────
   const invoiceData = [
-    { number: 'INV-001', customerName: 'Globex Corporation', amount: 15000, status: 'paid', daysOffset: -60 },
+    {
+      number: 'INV-001',
+      customerName: 'Globex Corporation',
+      amount: 15000,
+      status: 'paid',
+      daysOffset: -60,
+    },
     { number: 'INV-002', customerName: 'Initech', amount: 8500, status: 'paid', daysOffset: -45 },
     { number: 'INV-003', customerName: 'Hooli', amount: 12000, status: 'sent', daysOffset: -30 },
-    { number: 'INV-004', customerName: 'Dunder Mifflin', amount: 3200, status: 'overdue', daysOffset: -40 },
-    { number: 'INV-005', customerName: 'Waystar Royco', amount: 9750, status: 'sent', daysOffset: -20 },
-    { number: 'INV-006', customerName: 'Sterling Cooper', amount: 5500, status: 'draft', daysOffset: -5 },
-    { number: 'INV-007', customerName: 'Bluth Company', amount: 2100, status: 'overdue', daysOffset: -55 },
-    { number: 'INV-008', customerName: 'Umbrella Corp', amount: 14200, status: 'paid', daysOffset: -70 },
-    { number: 'INV-009', customerName: 'Globex Corporation', amount: 6800, status: 'sent', daysOffset: -10 },
+    {
+      number: 'INV-004',
+      customerName: 'Dunder Mifflin',
+      amount: 3200,
+      status: 'overdue',
+      daysOffset: -40,
+    },
+    {
+      number: 'INV-005',
+      customerName: 'Waystar Royco',
+      amount: 9750,
+      status: 'sent',
+      daysOffset: -20,
+    },
+    {
+      number: 'INV-006',
+      customerName: 'Sterling Cooper',
+      amount: 5500,
+      status: 'draft',
+      daysOffset: -5,
+    },
+    {
+      number: 'INV-007',
+      customerName: 'Bluth Company',
+      amount: 2100,
+      status: 'overdue',
+      daysOffset: -55,
+    },
+    {
+      number: 'INV-008',
+      customerName: 'Umbrella Corp',
+      amount: 14200,
+      status: 'paid',
+      daysOffset: -70,
+    },
+    {
+      number: 'INV-009',
+      customerName: 'Globex Corporation',
+      amount: 6800,
+      status: 'sent',
+      daysOffset: -10,
+    },
     { number: 'INV-010', customerName: 'Initech', amount: 500, status: 'draft', daysOffset: -2 },
   ];
 
@@ -272,7 +370,12 @@ async function seed() {
         issueDate: isoDate(issueDate),
         dueDate: isoDate(dueDate),
         lineItems: [
-          { description: 'Professional Services', quantity: 1, unitPrice: inv.amount, total: inv.amount },
+          {
+            description: 'Professional Services',
+            quantity: 1,
+            unitPrice: inv.amount,
+            total: inv.amount,
+          },
         ],
         notes: inv.status === 'overdue' ? 'Payment overdue — follow up required' : '',
         paidAt: inv.status === 'paid' ? isoDate(days(inv.daysOffset + 20)) : null,
@@ -316,12 +419,60 @@ async function seed() {
 
   // ── Employees (HR) ─────────────────────────────────────────────────────────
   const employeeData = [
-    { firstName: 'Sarah', lastName: 'Chen', email: 'schen@acme.com', department: 'Engineering', position: 'Senior Engineer', salary: 140000, startDate: isoDate(days(-730)) },
-    { firstName: 'Marcus', lastName: 'Williams', email: 'mwilliams@acme.com', department: 'Sales', position: 'Account Executive', salary: 95000, startDate: isoDate(days(-365)) },
-    { firstName: 'Priya', lastName: 'Patel', email: 'ppatel@acme.com', department: 'Engineering', position: 'Product Manager', salary: 125000, startDate: isoDate(days(-540)) },
-    { firstName: 'James', lastName: 'O\'Brien', email: 'jobrien@acme.com', department: 'Finance', position: 'Financial Analyst', salary: 105000, startDate: isoDate(days(-820)) },
-    { firstName: 'Aisha', lastName: 'Johnson', email: 'ajohnson@acme.com', department: 'HR', position: 'HR Business Partner', salary: 98000, startDate: isoDate(days(-270)) },
-    { firstName: 'John', lastName: 'Doe', email: 'john@acme.com', department: 'Engineering', position: 'Software Engineer', salary: 115000, startDate: isoDate(days(-180)) },
+    {
+      firstName: 'Sarah',
+      lastName: 'Chen',
+      email: 'schen@acme.com',
+      department: 'Engineering',
+      position: 'Senior Engineer',
+      salary: 140000,
+      startDate: isoDate(days(-730)),
+    },
+    {
+      firstName: 'Marcus',
+      lastName: 'Williams',
+      email: 'mwilliams@acme.com',
+      department: 'Sales',
+      position: 'Account Executive',
+      salary: 95000,
+      startDate: isoDate(days(-365)),
+    },
+    {
+      firstName: 'Priya',
+      lastName: 'Patel',
+      email: 'ppatel@acme.com',
+      department: 'Engineering',
+      position: 'Product Manager',
+      salary: 125000,
+      startDate: isoDate(days(-540)),
+    },
+    {
+      firstName: 'James',
+      lastName: "O'Brien",
+      email: 'jobrien@acme.com',
+      department: 'Finance',
+      position: 'Financial Analyst',
+      salary: 105000,
+      startDate: isoDate(days(-820)),
+    },
+    {
+      firstName: 'Aisha',
+      lastName: 'Johnson',
+      email: 'ajohnson@acme.com',
+      department: 'HR',
+      position: 'HR Business Partner',
+      salary: 98000,
+      startDate: isoDate(days(-270)),
+    },
+    {
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'john@acme.com',
+      department: 'Engineering',
+      position: 'Software Engineer',
+      salary: 115000,
+      startDate: isoDate(days(-180)),
+    },
   ];
 
   const employeeRecordIds: string[] = [];
@@ -346,10 +497,38 @@ async function seed() {
 
   // ── Leave Requests ─────────────────────────────────────────────────────────
   const leaveData = [
-    { employeeIdx: 0, type: 'Annual Leave', startDate: isoDate(days(14)), endDate: isoDate(days(21)), status: 'approved', days: 5 },
-    { employeeIdx: 2, type: 'Annual Leave', startDate: isoDate(days(7)), endDate: isoDate(days(9)), status: 'pending', days: 3 },
-    { employeeIdx: 3, type: 'Sick Leave', startDate: isoDate(days(-5)), endDate: isoDate(days(-3)), status: 'approved', days: 3 },
-    { employeeIdx: 5, type: 'Annual Leave', startDate: isoDate(days(30)), endDate: isoDate(days(37)), status: 'pending', days: 5 },
+    {
+      employeeIdx: 0,
+      type: 'Annual Leave',
+      startDate: isoDate(days(14)),
+      endDate: isoDate(days(21)),
+      status: 'approved',
+      days: 5,
+    },
+    {
+      employeeIdx: 2,
+      type: 'Annual Leave',
+      startDate: isoDate(days(7)),
+      endDate: isoDate(days(9)),
+      status: 'pending',
+      days: 3,
+    },
+    {
+      employeeIdx: 3,
+      type: 'Sick Leave',
+      startDate: isoDate(days(-5)),
+      endDate: isoDate(days(-3)),
+      status: 'approved',
+      days: 3,
+    },
+    {
+      employeeIdx: 5,
+      type: 'Annual Leave',
+      startDate: isoDate(days(30)),
+      endDate: isoDate(days(37)),
+      status: 'pending',
+      days: 5,
+    },
   ];
 
   for (const leave of leaveData) {
@@ -360,7 +539,8 @@ async function seed() {
       data: {
         ...leave,
         employeeId: employeeRecordIds[leave.employeeIdx],
-        employeeName: `${employeeData[leave.employeeIdx]?.firstName ?? ''} ${employeeData[leave.employeeIdx]?.lastName ?? ''}`.trim(),
+        employeeName:
+          `${employeeData[leave.employeeIdx]?.firstName ?? ''} ${employeeData[leave.employeeIdx]?.lastName ?? ''}`.trim(),
         reason: leave.type === 'Sick Leave' ? 'Flu recovery' : 'Personal vacation',
         approvedBy: leave.status === 'approved' ? hrId : null,
         approvedAt: leave.status === 'approved' ? isoDate(days(-2)) : null,
@@ -440,7 +620,8 @@ async function seed() {
           status: task.status,
           projectId,
           assigneeId: employeeRecordIds[task.assigneeIdx],
-          assigneeName: `${employeeData[task.assigneeIdx]?.firstName ?? ''} ${employeeData[task.assigneeIdx]?.lastName ?? ''}`.trim(),
+          assigneeName:
+            `${employeeData[task.assigneeIdx]?.firstName ?? ''} ${employeeData[task.assigneeIdx]?.lastName ?? ''}`.trim(),
           priority: 'medium',
           dueDate: proj.endDate,
         },
@@ -448,15 +629,27 @@ async function seed() {
       });
     }
   }
-  console.log(`  Projects created: ${projectData.length} with ${projectData.reduce((s, p) => s + p.tasks.length, 0)} tasks`);
+  console.log(
+    `  Projects created: ${projectData.length} with ${projectData.reduce((s, p) => s + p.tasks.length, 0)} tasks`,
+  );
 
   // ── Support Tickets ────────────────────────────────────────────────────────
   const ticketData = [
     { subject: 'Cannot login to admin panel', priority: 'high', status: 'open', contactIdx: 3 },
-    { subject: 'Invoice #INV-003 incorrect amount', priority: 'medium', status: 'in_progress', contactIdx: 2 },
+    {
+      subject: 'Invoice #INV-003 incorrect amount',
+      priority: 'medium',
+      status: 'in_progress',
+      contactIdx: 2,
+    },
     { subject: 'Data export feature broken', priority: 'high', status: 'open', contactIdx: 0 },
     { subject: 'Integration not syncing', priority: 'low', status: 'resolved', contactIdx: 4 },
-    { subject: 'Need to update billing details', priority: 'low', status: 'resolved', contactIdx: 5 },
+    {
+      subject: 'Need to update billing details',
+      priority: 'low',
+      status: 'resolved',
+      contactIdx: 5,
+    },
   ];
 
   for (const ticket of ticketData) {
@@ -469,7 +662,8 @@ async function seed() {
         priority: ticket.priority,
         status: ticket.status,
         contactId: contactIds[ticket.contactIdx],
-        contactName: `${contacts[ticket.contactIdx]?.firstName ?? ''} ${contacts[ticket.contactIdx]?.lastName ?? ''}`.trim(),
+        contactName:
+          `${contacts[ticket.contactIdx]?.firstName ?? ''} ${contacts[ticket.contactIdx]?.lastName ?? ''}`.trim(),
         assignedTo: adminId,
         resolvedAt: ticket.status === 'resolved' ? isoDate(days(-3)) : null,
         channel: 'email',
@@ -485,21 +679,24 @@ async function seed() {
     {
       title: 'Getting Started with Veska',
       slug: 'getting-started',
-      content: '# Getting Started\n\nWelcome to Veska! This guide will walk you through the initial setup.\n\n## Step 1: Create your tenant\n...\n\n## Step 2: Invite users\n...',
+      content:
+        '# Getting Started\n\nWelcome to Veska! This guide will walk you through the initial setup.\n\n## Step 1: Create your tenant\n...\n\n## Step 2: Invite users\n...',
       category: 'Onboarding',
       status: 'published',
     },
     {
       title: 'How to Create an Invoice',
       slug: 'create-invoice',
-      content: '# Creating Invoices\n\nInvoices can be created from the Finance module.\n\n## Steps\n1. Navigate to Finance > Invoices\n2. Click "New Invoice"\n3. Fill in customer details\n...',
+      content:
+        '# Creating Invoices\n\nInvoices can be created from the Finance module.\n\n## Steps\n1. Navigate to Finance > Invoices\n2. Click "New Invoice"\n3. Fill in customer details\n...',
       category: 'Finance',
       status: 'published',
     },
     {
       title: 'Leave Policy',
       slug: 'leave-policy',
-      content: '# Leave Policy\n\nAcme Corp provides competitive leave entitlements.\n\n## Annual Leave\nAll employees receive 20 days of annual leave per year.\n\n## Sick Leave\nUp to 10 days of paid sick leave per year.\n...',
+      content:
+        '# Leave Policy\n\nAcme Corp provides competitive leave entitlements.\n\n## Annual Leave\nAll employees receive 20 days of annual leave per year.\n\n## Sick Leave\nUp to 10 days of paid sick leave per year.\n...',
       category: 'HR',
       status: 'published',
     },
@@ -527,11 +724,51 @@ async function seed() {
 
   // ── Inventory Items ────────────────────────────────────────────────────────
   const inventoryData = [
-    { name: 'Acme Widget Pro', sku: 'AWP-001', price: 299, cost: 120, stock: 450, reorderLevel: 50, category: 'Hardware' },
-    { name: 'Acme Cloud Subscription', sku: 'ACS-001', price: 99, cost: 15, stock: 9999, reorderLevel: 0, category: 'Software' },
-    { name: 'Acme Support Package', sku: 'ASP-001', price: 499, cost: 150, stock: 100, reorderLevel: 10, category: 'Services' },
-    { name: 'USB-C Hub 7-in-1', sku: 'HUB-001', price: 49, cost: 18, stock: 23, reorderLevel: 20, category: 'Accessories' },
-    { name: 'Mechanical Keyboard MK3', sku: 'KBD-003', price: 149, cost: 55, stock: 8, reorderLevel: 15, category: 'Accessories' },
+    {
+      name: 'Acme Widget Pro',
+      sku: 'AWP-001',
+      price: 299,
+      cost: 120,
+      stock: 450,
+      reorderLevel: 50,
+      category: 'Hardware',
+    },
+    {
+      name: 'Acme Cloud Subscription',
+      sku: 'ACS-001',
+      price: 99,
+      cost: 15,
+      stock: 9999,
+      reorderLevel: 0,
+      category: 'Software',
+    },
+    {
+      name: 'Acme Support Package',
+      sku: 'ASP-001',
+      price: 499,
+      cost: 150,
+      stock: 100,
+      reorderLevel: 10,
+      category: 'Services',
+    },
+    {
+      name: 'USB-C Hub 7-in-1',
+      sku: 'HUB-001',
+      price: 49,
+      cost: 18,
+      stock: 23,
+      reorderLevel: 20,
+      category: 'Accessories',
+    },
+    {
+      name: 'Mechanical Keyboard MK3',
+      sku: 'KBD-003',
+      price: 149,
+      cost: 55,
+      stock: 8,
+      reorderLevel: 15,
+      category: 'Accessories',
+    },
   ];
 
   for (const item of inventoryData) {
@@ -557,6 +794,140 @@ async function seed() {
     });
   }
   console.log(`  Inventory items created: ${inventoryData.length}`);
+
+  // ── Sales orders ───────────────────────────────────────────────────────────
+  // The dashboard counts SalesOrder, PurchaseOrder, PayrollRun and TimeEntry rows.
+  // None of them were seeded, so four tiles always read zero and the Sales,
+  // Purchasing, Payroll and Time pages opened empty.
+  const salesOrders = [
+    { number: 'SO-1001', customer: 'Globex Corporation', amount: 24500, status: 'confirmed' },
+    { number: 'SO-1002', customer: 'Initech', amount: 8900, status: 'pending' },
+    { number: 'SO-1003', customer: 'Hooli', amount: 41200, status: 'shipped' },
+    { number: 'SO-1004', customer: 'Dunder Mifflin', amount: 3150, status: 'delivered' },
+    { number: 'SO-1005', customer: 'Waystar Royco', amount: 17800, status: 'confirmed' },
+  ];
+  for (const o of salesOrders) {
+    await db.insert(schema.entityRecords).values({
+      id: randomUUID(),
+      tenantId,
+      entityType: 'SalesOrder',
+      data: {
+        orderNumber: o.number,
+        customerName: o.customer,
+        amount: o.amount,
+        currency: 'USD',
+        status: o.status,
+        orderDate: isoDate(days(-Math.floor(Math.random() * 20) - 1)),
+        expectedDelivery: isoDate(days(Math.floor(Math.random() * 21) + 3)),
+      },
+      createdBy: adminId,
+    });
+  }
+  console.log(`  Sales orders created: ${salesOrders.length}`);
+
+  // ── Purchase orders ────────────────────────────────────────────────────────
+  const purchaseOrders = [
+    { number: 'PO-2001', vendor: 'Acme Components', amount: 12400, status: 'ordered' },
+    { number: 'PO-2002', vendor: 'Northwind Supplies', amount: 3600, status: 'draft' },
+    { number: 'PO-2003', vendor: 'Contoso Hardware', amount: 8750, status: 'ordered' },
+    { number: 'PO-2004', vendor: 'Fabrikam Logistics', amount: 2100, status: 'received' },
+  ];
+  for (const o of purchaseOrders) {
+    await db.insert(schema.entityRecords).values({
+      id: randomUUID(),
+      tenantId,
+      entityType: 'PurchaseOrder',
+      data: {
+        orderNumber: o.number,
+        vendorName: o.vendor,
+        amount: o.amount,
+        currency: 'USD',
+        status: o.status,
+        orderDate: isoDate(days(-Math.floor(Math.random() * 25) - 1)),
+      },
+      createdBy: adminId,
+    });
+  }
+  console.log(`  Purchase orders created: ${purchaseOrders.length}`);
+
+  // ── Payroll runs (this month, so the dashboard tile is non-zero) ───────────
+  const payrollRuns = [
+    { period: 'Current month — first half', gross: 48200, employees: 6, status: 'completed' },
+    { period: 'Current month — second half', gross: 48200, employees: 6, status: 'draft' },
+  ];
+  for (const r of payrollRuns) {
+    await db.insert(schema.entityRecords).values({
+      id: randomUUID(),
+      tenantId,
+      entityType: 'PayrollRun',
+      data: {
+        period: r.period,
+        grossAmount: r.gross,
+        netAmount: Math.round(r.gross * 0.78),
+        employeeCount: r.employees,
+        currency: 'USD',
+        status: r.status,
+      },
+      createdBy: adminId,
+    });
+  }
+  console.log(`  Payroll runs created: ${payrollRuns.length}`);
+
+  // ── Time entries (this week) ───────────────────────────────────────────────
+  const timeTasks = [
+    'Client onboarding call',
+    'Pipeline review',
+    'Invoice reconciliation',
+    'Support triage',
+    'Sprint planning',
+    'Vendor negotiation',
+  ];
+  let timeCount = 0;
+  for (const userId of [adminId, hrId, financeId, johnId]) {
+    for (let i = 0; i < 3; i++) {
+      await db.insert(schema.entityRecords).values({
+        id: randomUUID(),
+        tenantId,
+        entityType: 'TimeEntry',
+        data: {
+          userId,
+          description: timeTasks[(timeCount + i) % timeTasks.length],
+          hours: [2, 3.5, 4, 6, 7.5][Math.floor(Math.random() * 5)],
+          billable: i % 2 === 0,
+          date: isoDate(new Date()),
+        },
+        createdBy: userId,
+      });
+      timeCount++;
+    }
+  }
+  console.log(`  Time entries created: ${timeCount}`);
+
+  // ── Approval chain + pending requests ──────────────────────────────────────
+  // Without a chain nothing ever routes for sign-off, so the approvals inbox was
+  // empty and money-moving actions had no gate at all out of the box.
+  const chainId = randomUUID();
+  await db.execute(sql`
+    INSERT INTO "approvalChains" ("id", "tenantId", "name", "entityType", "conditionField",
+      "conditionOp", "conditionValue", "steps", "enabled")
+    VALUES (${chainId}, ${tenantId}, 'Expenses over $500', 'expense', 'amount', 'gt', 500,
+      ${JSON.stringify([{ order: 1, approverRole: 'finance', label: 'Finance review' }])}::jsonb, true)
+  `);
+
+  const pendingApprovals = [
+    { type: 'Expense', title: 'Expense: Client dinner — $780' },
+    { type: 'Expense', title: 'Expense: Conference travel — $1,240' },
+    { type: 'PurchaseOrder', title: 'PO-2001: Acme Components — $12,400' },
+  ];
+  for (const a of pendingApprovals) {
+    await db.execute(sql`
+      INSERT INTO "approvalRequests" ("id", "tenantId", "chainId", "entityType", "entityId",
+        "entityTitle", "currentStep", "totalSteps", "status", "requestedBy")
+      VALUES (${randomUUID()}, ${tenantId}, ${chainId}, ${a.type}, ${randomUUID()},
+        ${a.title}, 1, 1, 'pending', ${johnId})
+    `);
+  }
+  console.log(`  Approval chain + ${pendingApprovals.length} pending requests created`);
 
   console.log('\nSeed complete! Login credentials:');
   console.log('  admin@acme.com  / demo1234  (Admin)');
