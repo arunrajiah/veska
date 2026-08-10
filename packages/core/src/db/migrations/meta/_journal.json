@@ -232,6 +232,13 @@
       "when": 1747000032000,
       "tag": "0032_user_auth",
       "breakpoints": false
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1747000033000,
+      "tag": "0033_rls_tenant_policies",
+      "breakpoints": false
     }
   ]
 }
