@@ -233,17 +233,19 @@ hrRouter.post(
     });
 
     // Trigger approval flow for all leave requests
-    void new ApprovalService(db).trigger({
-      tenantId,
-      entityType: 'LeaveRequest',
-      entityId: record.id,
-      requestedBy: identityId,
-      metadata: {
-        leaveType: body.leave_type,
-        startDate: body.start_date,
-        endDate: body.end_date,
-      },
-    }).catch(() => {});
+    await new ApprovalService(db)
+      .trigger({
+        tenantId,
+        entityType: 'LeaveRequest',
+        entityId: record.id,
+        requestedBy: identityId,
+        metadata: {
+          leaveType: body.leave_type,
+          startDate: body.start_date,
+          endDate: body.end_date,
+        },
+      })
+      .catch(() => {});
 
     return c.json(record, 201);
   },
@@ -361,14 +363,16 @@ hrRouter.patch(
           let resolvedName = employeeName;
 
           if (employeeId) {
-            const empRow = (await db.execute(sql`
+            const empRow = (
+              (await db.execute(sql`
               SELECT data->>'email' AS email,
                      COALESCE(data->>'name', data->>'full_name', data->>'first_name') AS name
               FROM "entityRecords"
               WHERE id = ${employeeId}::uuid
                 AND "tenantId" = ${tenantId}::uuid
               LIMIT 1
-            `) as unknown as { rows: Array<{ email: string | null; name: string | null }> }).rows[0];
+            `)) as unknown as { rows: Array<{ email: string | null; name: string | null }> }
+            ).rows[0];
 
             email = empRow?.email ?? null;
             resolvedName = empRow?.name ?? resolvedName;

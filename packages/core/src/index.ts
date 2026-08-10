@@ -6,7 +6,7 @@ export * from './primitives/channel.js';
 export * from './primitives/integration.js';
 
 // Database
-export { createDatabase, type Database, schema } from './db/index.js';
+export { createDatabase, withTenantTransaction, type Database, schema } from './db/index.js';
 
 // AI
 export { type LLMProvider, type CompletionMessage, type CompletionParams, type CompletionResult, type Tool } from './ai/provider.js';

@@ -15,7 +15,9 @@ export const aiRouter = new Hono<{ Variables: TenantContext }>();
 
 aiRouter.post('/insights', aiLimit, async (c) => {
   const { db, tenantId } = c.get('tenantCtx');
-  const body = await c.req.json<{ focus?: 'finance' | 'hr' | 'sales' | 'ops' }>().catch(() => ({ focus: undefined }));
+  const body = await c.req
+    .json<{ focus?: 'finance' | 'hr' | 'sales' | 'ops' }>()
+    .catch(() => ({ focus: undefined }));
   const focus = body.focus;
 
   // Fetch KPI snapshot in parallel
@@ -80,13 +82,25 @@ aiRouter.post('/insights', aiLimit, async (c) => {
     focus,
     openInvoices: {
       count: Number((openInvoicesResult.rows[0] as { count: string; total: string })?.count ?? 0),
-      totalAmount: Number((openInvoicesResult.rows[0] as { count: string; total: string })?.total ?? 0),
+      totalAmount: Number(
+        (openInvoicesResult.rows[0] as { count: string; total: string })?.total ?? 0,
+      ),
     },
-    serviceTicketsByPriority: serviceTicketsResult.rows as Array<{ priority: string; count: string }>,
-    budgetUtilization: budgetResult.rows as Array<{ budget_name: string; planned: string; actual: string; utilization_pct: string }>,
+    serviceTicketsByPriority: serviceTicketsResult.rows as Array<{
+      priority: string;
+      count: string;
+    }>,
+    budgetUtilization: budgetResult.rows as Array<{
+      budget_name: string;
+      planned: string;
+      actual: string;
+      utilization_pct: string;
+    }>,
     pipelineDeals: {
       count: Number((dealsResult.rows[0] as { count: string; total_value: string })?.count ?? 0),
-      totalValue: Number((dealsResult.rows[0] as { count: string; total_value: string })?.total_value ?? 0),
+      totalValue: Number(
+        (dealsResult.rows[0] as { count: string; total_value: string })?.total_value ?? 0,
+      ),
     },
     overdueContracts: {
       count: Number((overdueContractsResult.rows[0] as { count: string })?.count ?? 0),
@@ -118,16 +132,18 @@ aiRouter.post('/insights', aiLimit, async (c) => {
     insights = JSON.parse(jsonText) as unknown[];
 
     // Fire-and-forget usage log
-    void new AIUsageService(db).log({
-      tenantId,
-      feature: 'insights',
-      model: process.env['ANTHROPIC_MODEL'] ?? process.env['OLLAMA_MODEL'] ?? 'claude-sonnet-4-5',
-      promptTokens: 0,
-      completionTokens: 0,
-      durationMs: insightsDuration,
-      requestSummary: `Insights focus=${focus ?? 'all'}`,
-      isLocal: ['ollama', 'local'].includes(process.env['LLM_PROVIDER'] ?? ''),
-    }).catch(() => {});
+    await new AIUsageService(db)
+      .log({
+        tenantId,
+        feature: 'insights',
+        model: process.env['ANTHROPIC_MODEL'] ?? process.env['OLLAMA_MODEL'] ?? 'claude-sonnet-4-5',
+        promptTokens: 0,
+        completionTokens: 0,
+        durationMs: insightsDuration,
+        requestSummary: `Insights focus=${focus ?? 'all'}`,
+        isLocal: ['ollama', 'local'].includes(process.env['LLM_PROVIDER'] ?? ''),
+      })
+      .catch(() => {});
   } catch (err) {
     console.error('[AI /insights] LLM or parse error:', err);
     insights = [];
@@ -285,10 +301,12 @@ aiRouter.post('/conversations/:id/chat', async (c) => {
     ORDER BY "createdAt" ASC
   `);
 
-  const history: LLMMessage[] = (historyRows.rows as Array<{ role: string; content: string }>).map((row) => ({
-    role: row.role as 'user' | 'assistant',
-    content: row.content,
-  }));
+  const history: LLMMessage[] = (historyRows.rows as Array<{ role: string; content: string }>).map(
+    (row) => ({
+      role: row.role as 'user' | 'assistant',
+      content: row.content,
+    }),
+  );
 
   // Check for API key — return mock if not configured
   if (!process.env['ANTHROPIC_API_KEY']) {
@@ -353,20 +371,22 @@ aiRouter.post('/conversations/:id/chat', async (c) => {
   const chatDuration = Date.now() - chatStart;
 
   // Fire-and-forget usage log (includes piiDetected flag)
-  void new AIUsageService(db).log({
-    tenantId,
-    userId: c.get('tenantCtx').identityId,
-    sessionId: conversationId,
-    feature: 'action_agent',
-    model: process.env['ANTHROPIC_MODEL'] ?? process.env['OLLAMA_MODEL'] ?? 'claude-sonnet-4-5',
-    promptTokens: 0,
-    completionTokens: 0,
-    durationMs: chatDuration,
-    toolsUsed,
-    requestSummary: userMessage.slice(0, 100),
-    isLocal: ['ollama', 'local'].includes(process.env['LLM_PROVIDER'] ?? ''),
-    metadata: { piiDetected },
-  }).catch(() => {});
+  await new AIUsageService(db)
+    .log({
+      tenantId,
+      userId: c.get('tenantCtx').identityId,
+      sessionId: conversationId,
+      feature: 'action_agent',
+      model: process.env['ANTHROPIC_MODEL'] ?? process.env['OLLAMA_MODEL'] ?? 'claude-sonnet-4-5',
+      promptTokens: 0,
+      completionTokens: 0,
+      durationMs: chatDuration,
+      toolsUsed,
+      requestSummary: userMessage.slice(0, 100),
+      isLocal: ['ollama', 'local'].includes(process.env['LLM_PROVIDER'] ?? ''),
+      metadata: { piiDetected },
+    })
+    .catch(() => {});
 
   // Save ORIGINAL (unmasked) user message in the DB
   await db.execute(sql`
@@ -428,9 +448,7 @@ aiRouter.get('/provider-info', async (c) => {
     provider,
     model,
     isLocal,
-    ollamaUrl: isLocal
-      ? (process.env['OLLAMA_BASE_URL'] ?? 'http://localhost:11434')
-      : null,
+    ollamaUrl: isLocal ? (process.env['OLLAMA_BASE_URL'] ?? 'http://localhost:11434') : null,
   });
 });
 

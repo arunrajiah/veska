@@ -116,13 +116,18 @@ expensesRouter.post(
     z.object({
       employee_id: z.string().optional(),
       employee_name: z.string().optional(),
-      category: z.enum(['travel', 'meals', 'equipment', 'software', 'office', 'other']).default('other'),
+      category: z
+        .enum(['travel', 'meals', 'equipment', 'software', 'office', 'other'])
+        .default('other'),
       amount: z.number(),
       currency: z.string().default('USD'),
       date: z.string(),
       description: z.string().min(1),
       notes: z.string().optional(),
-      status: z.enum(['draft', 'submitted', 'approved', 'rejected', 'paid']).optional().default('draft'),
+      status: z
+        .enum(['draft', 'submitted', 'approved', 'rejected', 'paid'])
+        .optional()
+        .default('draft'),
     }),
   ),
   async (c) => {
@@ -147,14 +152,16 @@ expensesRouter.post(
 
     // Trigger approval flow if submitted
     if (data.status === 'submitted') {
-      void new ApprovalService(db).trigger({
-        tenantId,
-        entityType: 'Expense',
-        entityId: record.id,
-        requestedBy: identityId,
-        amount: body.amount,
-        metadata: { description: body.description, amount: body.amount },
-      }).catch(err => console.error('[approval] trigger failed:', err));
+      await new ApprovalService(db)
+        .trigger({
+          tenantId,
+          entityType: 'Expense',
+          entityId: record.id,
+          requestedBy: identityId,
+          amount: body.amount,
+          metadata: { description: body.description, amount: body.amount },
+        })
+        .catch((err) => console.error('[approval] trigger failed:', err));
     }
 
     return c.json(record, 201);
@@ -226,66 +233,65 @@ expensesRouter.post(
 
 // ── Submit ───────────────────────────────────────────────────
 
-expensesRouter.patch(
-  '/:id/submit',
-  async (c) => {
-    const id = c.req.param('id');
-    const { db, tenantId, identityId } = c.get('tenantCtx');
+expensesRouter.patch('/:id/submit', async (c) => {
+  const id = c.req.param('id');
+  const { db, tenantId, identityId } = c.get('tenantCtx');
 
-    const expense = await db.query.entityRecords.findFirst({
-      where: and(
-        eq(schema.entityRecords.tenantId, tenantId),
-        eq(schema.entityRecords.entityType, 'Expense'),
-        eq(schema.entityRecords.id, id),
-        isNull(schema.entityRecords.deletedAt),
-      ),
-    });
+  const expense = await db.query.entityRecords.findFirst({
+    where: and(
+      eq(schema.entityRecords.tenantId, tenantId),
+      eq(schema.entityRecords.entityType, 'Expense'),
+      eq(schema.entityRecords.id, id),
+      isNull(schema.entityRecords.deletedAt),
+    ),
+  });
 
-    if (!expense) return c.json({ error: 'Expense not found' }, 404);
+  if (!expense) return c.json({ error: 'Expense not found' }, 404);
 
-    const existing = expense.data as Record<string, unknown>;
-    const updated: Record<string, unknown> = { ...existing, status: 'submitted' };
+  const existing = expense.data as Record<string, unknown>;
+  const updated: Record<string, unknown> = { ...existing, status: 'submitted' };
 
-    const [result] = await db
-      .update(schema.entityRecords)
-      .set({ data: updated, updatedAt: new Date() })
-      .where(eq(schema.entityRecords.id, id))
-      .returning();
+  const [result] = await db
+    .update(schema.entityRecords)
+    .set({ data: updated, updatedAt: new Date() })
+    .where(eq(schema.entityRecords.id, id))
+    .returning();
 
-    const submitDiff = redactDiff(computeDiff(existing, updated));
-    void logAudit(sharedDb, {
-      tenantId,
-      actorId: identityId,
-      actorType: 'user',
-      action: 'update',
-      entityType: 'Expense',
-      entityId: id,
-      before: existing,
-      after: updated,
-      diff: submitDiff,
-    });
+  const submitDiff = redactDiff(computeDiff(existing, updated));
+  void logAudit(sharedDb, {
+    tenantId,
+    actorId: identityId,
+    actorType: 'user',
+    action: 'update',
+    entityType: 'Expense',
+    entityId: id,
+    before: existing,
+    after: updated,
+    diff: submitDiff,
+  });
 
-    // Trigger approval flow
-    void new ApprovalService(db).trigger({
+  // Trigger approval flow
+  await new ApprovalService(db)
+    .trigger({
       tenantId,
       entityType: 'Expense',
       entityId: id,
       requestedBy: identityId,
       amount: Number(existing['amount'] ?? 0),
       metadata: { description: existing['description'], amount: existing['amount'] },
-    }).catch(err => console.error('[approval] trigger failed:', err));
+    })
+    .catch((err) => console.error('[approval] trigger failed:', err));
 
-    dispatchWebhookEvent({
-      tenantId,
-      db,
-      event: 'expense.submitted',
-      resourceId: id,
-      data: { id, tenantId, status: 'submitted', amount: existing['amount'] },
-    });
+  dispatchWebhookEvent({
+    tenantId,
+    db,
+    event: 'expense.submitted',
+    resourceId: id,
+    data: { id, tenantId, status: 'submitted', amount: existing['amount'] },
+  });
 
-    return c.json(result);
-  },
-);
+  return c.json(result);
+});
 
 // ── Update / status transitions ──────────────────────────────
 
