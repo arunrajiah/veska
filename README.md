@@ -86,7 +86,7 @@ Under the hood it is not a thin wrapper around a chat model:
 
 - **Real double-entry accounting** — an immutable ledger, invoices, expenses, budgets, recurring billing
 - **An AI action agent with 30 ERP tools** — create invoices, approve expenses, search contacts, forecast revenue — every action audit-logged with the AI's reasoning trace
-- **Multi-tenant by design** — tenant isolation enforced at the database layer, capability-based RBAC, TOTP 2FA
+- **Multi-tenant by design** — every request is scoped to the tenant on its session, capability-based RBAC, TOTP 2FA
 - **A workflow engine** — triggers on any entity event, with approvals routed to Slack/Email
 - **A plugin SDK** — Stripe, QuickBooks, Shopify, Xero, and Google Calendar plugins ship in-repo
 
