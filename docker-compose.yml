@@ -10,6 +10,7 @@ services:
       - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./docker/initdb:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U veska']
       interval: 10s
@@ -39,6 +40,9 @@ services:
       - '3001:3001'
     environment:
       DATABASE_URL: postgresql://veska:veska@postgres:5432/veska
+      # Non-superuser role for request-scoped queries, so RLS is actually enforced.
+      # Created by docker/initdb/01-app-role.sh on first start of the volume.
+      DATABASE_APP_URL: postgresql://veska_app:veska_app@postgres:5432/veska
       REDIS_URL: redis://redis:6379
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
       NODE_ENV: development

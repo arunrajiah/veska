@@ -73,6 +73,21 @@ See [.env.example](.env.example) for the full list with descriptions. Minimum re
 3. Add the bot token and signing secret to your `.env`
 4. Invite the bot to your workspace channels
 
+## Database roles and row-level security
+
+Veska ships row-level security policies that pin every tenant-scoped query to the
+tenant on the request's session. They are enforced only when request-scoped queries
+run as a non-superuser, so the API uses two connections:
+
+- `DATABASE_URL` — privileged role. Migrations, seeding, auth, and background workers.
+- `DATABASE_APP_URL` — non-superuser role for request-scoped queries. In Docker this
+  role (`veska_app`) is created automatically on first start by
+  `docker/initdb/01-app-role.sh`; set `POSTGRES_APP_PASSWORD` to override its default
+  password and update `DATABASE_APP_URL` to match.
+
+If `DATABASE_APP_URL` is unset the API falls back to `DATABASE_URL` and behaves as
+before, with isolation enforced by the application layer only.
+
 ## Upgrades
 
 ```bash

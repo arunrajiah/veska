@@ -1,7 +1,7 @@
 import type { MiddlewareHandler } from 'hono';
 import { eq } from 'drizzle-orm';
 import { schema, ConfigAgent, withTenantTransaction } from '@veska/core';
-import { sharedDb, sharedLlm } from '../shared.js';
+import { sharedDb, sharedAppDb, sharedLlm } from '../shared.js';
 import type { SessionContext } from './session.js';
 
 export interface TenantContext {
@@ -57,7 +57,7 @@ export const tenantContext: MiddlewareHandler<{
 
   // Every other request runs inside a transaction with app.tenant_id set, so the RLS
   // policies constrain each query to this tenant at the database level.
-  await withTenantTransaction(sharedDb, tenantId, async (scopedDb) => {
+  await withTenantTransaction(sharedAppDb, tenantId, async (scopedDb) => {
     c.set('tenantCtx', { tenantId, identityId, db: scopedDb, configAgent });
     await next();
   });
