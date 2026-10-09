@@ -46,3 +46,8 @@ test-results/
 
 # Redis snapshot artifact
 dump.rdb
+
+# Local AI assistant / OS / env files
+CLAUDE.md
+CLAUDE.local.md
+.mcp.json
