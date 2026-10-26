@@ -48,7 +48,29 @@ Traditional ERP systems take months to implement, require consultants, and need 
 
 ## Try it in 5 minutes
 
-Spin up a complete demo company — contacts, a $258K open deal pipeline, invoices, expenses, support tickets — and click around:
+One command. No Node, no pnpm, no cloning. The only prerequisite is Docker:
+
+```bash
+mkdir veska && cd veska
+curl -fsSL https://raw.githubusercontent.com/arunrajiah/veska/main/docker-compose.standalone.yml -o docker-compose.yml
+docker compose up -d
+```
+
+This pulls prebuilt images, runs database migrations, and starts everything. Then load the "Acme Corp" demo company (contacts, a $258K open deal pipeline, invoices, expenses, support tickets) and click around:
+
+```bash
+docker compose --profile demo run --rm seed
+```
+
+| | |
+|---|---|
+| Admin UI | http://localhost:3000 |
+| Demo login | `admin@acme.com` / `demo1234` |
+| API | http://localhost:3001 |
+
+Other demo users: `finance@acme.com`, `hr@acme.com`, `john@acme.com` (same password), each seeing the app through a different role. AI features need an `ANTHROPIC_API_KEY` (or a local Ollama): put it in a `.env` file next to the compose file. For production deployment, see **[SELF_HOSTING.md](SELF_HOSTING.md)**.
+
+### Run from source (for development)
 
 ```bash
 # Prerequisites: Node.js 22+, pnpm 9+, Docker
@@ -63,18 +85,7 @@ pnpm seed                     # loads the "Acme Corp" demo company
 pnpm dev
 ```
 
-Then open the Admin UI and log in as the demo admin:
-
-| | |
-|---|---|
-| Admin UI | http://localhost:3000 |
-| Demo login | `admin@acme.com` / `demo1234` |
-| API | http://localhost:3001 |
-| Marketplace | http://localhost:3003 |
-
-Other demo users: `finance@acme.com`, `hr@acme.com`, `john@acme.com` (same password) — each sees the app through a different role. Wipe the demo data anytime with `pnpm seed:clear`.
-
-For production deployment, see **[SELF_HOSTING.md](SELF_HOSTING.md)**.
+Same URLs and logins as above (plus the Marketplace at http://localhost:3003). Wipe the demo data anytime with `pnpm seed:clear`.
 
 ## What is Veska?
 
@@ -166,7 +177,9 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the full design.
 
 ## Docker
 
-Run the full stack (Postgres, Redis, API, Admin UI, marketplace, marketing) with a single command:
+**Prebuilt images** are published to GHCR on every push to `main` and every release: `ghcr.io/arunrajiah/veska-api`, `-admin`, `-marketing`, and `-marketplace`. The [docker-compose.standalone.yml](docker-compose.standalone.yml) quickstart above uses them; pin a release with `VESKA_TAG=v0.1.0`.
+
+**Build from source** instead: run the full stack (Postgres, Redis, API, Admin UI, marketplace, marketing) with a single command:
 
 ```bash
 cp .env.example .env

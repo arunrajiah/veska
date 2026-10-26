@@ -1,0 +1,144 @@
+# Veska one-command install. Prebuilt images from GHCR: no Node, pnpm, or
+# source checkout needed.
+#
+#   mkdir veska && cd veska
+#   curl -fsSL https://raw.githubusercontent.com/arunrajiah/veska/main/docker-compose.standalone.yml -o docker-compose.yml
+#   docker compose up -d
+#
+# Then open http://localhost:3000. Load the "Acme Corp" demo company with:
+#
+#   docker compose --profile demo run --rm seed
+#
+# AI features need ANTHROPIC_API_KEY (or a local Ollama); everything else works
+# without it. Configure through a .env file next to this compose file; see
+# .env.example in the repo for every option. For real deployments set
+# POSTGRES_PASSWORD, POSTGRES_APP_PASSWORD, JWT_SECRET, and MAGIC_LINK_SECRET.
+#
+# Pin a release with VESKA_TAG (default: latest), e.g. VESKA_TAG=v0.2.0.
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: veska
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-veska}
+      POSTGRES_DB: veska
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U veska']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # One-shot: creates the non-superuser role the API uses for request-scoped
+  # queries, so row-level security is enforced. Mirrors docker/initdb/01-app-role.sh
+  # but is idempotent, so it also works against an existing data volume.
+  db-init:
+    image: pgvector/pgvector:pg16
+    restart: 'no'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD:-veska}
+      APP_PASSWORD: ${POSTGRES_APP_PASSWORD:-veska_app}
+    entrypoint: ['/bin/bash', '-c']
+    command:
+      - |
+        psql -h postgres -U veska -d veska -c "CREATE ROLE veska_app LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE" 2>/dev/null || true
+        psql -v ON_ERROR_STOP=1 -h postgres -U veska -d veska <<SQL
+        ALTER ROLE veska_app LOGIN PASSWORD '$${APP_PASSWORD}';
+        GRANT USAGE ON SCHEMA public TO veska_app;
+        GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO veska_app;
+        GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO veska_app;
+        ALTER DEFAULT PRIVILEGES FOR ROLE veska IN SCHEMA public
+          GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO veska_app;
+        ALTER DEFAULT PRIVILEGES FOR ROLE veska IN SCHEMA public
+          GRANT USAGE, SELECT ON SEQUENCES TO veska_app;
+        SQL
+
+  # One-shot: brings the schema up to date, then exits. The API waits for it.
+  migrate:
+    image: ghcr.io/arunrajiah/veska-api:${VESKA_TAG:-latest}
+    restart: 'no'
+    depends_on:
+      db-init:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgresql://veska:${POSTGRES_PASSWORD:-veska}@postgres:5432/veska
+    command: ['node', 'packages/core/dist/db/migrate.js']
+
+  api:
+    image: ghcr.io/arunrajiah/veska-api:${VESKA_TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - '3001:3001'
+    environment:
+      DATABASE_URL: postgresql://veska:${POSTGRES_PASSWORD:-veska}@postgres:5432/veska
+      # Non-superuser role for request-scoped queries, so RLS is enforced.
+      DATABASE_APP_URL: postgresql://veska_app:${POSTGRES_APP_PASSWORD:-veska_app}@postgres:5432/veska
+      REDIS_URL: redis://redis:6379
+      LLM_PROVIDER: ${LLM_PROVIDER:-anthropic}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-}
+      NODE_ENV: production
+      PORT: 3001
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      MAGIC_LINK_SECRET: ${MAGIC_LINK_SECRET:-change-me-32-chars-minimum}
+      MAGIC_LINK_BASE_URL: ${MAGIC_LINK_BASE_URL:-http://localhost:3000}
+      STORAGE_PROVIDER: local
+      UPLOAD_DIR: /app/uploads
+      UPLOAD_BASE_URL: ${UPLOAD_BASE_URL:-http://localhost:3001/uploads}
+    volumes:
+      - uploads_data:/app/uploads
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+
+  admin:
+    image: ghcr.io/arunrajiah/veska-admin:${VESKA_TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      # Browser-side: reached from the host, so localhost.
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
+      # Server-side (route handlers and the /api/veska proxy): compose network.
+      API_URL: http://api:3001
+      NODE_ENV: production
+    depends_on:
+      - api
+
+  # Optional: loads the "Acme Corp" demo company.
+  # Run with: docker compose --profile demo run --rm seed
+  seed:
+    image: ghcr.io/arunrajiah/veska-api:${VESKA_TAG:-latest}
+    profiles: [demo]
+    restart: 'no'
+    environment:
+      DATABASE_URL: postgresql://veska:${POSTGRES_PASSWORD:-veska}@postgres:5432/veska
+    command: ['node', 'packages/core/dist/db/seed.js']
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  postgres_data:
+  redis_data:
+  uploads_data:

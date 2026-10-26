@@ -9,9 +9,29 @@ This guide covers everything you need to run Veska on your own infrastructure.
 - An **Anthropic API key** (for the AI configuration and action agents)
 - A **Slack app** (for the Slack channel adapter)
 
-## Quick start — Docker Compose
+## Quick start — prebuilt images (recommended)
 
-The fastest path to a running Veska instance:
+The fastest path to a running Veska instance. No Node, no source checkout, just Docker:
+
+```bash
+mkdir veska && cd veska
+curl -fsSL https://raw.githubusercontent.com/arunrajiah/veska/main/docker-compose.standalone.yml -o docker-compose.yml
+
+# Configure: create a .env file next to the compose file and set at minimum:
+#   ANTHROPIC_API_KEY=sk-ant-...        (or LLM_PROVIDER=ollama for local models)
+#   JWT_SECRET=<random string>
+#   MAGIC_LINK_SECRET=<any 32+ char random string>
+#   POSTGRES_PASSWORD=<random string>
+#   POSTGRES_APP_PASSWORD=<random string>
+
+docker compose up -d
+```
+
+Migrations run automatically before the API starts. Visit http://localhost:3000 to complete onboarding. Images are published to GHCR for amd64 and arm64 on every push to `main` and every release; pin a release by setting `VESKA_TAG=v0.1.0` in `.env`.
+
+## Quick start — build from source
+
+Use this when you want to run modified code:
 
 ```bash
 git clone https://github.com/arunrajiah/veska.git
@@ -23,7 +43,7 @@ cp .env.example .env
 #    - ANTHROPIC_API_KEY
 #    - MAGIC_LINK_SECRET (any 32+ char random string)
 
-# 2. Start all services
+# 2. Build and start all services
 docker compose up -d
 
 # 3. Run database migrations
@@ -33,8 +53,6 @@ docker compose exec api node packages/core/dist/db/migrate.js
 open http://localhost:3000
 ```
 
-Veska is now running. Visit http://localhost:3000 to complete onboarding.
-
 ## Deployment targets
 
 ### Bare VPS (Ubuntu 22.04+)
@@ -43,15 +61,16 @@ Veska is now running. Visit http://localhost:3000 to complete onboarding.
 # Install Docker
 curl -fsSL https://get.docker.com | sh
 
-# Clone and configure
-git clone https://github.com/arunrajiah/veska.git /opt/veska
-cd /opt/veska
-cp .env.example .env
-# Edit .env
+# Fetch the standalone compose file (prebuilt images) and configure
+mkdir -p /opt/veska && cd /opt/veska
+curl -fsSL https://raw.githubusercontent.com/arunrajiah/veska/main/docker-compose.standalone.yml -o docker-compose.yml
+# Create .env with the secrets listed in the quick start above
 
 # Start
-docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+docker compose up -d
 ```
+
+To build from source on the VPS instead, clone the repo and use `docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d`.
 
 One-click deploy templates (Railway, Fly.io, Helm) are planned — see [ROADMAP.md](ROADMAP.md). Contributions welcome.
 
@@ -90,10 +109,18 @@ before, with isolation enforced by the application layer only.
 
 ## Upgrades
 
+Prebuilt images (standalone compose): migrations run automatically on every `up`.
+
 ```bash
-git pull origin main
 docker compose pull
 docker compose up -d
+```
+
+Source checkout:
+
+```bash
+git pull origin main
+docker compose up -d --build
 docker compose exec api node packages/core/dist/db/migrate.js
 ```
 

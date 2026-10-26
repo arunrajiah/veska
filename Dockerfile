@@ -49,6 +49,8 @@ FROM base AS api
 WORKDIR /app
 ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 veska
+# Owned upload dir so a named volume mounted here inherits writable ownership.
+RUN mkdir -p /app/uploads && chown veska:nodejs /app/uploads
 COPY --from=builder --chown=veska:nodejs /app/apps/api/dist ./apps/api/dist
 COPY --from=builder --chown=veska:nodejs /app/apps/api/package.json ./apps/api/package.json
 # pnpm resolves workspace imports through per-package node_modules symlinks, so the
