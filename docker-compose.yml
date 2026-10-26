@@ -48,7 +48,7 @@ services:
       NODE_ENV: development
       PORT: 3001
       JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
-      MAGIC_LINK_SECRET: ${MAGIC_LINK_SECRET:-change-me-32-chars-minimum}
+      MAGIC_LINK_SECRET: ${MAGIC_LINK_SECRET:-insecure-default-magic-link-secret-change-me}
       MAGIC_LINK_BASE_URL: http://localhost:3000
     depends_on:
       postgres:

@@ -935,7 +935,7 @@ async function seed() {
   console.log('  finance@acme.com/ demo1234  (Finance)');
   console.log('  john@acme.com   / demo1234  (Employee)');
 
-  console.log('\nSign in at http://localhost:3000 — no further configuration needed.');
+  console.log('\nSign in at http://localhost:3000, no further configuration needed.');
 }
 
 seed()
