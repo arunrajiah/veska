@@ -1,6 +1,6 @@
 # Show HN draft
 
-> Post from your own HN account. HN strongly prefers plain, honest, technical writing from the actual author — edit this into your own voice before posting. Best timing: weekday morning US Pacific time. Stay in the thread all day answering comments; that's where launches are won.
+> Post from your own HN account. HN strongly prefers plain, honest, technical writing from the actual author; edit this into your own voice before posting. Best timing: weekday morning US Pacific time. Stay in the thread all day answering comments; that's where launches are won.
 
 **Title:**
 
