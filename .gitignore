@@ -25,9 +25,6 @@ coverage/
 *.swp
 *.swo
 
-# Claude Code editor config — local dev tooling, not for public repos
-.claude/
-
 # OS
 .DS_Store
 Thumbs.db
@@ -47,7 +44,5 @@ test-results/
 # Redis snapshot artifact
 dump.rdb
 
-# Local AI assistant / OS / env files
-CLAUDE.md
-CLAUDE.local.md
+# Local OS / env files
 .mcp.json
